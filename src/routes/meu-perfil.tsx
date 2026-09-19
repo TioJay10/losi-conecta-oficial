@@ -19,6 +19,7 @@ type Business = {
   logo_url: string | null;
   cover_url: string | null;
   slug: string;
+  approval_status: "pending" | "approved" | "rejected";
 };
 
 export const Route = createFileRoute("/meu-perfil")({
@@ -297,7 +298,7 @@ function BusinessProfilePage() {
           <div>
             <div style={styles.badge}>PERFIL COMERCIAL</div>
             <h1>Apresente sua empresa</h1>
-            <p style={styles.text}>Essas informações serão usadas no seu perfil público dentro do LOSI CONECTA.</p>
+            <p style={styles.text}>Essas informações serão usadas no seu perfil público dentro do LOSI CONECTA.</p>{business && <div style={styles.statusBox}><strong>Status do perfil:</strong> {business.approval_status === "approved" ? "Aprovado e publicado" : business.approval_status === "rejected" ? "Rejeitado — revise os dados e aguarde nova análise" : "Aguardando aprovação da administração"}</div>}
           </div>
         </div>
 
