@@ -207,3 +207,17 @@ h1,h2,h3,p { overflow-wrap:anywhere; }
 .provider-review-form small {
   color: #687386;
 }
+
+.provider-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 9px 0 2px;
+  font-size: 13px;
+}
+.provider-card-rating strong {
+  letter-spacing: .02em;
+}
+.provider-card-rating span {
+  color: #687386;
+}
