@@ -101,8 +101,8 @@ function AuthPage() {
     "Recuperar senha";
 
   return (
-    <main style={styles.page}>
-      <section style={styles.card}>
+    <main className="auth-page" style={styles.page}>
+      <section className="x" style={styles.card}>
         <div style={styles.brand}>LOSI <span>CONECTA</span></div>
         <div style={styles.eyebrow}>PROFISSIONAIS DE EVENTOS</div>
         <h1 style={styles.title}>{title}</h1>
