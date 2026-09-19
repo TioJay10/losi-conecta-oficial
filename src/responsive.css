@@ -1,226 +1,449 @@
-/* LOSI CONECTA — responsive layout */
-* { box-sizing: border-box; }
-html, body { width: 100%; min-width: 0; overflow-x: hidden; }
-button, input, textarea, select { max-width: 100%; }
+/* LOSI CONECTA — responsive system */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-@media (max-width: 760px) {
-  .home-header {
+html {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* TABLET */
+@media screen and (max-width: 1050px) {
+  .home-page .home-header {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .home-page .home-section {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+
+  .home-page .home-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .home-page .home-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .home-page .home-dark-section {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+
+  .home-page .home-cta-section {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+
+  .home-page .home-cta-card {
+    padding: 40px !important;
+  }
+
+  .dashboard-content,
+  .admin-content,
+  .profile-content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* PHONE / SMALL TABLET */
+@media screen and (max-width: 760px) {
+  .home-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .home-page .home-header {
+    width: 100% !important;
     height: 64px !important;
     padding: 0 16px !important;
     gap: 12px !important;
   }
-  .home-header .home-nav { display: none !important; }
-  .home-header > a:last-child {
+
+  .home-page .home-header .home-nav {
+    display: none !important;
+  }
+
+  .home-page .home-header > a:last-child {
+    flex: 0 0 auto !important;
     padding: 9px 13px !important;
     font-size: 13px !important;
   }
 
   .home-page .home-hero {
-    padding: 68px 20px 60px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 64px 20px 56px !important;
     text-align: center !important;
   }
+
+  .home-page .home-hero > * {
+    max-width: 100% !important;
+  }
+
   .home-page .home-hero h1 {
     width: 100% !important;
-    max-width: 620px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    font-size: clamp(36px, 10.5vw, 54px) !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    font-size: clamp(34px, 10vw, 52px) !important;
     line-height: 1.06 !important;
-    overflow-wrap: anywhere !important;
+    letter-spacing: -0.045em !important;
+    overflow-wrap: break-word !important;
   }
+
   .home-page .home-hero p {
     width: 100% !important;
     max-width: 560px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin: 22px auto 0 !important;
     font-size: 16px !important;
     line-height: 1.55 !important;
-    overflow-wrap: anywhere !important;
   }
+
   .home-page .home-hero .home-hero-actions {
-    flex-direction: column !important;
-    align-items: stretch !important;
     width: 100% !important;
     max-width: 420px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin: 30px auto 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
   }
+
   .home-page .home-hero .home-hero-actions a {
     width: 100% !important;
+    display: block !important;
     text-align: center !important;
   }
 
   .home-page .home-section {
-    padding: 60px 20px !important;
-  }
-  .home-page .home-section > * {
+    width: 100% !important;
     max-width: 100% !important;
+    padding: 56px 20px !important;
+    margin: 0 !important;
   }
+
+  .home-page .home-section > *,
   .home-page .home-section > div:first-child {
     width: 100% !important;
+    max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
+
   .home-page .home-section h2,
+  .home-page .home-section h3,
   .home-page .home-section p {
     max-width: 100% !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
   }
+
   .home-page .home-section h2 {
-    line-height: 1.1 !important;
+    font-size: clamp(30px, 8.5vw, 42px) !important;
+    line-height: 1.08 !important;
   }
+
   .home-page .home-section p {
+    font-size: 16px !important;
     line-height: 1.6 !important;
   }
+
   .home-page .home-steps,
   .home-page .home-audience-grid,
   .home-page .home-category-grid {
-    grid-template-columns: 1fr !important;
     width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
-  .home-page .home-steps article {
-    min-height: auto !important;
-  }
+
   .home-page .home-steps article,
   .home-page .home-audience-grid article,
   .home-page .home-category-grid > div {
+    width: 100% !important;
     min-width: 0 !important;
+    max-width: 100% !important;
   }
-  .home-page .home-steps article p,
-  .home-page .home-audience-grid article p,
-  .home-page .home-category-grid > div {
-    overflow-wrap: anywhere !important;
+
+  .home-page .home-steps article {
+    min-height: auto !important;
+    padding: 24px !important;
   }
 
   .home-page .home-dark-section {
-    padding: 60px 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 56px 20px !important;
   }
-  .home-page .home-dark-section > * {
+
+  .home-page .home-dark-section > *,
+  .home-page .home-dark-section .home-audience-grid {
+    width: 100% !important;
     max-width: 100% !important;
   }
+
   .home-page .home-dark-section h2,
   .home-page .home-dark-section p {
     max-width: 100% !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
   }
-  .home-page .home-dark-section p {
-    line-height: 1.6 !important;
+
+  .home-page .home-dark-section h2 {
+    font-size: clamp(31px, 9vw, 44px) !important;
+  }
+
+  .home-page .home-audience-grid article {
+    padding: 24px !important;
   }
 
   .home-page .home-cta-section {
-    padding: 16px 20px 60px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 20px 56px !important;
   }
+
   .home-page .home-cta-card {
+    width: 100% !important;
+    max-width: 100% !important;
     padding: 28px 22px !important;
+    margin: 0 !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 22px !important;
+    gap: 20px !important;
     border-radius: 18px !important;
-    text-align: left !important;
   }
+
   .home-page .home-cta-card h2,
   .home-page .home-cta-card p {
     max-width: 100% !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
   }
+
   .home-page .home-cta-card a {
     width: 100% !important;
     text-align: center !important;
   }
+
   .home-page footer {
+    width: 100% !important;
     padding: 24px 20px !important;
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 8px !important;
   }
 
+  /* DASHBOARD / ADMIN / PROFILE */
+  .dashboard-page,
+  .admin-page,
+  .profile-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
   .dashboard-header,
   .admin-header,
   .profile-header {
+    width: 100% !important;
     height: 64px !important;
     padding: 0 16px !important;
+    gap: 12px !important;
   }
+
   .dashboard-content,
   .admin-content,
   .profile-content {
     width: 100% !important;
     max-width: 100% !important;
+    margin: 0 !important;
     padding: 32px 16px 56px !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
   }
+
+  .dashboard-content > *,
+  .admin-content > *,
+  .profile-content > * {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
   .dashboard-grid,
   .admin-grid,
   .profile-form-grid {
-    grid-template-columns: 1fr !important;
     width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
+
   .dashboard-content h1,
   .admin-content h1,
   .profile-content h1 {
+    width: 100% !important;
     max-width: 100% !important;
     font-size: clamp(28px, 9vw, 40px) !important;
-    line-height: 1.1 !important;
-    overflow-wrap: anywhere !important;
+    line-height: 1.08 !important;
+    overflow-wrap: break-word !important;
   }
-  .dashboard-content p,
-  .admin-content p,
-  .profile-content p,
+
   .dashboard-content h2,
-  .admin-content h2,
-  .profile-content h2,
   .dashboard-content h3,
+  .dashboard-content p,
+  .admin-content h2,
   .admin-content h3,
-  .profile-content h3 {
+  .admin-content p,
+  .profile-content h2,
+  .profile-content h3,
+  .profile-content p {
     max-width: 100% !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
   }
+
   .dashboard-content .card,
   .admin-content .card,
   .profile-content > form {
+    width: 100% !important;
     min-width: 0 !important;
+    max-width: 100% !important;
   }
-  .profile-page .profile-form-grid {
-    gap: 14px !important;
-  }
+
   .profile-page .profile-content > form {
     padding: 20px !important;
   }
-  .profile-page .profile-content h2 {
-    font-size: 21px !important;
+
+  .profile-page .profile-form-grid {
+    gap: 14px !important;
   }
 
+  .profile-page input,
+  .profile-page textarea,
+  .profile-page select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* AUTH */
   .auth-page {
     width: 100% !important;
-    padding: 16px !important;
+    max-width: 100% !important;
     min-height: 100dvh !important;
+    padding: 16px !important;
+    overflow-x: hidden !important;
   }
-  .auth-page .auth-card,
-  .auth-page > section {
+
+  .auth-page > section,
+  .auth-page .auth-card {
     width: 100% !important;
     max-width: 440px !important;
-    padding: 24px 20px !important;
-    border-radius: 16px !important;
     min-width: 0 !important;
+    padding: 24px 20px !important;
+    margin: 0 auto !important;
   }
+
   .auth-page h1 {
+    width: 100% !important;
     max-width: 100% !important;
     font-size: 27px !important;
     line-height: 1.15 !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
   }
-  .auth-page p {
+
+  .auth-page p,
+  .auth-page label {
     max-width: 100% !important;
-    overflow-wrap: anywhere !important;
+    overflow-wrap: break-word !important;
   }
-  .auth-page label,
+
   .auth-page input,
   .auth-page button {
-    min-width: 0 !important;
+    width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .auth-page .link,
+  .auth-page .home,
+  .auth-page .inlineLink {
+    width: auto !important;
   }
 }
 
-@media (min-width: 761px) and (max-width: 1050px) {
-  .home-page .home-steps { grid-template-columns: 1fr 1fr !important; }
-  .home-page .home-category-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+/* VERY SMALL PHONES */
+@media screen and (max-width: 390px) {
+  .home-page .home-header {
+    padding: 0 12px !important;
+  }
+
+  .home-page .home-header > a:first-child {
+    font-size: 16px !important;
+    letter-spacing: .05em !important;
+  }
+
+  .home-page .home-header > a:last-child {
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .home-page .home-hero,
+  .home-page .home-section,
+  .home-page .home-dark-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .home-page .home-hero h1 {
+    font-size: 34px !important;
+  }
+
+  .home-page .home-cta-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .dashboard-content,
+  .admin-content,
+  .profile-content {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .auth-page {
+    padding: 10px !important;
+  }
+
+  .auth-page > section,
+  .auth-page .auth-card {
+    padding: 22px 16px !important;
+  }
 }
