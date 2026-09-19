@@ -1,0 +1,121 @@
+/* LOSI CONECTA — responsive layout */
+* { box-sizing: border-box; }
+html, body { width: 100%; min-width: 0; overflow-x: hidden; }
+button, input, textarea, select { max-width: 100%; }
+
+@media (max-width: 760px) {
+  .home-header {
+    height: 64px !important;
+    padding: 0 16px !important;
+    gap: 12px !important;
+  }
+  .home-header .home-nav { display: none !important; }
+  .home-header > a:last-child {
+    padding: 9px 13px !important;
+    font-size: 13px !important;
+  }
+  .home-page .home-hero {
+    padding: 72px 20px 64px !important;
+  }
+  .home-page .home-hero h1 {
+    font-size: clamp(36px, 11vw, 54px) !important;
+    line-height: 1.04 !important;
+  }
+  .home-page .home-hero p {
+    font-size: 16px !important;
+    line-height: 1.55 !important;
+  }
+  .home-page .home-hero .home-hero-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .home-page .home-hero .home-hero-actions a {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .home-page .home-section {
+    padding: 64px 20px !important;
+  }
+  .home-page .home-steps,
+  .home-page .home-audience-grid,
+  .home-page .home-category-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .home-page .home-steps article {
+    min-height: auto !important;
+  }
+  .home-page .home-dark-section {
+    padding: 64px 20px !important;
+  }
+  .home-page .home-cta-section {
+    padding: 16px 20px 64px !important;
+  }
+  .home-page .home-cta-card {
+    padding: 30px 24px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 24px !important;
+    border-radius: 18px !important;
+  }
+  .home-page .home-cta-card a {
+    text-align: center !important;
+  }
+  .home-page footer {
+    padding: 24px 20px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .dashboard-header,
+  .admin-header,
+  .profile-header {
+    height: 64px !important;
+    padding: 0 16px !important;
+  }
+  .dashboard-content,
+  .admin-content,
+  .profile-content {
+    padding: 36px 16px 56px !important;
+  }
+  .dashboard-grid,
+  .admin-grid,
+  .profile-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .dashboard-content h1,
+  .admin-content h1,
+  .profile-content h1 {
+    font-size: clamp(28px, 9vw, 40px) !important;
+    line-height: 1.1 !important;
+  }
+  .dashboard-content .card,
+  .admin-content .card {
+    min-width: 0 !important;
+  }
+  .profile-page .profile-form-grid {
+    gap: 14px !important;
+  }
+  .profile-page .profile-content > form {
+    padding: 20px !important;
+  }
+  .profile-page .profile-content h2 {
+    font-size: 21px !important;
+  }
+
+  .auth-page {
+    padding: 16px !important;
+    min-height: 100dvh !important;
+  }
+  .auth-page .auth-card {
+    padding: 24px 20px !important;
+    border-radius: 16px !important;
+  }
+  .auth-page .auth-card h1 {
+    font-size: 27px !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1050px) {
+  .home-page .home-steps { grid-template-columns: 1fr 1fr !important; }
+  .home-page .home-category-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+}
