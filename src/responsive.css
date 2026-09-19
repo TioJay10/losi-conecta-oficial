@@ -317,3 +317,29 @@ h1,h2,h3,p { overflow-wrap:anywhere; }
 @media(max-width:390px){
   .provider-portfolio-grid{grid-template-columns:1fr}
 }
+
+/* Métricas e operação administrativa */
+.admin-metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:28px}
+.admin-metric{background:#fff;border:1px solid #e7e9f0;border-radius:14px;padding:18px;min-width:0}
+.admin-metric span{display:block;color:#687386;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.admin-metric strong{display:block;margin-top:8px;font-size:28px;line-height:1.1}
+.admin-metric small{display:block;margin-top:7px;color:#9299a9;font-size:12px}
+.admin-pending-panel{margin-top:22px;background:#fff;border:1px solid #e7e9f0;border-radius:16px;padding:22px}
+.admin-pending-list{display:grid;gap:8px;margin-top:18px}
+.admin-pending-item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid #e7e9f0;border-radius:10px}
+.admin-pending-item>div:first-child{min-width:0}
+.admin-pending-item strong,.admin-pending-item span{display:block;overflow-wrap:anywhere}
+.admin-pending-item span{margin-top:4px;color:#687386;font-size:13px}
+.admin-filters{display:grid;grid-template-columns:minmax(0,1fr) 190px auto;gap:10px;margin-bottom:14px}
+.admin-filters input,.admin-filters select{width:100%;min-height:42px;box-sizing:border-box;border:1px solid #dfe2ea;border-radius:9px;background:#fff;padding:10px 12px;font:inherit;color:#172033}
+.admin-filter-count{display:flex;align-items:center;justify-content:center;min-height:42px;padding:0 12px;border-radius:9px;background:#f1f2f6;color:#687386;font-size:12px;font-weight:800;white-space:nowrap}
+@media(max-width:899px){.admin-metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:599px){
+  .admin-metrics-grid{grid-template-columns:1fr}
+  .admin-pending-panel{padding:16px}
+  .admin-pending-item{align-items:flex-start;flex-direction:column}
+  .admin-pending-item .admin-item-actions{width:100%}
+  .admin-pending-item .admin-item-actions button{flex:1}
+  .admin-filters{grid-template-columns:1fr}
+  .admin-filter-count{justify-content:flex-start}
+}
