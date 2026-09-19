@@ -297,3 +297,23 @@ h1,h2,h3,p { overflow-wrap:anywhere; }
 .provider-location,.provider-body p{overflow-wrap:anywhere}
 .provider-services{display:flex;flex-wrap:wrap;gap:6px}
 .provider-services span{max-width:100%;overflow-wrap:anywhere}
+
+.provider-profile-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-width:0}
+.provider-profile-actions>*{box-sizing:border-box}
+.provider-profile-save,.provider-profile-contact{min-height:44px;display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:10px 16px;border-radius:10px;font-weight:800;text-decoration:none;cursor:pointer}
+.provider-profile-save{border:1px solid #dfe2ea;background:#fff;color:#3f4657}
+.provider-profile-contact{background:#4f46c7;color:#fff}
+.provider-profile-save:disabled{opacity:.65;cursor:wait}
+.provider-portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:18px}
+.provider-portfolio-item{display:block;overflow:hidden;border:1px solid #e7e9f0;border-radius:12px;aspect-ratio:4/3;background:#f3f4f8}
+.provider-portfolio-item img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .2s ease}
+.provider-portfolio-item:hover img{transform:scale(1.03)}
+@media(max-width:599px){
+  .provider-profile-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .provider-profile-actions>*{width:100%}
+  .provider-portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .provider-profile-save,.provider-profile-contact{padding:10px 12px;font-size:14px}
+}
+@media(max-width:390px){
+  .provider-portfolio-grid{grid-template-columns:1fr}
+}
