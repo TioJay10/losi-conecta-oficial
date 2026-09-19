@@ -75,18 +75,18 @@ function DashboardPage() {
   if (!user || !profile) return null;
 
   return (
-    <main style={styles.page}>
-      <header style={styles.header}>
+    <main className="dashboard-page" style={styles.page}>
+      <header className="dashboard-header" style={styles.header}>
         <div style={styles.logo}>LOSI <span>CONECTA</span></div>
         <button onClick={logout} style={styles.logout}>Sair</button>
       </header>
 
-      <section style={styles.content}>
+      <section className="dashboard-content" style={styles.content}>
         <div style={styles.badge}>PROFISSIONAL</div>
         <h1>Olá, {profile.full_name || user.email?.split("@")[0] || "profissional"}.</h1>
         <p style={styles.text}>Sua conta profissional está autenticada e conectada ao LOSI CONECTA.</p>
 
-        <div style={styles.grid}>
+        <div className="dashboard-grid" style={styles.grid}>
           <div style={styles.card}>
             <strong>Encontrar fornecedores</strong>
             <p>Pesquise profissionais e empresas para seus eventos.</p>
