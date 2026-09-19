@@ -73,6 +73,7 @@ export interface FileRoutesByTo {
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
   '/buscar': typeof BuscarRoute
+  '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
 
 export interface FileRoutesById {
