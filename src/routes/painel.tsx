@@ -137,7 +137,18 @@ function DashboardPage() {
           </div>
         )}
 
-        {hasBusinessProfile && businessStatus && (\n          <section className="dashboard-status" style={styles.statusSection}>\n            <div>\n              <div style={styles.badge}>STATUS DO PERFIL</div>\n              <h2 style={{ margin: "10px 0 6px" }}>{businessStatus === "approved" ? "Perfil aprovado e publicado" : businessStatus === "rejected" ? "Perfil precisa de ajustes" : "Perfil em análise"}</h2>\n              <p style={{ ...styles.text, marginTop: 0 }}>{businessStatus === "approved" ? "Seu perfil está disponível para quem pesquisa fornecedores no LOSI CONECTA." : businessStatus === "rejected" ? "Revise as informações solicitadas e salve novamente para enviar uma nova análise." : "A administração está analisando seus dados. Você pode continuar atualizando seu perfil enquanto aguarda."}</p>\n            </div>\n            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.secondary}>Gerenciar perfil</button>\n          </section>\n        )}\n\n        {savedBusinesses.length > 0 && (
+        {hasBusinessProfile && businessStatus && (
+          <section className="dashboard-status" style={styles.statusSection}>
+            <div>
+              <div style={styles.badge}>STATUS DO PERFIL</div>
+              <h2 style={{ margin: "10px 0 6px" }}>{businessStatus === "approved" ? "Perfil aprovado e publicado" : businessStatus === "rejected" ? "Perfil precisa de ajustes" : "Perfil em análise"}</h2>
+              <p style={{ ...styles.text, marginTop: 0 }}>{businessStatus === "approved" ? "Seu perfil está disponível para quem pesquisa fornecedores no LOSI CONECTA." : businessStatus === "rejected" ? "Revise as informações solicitadas e salve novamente para enviar uma nova análise." : "A administração está analisando seus dados. Você pode continuar atualizando seu perfil enquanto aguarda."}</p>
+            </div>
+            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.secondary}>Gerenciar perfil</button>
+          </section>
+        )}
+
+        {savedBusinesses.length > 0 && (
           <section style={{ marginTop: 42 }}>
             <div style={styles.badge}>SALVOS</div>
             <h2 style={{ margin: "10px 0 6px" }}>Fornecedores salvos</h2>
@@ -172,7 +183,9 @@ const styles: Record<string, CSSProperties> = {
   onboardingLabel: { fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7" },
   onboardingTitle: { margin: "8px 0 6px", fontSize: 24 },
   onboardingText: { margin: 0, color: "#687386", lineHeight: 1.55, maxWidth: 650 },
-  primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },\n  secondary: { border: "1px solid #dfe2ea", background: "#fff", color: "#4f46c7", borderRadius: 9, padding: "11px 16px", fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap" },\n  statusSection: { marginTop: 24, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 22, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18 },
+  primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
+  secondary: { border: "1px solid #dfe2ea", background: "#fff", color: "#4f46c7", borderRadius: 9, padding: "11px 16px", fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap" },
+  statusSection: { marginTop: 24, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 22, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18 },
   savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },
   center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
 };
