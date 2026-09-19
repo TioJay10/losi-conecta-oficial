@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
 type Review = { id: string; rating: number; comment: string | null; created_at: string; reviewer: { full_name: string | null } | null };
