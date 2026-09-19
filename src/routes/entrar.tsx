@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FormEvent, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
+const APP_URL = "https://losi-conecta-oficial.vercel.app";
+
 export const Route = createFileRoute("/entrar")({
   component: AuthPage,
 });
@@ -20,6 +22,7 @@ function AuthPage() {
 
   useEffect(() => {
     if (!supabase) return;
+
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/painel" });
     });
@@ -32,17 +35,19 @@ function AuthPage() {
     setError("");
 
     if (!supabase) {
-      setError("O sistema ainda não está conectado às variáveis do Supabase no ambiente do aplicativo.");
+      setError("O sistema ainda não está conectado ao Supabase.");
       setLoading(false);
       return;
     }
 
     if (mode === "recovery") {
-      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/entrar",
+      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: APP_URL + "/entrar",
       });
+
       if (recoveryError) setError(recoveryError.message);
       else setMessage("Se este e-mail estiver cadastrado, enviaremos as instruções para redefinir sua senha.");
+
       setLoading(false);
       return;
     }
@@ -59,7 +64,7 @@ function AuthPage() {
         password,
         options: {
           data: { full_name: name.trim() },
-          emailRedirectTo: window.location.origin + "/painel",
+          emailRedirectTo: APP_URL + "/painel",
         },
       });
 
@@ -145,7 +150,7 @@ function AuthPage() {
           {mode === "login" ? (
             <>Ainda não tem conta? <button style={styles.inlineLink} onClick={() => { setMode("signup"); setError(""); setMessage(""); }}>Criar conta</button></>
           ) : (
-            <><button style={styles.inlineLink} onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Voltar para entrar</button></>
+            <button style={styles.inlineLink} onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Voltar para entrar</button>
           )}
         </div>
 
