@@ -28,13 +28,16 @@ function DashboardPage() {
         return;
       }
 
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        navigate({ to: "/entrar" });
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        if (mounted) {
+          setLoading(false);
+          navigate({ to: "/entrar" });
+        }
         return;
       }
 
-      const currentUser = sessionData.session.user;
+      const currentUser = userData.user;
 
       const { data, error } = await supabase
         .from("profiles")
@@ -44,9 +47,15 @@ function DashboardPage() {
 
       if (!mounted) return;
 
-      if (error || !data) {
-        await supabase.auth.signOut();
-        navigate({ to: "/entrar" });
+      if (error) {
+        setLoading(false);
+        console.error("Erro ao carregar perfil:", error);
+        return;
+      }
+
+      if (!data) {
+        setLoading(false);
+        console.error("Perfil do usuário não encontrado:", currentUser.id);
         return;
       }
 
