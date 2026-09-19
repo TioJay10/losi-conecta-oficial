@@ -1,19 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// These values are intentionally public client configuration.
+// The Supabase publishable key is designed to be exposed in browser applications.
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ??
+  "https://bpvaftobiosjesdbaany.supabase.co";
 
-export const supabase =
-  supabaseUrl && supabasePublishableKey
-    ? createClient(supabaseUrl, supabasePublishableKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-        },
-      })
-    : null;
+const supabasePublishableKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  "sb_publishable_EsH6rhQ7pJ0SP6dM9_tILA_KO7MShd1";
+
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 
 export function isSupabaseConfigured() {
-  return Boolean(supabase);
+  return true;
 }
