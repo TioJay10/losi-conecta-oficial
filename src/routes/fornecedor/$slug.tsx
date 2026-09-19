@@ -80,7 +80,20 @@ function ProviderPage() {
     );
   }
 
-  async function toggleFavorite() {\n    if (!userId) {\n      window.location.href = "/entrar";\n      return;\n    }\n    setFavoriteBusy(true);\n    const result = isFavorite\n      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", business.id)\n      : await supabase.from("favorites").insert({ user_id: userId, business_id: business.id });\n    if (!result.error) setIsFavorite(!isFavorite);\n    setFavoriteBusy(false);\n  }\n\n  async function submitReview(event: React.FormEvent) {
+  async function toggleFavorite() {
+    if (!userId) {
+      window.location.href = "/entrar";
+      return;
+    }
+    setFavoriteBusy(true);
+    const result = isFavorite
+      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", business.id)
+      : await supabase.from("favorites").insert({ user_id: userId, business_id: business.id });
+    if (!result.error) setIsFavorite(!isFavorite);
+    setFavoriteBusy(false);
+  }
+
+  async function submitReview(event: React.FormEvent) {
     event.preventDefault();
     setReviewMessage("");
     setReviewing(true);
