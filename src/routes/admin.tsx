@@ -16,7 +16,9 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
-  const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews">("overview");
+  const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews" | "commercial">("overview");
+  const [plans, setPlans] = useState<Array<{id:string;name:string;slug:string;price_cents:number;billing_period:string;active:boolean}>>([]);
+  const [subscriptions, setSubscriptions] = useState<Array<{id:string;business_id:string;plan_id:string;status:string;ends_at:string|null;business:{business_name:string}|null;plan:{name:string}|null}>>([]);
   const [dataError, setDataError] = useState("");
   const [businessSearch, setBusinessSearch] = useState("");
   const [businessStatusFilter, setBusinessStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
@@ -40,27 +42,31 @@ function AdminPage() {
       if (data.user_type !== "admin") { navigate({ to: "/painel" }); return; }
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
-      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult] = await Promise.all([
+      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state").order("created_at",{ascending:false}),
         supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,verified,active,approval_status").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
+        supabase.from("plans").select("id,name,slug,price_cents,billing_period,active").order("price_cents"),
+        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").order("created_at",{ascending:false}),
       ]);
       if (!mounted) return;
-      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult].find((result) => result.error)?.error;
+      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult].find((result) => result.error)?.error;
       if (firstError) setDataError(firstError.message);
       setUsers((usersResult.data ?? []) as typeof users);
       setBusinesses((businessesResult.data ?? []) as typeof businesses);
       setCategories((categoriesResult.data ?? []) as typeof categories);
       setServices((servicesResult.data ?? []) as unknown as typeof services);
       setReviews((reviewsResult.data ?? []) as unknown as typeof reviews);
+      setPlans((plansResult.data ?? []) as typeof plans);
+      setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);
       setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
       setLoading(false);
     }
     load();
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["overview","users","businesses","categories","services","reviews"].includes(requestedSection)) {
+    if (requestedSection && ["overview","users","businesses","categories","services","reviews","commercial"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -96,6 +102,7 @@ function AdminPage() {
     { id: "services" as const, label: "Serviços", count: stats.services },
     { id: "categories" as const, label: "Categorias", count: stats.categories },
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
+    { id: "commercial" as const, label: "Comercial" },
   ];
   const pendingBusinesses = businesses.filter((item) => item.approval_status === "pending");
   const approvedBusinesses = businesses.filter((item) => item.approval_status === "approved");
@@ -108,7 +115,7 @@ function AdminPage() {
     return matchesSearch && (businessStatusFilter === "all" || item.approval_status === businessStatusFilter);
   });
   const selectedBusiness = selectedBusinessId ? businesses.find((item) => item.id === selectedBusinessId) ?? null : null;
-  const sectionTitle = section === "overview" ? "Visão geral" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : "Avaliações recebidas";
+  const sectionTitle = section === "overview" ? "Visão geral" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
 
   return (
     <main className="admin-page" style={styles.page}>
@@ -179,6 +186,7 @@ function AdminPage() {
                 )}
                 <div className="admin-list">{filteredBusinesses.length === 0 ? <div className="admin-empty">Nenhuma empresa encontrada com esses filtros.</div> : filteredBusinesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => setSelectedBusinessId(item.id)}>Analisar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button>{item.approval_status !== "approved" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button>}{item.approval_status !== "rejected" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button>}<button style={styles.actionButton} onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               </div>
+              : section === "commercial" ? <div className="admin-commercial-grid">{plans.map(plan => <article className="admin-commercial-card" key={plan.id}><span>{plan.billing_period === "free" ? "PLANO GRATUITO" : "PLANO PAGO"}</span><h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "Grátis" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>Plano {plan.active ? "ativo" : "inativo"} para fornecedores.</p></article>)}<section className="admin-commercial-subscriptions"><div style={styles.badge}>ASSINATURAS</div><h2>Fornecedores com plano</h2>{subscriptions.length === 0 ? <p style={styles.text}>Nenhuma assinatura ativa ou registrada.</p> : subscriptions.map(item => <div className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business?.business_name || "Fornecedor"}</strong><span>{item.plan?.name || "Plano"} · {item.status}{item.ends_at ? ` · até ${new Date(item.ends_at).toLocaleDateString("pt-BR")}` : ""}</span></div></div></div>)}</section></div>
               : section === "categories" ? <div><div className="admin-filters admin-simple-filter"><input value={categorySearch} onChange={(e) => setCategorySearch(e.target.value)} placeholder="Buscar categoria..." aria-label="Buscar categorias" /><span className="admin-filter-count">{categories.filter(item => `${item.name} ${item.slug}`.toLocaleLowerCase("pt-BR").includes(categorySearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{categories.filter(item => `${item.name} ${item.slug}`.toLocaleLowerCase("pt-BR").includes(categorySearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.slug} · {item.active ? "Ativa" : "Inativa"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("categories").update({active:next}).eq("id",item.id);if(!error)setCategories(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div></div>
                : section === "services" ? <><div className="admin-filters admin-simple-filter"><input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder="Buscar serviço ou fornecedor..." aria-label="Buscar serviços" /><span className="admin-filter-count">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.business?.business_name || "Empresa não informada"} · {item.category?.name || "Sem categoria"} · {item.active ? "Ativo" : "Inativo"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("services").update({active:next}).eq("id",item.id);if(!error)setServices(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div></div></>
               : <div><div className="admin-filters admin-simple-filter"><input value={reviewSearch} onChange={(e) => setReviewSearch(e.target.value)} placeholder="Buscar avaliação, fornecedor ou autor..." aria-label="Buscar avaliações" /><span className="admin-filter-count">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{"★".repeat(item.rating)} · {item.business?.business_name || "Empresa"}</strong><span>{item.reviewer?.full_name || "Usuário"} · {item.comment || "Sem comentário"} · {item.active ? "Visível" : "Oculta"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={()=>updateReview(item.id,{active:!item.active})}>{item.active ? "Ocultar" : "Publicar"}</button><button style={styles.actionButton} onClick={()=>deleteReview(item.id)}>Excluir</button></div></div></article>)}</div></>}
