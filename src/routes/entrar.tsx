@@ -138,15 +138,24 @@ function AuthPage() {
       return;
     }
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    try {
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    if (loginError) {
-      setError("E-mail ou senha inválidos.");
-    } else if (data.session) {
-      navigate({ to: "/painel" });
+      if (loginError) {
+        setError(loginError.message || "E-mail ou senha inválidos.");
+      } else if (data.session) {
+        setMessage("Login realizado. Abrindo seu painel...");
+        // A navegação por URL também funciona no preview do StackBlitz,
+        // onde a navegação SPA pode não atualizar o preview corretamente.
+        window.location.assign("/painel");
+      } else {
+        setError("O Supabase não retornou uma sessão. Tente novamente.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível concluir o login.");
     }
 
     setLoading(false);
