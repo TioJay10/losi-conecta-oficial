@@ -151,7 +151,19 @@ function AdminPage() {
     setCreatingUser(false);
 
     if (error || data?.error) {
-      setCreateUserError(data?.error || error?.message || "Não foi possível cadastrar o usuário.");
+      let detailedMessage = data?.error || "";
+      if (!detailedMessage && error) {
+        try {
+          const response = (error as unknown as { context?: Response }).context;
+          if (response && typeof response.json === "function") {
+            const body = await response.clone().json();
+            detailedMessage = body?.error || body?.message || "";
+          }
+        } catch {
+          // Mantém a mensagem padrão quando a resposta não puder ser lida.
+        }
+      }
+      setCreateUserError(detailedMessage || error?.message || "Não foi possível cadastrar o usuário.");
       return;
     }
 
