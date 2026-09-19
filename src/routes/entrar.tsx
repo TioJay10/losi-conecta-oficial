@@ -148,9 +148,7 @@ function AuthPage() {
         setError(loginError.message || "E-mail ou senha inválidos.");
       } else if (data.session) {
         setMessage("Login realizado. Abrindo seu painel...");
-        // A navegação por URL também funciona no preview do StackBlitz,
-        // onde a navegação SPA pode não atualizar o preview corretamente.
-        window.location.assign("/painel");
+        await navigate({ to: "/painel" });
       } else {
         setError("O Supabase não retornou uma sessão. Tente novamente.");
       }
