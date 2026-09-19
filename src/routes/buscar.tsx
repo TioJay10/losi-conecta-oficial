@@ -22,10 +22,20 @@ function SearchPage() {
   const [categoryId, setCategoryId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [favoriteBusy, setFavoriteBusy] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
     async function loadCatalog() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentUserId = sessionData.session?.user.id ?? null;
+      if (currentUserId) {
+        setUserId(currentUserId);
+        const { data: favoriteData } = await supabase.from("favorites").select("business_id").eq("user_id", currentUserId);
+        if (mounted) setFavoriteIds((favoriteData ?? []).map((item) => item.business_id));
+      }
       const [businessResult, categoryResult] = await Promise.all([
         supabase
           .from("business_profiles")
@@ -64,6 +74,22 @@ function SearchPage() {
       );
     });
   }, [businesses, search, city, categoryId]);
+
+  async function toggleFavorite(businessId: string) {
+    if (!userId) {
+      window.location.href = "/entrar";
+      return;
+    }
+    setFavoriteBusy(businessId);
+    const isFavorite = favoriteIds.includes(businessId);
+    const result = isFavorite
+      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", businessId)
+      : await supabase.from("favorites").insert({ user_id: userId, business_id: businessId });
+    if (!result.error) {
+      setFavoriteIds((current) => isFavorite ? current.filter((id) => id !== businessId) : [...current, businessId]);
+    }
+    setFavoriteBusy(null);
+  }
 
   function whatsappUrl(business: Business) {
     const raw = business.whatsapp || business.phone || "";
