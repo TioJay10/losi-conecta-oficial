@@ -76,27 +76,58 @@ function SearchPage() {
     });
   }, [businesses, search, city, categoryId]);
 
+  const scoredResults = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase("pt-BR");
+    const tokens = query.split(/\\s+/).map((token) => token.trim()).filter((token) => token.length >= 2);
+
+    function normalize(value: string) {
+      return value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("pt-BR");
+    }
+
+    function score(business: Business) {
+      if (!tokens.length) return 0;
+      const name = normalize(business.business_name);
+      const description = normalize(business.description ?? "");
+      const cityName = normalize(business.city ?? "");
+      const serviceNames = business.services.map((service) => normalize(service.name));
+      const categoryNames = business.services.map((service) => normalize(service.categories?.name ?? ""));
+      let total = 0;
+      for (const token of tokens) {
+        if (name.includes(token)) total += 40;
+        if (serviceNames.some((value) => value.includes(token))) total += 30;
+        if (categoryNames.some((value) => value.includes(token))) total += 25;
+        if (description.includes(token)) total += 10;
+        if (cityName.includes(token)) total += 5;
+      }
+      if (query && name === query) total += 50;
+      return total;
+    }
+
+    return results.map((business) => ({ business, searchScore: score(business) }));
+  }, [results, search]);
+
   const sortedResults = useMemo(() => {
-    const copy = [...results];
+    const copy = [...scoredResults];
     const rating = (business: Business) =>
       business.reviews.length
         ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length
         : 0;
     if (sortBy === "rating") {
-      return copy.sort((a, b) => rating(b) - rating(a) || a.business_name.localeCompare(b.business_name, "pt-BR"));
+      return copy.sort((a, b) => rating(b.business) - rating(a.business) || a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
     }
     if (sortBy === "az") {
-      return copy.sort((a, b) => a.business_name.localeCompare(b.business_name, "pt-BR"));
+      return copy.sort((a, b) => a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
     }
     if (sortBy === "saved") {
-      return copy.sort((a, b) => Number(favoriteIds.includes(b.id)) - Number(favoriteIds.includes(a.id)));
+      return copy.sort((a, b) => Number(favoriteIds.includes(b.business.id)) - Number(favoriteIds.includes(a.business.id))).map((item) => item.business);
     }
     return copy.sort((a, b) =>
-      Number(b.verified) - Number(a.verified) ||
-      rating(b) - rating(a) ||
-      a.business_name.localeCompare(b.business_name, "pt-BR")
-    );
-  }, [results, sortBy, favoriteIds]);
+      b.searchScore - a.searchScore ||
+      Number(b.business.verified) - Number(a.business.verified) ||
+      rating(b.business) - rating(a.business) ||
+      a.business.business_name.localeCompare(b.business.business_name, "pt-BR")
+    ).map((item) => item.business);
+  }, [scoredResults, sortBy, favoriteIds]);
 
   async function toggleFavorite(businessId: string) {
     if (!userId) {
