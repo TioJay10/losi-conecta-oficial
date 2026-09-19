@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
 type Category = { id: string; name: string };
+type Service = { id: string; name: string; description: string | null; category_id: string; category_name: string | null };
 type Business = {
   id: string;
   business_name: string;
@@ -29,6 +30,8 @@ function BusinessProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [business, setBusiness] = useState<Business | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -80,6 +83,10 @@ function BusinessProfilePage() {
       setUser(currentUser);
       setBusiness(loaded);
       setCategories(categoryResult.data ?? []);
+
+      if (loaded) {
+        await loadServices(loaded.id, mounted);
+      }
       setCategoryId(categoryResult.data?.[0]?.id ?? "");
 
       if (loaded) {
@@ -106,6 +113,30 @@ function BusinessProfilePage() {
       mounted = false;
     };
   }, [navigate]);
+
+  async function loadServices(businessId: string, mounted = true) {
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("services")
+      .select("id,name,description,category_id,categories(name)")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false });
+
+    if (!mounted) return;
+    if (error) {
+      setMessage("Não foi possível carregar os serviços: " + error.message);
+      return;
+    }
+
+    const mapped = (data ?? []).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      category_id: item.category_id,
+      category_name: item.categories?.name ?? null,
+    })) as Service[];
+    setServices(mapped);
+  }
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -156,7 +187,9 @@ function BusinessProfilePage() {
     if (result.error) {
       setMessage("Não foi possível salvar o perfil: " + result.error.message);
     } else {
-      setBusiness(result.data as Business);
+      const savedBusiness = result.data as Business;
+      setBusiness(savedBusiness);
+      await loadServices(savedBusiness.id);
       setMessage("Perfil comercial salvo com sucesso.");
     }
 
@@ -184,7 +217,70 @@ function BusinessProfilePage() {
 
     setServiceName("");
     setServiceDescription("");
+    await loadServices(business.id);
     setMessage("Serviço cadastrado.");
+  }
+
+  function startEditService(service: Service) {
+    setEditingServiceId(service.id);
+    setServiceName(service.name);
+    setServiceDescription(service.description ?? "");
+    setCategoryId(service.category_id);
+  }
+
+  function cancelEditService() {
+    setEditingServiceId(null);
+    setServiceName("");
+    setServiceDescription("");
+    if (categories[0]) setCategoryId(categories[0].id);
+  }
+
+  async function saveService(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase || !business || !editingServiceId || !categoryId || !serviceName.trim()) {
+      setMessage("Informe categoria e nome do serviço.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("services")
+      .update({
+        category_id: categoryId,
+        name: serviceName.trim(),
+        description: serviceDescription.trim() || null,
+      })
+      .eq("id", editingServiceId)
+      .eq("business_id", business.id);
+
+    if (error) {
+      setMessage("Não foi possível atualizar o serviço: " + error.message);
+      return;
+    }
+
+    cancelEditService();
+    await loadServices(business.id);
+    setMessage("Serviço atualizado.");
+  }
+
+  async function deleteService(service: Service) {
+    if (!supabase || !business) return;
+    const confirmed = window.confirm(`Excluir o serviço "${service.name}"?`);
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("services")
+      .delete()
+      .eq("id", service.id)
+      .eq("business_id", business.id);
+
+    if (error) {
+      setMessage("Não foi possível excluir o serviço: " + error.message);
+      return;
+    }
+
+    if (editingServiceId === service.id) cancelEditService();
+    await loadServices(business.id);
+    setMessage("Serviço excluído.");
   }
 
   if (loading) return <main style={styles.center}>Carregando seu perfil...</main>;
@@ -226,8 +322,8 @@ function BusinessProfilePage() {
           <button disabled={saving} style={styles.primary}>{saving ? "Salvando..." : "Salvar perfil comercial"}</button>
         </form>
 
-        <form onSubmit={addService} style={styles.card}>
-          <h2>Adicionar serviço</h2>
+        <form onSubmit={editingServiceId ? saveService : addService} style={styles.card}>
+          <h2>{editingServiceId ? "Editar serviço" : "Adicionar serviço"}</h2>
           <div style={styles.formGrid}>
             <div>
               <label style={styles.label}>Categoria</label>
@@ -240,9 +336,44 @@ function BusinessProfilePage() {
           </div>
           <label style={styles.label}>Descrição do serviço</label>
           <textarea value={serviceDescription} onChange={(e) => setServiceDescription(e.target.value)} style={styles.textarea} rows={3} placeholder="Descreva esse serviço..." />
-          <button disabled={!business} style={styles.secondary}>Cadastrar serviço</button>
+          <div style={styles.actions}>
+            <button disabled={!business} style={styles.secondary}>{editingServiceId ? "Salvar alterações" : "Cadastrar serviço"}</button>
+            {editingServiceId && <button type="button" onClick={cancelEditService} style={styles.cancel}>Cancelar</button>}
+          </div>
           {!business && <p style={styles.hint}>Primeiro salve o perfil comercial.</p>}
         </form>
+
+        <section style={styles.card}>
+          <div style={styles.servicesHeader}>
+            <div>
+              <h2 style={{ marginBottom: 6 }}>Meus serviços</h2>
+              <p style={styles.text}>Os serviços ativos aparecem automaticamente no seu perfil público e no catálogo.</p>
+            </div>
+            <span style={styles.count}>{services.length}</span>
+          </div>
+
+          {services.length === 0 ? (
+            <div style={styles.empty}>Nenhum serviço cadastrado ainda.</div>
+          ) : (
+            <div style={styles.serviceList}>
+              {services.map((service) => (
+                <article key={service.id} style={styles.serviceItem}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={styles.serviceCategory}>{service.category_name ?? "Sem categoria"}</div>
+                    <h3 style={styles.serviceTitle}>{service.name}</h3>
+                    {service.description && <p style={styles.serviceDescription}>{service.description}</p>}
+                  </div>
+                  <div style={styles.serviceActions}>
+                    <button type="button" onClick={() => startEditService(service)} style={styles.smallButton}>Editar</button>
+                    <button type="button" onClick={() => deleteService(service)} style={styles.deleteButton}>Excluir</button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {business && <button type="button" onClick={() => navigate({ to: "/fornecedor/$slug", params: { slug: business.slug } })} style={styles.publicButton}>Ver meu perfil público →</button>}
 
         {message && <div style={styles.message}>{message}</div>}
       </section>
@@ -270,6 +401,20 @@ const styles: Record<string, React.CSSProperties> = {
   text: { color: "#687386", fontSize: 16, lineHeight: 1.5 },
   card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 28, marginBottom: 18 },
   formGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 18, marginBottom: 18 },
+  actions: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" },
+  cancel: { border: "1px solid #dfe2ea", background: "#fff", color: "#566074", borderRadius: 9, padding: "11px 18px", fontWeight: 700, cursor: "pointer" },
+  servicesHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 18 },
+  count: { minWidth: 34, height: 34, borderRadius: 999, display: "grid", placeItems: "center", background: "#ebe9ff", color: "#4f46c7", fontWeight: 800 },
+  empty: { border: "1px dashed #dfe2ea", borderRadius: 12, padding: 22, color: "#8a91a3", textAlign: "center" },
+  serviceList: { display: "grid", gap: 10 },
+  serviceItem: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, padding: 16, border: "1px solid #e7e9f0", borderRadius: 12 },
+  serviceCategory: { fontSize: 11, fontWeight: 800, color: "#4f46c7", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 5 },
+  serviceTitle: { margin: 0, fontSize: 16 },
+  serviceDescription: { margin: "6px 0 0", color: "#687386", fontSize: 13, lineHeight: 1.45 },
+  serviceActions: { display: "flex", gap: 8, flexShrink: 0 },
+  smallButton: { border: "1px solid #dfe2ea", background: "#fff", color: "#4f46c7", borderRadius: 8, padding: "8px 11px", fontWeight: 700, cursor: "pointer" },
+  deleteButton: { border: "1px solid #f0d7d7", background: "#fff", color: "#b44747", borderRadius: 8, padding: "8px 11px", fontWeight: 700, cursor: "pointer" },
+  publicButton: { display: "block", margin: "4px auto 0", border: 0, background: "transparent", color: "#4f46c7", fontWeight: 800, cursor: "pointer" },
   label: { display: "block", fontSize: 13, fontWeight: 700, color: "#465066", marginBottom: 7 },
   input: { width: "100%", boxSizing: "border-box", padding: "12px 13px", border: "1px solid #dfe2ea", borderRadius: 9, fontSize: 14, background: "#fff" },
   textarea: { width: "100%", boxSizing: "border-box", padding: "12px 13px", border: "1px solid #dfe2ea", borderRadius: 9, fontSize: 14, resize: "vertical", fontFamily: "inherit", marginBottom: 18 },
