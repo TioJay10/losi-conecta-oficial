@@ -19,14 +19,41 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [recoverySession, setRecoverySession] = useState(false);
 
   useEffect(() => {
     if (!supabase) return;
 
+    let mounted = true;
+
     supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      if (data.session && recoverySession) {
+        setMode("recovery");
+        return;
+      }
       if (data.session) navigate({ to: "/painel" });
     });
-  }, [navigate]);
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (event === "PASSWORD_RECOVERY" && session) {
+        setRecoverySession(true);
+        setMode("recovery");
+        setMessage("");
+        setError("");
+        return;
+      }
+      if (session && event === "SIGNED_IN" && !recoverySession) {
+        navigate({ to: "/painel" });
+      }
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [navigate, recoverySession]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -41,6 +68,34 @@ function AuthPage() {
     }
 
     if (mode === "recovery") {
+      if (recoverySession) {
+        if (password.length < 6) {
+          setError("A nova senha precisa ter pelo menos 6 caracteres.");
+          setLoading(false);
+          return;
+        }
+
+        const { error: updateError } = await supabase.auth.updateUser({ password });
+        if (updateError) {
+          setError("Não foi possível atualizar a senha. Solicite um novo link de recuperação.");
+        } else {
+          await supabase.auth.signOut();
+          setRecoverySession(false);
+          setPassword("");
+          setMode("login");
+          setMessage("Senha atualizada com sucesso. Agora entre com sua nova senha.");
+        }
+
+        setLoading(false);
+        return;
+      }
+
+      if (!email.trim()) {
+        setError("Informe seu e-mail.");
+        setLoading(false);
+        return;
+      }
+
       const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: APP_URL + "/entrar",
       });
@@ -98,6 +153,7 @@ function AuthPage() {
   const title =
     mode === "login" ? "Entrar no LOSI CONECTA" :
     mode === "signup" ? "Criar sua conta" :
+    recoverySession ? "Definir nova senha" :
     "Recuperar senha";
 
   return (
@@ -109,7 +165,7 @@ function AuthPage() {
         <p style={styles.subtitle}>
           {mode === "login" && "Acesse sua conta para encontrar e conectar-se a fornecedores."}
           {mode === "signup" && "Crie seu acesso para fazer parte da rede de profissionais."}
-          {mode === "recovery" && "Informe seu e-mail para receber as instruções de acesso."}
+          {mode === "recovery" && (recoverySession ? "Escolha uma nova senha para sua conta." : "Informe seu e-mail para receber as instruções de acesso.")}
         </p>
 
         <form onSubmit={submit} style={styles.form}>
@@ -125,10 +181,10 @@ function AuthPage() {
             <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="voce@email.com" autoComplete="email" style={styles.input} />
           </label>
 
-          {mode !== "recovery" && (
+          {(mode !== "recovery" || recoverySession) && (
             <label style={styles.label}>
-              Senha
-              <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={6} placeholder="Mínimo de 6 caracteres" autoComplete={mode === "login" ? "current-password" : "new-password"} style={styles.input} />
+              {recoverySession ? "Nova senha" : "Senha"}
+              <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={6} placeholder="Mínimo de 6 caracteres" autoComplete={recoverySession ? "new-password" : mode === "login" ? "current-password" : "new-password"} style={styles.input} />
             </label>
           )}
 
@@ -136,7 +192,7 @@ function AuthPage() {
           {message && <div style={styles.success}>{message}</div>}
 
           <button disabled={loading} type="submit" style={styles.button}>
-            {loading ? "Aguarde..." : mode === "login" ? "Entrar" : mode === "signup" ? "Criar conta" : "Enviar instruções"}
+            {loading ? "Aguarde..." : mode === "login" ? "Entrar" : mode === "signup" ? "Criar conta" : recoverySession ? "Atualizar senha" : "Enviar instruções"}
           </button>
         </form>
 
@@ -150,7 +206,17 @@ function AuthPage() {
           {mode === "login" ? (
             <>Ainda não tem conta? <button style={styles.inlineLink} onClick={() => { setMode("signup"); setError(""); setMessage(""); }}>Criar conta</button></>
           ) : (
-            <button style={styles.inlineLink} onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Voltar para entrar</button>
+            <button
+              style={styles.inlineLink}
+              onClick={() => {
+                setMode("login");
+                setRecoverySession(false);
+                setError("");
+                setMessage("");
+              }}
+            >
+              Voltar para entrar
+            </button>
           )}
         </div>
 
