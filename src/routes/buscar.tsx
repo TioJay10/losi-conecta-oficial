@@ -20,6 +20,7 @@ function SearchPage() {
   const [search, setSearch] = useState("");
   const [city, setCity] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [sortBy, setSortBy] = useState("relevance");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
@@ -74,6 +75,28 @@ function SearchPage() {
       );
     });
   }, [businesses, search, city, categoryId]);
+
+  const sortedResults = useMemo(() => {
+    const copy = [...results];
+    const rating = (business: Business) =>
+      business.reviews.length
+        ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length
+        : 0;
+    if (sortBy === "rating") {
+      return copy.sort((a, b) => rating(b) - rating(a) || a.business_name.localeCompare(b.business_name, "pt-BR"));
+    }
+    if (sortBy === "az") {
+      return copy.sort((a, b) => a.business_name.localeCompare(b.business_name, "pt-BR"));
+    }
+    if (sortBy === "saved") {
+      return copy.sort((a, b) => Number(favoriteIds.includes(b.id)) - Number(favoriteIds.includes(a.id)));
+    }
+    return copy.sort((a, b) =>
+      Number(b.verified) - Number(a.verified) ||
+      rating(b) - rating(a) ||
+      a.business_name.localeCompare(b.business_name, "pt-BR")
+    );
+  }, [results, sortBy, favoriteIds]);
 
   async function toggleFavorite(businessId: string) {
     if (!userId) {
@@ -130,13 +153,24 @@ function SearchPage() {
       </section>
       <section className="catalog-results">
         <div className="catalog-results-head">
-          <div>
+          <div className="catalog-results-heading">
             <div className="catalog-kicker">FORNECEDORES</div>
             <h2>{loading ? "Carregando..." : String(results.length) + " fornecedor" + (results.length === 1 ? "" : "es") + " encontrado" + (results.length === 1 ? "" : "s")}</h2>
           </div>
-          {(search || city || categoryId) && (
-            <button className="catalog-clear" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); }}>Limpar filtros</button>
-          )}
+          <div className="catalog-results-tools">
+            <label className="catalog-sort">
+              <span>Ordenar</span>
+              <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label="Ordenar resultados">
+                <option value="relevance">Mais relevantes</option>
+                <option value="rating">Melhor avaliados</option>
+                <option value="saved">Meus salvos</option>
+                <option value="az">Nome: A–Z</option>
+              </select>
+            </label>
+            {(search || city || categoryId) && (
+              <button className="catalog-clear" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); }}>Limpar filtros</button>
+            )}
+          </div>
         </div>
         {error && <div className="catalog-message catalog-error">{error}</div>}
         {!loading && !error && results.length === 0 && (
@@ -146,8 +180,15 @@ function SearchPage() {
             <Link to="/entrar">Quero cadastrar minha empresa</Link>
           </div>
         )}
+        {(search || city || categoryId) && (
+          <div className="catalog-active-filters" aria-label="Filtros ativos">
+            {search && <span>Busca: {search}</span>}
+            {city && <span>Cidade: {city}</span>}
+            {categoryId && <span>Categoria: {categories.find((category) => category.id === categoryId)?.name}</span>}
+          </div>
+        )}
         <div className="catalog-grid">
-          {results.map((business) => {
+          {sortedResults.map((business) => {
             const whatsapp = whatsappUrl(business);
             const serviceNames = business.services.map((service) => service.name).filter(Boolean).slice(0, 3);
             return (
