@@ -17,6 +17,7 @@ type Business = {
   address: string | null;
   logo_url: string | null;
   cover_url: string | null;
+  slug: string;
 };
 
 export const Route = createFileRoute("/meu-perfil")({
@@ -122,12 +123,20 @@ function BusinessProfilePage() {
     setSaving(true);
     setMessage("");
 
+      const normalizedName = form.business_name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
     const payload = {
       owner_id: user.id,
       business_name: form.business_name.trim(),
       slug: business?.id
-        ? business.business_name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + business.id.slice(0, 8)
-        : crypto.randomUUID().slice(0, 8) + "-" + form.business_name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+        ? business.slug
+        : normalizedName + "-" + crypto.randomUUID().slice(0, 8),
       description: form.description.trim() || null,
       phone: form.phone.trim() || null,
       whatsapp: form.whatsapp.trim() || null,
