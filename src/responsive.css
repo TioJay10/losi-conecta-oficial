@@ -343,3 +343,7 @@ h1,h2,h3,p { overflow-wrap:anywhere; }
   .admin-filters{grid-template-columns:1fr}
   .admin-filter-count{justify-content:flex-start}
 }
+
+.admin-review-card{margin-bottom:14px;padding:20px;background:#f9f9fc;border:1px solid #dfe2ea;border-radius:14px}
+.admin-review-status{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;color:#687386;font-size:13px}
+@media(max-width:599px){.admin-review-card{padding:16px}.admin-review-card .admin-section-head{flex-direction:column}.admin-review-card .admin-section-head button{width:100%}}
