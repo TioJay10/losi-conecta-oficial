@@ -13,6 +13,8 @@ function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ full_name: string | null; user_type: "professional" | "admin" } | null>(null);
   const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
+  const [plans, setPlans] = useState<Array<{id:string;name:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean}>>([]);
+  const [currentPlan, setCurrentPlan] = useState<{name:string;ends_at:string|null}|null>(null);
   const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -148,6 +150,14 @@ function DashboardPage() {
           </section>
         )}
 
+        <section className="dashboard-commercial" style={styles.statusSection}>
+          <div>
+            <div style={styles.badge}>PLANOS PARA FORNECEDORES</div>
+            <h2 style={{margin:"10px 0 6px"}}>{currentPlan ? currentPlan.name : "Plano gratuito"}</h2>
+            <p style={{...styles.text,marginTop:0}}>{currentPlan?.ends_at ? "Seu plano está ativo até " + new Date(currentPlan.ends_at).toLocaleDateString("pt-BR") + "." : "Comece gratuitamente e conheça opções para aumentar a visibilidade do seu negócio."}</p>
+          </div>
+          <div className="dashboard-plan-grid">{plans.filter(p => p.billing_period !== "free").map(plan => <div className="dashboard-plan-card" key={plan.id}><strong>{plan.name}</strong><span>{plan.price_cents === 0 ? "Grátis" : "R$ " + (plan.price_cents/100).toFixed(2).replace(".",",") + "/mês"}</span><small>{plan.description || "Mais recursos para seu perfil."}</small></div>)}</div>
+        </section>
         {savedBusinesses.length > 0 && (
           <section style={{ marginTop: 42 }}>
             <div style={styles.badge}>SALVOS</div>
