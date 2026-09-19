@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
@@ -11,7 +11,9 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ full_name: string | null; user_type: "professional" | "admin" } | null>(null);
-  const [hasBusinessProfile, setHasBusinessProfile] = useState(false);\n  const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
+  const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
+  const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
+  const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,6 +57,13 @@ function DashboardPage() {
         .select("id")
         .eq("owner_id", currentUser.id)
         .maybeSingle();
+
+      const { data: favoriteRows } = await supabase.from("favorites").select("business_id").eq("user_id", currentUser.id);
+      const ids = (favoriteRows ?? []).map((row) => row.business_id);
+      if (ids.length) {
+        const { data: saved } = await supabase.from("business_profiles").select("id,business_name,slug,city,state").in("id", ids).eq("active", true).eq("approval_status", "approved").order("business_name");
+        if (mounted) setSavedBusinesses(saved ?? []);
+      }
 
       if (!mounted) return;
 
@@ -126,6 +135,22 @@ function DashboardPage() {
             </button>
           </div>
         )}
+
+        {savedBusinesses.length > 0 && (
+          <section style={{ marginTop: 42 }}>
+            <div style={styles.badge}>SALVOS</div>
+            <h2 style={{ margin: "10px 0 6px" }}>Fornecedores salvos</h2>
+            <p style={{ ...styles.text, marginTop: 0 }}>Seus fornecedores favoritos ficam reunidos aqui.</p>
+            <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
+              {savedBusinesses.map((business) => (
+                <Link key={business.id} to={"/fornecedor/" + business.slug} style={styles.savedCard}>
+                  <strong>{business.business_name}</strong>
+                  <span>{business.city}{business.city && business.state ? " — " : ""}{business.state}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </section>
     </main>
   );
@@ -147,6 +172,8 @@ const styles: Record<string, React.CSSProperties> = {
   onboardingTitle: { margin: "8px 0 6px", fontSize: 24 },
   onboardingText: { margin: 0, color: "#687386", lineHeight: 1.55, maxWidth: 650 },
   primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
-  savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },\n  center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
+  savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },
+  savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },
+  center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
 };
 
