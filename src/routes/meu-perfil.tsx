@@ -398,6 +398,7 @@ const styles: Record<string, React.CSSProperties> = {
   back: { border: 0, background: "transparent", cursor: "pointer", color: "#566074", fontSize: 14 },
   content: { maxWidth: 1000, margin: "0 auto", padding: "48px 24px 80px" },
   heading: { marginBottom: 28 },
+  statusBox: { marginTop: 14, padding: "12px 14px", borderRadius: 10, background: "#f3f4ff", border: "1px solid #dfe0ff", color: "#4f46c7", fontSize: 14 },
   badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
   text: { color: "#687386", fontSize: 16, lineHeight: 1.5 },
   card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 28, marginBottom: 18 },
