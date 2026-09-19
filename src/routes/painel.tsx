@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
@@ -12,7 +13,6 @@ function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ full_name: string | null; user_type: "professional" | "admin" } | null>(null);
   const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
-  const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -156,7 +156,7 @@ function DashboardPage() {
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, CSSProperties> = {
   page: { minHeight: "100vh", background: "#f7f8fc", color: "#172033", fontFamily: "Arial, sans-serif" },
   header: { height: 72, background: "#fff", borderBottom: "1px solid #e7e9f0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px", boxSizing: "border-box" },
   logo: { fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
@@ -172,7 +172,6 @@ const styles: Record<string, React.CSSProperties> = {
   onboardingTitle: { margin: "8px 0 6px", fontSize: 24 },
   onboardingText: { margin: 0, color: "#687386", lineHeight: 1.55, maxWidth: 650 },
   primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
-  savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },
   savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },
   center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
 };
