@@ -36,6 +36,7 @@ function BusinessProfilePage() {
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<"logo" | "cover" | "portfolio" | null>(null);
   const [message, setMessage] = useState("");
   const [form, setForm] = useState({
     business_name: "",
@@ -140,6 +141,48 @@ function BusinessProfilePage() {
       category_name: item.categories?.name ?? null,
     })) as Service[];
     setServices(mapped);
+  }
+
+  async function uploadImage(file: File, kind: "logo" | "cover" | "portfolio") {
+    if (!supabase || !user) {
+      setMessage("Entre na sua conta para enviar imagens.");
+      return;
+    }
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      setMessage("Use uma imagem JPG, PNG ou WebP.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage("A imagem deve ter no máximo 5 MB.");
+      return;
+    }
+
+    setUploading(kind);
+    setMessage("");
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = user.id + "/" + kind + "-" + crypto.randomUUID() + "." + extension;
+    const { error: uploadError } = await supabase.storage.from("provider-media").upload(path, file, {
+      cacheControl: "31536000",
+      contentType: file.type,
+      upsert: false,
+    });
+
+    if (uploadError) {
+      setMessage("Não foi possível enviar a imagem: " + uploadError.message);
+      setUploading(null);
+      return;
+    }
+
+    const { data } = supabase.storage.from("provider-media").getPublicUrl(path);
+    if (kind === "logo") update("logo_url", data.publicUrl);
+    if (kind === "cover") update("cover_url", data.publicUrl);
+    if (kind === "portfolio") {
+      const urls = form.portfolio_urls.split("\n").map((url) => url.trim()).filter(Boolean);
+      update("portfolio_urls", [...urls, data.publicUrl].slice(0, 12).join("\n"));
+    }
+    setMessage("Imagem enviada. Salve o perfil para confirmar as alterações.");
+    setUploading(null);
   }
 
   function update(field: keyof typeof form, value: string) {
@@ -331,13 +374,29 @@ function BusinessProfilePage() {
             <Field label="Cidade" value={form.city} onChange={(v) => update("city", v)} />
             <Field label="Estado" value={form.state} onChange={(v) => update("state", v)} />
             <Field label="Endereço" value={form.address} onChange={(v) => update("address", v)} />
-            <Field label="URL da logo" value={form.logo_url} onChange={(v) => update("logo_url", v)} />
-            <Field label="URL da capa" value={form.cover_url} onChange={(v) => update("cover_url", v)} />
+            <div>
+              <Field label="URL da logo" value={form.logo_url} onChange={(v) => update("logo_url", v)} />
+              <label style={styles.uploadButton}>
+                {uploading === "logo" ? "Enviando..." : "Enviar logo"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={uploading !== null} onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadImage(file, "logo"); e.currentTarget.value = ""; }} />
+              </label>
+            </div>
+            <div>
+              <Field label="URL da capa" value={form.cover_url} onChange={(v) => update("cover_url", v)} />
+              <label style={styles.uploadButton}>
+                {uploading === "cover" ? "Enviando..." : "Enviar capa"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={uploading !== null} onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadImage(file, "cover"); e.currentTarget.value = ""; }} />
+              </label>
+            </div>
           </div>
 
           <label style={styles.label}>Portfólio de imagens</label>
           <textarea value={form.portfolio_urls} onChange={(e) => update("portfolio_urls", e.target.value)} style={styles.textarea} rows={4} placeholder={"Cole uma URL de imagem por linha. Ex.: https://site.com/foto.jpg"} />
-          <p style={styles.hint}>Até 12 imagens. Use links públicos de imagens; elas aparecerão no seu perfil público.</p>
+          <p style={styles.hint}>Até 12 imagens. Você pode enviar arquivos diretamente ou colar links públicos.</p>
+          <label style={styles.uploadButton}>
+            {uploading === "portfolio" ? "Enviando imagem..." : "Adicionar imagem ao portfólio"}
+            <input type="file" accept="image/jpeg,image/png,image/webp" hidden disabled={uploading !== null} onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadImage(file, "portfolio"); e.currentTarget.value = ""; }} />
+          </label>
 
           <label style={styles.label}>Descrição</label>
           <textarea value={form.description} onChange={(e) => update("description", e.target.value)} style={styles.textarea} rows={5} placeholder="Conte o que sua empresa oferece..." />
@@ -474,5 +533,6 @@ const styles: Record<string, React.CSSProperties> = {
   secondary: { border: "1px solid #4f46c7", background: "#fff", color: "#4f46c7", borderRadius: 9, padding: "11px 18px", fontWeight: 700, cursor: "pointer" },
   message: { background: "#fff", border: "1px solid #dfe2ea", borderRadius: 12, padding: 16, color: "#465066" },
   hint: { color: "#8a91a3", fontSize: 13 },
+  uploadButton: { display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: -8, marginBottom: 16, padding: "9px 13px", border: "1px solid #dfe2ea", borderRadius: 9, background: "#fff", color: "#4f46c7", fontSize: 13, fontWeight: 800, cursor: "pointer" },
   center: { minHeight: "100vh", display: "grid", placeItems: "center", color: "#687386", fontFamily: "Arial, sans-serif" },
 };
