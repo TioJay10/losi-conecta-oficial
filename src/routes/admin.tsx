@@ -15,7 +15,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; city: string | null; state: string | null; verified: boolean; active: boolean }>>([]);
-  const [section, setSection] = useState<"overview" | "users" | "businesses">("overview");
+  const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services">("overview");\n  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string; active: boolean }>>([]);\n  const [services, setServices] = useState<Array<{ id: string; name: string; description: string | null; active: boolean; business: { business_name: string } | null; category: { name: string } | null }>>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -54,7 +54,7 @@ function AdminPage() {
 
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
-      setLoading(false);
+      const [categoriesResult, servicesResult] = await Promise.all([\n        supabase.from("categories").select("id,name,slug,active").order("name"),\n        supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at", { ascending: false }),\n      ]);\n      if (!mounted) return;\n      setCategories((categoriesResult.data ?? []) as typeof categories);\n      setServices((servicesResult.data ?? []) as unknown as typeof services);\n      setLoading(false);
     }
 
     load();
@@ -101,13 +101,13 @@ function AdminPage() {
         <div className="admin-grid" style={styles.grid}>
           <button style={styles.cardButton} onClick={() => setSection("users")}><strong>Usuários <em>{stats.users}</em></strong><span>Ver contas cadastradas.</span></button>
           <button style={styles.cardButton} onClick={() => setSection("businesses")}><strong>Empresas <em>{stats.businesses}</em></strong><span>Ver perfis comerciais.</span></button>
-          <div style={styles.card}><strong>Categorias <em>{stats.categories}</em></strong><span>Categorias cadastradas.</span></div>
-          <div style={styles.card}><strong>Serviços <em>{stats.services}</em></strong><span>Serviços cadastrados.</span></div>
+          <button style={styles.cardButton} onClick={() => setSection("categories")}><strong>Categorias <em>{stats.categories}</em></strong><span>Gerenciar categorias.</span></button>
+          <button style={styles.cardButton} onClick={() => setSection("services")}><strong>Serviços <em>{stats.services}</em></strong><span>Gerenciar serviços.</span></button>
           <div style={styles.card}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Avaliações registradas.</span></div>
           <div style={styles.card}><strong>Métricas</strong><span>Acompanhar o crescimento da plataforma.</span></div>
         </div>
         {section !== "overview" && <section className="admin-table-section">
-          <div className="admin-section-head"><div><div style={styles.badge}>{section === "users" ? "USUÁRIOS" : "EMPRESAS"}</div><h2>{section === "users" ? "Usuários cadastrados" : "Empresas cadastradas"}</h2></div><button style={styles.backButton} onClick={() => setSection("overview")}>Voltar</button></div>
+          <div className="admin-section-head"><div><div style={styles.badge}>{section === "users" ? "USUÁRIOS" : section === "businesses" ? "EMPRESAS" : section === "categories" ? "CATEGORIAS" : "SERVIÇOS"}</div><h2>{section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "categories" ? "Categorias cadastradas" : "Serviços cadastrados"}</h2></div><button style={styles.backButton} onClick={() => setSection("overview")}>Voltar</button></div>
           {section === "users" ? <div className="admin-list">{users.map(item => <article className="admin-list-item" key={item.id}><strong>{item.full_name || "Sem nome"}</strong><span>{item.user_type === "admin" ? "Administrador" : "Profissional"}{item.city ? " · " + item.city : ""}{item.state ? " - " + item.state : ""}</span></article>)}</div> : <div className="admin-list">{businesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(item.id, { verified: !item.verified })}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id, { active: !item.active })}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>}
         </section>}
       </section>
