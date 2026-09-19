@@ -165,6 +165,7 @@ function BusinessProfilePage() {
 
     const payload = {
       owner_id: user.id,
+      approval_status: business?.approval_status === "rejected" ? "pending" : business?.approval_status ?? "pending",
       business_name: form.business_name.trim(),
       slug: business?.id
         ? business.slug
@@ -191,7 +192,11 @@ function BusinessProfilePage() {
       const savedBusiness = result.data as Business;
       setBusiness(savedBusiness);
       await loadServices(savedBusiness.id);
-      setMessage("Perfil comercial salvo com sucesso.");
+      setMessage(
+        business?.approval_status === "rejected"
+          ? "Alterações salvas e enviadas para nova análise."
+          : "Perfil comercial salvo com sucesso."
+      );
     }
 
     setSaving(false);
@@ -286,6 +291,8 @@ function BusinessProfilePage() {
 
   if (loading) return <main style={styles.center}>Carregando seu perfil...</main>;
 
+  const onboardingStep = !business ? 1 : services.length === 0 ? 2 : 3;
+
   return (
     <main className="profile-page" style={styles.page}>
       <header className="profile-header" style={styles.header}>
@@ -298,7 +305,15 @@ function BusinessProfilePage() {
           <div>
             <div style={styles.badge}>PERFIL COMERCIAL</div>
             <h1>Apresente sua empresa</h1>
-            <p style={styles.text}>Essas informações serão usadas no seu perfil público dentro do LOSI CONECTA.</p>{business && <div style={styles.statusBox}><strong>Status do perfil:</strong> {business.approval_status === "approved" ? "Aprovado e publicado" : business.approval_status === "rejected" ? "Rejeitado — revise os dados e aguarde nova análise" : "Aguardando aprovação da administração"}</div>}
+            <p style={styles.text}>Essas informações serão usadas no seu perfil público dentro do LOSI CONECTA.</p>
+            {business && <div style={styles.statusBox}><strong>Status do perfil:</strong> {business.approval_status === "approved" ? "Aprovado e publicado" : business.approval_status === "rejected" ? "Rejeitado — revise os dados e aguarde nova análise" : "Aguardando aprovação da administração"}</div>}
+          </div>
+        </div>
+
+        <div className="onboarding-steps" style={styles.steps}>
+          <Step number="1" title="Perfil comercial" active={onboardingStep === 1} done={onboardingStep > 1} />
+          <Step number="2" title="Primeiro serviço" active={onboardingStep === 2} done={onboardingStep > 2} />
+          <Step number="3" title="Enviar para análise" active={onboardingStep === 3} done={false} />
           </div>
         </div>
 
@@ -324,7 +339,8 @@ function BusinessProfilePage() {
         </form>
 
         <form onSubmit={editingServiceId ? saveService : addService} style={styles.card}>
-          <h2>{editingServiceId ? "Editar serviço" : "Adicionar serviço"}</h2>
+          <h2>{editingServiceId ? "Editar serviço" : "Adicione seu primeiro serviço"}</h2>
+          {!business && <p style={styles.hint}>Salve o perfil comercial acima para liberar o cadastro de serviços.</p>}
           <div style={styles.formGrid}>
             <div>
               <label style={styles.label}>Categoria</label>
@@ -343,6 +359,16 @@ function BusinessProfilePage() {
           </div>
           {!business && <p style={styles.hint}>Primeiro salve o perfil comercial.</p>}
         </form>
+
+        {business && services.length > 0 && (
+          <section style={styles.nextStep}>
+            <div>
+              <strong>Seu perfil já está estruturado.</strong>
+              <p style={styles.text}>Agora a administração precisa analisar seus dados. Enquanto aguarda, você pode continuar ajustando seus serviços e informações.</p>
+            </div>
+            <button type="button" onClick={() => navigate({ to: "/painel" })} style={styles.primary}>Voltar ao painel</button>
+          </section>
+        )}
 
         <section style={styles.card}>
           <div style={styles.servicesHeader}>
@@ -382,6 +408,15 @@ function BusinessProfilePage() {
   );
 }
 
+function Step({ number, title, active, done }: { number: string; title: string; active: boolean; done: boolean }) {
+  return (
+    <div className={active ? "onboarding-step active" : "onboarding-step"} style={styles.step}>
+      <span style={done ? styles.stepNumberDone : active ? styles.stepNumberActive : styles.stepNumber}>{done ? "✓" : number}</span>
+      <span style={active ? styles.stepTitleActive : styles.stepTitle}>{title}</span>
+    </div>
+  );
+}
+
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <div>
@@ -399,6 +434,14 @@ const styles: Record<string, React.CSSProperties> = {
   content: { maxWidth: 1000, margin: "0 auto", padding: "48px 24px 80px" },
   heading: { marginBottom: 28 },
   statusBox: { marginTop: 14, padding: "12px 14px", borderRadius: 10, background: "#f3f4ff", border: "1px solid #dfe0ff", color: "#4f46c7", fontSize: 14 },
+  steps: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 22 },
+  step: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "13px 14px", display: "flex", alignItems: "center", gap: 10 },
+  stepNumber: { width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", background: "#f1f2f6", color: "#7b8292", fontSize: 12, fontWeight: 800, flexShrink: 0 },
+  stepNumberActive: { width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", background: "#ebe9ff", color: "#4f46c7", fontSize: 12, fontWeight: 800, flexShrink: 0 },
+  stepNumberDone: { width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", background: "#eaf7ef", color: "#237345", fontSize: 12, fontWeight: 800, flexShrink: 0 },
+  stepTitle: { color: "#7b8292", fontSize: 13, fontWeight: 700 },
+  stepTitleActive: { color: "#172033", fontSize: 13, fontWeight: 800 },
+  nextStep: { marginBottom: 18, background: "#fff", border: "1px solid #dfe2ea", borderRadius: 16, padding: 22, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18 },
   badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
   text: { color: "#687386", fontSize: 16, lineHeight: 1.5 },
   card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 28, marginBottom: 18 },
