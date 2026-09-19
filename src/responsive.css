@@ -783,3 +783,225 @@ h1,h2,h3,p { overflow-wrap:anywhere; }
     align-items:stretch;
   }
 }
+
+
+/* Cadastro manual de usuários — formulário administrativo */
+.admin-users-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:16px 18px;
+  margin-bottom:12px;
+  background:#fff;
+  border:1px solid #e3e6ed;
+  border-radius:12px;
+}
+.admin-users-toolbar>div{
+  min-width:0;
+}
+.admin-users-toolbar strong{
+  display:block;
+  color:#172033;
+  font-size:14px;
+  line-height:1.3;
+}
+.admin-users-toolbar span{
+  display:block;
+  margin-top:4px;
+  color:#7a8394;
+  font-size:12px;
+  line-height:1.45;
+}
+.admin-primary-button,
+.admin-secondary-button{
+  min-height:40px;
+  padding:10px 15px;
+  border-radius:9px;
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  transition:background .15s ease,border-color .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+.admin-primary-button{
+  border:1px solid #4f46c7;
+  background:#4f46c7;
+  color:#fff;
+  box-shadow:0 3px 10px rgba(79,70,199,.16);
+}
+.admin-primary-button:hover{
+  background:#443bb5;
+  border-color:#443bb5;
+  transform:translateY(-1px);
+}
+.admin-primary-button:disabled{
+  opacity:.6;
+  cursor:wait;
+  transform:none;
+}
+.admin-secondary-button{
+  border:1px solid #dfe2e9;
+  background:#fff;
+  color:#566075;
+}
+.admin-secondary-button:hover{
+  background:#f7f8fb;
+  border-color:#cfd3dd;
+}
+.admin-user-form{
+  position:relative;
+  padding:24px;
+  margin-bottom:16px;
+  background:#fff;
+  border:1px solid #dfe2ea;
+  border-radius:14px;
+  box-shadow:0 8px 24px rgba(23,32,51,.045);
+  overflow:hidden;
+}
+.admin-user-form:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:4px;
+  background:#5a55c9;
+}
+.admin-form-heading{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:20px;
+}
+.admin-form-heading h2{
+  margin:7px 0 5px!important;
+  color:#172033;
+  font-size:20px!important;
+  line-height:1.25!important;
+  letter-spacing:-.02em;
+}
+.admin-form-heading p{
+  margin:0;
+  max-width:680px;
+  color:#7a8394;
+  font-size:13px;
+  line-height:1.55;
+}
+.admin-form-kicker{
+  display:inline-block;
+  color:#5a55c9;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.admin-form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.admin-form-field{
+  display:grid;
+  gap:7px;
+  min-width:0;
+}
+.admin-form-field-wide{
+  grid-column:1/-1;
+}
+.admin-form-field>span{
+  color:#4d5669;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.admin-form-field input,
+.admin-form-field select{
+  width:100%;
+  min-height:44px;
+  box-sizing:border-box;
+  padding:11px 13px;
+  border:1px solid #d8dce5;
+  border-radius:10px;
+  background:#fbfcfe;
+  color:#172033;
+  font:inherit;
+  font-size:13px;
+  outline:none;
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+}
+.admin-form-field input::placeholder{
+  color:#a0a7b4;
+}
+.admin-form-field input:hover,
+.admin-form-field select:hover{
+  border-color:#c8ccd7;
+  background:#fff;
+}
+.admin-form-field input:focus,
+.admin-form-field select:focus{
+  border-color:#7770d3;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(90,85,201,.11);
+}
+.admin-form-field-small{
+  grid-column:auto;
+}
+.admin-form-message{
+  margin-top:16px;
+  padding:11px 13px;
+  border-radius:9px;
+  font-size:12px;
+  line-height:1.45;
+}
+.admin-form-message-error{
+  color:#a13e49;
+  background:#fff5f6;
+  border:1px solid #f0d7db;
+}
+.admin-form-message-success{
+  color:#2f7655;
+  background:#f2faf5;
+  border:1px solid #cfe9d9;
+}
+.admin-form-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:9px;
+  margin-top:20px;
+  padding-top:17px;
+  border-top:1px solid #eceef3;
+}
+@media(max-width:699px){
+  .admin-users-toolbar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .admin-users-toolbar .admin-primary-button{
+    width:100%;
+  }
+  .admin-form-grid{
+    grid-template-columns:1fr;
+  }
+  .admin-form-field-wide{
+    grid-column:auto;
+  }
+  .admin-user-form{
+    padding:20px 17px;
+  }
+}
+@media(max-width:599px){
+  .admin-form-heading{
+    margin-bottom:17px;
+  }
+  .admin-form-heading h2{
+    font-size:18px!important;
+  }
+  .admin-form-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .admin-form-actions button{
+    width:100%;
+  }
+}
