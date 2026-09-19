@@ -78,10 +78,10 @@ function SearchPage() {
 
   const scoredResults = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("pt-BR");
-    const tokens = query.split(/\\s+/).map((token) => token.trim()).filter((token) => token.length >= 2);
+    const tokens = query.split(/\s+/).map((token) => token.trim()).filter((token) => token.length >= 2);
 
     function normalize(value: string) {
-      return value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("pt-BR");
+      return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
     }
 
     function score(business: Business) {
