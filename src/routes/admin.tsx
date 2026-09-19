@@ -11,7 +11,8 @@ function AdminPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(true);\n  const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; city: string | null; state: string | null; verified: boolean; active: boolean }>>([]);
   const [section, setSection] = useState<"overview" | "users" | "businesses">("overview");
@@ -68,6 +69,12 @@ function AdminPage() {
     };
   }, [navigate]);
 
+  async function updateBusiness(id: string, changes: { verified?: boolean; active?: boolean }) {
+    const { error } = await supabase.from("business_profiles").update(changes).eq("id", id);
+    if (error) return;
+    setBusinesses((current) => current.map((item) => item.id === id ? { ...item, ...changes } : item));
+  }
+
   async function logout() {
     if (supabase) await supabase.auth.signOut();
     navigate({ to: "/entrar" });
@@ -101,7 +108,7 @@ function AdminPage() {
         </div>
         {section !== "overview" && <section className="admin-table-section">
           <div className="admin-section-head"><div><div style={styles.badge}>{section === "users" ? "USUÁRIOS" : "EMPRESAS"}</div><h2>{section === "users" ? "Usuários cadastrados" : "Empresas cadastradas"}</h2></div><button style={styles.backButton} onClick={() => setSection("overview")}>Voltar</button></div>
-          {section === "users" ? <div className="admin-list">{users.map(item => <article className="admin-list-item" key={item.id}><strong>{item.full_name || "Sem nome"}</strong><span>{item.user_type === "admin" ? "Administrador" : "Profissional"}{item.city ? " · " + item.city : ""}{item.state ? " - " + item.state : ""}</span></article>)}</div> : <div className="admin-list">{businesses.map(item => <article className="admin-list-item" key={item.id}><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"}</span></article>)}</div>}
+          {section === "users" ? <div className="admin-list">{users.map(item => <article className="admin-list-item" key={item.id}><strong>{item.full_name || "Sem nome"}</strong><span>{item.user_type === "admin" ? "Administrador" : "Profissional"}{item.city ? " · " + item.city : ""}{item.state ? " - " + item.state : ""}</span></article>)}</div> : <div className="admin-list">{businesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(item.id, { verified: !item.verified })}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id, { active: !item.active })}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>}
         </section>}
       </section>
     </main>
@@ -118,6 +125,9 @@ const styles: Record<string, React.CSSProperties> = {
   badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
   text: { color: "#687386", fontSize: 17 },
   grid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16, marginTop: 32 },
-  cardButton: { minHeight: 120, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 22, display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box", textAlign: "left", cursor: "pointer", font: "inherit", color: "inherit" },\n  backButton: { border: "1px solid #dfe2ea", background: "#fff", borderRadius: 9, padding: "9px 14px", cursor: "pointer" },\n  card: { minHeight: 120, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 22, display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box" },
+  actionButton: { border: "1px solid #dfe2ea", background: "#fff", borderRadius: 8, padding: "8px 10px", cursor: "pointer", fontSize: 12, fontWeight: 700 },
+  cardButton: { minHeight: 120, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 22, display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box", textAlign: "left", cursor: "pointer", font: "inherit", color: "inherit" },
+  backButton: { border: "1px solid #dfe2ea", background: "#fff", borderRadius: 9, padding: "9px 14px", cursor: "pointer" },
+  card: { minHeight: 120, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 22, display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box" },
   center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
 };
