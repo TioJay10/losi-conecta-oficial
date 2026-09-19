@@ -20,6 +20,7 @@ type Business = {
   cover_url: string | null;
   slug: string;
   approval_status: "pending" | "approved" | "rejected";
+  portfolio_urls: string[];
 };
 
 export const Route = createFileRoute("/meu-perfil")({
@@ -48,6 +49,7 @@ function BusinessProfilePage() {
     address: "",
     logo_url: "",
     cover_url: "",
+    portfolio_urls: "",
   });
   const [serviceName, setServiceName] = useState("");
   const [serviceDescription, setServiceDescription] = useState("");
@@ -103,6 +105,7 @@ function BusinessProfilePage() {
           address: loaded.address ?? "",
           logo_url: loaded.logo_url ?? "",
           cover_url: loaded.cover_url ?? "",
+          portfolio_urls: (loaded.portfolio_urls ?? []).join("\n"),
         });
       }
 
@@ -180,6 +183,7 @@ function BusinessProfilePage() {
       address: form.address.trim() || null,
       logo_url: form.logo_url.trim() || null,
       cover_url: form.cover_url.trim() || null,
+      portfolio_urls: form.portfolio_urls.split("\n").map((url) => url.trim()).filter((url) => /^https?:\/\//i.test(url)).slice(0, 12),
     };
 
     const result = business
@@ -330,6 +334,10 @@ function BusinessProfilePage() {
             <Field label="URL da logo" value={form.logo_url} onChange={(v) => update("logo_url", v)} />
             <Field label="URL da capa" value={form.cover_url} onChange={(v) => update("cover_url", v)} />
           </div>
+
+          <label style={styles.label}>Portfólio de imagens</label>
+          <textarea value={form.portfolio_urls} onChange={(e) => update("portfolio_urls", e.target.value)} style={styles.textarea} rows={4} placeholder={"Cole uma URL de imagem por linha. Ex.: https://site.com/foto.jpg"} />
+          <p style={styles.hint}>Até 12 imagens. Use links públicos de imagens; elas aparecerão no seu perfil público.</p>
 
           <label style={styles.label}>Descrição</label>
           <textarea value={form.description} onChange={(e) => update("description", e.target.value)} style={styles.textarea} rows={5} placeholder="Conte o que sua empresa oferece..." />
