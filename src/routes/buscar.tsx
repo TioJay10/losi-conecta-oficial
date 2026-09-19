@@ -4,11 +4,12 @@ import { supabase } from "../lib/supabase";
 
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
+type ReviewSummary = { rating: number };
 type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; logo_url: string | null; cover_url: string | null;
-  verified: boolean; services: Service[];
+  verified: boolean; services: Service[]; reviews: ReviewSummary[];
 };
 
 export const Route = createFileRoute("/buscar")({ component: SearchPage });
@@ -26,7 +27,7 @@ function SearchPage() {
     let mounted = true;
     async function loadCatalog() {
       const [businessResult, categoryResult] = await Promise.all([
-        supabase.from("business_profiles").select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,services(id,name,category_id,categories(name))").eq("active", true).order("business_name"),
+        supabase.from("business_profiles").select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,services(id,name,category_id,categories(name)),reviews(rating)").eq("active", true).order("business_name"),
         supabase.from("categories").select("id,name,slug").eq("active", true).order("name"),
       ]);
       if (!mounted) return;
@@ -131,7 +132,7 @@ function SearchPage() {
                     <h3>{business.business_name}</h3>
                     {business.verified && <span className="provider-verified">Verificado</span>}
                   </div>
-                  {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
+                  {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}\n                  {business.reviews.length > 0 && (() => { const avg = business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length; return <div className="provider-card-rating" aria-label={`${avg.toFixed(1)} de 5, ${business.reviews.length} avaliações`}><strong>★ {avg.toFixed(1)}</strong><span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span></div>; })()}
                   <p>{business.description || "Profissional ou empresa para eventos cadastrada no LOSI CONECTA."}</p>
                   {serviceNames.length > 0 && <div className="provider-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
                   <div className="provider-actions">
