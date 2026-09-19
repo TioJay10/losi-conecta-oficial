@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
+type Review = { id: string; rating: number; comment: string | null; created_at: string; reviewer: { full_name: string | null } | null };
 type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
@@ -19,6 +20,11 @@ function ProviderPage() {
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewMessage, setReviewMessage] = useState("");
+  const [reviewing, setReviewing] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -31,8 +37,21 @@ function ProviderPage() {
         .maybeSingle();
 
       if (!mounted) return;
-      if (queryError) setError("Não foi possível carregar este fornecedor.");
-      else setBusiness((data ?? null) as unknown as Business);
+      if (queryError) {
+        setError("Não foi possível carregar este fornecedor.");
+      } else {
+        const loaded = (data ?? null) as unknown as Business;
+        setBusiness(loaded);
+        if (loaded) {
+          const { data: reviewData } = await supabase
+            .from("reviews")
+            .select("id,rating,comment,created_at,reviewer:profiles(full_name)")
+            .eq("business_id", loaded.id)
+            .eq("active", true)
+            .order("created_at", { ascending: false });
+          if (mounted) setReviews((reviewData ?? []) as unknown as Review[]);
+        }
+      }
       setLoading(false);
     }
     load();
@@ -49,6 +68,40 @@ function ProviderPage() {
     );
   }
 
+  async function submitReview(event: React.FormEvent) {
+    event.preventDefault();
+    setReviewMessage("");
+    setReviewing(true);
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      setReviewMessage("Entre na sua conta para avaliar este fornecedor.");
+      setReviewing(false);
+      return;
+    }
+    const { error: insertError } = await supabase.from("reviews").insert({
+      business_id: business.id,
+      reviewer_id: sessionData.session.user.id,
+      rating: reviewRating,
+      comment: reviewComment.trim() || null,
+    });
+    if (insertError) {
+      setReviewMessage(insertError.code === "23505" ? "Você já avaliou este fornecedor." : "Não foi possível publicar sua avaliação.");
+    } else {
+      setReviewComment("");
+      setReviewRating(5);
+      const { data: reviewData } = await supabase
+        .from("reviews")
+        .select("id,rating,comment,created_at,reviewer:profiles(full_name)")
+        .eq("business_id", business.id)
+        .eq("active", true)
+        .order("created_at", { ascending: false });
+      setReviews((reviewData ?? []) as unknown as Review[]);
+      setReviewMessage("Avaliação publicada.");
+    }
+    setReviewing(false);
+  }
+
+  const averageRating = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
   const rawPhone = business.whatsapp || business.phone || "";
   const digits = rawPhone.replace(/\D/g, "");
   const whatsapp = digits ? "https://wa.me/" + (digits.startsWith("55") ? digits : "55" + digits) + "?text=" + encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA.") : null;
@@ -84,6 +137,35 @@ function ProviderPage() {
             <div className="catalog-kicker">SOBRE O FORNECEDOR</div>
             <h2>Conheça o trabalho</h2>
             <p>{business.description || "Este profissional ainda não adicionou uma descrição."}</p>
+          </div>
+
+          <div className="provider-profile-card provider-reviews-card">
+            <div className="catalog-kicker">AVALIAÇÕES</div>
+            <div className="provider-rating-summary">
+              <strong>{averageRating ? averageRating.toFixed(1) : "—"}</strong>
+              <span>{"★".repeat(Math.round(averageRating)) || "Sem avaliações"} · {reviews.length} {reviews.length === 1 ? "avaliação" : "avaliações"}</span>
+            </div>
+            {reviews.length === 0 ? <p>Este fornecedor ainda não recebeu avaliações.</p> : (
+              <div className="provider-review-list">
+                {reviews.map((review) => (
+                  <article key={review.id}>
+                    <div className="provider-review-head"><strong>{review.reviewer?.full_name || "Usuário"}</strong><span>{"★".repeat(review.rating)}</span></div>
+                    {review.comment && <p>{review.comment}</p>}
+                  </article>
+                ))}
+              </div>
+            )}
+            <form className="provider-review-form" onSubmit={submitReview}>
+              <h3>Avalie este fornecedor</h3>
+              <label>Nota
+                <select value={reviewRating} onChange={(e) => setReviewRating(Number(e.target.value))}>
+                  <option value={5}>5 — Excelente</option><option value={4}>4 — Muito bom</option><option value={3}>3 — Bom</option><option value={2}>2 — Regular</option><option value={1}>1 — Ruim</option>
+                </select>
+              </label>
+              <textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} rows={3} placeholder="Conte como foi sua experiência..." />
+              <button type="submit" disabled={reviewing}>{reviewing ? "Publicando..." : "Publicar avaliação"}</button>
+              {reviewMessage && <small>{reviewMessage}</small>}
+            </form>
           </div>
 
           <div className="provider-profile-card">
