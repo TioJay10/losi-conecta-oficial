@@ -27,7 +27,12 @@ function SearchPage() {
     let mounted = true;
     async function loadCatalog() {
       const [businessResult, categoryResult] = await Promise.all([
-        supabase.from("business_profiles").select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,services(id,name,category_id,categories(name)),reviews(rating)").eq("active", true).order("business_name"),
+        supabase
+          .from("business_profiles")
+          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,services(id,name,category_id,categories(name)),reviews(rating)")
+          .eq("active", true)
+          .eq("approval_status", "approved")
+          .order("business_name"),
         supabase.from("categories").select("id,name,slug").eq("active", true).order("name"),
       ]);
       if (!mounted) return;
@@ -132,11 +137,23 @@ function SearchPage() {
                     <h3>{business.business_name}</h3>
                     {business.verified && <span className="provider-verified">Verificado</span>}
                   </div>
-                  {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}\n                  {business.reviews.length > 0 && (() => { const avg = business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length; return <div className="provider-card-rating" aria-label={`${avg.toFixed(1)} de 5, ${business.reviews.length} avaliações`}><strong>★ {avg.toFixed(1)}</strong><span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span></div>; })()}
+                  {(business.city || business.state) && (
+                    <div className="provider-location">
+                      {business.city}{business.city && business.state ? " — " : ""}{business.state}
+                    </div>
+                  )}
+                  {business.reviews.length > 0 && (() => {
+                    const avg = business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length;
+                    return <div className="provider-card-rating" aria-label={avg.toFixed(1) + " de 5, " + business.reviews.length + " avaliações"}>
+                      <strong>★ {avg.toFixed(1)}</strong>
+                      <span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span>
+                    </div>;
+                  })()}
                   <p>{business.description || "Profissional ou empresa para eventos cadastrada no LOSI CONECTA."}</p>
                   {serviceNames.length > 0 && <div className="provider-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
                   <div className="provider-actions">
-                    <Link to={"/fornecedor/" + business.slug} className="provider-profile-link">Ver perfil</Link>{whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="provider-primary">Conversar pelo WhatsApp</a> : <span className="provider-disabled">Contato ainda não informado</span>}
+                    <Link to={"/fornecedor/" + business.slug} className="provider-profile-link">Ver perfil</Link>
+                    {whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="provider-primary">Conversar pelo WhatsApp</a> : <span className="provider-disabled">Contato ainda não informado</span>}
                   </div>
                 </div>
               </article>
