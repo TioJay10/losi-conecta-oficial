@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { CSSProperties } from "react";
 import { supabase } from "../lib/supabase";
@@ -128,7 +129,7 @@ function AdminPage() {
     const { error } = await supabase.from("reviews").delete().eq("id",id);
     if (!error) setReviews(current=>current.filter(item=>item.id!==id));
   }
-  async function createManualUser(event: React.FormEvent<HTMLFormElement>) {
+  async function createManualUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setCreateUserError("");
     setCreateUserSuccess("");
