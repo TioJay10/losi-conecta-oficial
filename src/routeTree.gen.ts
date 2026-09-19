@@ -64,6 +64,7 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/buscar': typeof BuscarRoute
 }
 
 export interface FileRoutesById {
@@ -73,6 +74,7 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/buscar': typeof BuscarRoute
 }
 
 export interface FileRouteTypes {
@@ -90,6 +92,7 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   MeuPerfilRoute: typeof MeuPerfilRoute
   PainelRoute: typeof PainelRoute
+  BuscarRoute: typeof BuscarRoute
 }
 
 declare module '@tanstack/react-router' {
