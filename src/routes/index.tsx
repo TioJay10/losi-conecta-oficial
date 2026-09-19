@@ -1,31 +1,439 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import type { CSSProperties } from "react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 function HomePage() {
-  const navigate = useNavigate();
-
   return (
     <main style={styles.page}>
+      <header style={styles.header}>
+        <Link to="/" style={styles.logo}>
+          LOSI <span>CONECTA</span>
+        </Link>
+
+        <nav style={styles.nav}>
+          <a href="#como-funciona" style={styles.navLink}>Como funciona</a>
+          <a href="#para-quem" style={styles.navLink}>Para quem é</a>
+          <a href="#categorias" style={styles.navLink}>Categorias</a>
+        </nav>
+
+        <Link to="/entrar" style={styles.headerButton}>Entrar</Link>
+      </header>
+
       <section style={styles.hero}>
-        <div style={styles.brand}>LOSI CONECTA</div>
-        <div style={styles.eyebrow}>REDE PROFISSIONAL DE EVENTOS</div>
-        <h1>Encontre os fornecedores certos para seu evento.</h1>
-        <p>Pesquise profissionais, serviços e empresas para transformar seu evento em realidade.</p>
-        <button onClick={() => navigate({ to: "/entrar" })} style={styles.button}>Entrar ou criar conta</button>
+        <div style={styles.heroGlow} />
+        <div style={styles.eyebrow}>A REDE DE PROFISSIONAIS PARA EVENTOS</div>
+        <h1 style={styles.heroTitle}>
+          Encontre quem você precisa para
+          <span style={styles.gradientText}> realizar seu evento.</span>
+        </h1>
+        <p style={styles.heroText}>
+          O LOSI CONECTA aproxima quem organiza eventos de profissionais,
+          empresas e fornecedores especializados — tudo em um só lugar.
+        </p>
+
+        <div style={styles.heroActions}>
+          <Link to="/entrar" style={styles.primaryButton}>Começar agora</Link>
+          <a href="#como-funciona" style={styles.secondaryButton}>Entender como funciona</a>
+        </div>
+
+        <div style={styles.heroNote}>
+          <span style={styles.dot} /> Encontre • Conheça • Conecte
+        </div>
       </section>
+
+      <section id="como-funciona" style={styles.section}>
+        <div style={styles.sectionIntro}>
+          <div style={styles.sectionKicker}>COMO FUNCIONA</div>
+          <h2 style={styles.sectionTitle}>Do que você precisa ao contato com o fornecedor.</h2>
+          <p style={styles.sectionText}>
+            O LOSI CONECTA foi pensado para deixar a busca por profissionais de eventos
+            mais simples, organizada e objetiva.
+          </p>
+        </div>
+
+        <div style={styles.steps}>
+          <Step number="01" title="Encontre" text="Pesquise por serviço, categoria e localização para descobrir profissionais que atendem ao que seu evento precisa." />
+          <Step number="02" title="Conheça" text="Veja o perfil profissional, serviços oferecidos, descrição, portfólio, localização e informações de contato." />
+          <Step number="03" title="Conecte" text="Quando encontrar o profissional ideal, entre em contato diretamente pelo WhatsApp e avance para a negociação." />
+        </div>
+      </section>
+
+      <section id="para-quem" style={styles.darkSection}>
+        <div style={styles.darkIntro}>
+          <div style={styles.sectionKickerLight}>PARA QUEM É</div>
+          <h2 style={styles.darkTitle}>Um ponto de encontro para o mercado de eventos.</h2>
+          <p style={styles.darkText}>
+            Seja para organizar um evento ou para divulgar seus serviços,
+            o LOSI CONECTA cria uma ponte entre quem procura e quem oferece.
+          </p>
+        </div>
+
+        <div style={styles.audienceGrid}>
+          <Audience
+            title="Quem organiza"
+            text="Encontre fornecedores e profissionais para festas, eventos corporativos, ativações, passeios e outras experiências."
+            label="PROCURAR FORNECEDORES"
+          />
+          <Audience
+            title="Quem fornece"
+            text="Crie sua presença profissional, apresente seus serviços e seja encontrado por pessoas que estão procurando soluções para eventos."
+            label="DIVULGAR SERVIÇOS"
+          />
+        </div>
+      </section>
+
+      <section id="categorias" style={styles.section}>
+        <div style={styles.sectionIntro}>
+          <div style={styles.sectionKicker}>O QUE VOCÊ PODE ENCONTRAR</div>
+          <h2 style={styles.sectionTitle}>Profissionais de diferentes áreas do evento.</h2>
+          <p style={styles.sectionText}>
+            A plataforma pode reunir desde serviços essenciais até atrações e soluções
+            especializadas para diferentes formatos de evento.
+          </p>
+        </div>
+
+        <div style={styles.categoryGrid}>
+          {[
+            "Recreação e entretenimento",
+            "Fotografia e vídeo",
+            "DJ e música",
+            "Decoração",
+            "Buffet e alimentação",
+            "Atrações",
+            "Estruturas e equipamentos",
+            "Outros serviços para eventos",
+          ].map((category) => (
+            <div key={category} style={styles.categoryCard}>
+              <span style={styles.categoryMark}>+</span>
+              <span>{category}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={styles.ctaSection}>
+        <div style={styles.ctaCard}>
+          <div>
+            <div style={styles.sectionKickerLight}>LOSI CONECTA</div>
+            <h2 style={styles.ctaTitle}>Seu próximo evento começa com as conexões certas.</h2>
+            <p style={styles.ctaText}>
+              Crie sua conta e faça parte de uma plataforma criada para aproximar
+              profissionais e oportunidades no mercado de eventos.
+            </p>
+          </div>
+          <Link to="/entrar" style={styles.ctaButton}>Criar minha conta</Link>
+        </div>
+      </section>
+
+      <footer style={styles.footer}>
+        <div style={styles.footerBrand}>LOSI CONECTA</div>
+        <div style={styles.footerText}>Encontre. Conheça. Conecte.</div>
+      </footer>
     </main>
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "#f7f8fc", color: "#172033", fontFamily: "Arial, sans-serif", padding: 24, boxSizing: "border-box" },
-  hero: { width: "100%", maxWidth: 760, textAlign: "center" },
-  brand: { fontSize: 14, fontWeight: 800, letterSpacing: ".18em", color: "#4f46c7", marginBottom: 18 },
-  eyebrow: { fontSize: 11, fontWeight: 800, letterSpacing: ".14em", color: "#7a8191", marginBottom: 18 },
-  h1: { margin: 0, fontSize: 48, lineHeight: 1.08 },
-  p: { margin: "20px auto", maxWidth: 600, color: "#687386", fontSize: 18, lineHeight: 1.5 },
-  button: { marginTop: 10, border: 0, borderRadius: 10, background: "#4f46c7", color: "#fff", padding: "13px 20px", fontSize: 15, fontWeight: 700, cursor: "pointer" },
+function Step({ number, title, text }: { number: string; title: string; text: string }) {
+  return (
+    <article style={styles.stepCard}>
+      <div style={styles.stepNumber}>{number}</div>
+      <h3 style={styles.cardTitle}>{title}</h3>
+      <p style={styles.cardText}>{text}</p>
+    </article>
+  );
+}
+
+function Audience({ title, text, label }: { title: string; text: string; label: string }) {
+  return (
+    <article style={styles.audienceCard}>
+      <div style={styles.audienceLabel}>{label}</div>
+      <h3 style={styles.audienceTitle}>{title}</h3>
+      <p style={styles.audienceText}>{text}</p>
+    </article>
+  );
+}
+
+const styles: Record<string, CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    background: "#f7f8fc",
+    color: "#172033",
+    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  },
+  header: {
+    position: "sticky",
+    top: 0,
+    zIndex: 10,
+    height: 72,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 24,
+    padding: "0 6vw",
+    background: "rgba(255,255,255,.92)",
+    backdropFilter: "blur(16px)",
+    borderBottom: "1px solid #e8eaf0",
+  },
+  logo: {
+    textDecoration: "none",
+    color: "#18213a",
+    fontSize: 18,
+    fontWeight: 900,
+    letterSpacing: ".08em",
+    whiteSpace: "nowrap",
+  },
+  logoSpan: {},
+  nav: { display: "flex", gap: 28, alignItems: "center" },
+  navLink: {
+    color: "#687386",
+    textDecoration: "none",
+    fontSize: 14,
+    fontWeight: 600,
+  },
+  headerButton: {
+    textDecoration: "none",
+    color: "#fff",
+    background: "#4f46c7",
+    borderRadius: 9,
+    padding: "10px 17px",
+    fontSize: 14,
+    fontWeight: 800,
+  },
+  hero: {
+    position: "relative",
+    overflow: "hidden",
+    textAlign: "center",
+    padding: "110px 24px 96px",
+    background: "linear-gradient(180deg, #ffffff 0%, #f7f8fc 100%)",
+  },
+  heroGlow: {
+    position: "absolute",
+    width: 520,
+    height: 520,
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(99,82,220,.15) 0%, rgba(99,82,220,0) 68%)",
+    top: -260,
+    left: "50%",
+    transform: "translateX(-50%)",
+    pointerEvents: "none",
+  },
+  eyebrow: {
+    position: "relative",
+    color: "#5a55c9",
+    fontSize: 11,
+    fontWeight: 900,
+    letterSpacing: ".18em",
+    marginBottom: 22,
+  },
+  heroTitle: {
+    position: "relative",
+    maxWidth: 900,
+    margin: "0 auto",
+    fontSize: "clamp(42px, 7vw, 76px)",
+    lineHeight: 1.02,
+    letterSpacing: "-.055em",
+    fontWeight: 900,
+  },
+  gradientText: {
+    background: "linear-gradient(100deg, #4f46c7, #7c3aed)",
+    WebkitBackgroundClip: "text",
+    color: "transparent",
+  },
+  heroText: {
+    maxWidth: 700,
+    margin: "26px auto 0",
+    color: "#687386",
+    fontSize: 18,
+    lineHeight: 1.65,
+  },
+  heroActions: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 12,
+    flexWrap: "wrap",
+    marginTop: 34,
+  },
+  primaryButton: {
+    textDecoration: "none",
+    background: "#4f46c7",
+    color: "#fff",
+    padding: "14px 23px",
+    borderRadius: 10,
+    fontWeight: 800,
+    fontSize: 15,
+    boxShadow: "0 12px 30px rgba(79,70,199,.2)",
+  },
+  secondaryButton: {
+    textDecoration: "none",
+    background: "#fff",
+    color: "#343b4d",
+    padding: "14px 23px",
+    borderRadius: 10,
+    fontWeight: 750,
+    fontSize: 15,
+    border: "1px solid #dfe2ea",
+  },
+  heroNote: {
+    marginTop: 28,
+    color: "#9299a8",
+    fontSize: 12,
+    fontWeight: 700,
+    letterSpacing: ".08em",
+  },
+  dot: {
+    display: "inline-block",
+    width: 7,
+    height: 7,
+    borderRadius: "50%",
+    background: "#6355d9",
+    marginRight: 8,
+  },
+  section: {
+    maxWidth: 1180,
+    margin: "0 auto",
+    padding: "100px 6vw",
+    boxSizing: "border-box",
+  },
+  sectionIntro: { maxWidth: 720, marginBottom: 48 },
+  sectionKicker: {
+    color: "#5a55c9",
+    fontSize: 11,
+    fontWeight: 900,
+    letterSpacing: ".16em",
+    marginBottom: 14,
+  },
+  sectionKickerLight: {
+    color: "#a9a3ff",
+    fontSize: 11,
+    fontWeight: 900,
+    letterSpacing: ".16em",
+    marginBottom: 14,
+  },
+  sectionTitle: {
+    margin: 0,
+    fontSize: "clamp(30px, 4vw, 48px)",
+    lineHeight: 1.08,
+    letterSpacing: "-.035em",
+  },
+  sectionText: {
+    margin: "17px 0 0",
+    color: "#70798b",
+    fontSize: 17,
+    lineHeight: 1.65,
+  },
+  steps: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 18,
+  },
+  stepCard: {
+    background: "#fff",
+    border: "1px solid #e7e9ef",
+    borderRadius: 18,
+    padding: 28,
+    minHeight: 210,
+    boxSizing: "border-box",
+    boxShadow: "0 10px 35px rgba(27,35,58,.04)",
+  },
+  stepNumber: {
+    color: "#6d65d7",
+    fontSize: 13,
+    fontWeight: 900,
+    letterSpacing: ".1em",
+    marginBottom: 40,
+  },
+  cardTitle: { margin: 0, fontSize: 25, letterSpacing: "-.02em" },
+  cardText: { margin: "12px 0 0", color: "#70798b", lineHeight: 1.6, fontSize: 15 },
+  darkSection: {
+    background: "#171b2b",
+    color: "#fff",
+    padding: "100px 6vw",
+  },
+  darkIntro: { maxWidth: 1180, margin: "0 auto 45px" },
+  darkTitle: {
+    margin: 0,
+    maxWidth: 700,
+    fontSize: "clamp(32px, 5vw, 55px)",
+    lineHeight: 1.05,
+    letterSpacing: "-.04em",
+  },
+  darkText: { maxWidth: 650, color: "#aeb4c5", fontSize: 17, lineHeight: 1.65, marginTop: 18 },
+  audienceGrid: {
+    maxWidth: 1180,
+    margin: "0 auto",
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 18,
+  },
+  audienceCard: {
+    border: "1px solid #30364b",
+    background: "#1e2335",
+    borderRadius: 18,
+    padding: 30,
+  },
+  audienceLabel: { color: "#a9a3ff", fontSize: 10, fontWeight: 900, letterSpacing: ".13em" },
+  audienceTitle: { margin: "15px 0 0", fontSize: 29, letterSpacing: "-.025em" },
+  audienceText: { color: "#b6bdcc", lineHeight: 1.65, fontSize: 15, margin: "12px 0 0", maxWidth: 500 },
+  categoryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    gap: 12,
+  },
+  categoryCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    minHeight: 76,
+    padding: "0 18px",
+    background: "#fff",
+    border: "1px solid #e5e8ef",
+    borderRadius: 13,
+    color: "#343b4d",
+    fontWeight: 750,
+    fontSize: 14,
+  },
+  categoryMark: { color: "#6355d9", fontSize: 20, fontWeight: 300 },
+  ctaSection: { padding: "20px 6vw 90px" },
+  ctaCard: {
+    maxWidth: 1060,
+    margin: "0 auto",
+    borderRadius: 24,
+    padding: "48px 52px",
+    background: "linear-gradient(125deg, #4f46c7, #352f88)",
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 35,
+    boxSizing: "border-box",
+    boxShadow: "0 25px 60px rgba(55,48,137,.2)",
+  },
+  ctaTitle: { margin: 0, maxWidth: 650, fontSize: "clamp(28px, 4vw, 43px)", lineHeight: 1.08, letterSpacing: "-.035em" },
+  ctaText: { maxWidth: 620, color: "#d8d6ff", lineHeight: 1.6, margin: "14px 0 0", fontSize: 15 },
+  ctaButton: {
+    flexShrink: 0,
+    textDecoration: "none",
+    background: "#fff",
+    color: "#4038a5",
+    padding: "14px 20px",
+    borderRadius: 10,
+    fontWeight: 900,
+    fontSize: 14,
+  },
+  footer: {
+    borderTop: "1px solid #e4e6ec",
+    padding: "28px 6vw",
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 20,
+    flexWrap: "wrap",
+    color: "#8991a1",
+    fontSize: 12,
+  },
+  footerBrand: { fontWeight: 900, letterSpacing: ".12em", color: "#454d60" },
+  footerText: { fontWeight: 600 },
 };
+
