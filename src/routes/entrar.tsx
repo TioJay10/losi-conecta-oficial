@@ -28,7 +28,9 @@ function AuthPage() {
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      if (data.session && recoverySession) {
+      const isRecoveryUrl = window.location.hash.includes("type=recovery");
+      if (data.session && (recoverySession || isRecoveryUrl)) {
+        setRecoverySession(true);
         setMode("recovery");
         return;
       }
@@ -158,7 +160,7 @@ function AuthPage() {
 
   return (
     <main className="auth-page" style={styles.page}>
-      <section className="x" style={styles.card}>
+      <section className="auth-card" style={styles.card}>
         <div style={styles.brand}>LOSI <span>CONECTA</span></div>
         <div style={styles.eyebrow}>PROFISSIONAIS DE EVENTOS</div>
         <h1 style={styles.title}>{title}</h1>
@@ -176,10 +178,12 @@ function AuthPage() {
             </label>
           )}
 
-          <label style={styles.label}>
-            E-mail
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="voce@email.com" autoComplete="email" style={styles.input} />
-          </label>
+          {!recoverySession && (
+            <label style={styles.label}>
+              E-mail
+              <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="voce@email.com" autoComplete="email" style={styles.input} />
+            </label>
+          )}
 
           {(mode !== "recovery" || recoverySession) && (
             <label style={styles.label}>
