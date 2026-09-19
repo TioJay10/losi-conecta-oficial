@@ -52,6 +52,10 @@ function AdminPage() {
       setLoading(false);
     }
     load();
+    const requestedSection = new URLSearchParams(window.location.search).get("section");
+    if (requestedSection && ["overview","users","businesses","categories","services","reviews"].includes(requestedSection)) {
+      setSection(requestedSection as typeof section);
+    }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
     return () => { mounted = false; listener.subscription.unsubscribe(); };
   }, [navigate]);
@@ -98,7 +102,7 @@ function AdminPage() {
         <aside className="admin-sidebar">
           <div className="admin-sidebar-title">GESTÃO</div>
           <nav className="admin-menu">
-            {menu.map(item => <button key={item.id} className={section === item.id ? "active" : ""} onClick={() => setSection(item.id)}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}
+            {menu.map(item => <button key={item.id} className={section === item.id ? "active" : ""} onClick={() => { setSection(item.id); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}
           </nav>
         </aside>
         <section className="admin-content" style={styles.content}>
@@ -108,16 +112,16 @@ function AdminPage() {
           {dataError && <div className="admin-data-error">Não foi possível carregar alguns dados: {dataError}</div>}
           {section === "overview" ? (
             <div className="admin-grid" style={styles.grid}>
-              <button style={styles.cardButton} onClick={() => setSection("users")}><strong>Usuários <em>{stats.users}</em></strong><span>Contas cadastradas na plataforma.</span></button>
-              <button style={styles.cardButton} onClick={() => setSection("businesses")}><strong>Empresas <em>{stats.businesses}</em></strong><span>Perfis comerciais e aprovação.</span></button>
-              <button style={styles.cardButton} onClick={() => setSection("services")}><strong>Serviços <em>{stats.services}</em></strong><span>Serviços publicados pelos profissionais.</span></button>
-              <button style={styles.cardButton} onClick={() => setSection("categories")}><strong>Categorias <em>{stats.categories}</em></strong><span>Organização do catálogo.</span></button>
-              <button style={styles.cardButton} onClick={() => setSection("reviews")}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Moderação das avaliações.</span></button>
+              <button style={styles.cardButton} onClick={() => { setSection("users"); window.history.replaceState(null, "", "/admin?section=users"); }}}><strong>Usuários <em>{stats.users}</em></strong><span>Contas cadastradas na plataforma.</span></button>
+              <button style={styles.cardButton} onClick={() => { setSection("businesses"); window.history.replaceState(null, "", "/admin?section=businesses"); }}}><strong>Empresas <em>{stats.businesses}</em></strong><span>Perfis comerciais e aprovação.</span></button>
+              <button style={styles.cardButton} onClick={() => { setSection("services"); window.history.replaceState(null, "", "/admin?section=services"); }}}><strong>Serviços <em>{stats.services}</em></strong><span>Serviços publicados pelos profissionais.</span></button>
+              <button style={styles.cardButton} onClick={() => { setSection("categories"); window.history.replaceState(null, "", "/admin?section=categories"); }}}><strong>Categorias <em>{stats.categories}</em></strong><span>Organização do catálogo.</span></button>
+              <button style={styles.cardButton} onClick={() => { setSection("reviews"); window.history.replaceState(null, "", "/admin?section=reviews"); }}}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Moderação das avaliações.</span></button>
               <div style={styles.card}><strong>Próximos módulos</strong><span>Métricas, planos e configurações da plataforma.</span></div>
             </div>
           ) : (
             <section className="admin-table-section">
-              <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => setSection("overview")}>Visão geral</button></div>
+              <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}}>Visão geral</button></div>
               {section === "users" ? <div className="admin-list">{users.length === 0 ? <div className="admin-empty">Nenhum usuário encontrado.</div> : users.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.full_name || "Usuário sem nome"}</strong><span>{item.user_type === "admin" ? "Administrador" : "Profissional"}{item.city ? " · " + item.city : ""}{item.state ? " - " + item.state : ""}</span></div><span className="admin-id">ID: {item.id.slice(0,8)}…</span></div></article>)}</div>
               : section === "businesses" ? <div className="admin-list">{businesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               : section === "categories" ? <div className="admin-list">{categories.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.slug} · {item.active ? "Ativa" : "Inativa"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("categories").update({active:next}).eq("id",item.id);if(!error)setCategories(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
