@@ -254,3 +254,20 @@ h1,h2,h3,p { overflow-wrap:anywhere; }
     width: 100%;
   }
 }
+
+
+.profile-page .onboarding-steps {
+  width: 100%;
+}
+@media (width <= 599px) {
+  .profile-page .onboarding-steps {
+    grid-template-columns: 1fr;
+  }
+  .profile-page .nextStep {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .profile-page .nextStep .primary {
+    width: 100%;
+  }
+}
