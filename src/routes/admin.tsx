@@ -17,7 +17,11 @@ function AdminPage() {
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
   const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews" | "commercial">("overview");
-  const [plans, setPlans] = useState<Array<{id:string;name:string;slug:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean;active:boolean}>>([]);\n  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);\n  const [planSavingId, setPlanSavingId] = useState<string | null>(null);\n  const [activatingBusinessId, setActivatingBusinessId] = useState<string | null>(null);\n  const [activationPlanId, setActivationPlanId] = useState("");
+  const [plans, setPlans] = useState<Array<{id:string;name:string;slug:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean;active:boolean}>>([]);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [planSavingId, setPlanSavingId] = useState<string | null>(null);
+  const [activatingBusinessId, setActivatingBusinessId] = useState<string | null>(null);
+  const [activationPlanByBusiness, setActivationPlanByBusiness] = useState<Record<string, string>>({});
   const [subscriptions, setSubscriptions] = useState<Array<{id:string;business_id:string;plan_id:string;status:string;ends_at:string|null;business:{business_name:string}|null;plan:{name:string}|null}>>([]);
   const [dataError, setDataError] = useState("");
   const [businessSearch, setBusinessSearch] = useState("");
@@ -79,7 +83,16 @@ function AdminPage() {
     setBusinesses((current) => current.map((item) => item.id === id ? { ...item, ...changes } : item));
   }
 
-  async function updatePlan(id: string, changes: { name: string; slug: string; description: string; price_cents: number; billing_period: string; highlighted: boolean; active: boolean }) {\n    setPlanSavingId(id);\n    const { data, error } = await supabase.from("plans").update(changes).eq("id", id).select("id,name,slug,description,price_cents,billing_period,highlighted,active").maybeSingle();\n    setPlanSavingId(null);\n    if (error || !data) return;\n    setPlans((current) => current.map((item) => item.id === id ? data as typeof item : item));\n    setEditingPlanId(null);\n  }\n\n  async function activateSubscription(businessId: string, planId: string) {
+  async function updatePlan(id: string, changes: { name: string; slug: string; description: string; price_cents: number; billing_period: string; highlighted: boolean; active: boolean }) {
+    setPlanSavingId(id);
+    const { data, error } = await supabase.from("plans").update(changes).eq("id", id).select("id,name,slug,description,price_cents,billing_period,highlighted,active").maybeSingle();
+    setPlanSavingId(null);
+    if (error || !data) return;
+    setPlans((current) => current.map((item) => item.id === id ? data as typeof item : item));
+    setEditingPlanId(null);
+  }
+
+  async function activateSubscription(businessId: string, planId: string) {
     const plan = plans.find((item) => item.id === planId);
     if (!plan) return;
     setActivatingBusinessId(businessId);
@@ -89,20 +102,18 @@ function AdminPage() {
     else if (plan.billing_period === "yearly") endsAt.setFullYear(endsAt.getFullYear() + 1);
     else if (plan.billing_period === "monthly") endsAt.setMonth(endsAt.getMonth() + 1);
     else endsAt.setFullYear(endsAt.getFullYear() + 100);
-    const { error: cancelError } = await supabase.from("business_subscriptions").update({ status: "expired" }).eq("business_id", businessId).eq("status", "active");
-    if (cancelError) { setActivatingBusinessId(null); return; }
-    const { data, error } = await supabase.from("business_subscriptions").insert({
-      business_id: businessId,
-      plan_id: planId,
-      status: "active",
-      starts_at: now.toISOString(),
-      ends_at: endsAt.toISOString(),
-      activated_by: user?.id ?? null,
-    }).select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").single();
+
+    const existing = subscriptions.find((item) => item.business_id === businessId && item.status === "active");
+    const payload = { plan_id: planId, status: "active", starts_at: now.toISOString(), ends_at: endsAt.toISOString(), activated_by: user?.id ?? null };
+    const result = existing
+      ? await supabase.from("business_subscriptions").update(payload).eq("id", existing.id).select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").single()
+      : await supabase.from("business_subscriptions").insert({ business_id: businessId, ...payload }).select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").single();
+
     setActivatingBusinessId(null);
-    if (error || !data) return;
-    setSubscriptions((current) => [data as unknown as typeof subscriptions[number], ...current]);
-    setActivationPlanId("");
+    if (result.error || !result.data) return;
+    const updated = result.data as unknown as typeof subscriptions[number];
+    setSubscriptions((current) => existing ? current.map((item) => item.id === existing.id ? updated : item) : [updated, ...current]);
+    setActivationPlanByBusiness((current) => ({ ...current, [businessId]: "" }));
   }
 
   async function updateReview(id:string, changes:{active?:boolean}) {
@@ -212,7 +223,24 @@ function AdminPage() {
                 )}
                 <div className="admin-list">{filteredBusinesses.length === 0 ? <div className="admin-empty">Nenhuma empresa encontrada com esses filtros.</div> : filteredBusinesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => setSelectedBusinessId(item.id)}>Analisar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button>{item.approval_status !== "approved" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button>}{item.approval_status !== "rejected" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button>}<button style={styles.actionButton} onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               </div>
-              : section === "commercial" ? <div className="admin-commercial-grid">\n                {plans.map(plan => <article className="admin-commercial-card" key={plan.id}>\n                  <div className="admin-commercial-card-head"><span>{plan.billing_period === "free" ? "PLANO GRATUITO" : "PLANO PAGO"}</span><button type="button" style={styles.actionButton} onClick={() => setEditingPlanId(editingPlanId === plan.id ? null : plan.id)}>{editingPlanId === plan.id ? "Fechar" : "Editar plano"}</button></div>\n                  {editingPlanId === plan.id ? (\n                    <form className="admin-plan-editor" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); const rawPrice = String(form.get("price_cents") || "0").replace(",", "."); updatePlan(plan.id, { name: String(form.get("name") || "").trim(), slug: String(form.get("slug") || "").trim(), description: String(form.get("description") || "").trim(), price_cents: Math.max(0, Math.round(Number(rawPrice) * 100)), billing_period: String(form.get("billing_period") || "monthly"), highlighted: form.get("highlighted") === "on", active: form.get("active") === "on" }); }}>\n                      <label>Nome<input name="name" defaultValue={plan.name} required /></label>\n                      <label>Slug<input name="slug" defaultValue={plan.slug} required /></label>\n                      <label>Descrição<textarea name="description" defaultValue={plan.description ?? ""} rows={3} /></label>\n                      <label>Preço mensal (R$)<input name="price_cents" type="number" min="0" step="0.01" defaultValue={(plan.price_cents / 100).toFixed(2)} /></label>\n                      <label>Periodicidade<select name="billing_period" defaultValue={plan.billing_period}><option value="free">Grátis</option><option value="monthly">Mensal</option><option value="quarterly">Trimestral</option><option value="yearly">Anual</option></select></label>\n                      <div className="admin-plan-checks"><label><input name="highlighted" type="checkbox" defaultChecked={plan.highlighted} /> Destacar plano</label><label><input name="active" type="checkbox" defaultChecked={plan.active} /> Plano ativo</label></div>\n                      <button type="submit" style={styles.actionButton} disabled={planSavingId === plan.id}>{planSavingId === plan.id ? "Salvando..." : "Salvar alterações"}</button>\n                    </form>\n                  ) : (<>\n                    <h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "Grátis" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>{plan.description || `Plano ${plan.active ? "ativo" : "inativo"} para fornecedores.`}</p><div className="admin-plan-meta"><span>{plan.active ? "Ativo" : "Inativo"}</span>{plan.highlighted && <span>Destacado</span>}</div>\n                  </>)}\n                </article>)}\n                <section className="admin-commercial-subscriptions">
+              : section === "commercial" ? <div className="admin-commercial-grid">
+                {plans.map(plan => <article className="admin-commercial-card" key={plan.id}>
+                  <div className="admin-commercial-card-head"><span>{plan.billing_period === "free" ? "PLANO GRATUITO" : "PLANO PAGO"}</span><button type="button" style={styles.actionButton} onClick={() => setEditingPlanId(editingPlanId === plan.id ? null : plan.id)}>{editingPlanId === plan.id ? "Fechar" : "Editar plano"}</button></div>
+                  {editingPlanId === plan.id ? (
+                    <form className="admin-plan-editor" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); const rawPrice = String(form.get("price_cents") || "0").replace(",", "."); updatePlan(plan.id, { name: String(form.get("name") || "").trim(), slug: String(form.get("slug") || "").trim(), description: String(form.get("description") || "").trim(), price_cents: Math.max(0, Math.round(Number(rawPrice) * 100)), billing_period: String(form.get("billing_period") || "monthly"), highlighted: form.get("highlighted") === "on", active: form.get("active") === "on" }); }}>
+                      <label>Nome<input name="name" defaultValue={plan.name} required /></label>
+                      <label>Slug<input name="slug" defaultValue={plan.slug} required /></label>
+                      <label>Descrição<textarea name="description" defaultValue={plan.description ?? ""} rows={3} /></label>
+                      <label>Preço mensal (R$)<input name="price_cents" type="number" min="0" step="0.01" defaultValue={(plan.price_cents / 100).toFixed(2)} /></label>
+                      <label>Periodicidade<select name="billing_period" defaultValue={plan.billing_period}><option value="free">Grátis</option><option value="monthly">Mensal</option><option value="quarterly">Trimestral</option><option value="yearly">Anual</option></select></label>
+                      <div className="admin-plan-checks"><label><input name="highlighted" type="checkbox" defaultChecked={plan.highlighted} /> Destacar plano</label><label><input name="active" type="checkbox" defaultChecked={plan.active} /> Plano ativo</label></div>
+                      <button type="submit" style={styles.actionButton} disabled={planSavingId === plan.id}>{planSavingId === plan.id ? "Salvando..." : "Salvar alterações"}</button>
+                    </form>
+                  ) : (<>
+                    <h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "Grátis" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>{plan.description || `Plano ${plan.active ? "ativo" : "inativo"} para fornecedores.`}</p><div className="admin-plan-meta"><span>{plan.active ? "Ativo" : "Inativo"}</span>{plan.highlighted && <span>Destacado</span>}</div>
+                  </>)}
+                </article>)}
+                <section className="admin-commercial-subscriptions">
                   <div style={styles.badge}>ATIVAÇÃO MANUAL</div>
                   <h2>Ativar plano após pagamento</h2>
                   <p style={styles.text}>Selecione o fornecedor e o plano somente depois de confirmar o pagamento pelo WhatsApp.</p>
@@ -221,11 +249,11 @@ function AdminPage() {
                       <div className="admin-list-item" key={business.id}>
                         <div className="admin-item-main"><div><strong>{business.business_name}</strong><span>{business.city || "Localização não informada"}{business.state ? " - " + business.state : ""}</span></div>
                           <div className="admin-item-actions">
-                            <select aria-label={`Plano para ${business.business_name}`} value={activationPlanId} onChange={(event) => setActivationPlanId(event.target.value)}>
+                            <select aria-label={`Plano para ${business.business_name}`}  value={activationPlanByBusiness[business.id] ?? ""} onChange={(event) => setActivationPlanByBusiness((current) => ({ ...current, [business.id]: event.target.value }))}>
                               <option value="">Selecionar plano</option>
                               {plans.filter((plan) => plan.billing_period !== "free" && plan.active).map((plan) => <option key={plan.id} value={plan.id}>{plan.name} — R$ {(plan.price_cents / 100).toFixed(2).replace(".", ",")}</option>)}
                             </select>
-                            <button type="button" style={styles.actionButton} disabled={!activationPlanId || activatingBusinessId === business.id} onClick={() => activateSubscription(business.id, activationPlanId)}>{activatingBusinessId === business.id ? "Ativando..." : "Ativar plano"}</button>
+                            <button type="button" style={styles.actionButton} disabled={!activationPlanByBusiness[business.id] || activatingBusinessId === business.id} onClick={() => activateSubscription(business.id, activationPlanByBusiness[business.id])}>{activatingBusinessId === business.id ? "Ativando..." : "Ativar plano"}</button>
                           </div>
                         </div>
                       </div>
@@ -235,7 +263,8 @@ function AdminPage() {
                     <div style={styles.badge}>ASSINATURAS</div><h2>Fornecedores com plano</h2>
                     {subscriptions.length === 0 ? <p style={styles.text}>Nenhuma assinatura ativa ou registrada.</p> : subscriptions.map(item => <div className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business?.business_name || "Fornecedor"}</strong><span>{item.plan?.name || "Plano"} · {item.status}{item.ends_at ? ` · até ${new Date(item.ends_at).toLocaleDateString("pt-BR")}` : ""}</span></div></div></div>)}
                   </div>
-                </section>\n              </div>
+                </section>
+              </div>
               : section === "categories" ? <div><div className="admin-filters admin-simple-filter"><input value={categorySearch} onChange={(e) => setCategorySearch(e.target.value)} placeholder="Buscar categoria..." aria-label="Buscar categorias" /><span className="admin-filter-count">{categories.filter(item => `${item.name} ${item.slug}`.toLocaleLowerCase("pt-BR").includes(categorySearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{categories.filter(item => `${item.name} ${item.slug}`.toLocaleLowerCase("pt-BR").includes(categorySearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.slug} · {item.active ? "Ativa" : "Inativa"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("categories").update({active:next}).eq("id",item.id);if(!error)setCategories(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div></div>
                : section === "services" ? <><div className="admin-filters admin-simple-filter"><input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder="Buscar serviço ou fornecedor..." aria-label="Buscar serviços" /><span className="admin-filter-count">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.business?.business_name || "Empresa não informada"} · {item.category?.name || "Sem categoria"} · {item.active ? "Ativo" : "Inativo"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("services").update({active:next}).eq("id",item.id);if(!error)setServices(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div></div></>
               : <div><div className="admin-filters admin-simple-filter"><input value={reviewSearch} onChange={(e) => setReviewSearch(e.target.value)} placeholder="Buscar avaliação, fornecedor ou autor..." aria-label="Buscar avaliações" /><span className="admin-filter-count">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{"★".repeat(item.rating)} · {item.business?.business_name || "Empresa"}</strong><span>{item.reviewer?.full_name || "Usuário"} · {item.comment || "Sem comentário"} · {item.active ? "Visível" : "Oculta"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={()=>updateReview(item.id,{active:!item.active})}>{item.active ? "Ocultar" : "Publicar"}</button><button style={styles.actionButton} onClick={()=>deleteReview(item.id)}>Excluir</button></div></div></article>)}</div></>}
