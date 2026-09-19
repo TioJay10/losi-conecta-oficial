@@ -31,6 +31,10 @@ function AdminPage() {
   const [serviceSearch, setServiceSearch] = useState("");
   const [reviewSearch, setReviewSearch] = useState("");
   const [categorySearch, setCategorySearch] = useState("");
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [createUserError, setCreateUserError] = useState("");
+  const [createUserSuccess, setCreateUserSuccess] = useState("");
   const [categories, setCategories] = useState<Array<{ id:string; name:string; slug:string; active:boolean }>>([]);
   const [services, setServices] = useState<Array<{ id:string; name:string; description:string|null; active:boolean; business:{business_name:string}|null; category:{name:string}|null }>>([]);
   const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);
@@ -124,6 +128,44 @@ function AdminPage() {
     const { error } = await supabase.from("reviews").delete().eq("id",id);
     if (!error) setReviews(current=>current.filter(item=>item.id!==id));
   }
+  async function createManualUser(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCreateUserError("");
+    setCreateUserSuccess("");
+    setCreatingUser(true);
+
+    const form = new FormData(event.currentTarget);
+    const payload = {
+      full_name: String(form.get("full_name") || "").trim(),
+      email: String(form.get("email") || "").trim(),
+      password: String(form.get("password") || ""),
+      phone: String(form.get("phone") || "").trim(),
+      city: String(form.get("city") || "").trim(),
+      state: String(form.get("state") || "").trim(),
+      user_type: String(form.get("user_type") || "professional"),
+    };
+
+    const { data, error } = await supabase.functions.invoke("admin-create-user", { body: payload });
+
+    setCreatingUser(false);
+
+    if (error || data?.error) {
+      setCreateUserError(data?.error || error?.message || "Não foi possível cadastrar o usuário.");
+      return;
+    }
+
+    setCreateUserSuccess("Usuário cadastrado com sucesso. O acesso já está liberado.");
+    event.currentTarget.reset();
+    const { data: refreshedUsers } = await supabase
+      .from("profiles")
+      .select("id,full_name,user_type,city,state")
+      .order("created_at", { ascending: false });
+    if (refreshedUsers) {
+      setUsers(refreshedUsers as typeof users);
+      setStats((current) => ({ ...current, users: refreshedUsers.length }));
+    }
+  }
+
   async function logout() {
     if (supabase) await supabase.auth.signOut();
     navigate({ to: "/entrar" });
@@ -202,7 +244,67 @@ function AdminPage() {
           ) : (
             <section className="admin-table-section">
               <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}>Visão geral</button></div>
-              {section === "users" ? <div className="admin-inline-list"><div className="admin-filters admin-simple-filter"><input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Buscar usuário, cidade ou estado..." aria-label="Buscar usuários" /><span className="admin-filter-count">{users.filter(item => `${item.full_name ?? ""} ${item.city ?? ""} ${item.state ?? ""}`.toLocaleLowerCase("pt-BR").includes(userSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{users.length === 0 ? <div className="admin-empty">Nenhum usuário encontrado.</div> : users.filter(item => `${item.full_name ?? ""} ${item.city ?? ""} ${item.state ?? ""}`.toLocaleLowerCase("pt-BR").includes(userSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.full_name || "Usuário sem nome"}</strong><span>{item.user_type === "admin" ? "Administrador" : "Profissional"}{item.city ? " · " + item.city : ""}{item.state ? " - " + item.state : ""}</span></div><span className="admin-id">ID: {item.id.slice(0,8)}…</span></div></article>)}</div></div>
+              {section === "users" ? <div className="admin-inline-list">
+                <div className="admin-users-toolbar">
+                  <div>
+                    <strong>Controle de usuários</strong>
+                    <span>Cadastre acessos diretamente pelo painel administrativo.</span>
+                  </div>
+                  <button type="button" className="admin-primary-button" onClick={() => { setShowCreateUser((value) => !value); setCreateUserError(""); setCreateUserSuccess(""); }}>
+                    {showCreateUser ? "Fechar cadastro" : "Cadastrar usuário"}
+                  </button>
+                </div>
+                {showCreateUser && (
+                  <form className="admin-user-form" onSubmit={createManualUser}>
+                    <div className="admin-form-heading">
+                      <div>
+                        <span className="admin-form-kicker">NOVO ACESSO</span>
+                        <h2>Cadastrar usuário manualmente</h2>
+                        <p>Crie o acesso e o perfil do usuário sem precisar passar pela tela pública de cadastro.</p>
+                      </div>
+                    </div>
+                    <div className="admin-form-grid">
+                      <label className="admin-form-field admin-form-field-wide">
+                        <span>Nome completo</span>
+                        <input name="full_name" required placeholder="Ex.: João da Silva" autoComplete="name" />
+                      </label>
+                      <label className="admin-form-field">
+                        <span>E-mail de acesso</span>
+                        <input name="email" type="email" required placeholder="nome@empresa.com.br" autoComplete="email" />
+                      </label>
+                      <label className="admin-form-field">
+                        <span>Senha inicial</span>
+                        <input name="password" type="password" minLength={6} required placeholder="Mínimo de 6 caracteres" autoComplete="new-password" />
+                      </label>
+                      <label className="admin-form-field">
+                        <span>Telefone</span>
+                        <input name="phone" type="tel" placeholder="(11) 99999-9999" autoComplete="tel" />
+                      </label>
+                      <label className="admin-form-field">
+                        <span>Cidade</span>
+                        <input name="city" placeholder="Ex.: São Paulo" autoComplete="address-level2" />
+                      </label>
+                      <label className="admin-form-field admin-form-field-small">
+                        <span>UF</span>
+                        <input name="state" maxLength={2} placeholder="SP" />
+                      </label>
+                      <label className="admin-form-field">
+                        <span>Tipo de acesso</span>
+                        <select name="user_type" defaultValue="professional">
+                          <option value="professional">Profissional</option>
+                          <option value="admin">Administrador</option>
+                        </select>
+                      </label>
+                    </div>
+                    {createUserError && <div className="admin-form-message admin-form-message-error">{createUserError}</div>}
+                    {createUserSuccess && <div className="admin-form-message admin-form-message-success">{createUserSuccess}</div>}
+                    <div className="admin-form-actions">
+                      <button type="button" className="admin-secondary-button" onClick={() => setShowCreateUser(false)}>Cancelar</button>
+                      <button type="submit" className="admin-primary-button" disabled={creatingUser}>{creatingUser ? "Criando acesso..." : "Criar usuário"}</button>
+                    </div>
+                  </form>
+                )}
+                <div className="admin-filters admin-simple-filter"><input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Buscar usuário, cidade ou estado..." aria-label="Buscar usuários" /><span className="admin-filter-count">{users.filter(item => `${item.full_name ?? ""} ${item.city ?? ""} ${item.state ?? ""}`.toLocaleLowerCase("pt-BR").includes(userSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{users.length === 0 ? <div className="admin-empty">Nenhum usuário encontrado.</div> : users.filter(item => `${item.full_name ?? ""} ${item.city ?? ""} ${item.state ?? ""}`.toLocaleLowerCase("pt-BR").includes(userSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.full_name || "Usuário sem nome"}</strong><span>{item.user_type === "admin" ? "Administrador" : "Profissional"}{item.city ? " · " + item.city : ""}{item.state ? " - " + item.state : ""}</span></div><span className="admin-id">ID: {item.id.slice(0,8)}…</span></div></article>)}</div></div>
               : section === "businesses" ? <div>
                 <div className="admin-filters">
                   <input value={businessSearch} onChange={(e) => setBusinessSearch(e.target.value)} placeholder="Buscar empresa, cidade ou estado..." aria-label="Buscar empresas" />
