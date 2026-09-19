@@ -15,7 +15,7 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null }>>([]);
-  const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
+  const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
   const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews">("overview");
   const [dataError, setDataError] = useState("");
   const [businessSearch, setBusinessSearch] = useState("");
@@ -38,7 +38,7 @@ function AdminPage() {
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
       const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state").order("created_at",{ascending:false}),
-        supabase.from("business_profiles").select("id,business_name,city,state,verified,active,approval_status").order("created_at",{ascending:false}),
+        supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,verified,active,approval_status").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
@@ -169,7 +169,7 @@ function AdminPage() {
                       <div><div style={styles.badge}>ANÁLISE DO FORNECEDOR</div><h2 style={{margin:"10px 0 4px"}}>{selectedBusiness.business_name}</h2><p style={{...styles.text,margin:0}}>{selectedBusiness.city || "Localização não informada"}{selectedBusiness.state ? " - " + selectedBusiness.state : ""}</p></div>
                       <button style={styles.backButton} onClick={() => setSelectedBusinessId(null)}>Fechar análise</button>
                     </div>
-                    <div className="admin-review-status"><span>Status: <strong>{selectedBusiness.approval_status === "approved" ? "Aprovada" : selectedBusiness.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</strong></span><span>{selectedBusiness.verified ? "Verificada" : "Não verificada"} · {selectedBusiness.active ? "Ativa" : "Inativa"}</span></div>
+                    <div className="admin-review-media">{selectedBusiness.cover_url && <img src={selectedBusiness.cover_url} alt="" className="admin-review-cover" />}{selectedBusiness.logo_url && <img src={selectedBusiness.logo_url} alt="" className="admin-review-logo" />}</div><div className="admin-review-status"><span>Status: <strong>{selectedBusiness.approval_status === "approved" ? "Aprovada" : selectedBusiness.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</strong></span><span>{selectedBusiness.verified ? "Verificada" : "Não verificada"} · {selectedBusiness.active ? "Ativa" : "Inativa"}</span></div>
                     <div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(selectedBusiness.id,{approval_status:"approved"})}>Aprovar fornecedor</button><button style={styles.actionButton} onClick={() => updateBusiness(selectedBusiness.id,{approval_status:"rejected"})}>Rejeitar fornecedor</button></div>
                   </div>
                 )}
