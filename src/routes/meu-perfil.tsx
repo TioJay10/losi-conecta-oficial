@@ -314,7 +314,6 @@ function BusinessProfilePage() {
           <Step number="1" title="Perfil comercial" active={onboardingStep === 1} done={onboardingStep > 1} />
           <Step number="2" title="Primeiro serviço" active={onboardingStep === 2} done={onboardingStep > 2} />
           <Step number="3" title="Enviar para análise" active={onboardingStep === 3} done={false} />
-          </div>
         </div>
 
         <form onSubmit={saveProfile} style={styles.card}>
