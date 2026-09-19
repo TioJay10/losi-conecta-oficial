@@ -11,6 +11,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as BuscarRouteImport } from './routes/buscar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -36,6 +37,12 @@ const MeuPerfilRoute = MeuPerfilRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const BuscarRoute = BuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const PainelRoute = PainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -48,6 +55,7 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/buscar': typeof BuscarRoute
 }
 
 export interface FileRoutesByTo {
@@ -69,10 +77,10 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel'
+  fullPaths: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel'
-  id: '__root__' | '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel'
+  to: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar'
+  id: '__root__' | '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar'
   fileRoutesById: FileRoutesById
 }
 
@@ -114,6 +122,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MeuPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/buscar': {
+      id: '/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof BuscarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/painel': {
       id: '/painel'
       path: '/painel'
@@ -130,6 +145,7 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute,
   MeuPerfilRoute,
   PainelRoute,
+  BuscarRoute,
 }
 
 export const routeTree = rootRouteImport
