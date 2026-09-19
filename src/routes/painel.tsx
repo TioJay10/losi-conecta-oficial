@@ -11,6 +11,7 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ full_name: string | null; user_type: "professional" | "admin" } | null>(null);
+  const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,8 +50,17 @@ function DashboardPage() {
         return;
       }
 
+      const { data: business } = await supabase
+        .from("business_profiles")
+        .select("id")
+        .eq("owner_id", currentUser.id)
+        .maybeSingle();
+
+      if (!mounted) return;
+
       setUser(currentUser);
       setProfile(data);
+      setHasBusinessProfile(Boolean(business));
       setLoading(false);
     }
 
@@ -86,20 +96,36 @@ function DashboardPage() {
         <h1>Olá, {profile.full_name || user.email?.split("@")[0] || "profissional"}.</h1>
         <p style={styles.text}>Sua conta profissional está autenticada e conectada ao LOSI CONECTA.</p>
 
-        <div className="dashboard-grid" style={styles.grid}>
-          <div style={styles.card}>
-            <strong>Encontrar fornecedores</strong>
-            <p>Pesquise profissionais e empresas para seus eventos.</p>
+        {!hasBusinessProfile ? (
+          <section style={styles.onboarding}>
+            <div>
+              <div style={styles.onboardingLabel}>PRIMEIRO PASSO</div>
+              <h2 style={styles.onboardingTitle}>Crie seu perfil comercial</h2>
+              <p style={styles.onboardingText}>
+                Apresente sua empresa, cadastre seus serviços e envie seu perfil para análise da administração.
+                Depois da aprovação, ele ficará disponível no catálogo.
+              </p>
+            </div>
+            <button onClick={() => navigate({ to: "/meu-perfil" })} style={styles.primary}>
+              Criar meu perfil →
+            </button>
+          </section>
+        ) : (
+          <div className="dashboard-grid" style={styles.grid}>
+            <button type="button" onClick={() => navigate({ to: "/buscar" })} style={styles.cardButton}>
+              <strong>Encontrar fornecedores</strong>
+              <span>Pesquise profissionais e empresas para seus eventos.</span>
+            </button>
+            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.cardButton}>
+              <strong>Meu perfil</strong>
+              <span>Atualize sua apresentação, contatos e informações comerciais.</span>
+            </button>
+            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.cardButton}>
+              <strong>Meus serviços</strong>
+              <span>Cadastre, edite e organize os serviços oferecidos pela sua empresa.</span>
+            </button>
           </div>
-          <div style={styles.card}>
-            <strong>Meu perfil</strong>
-            <p>Em breve você poderá apresentar seus serviços e portfólio.</p>
-          </div>
-          <div style={styles.card}>
-            <strong>Meus serviços</strong>
-            <p>Cadastre as categorias e serviços oferecidos pela sua empresa.</p>
-          </div>
-        </div>
+        )}
       </section>
     </main>
   );
@@ -115,6 +141,12 @@ const styles: Record<string, React.CSSProperties> = {
   text: { color: "#687386", fontSize: 17 },
   grid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16, marginTop: 32 },
   card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 24, lineHeight: 1.6 },
+  cardButton: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 24, lineHeight: 1.6, textAlign: "left", cursor: "pointer", display: "grid", gap: 8, color: "#172033" },
+  onboarding: { marginTop: 32, background: "#fff", border: "1px solid #dfe2ea", borderRadius: 18, padding: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, boxShadow: "0 12px 35px rgba(23,32,51,.05)" },
+  onboardingLabel: { fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7" },
+  onboardingTitle: { margin: "8px 0 6px", fontSize: 24 },
+  onboardingText: { margin: 0, color: "#687386", lineHeight: 1.55, maxWidth: 650 },
+  primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
   center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
 };
 
