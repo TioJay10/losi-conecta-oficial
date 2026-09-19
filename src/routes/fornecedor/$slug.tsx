@@ -8,7 +8,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; address: string | null; logo_url: string | null;
-  cover_url: string | null; verified: boolean; services: Service[];
+  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[];
 };
 
 export const Route = createFileRoute("/fornecedor/$slug")({
@@ -31,7 +31,7 @@ function ProviderPage() {
     async function load() {
       const { data, error: queryError } = await supabase
         .from("business_profiles")
-        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,verified,services(id,name,description,categories(name))")
+        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,services(id,name,description,categories(name))")
         .eq("slug", slug)
         .eq("active", true)
         .maybeSingle();
@@ -138,6 +138,20 @@ function ProviderPage() {
             <h2>Conheça o trabalho</h2>
             <p>{business.description || "Este profissional ainda não adicionou uma descrição."}</p>
           </div>
+
+          {business.portfolio_urls?.length > 0 && (
+            <div className="provider-profile-card">
+              <div className="catalog-kicker">PORTFÓLIO</div>
+              <h2>Trabalhos realizados</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginTop: 18 }}>
+                {business.portfolio_urls.map((url, index) => (
+                  <a key={url + index} href={url} target="_blank" rel="noreferrer" style={{ display: "block", borderRadius: 12, overflow: "hidden", border: "1px solid #e7e9f0", aspectRatio: "4 / 3", background: "#f3f4f8" }}>
+                    <img src={url} alt={"Trabalho " + (index + 1) + " de " + business.business_name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="provider-profile-card provider-reviews-card">
             <div className="catalog-kicker">AVALIAÇÕES</div>
