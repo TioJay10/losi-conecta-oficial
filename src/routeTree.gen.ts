@@ -12,6 +12,7 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as BuscarRouteImport } from './routes/buscar'
+import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,6 +38,12 @@ const MeuPerfilRoute = MeuPerfilRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const FornecedorSlugRoute = FornecedorSlugRouteImport.update({
+  id: '/fornecedor/$slug',
+  path: '/fornecedor/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const BuscarRoute = BuscarRouteImport.update({
   id: '/buscar',
   path: '/buscar',
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
   '/buscar': typeof BuscarRoute
+  '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
 
 export interface FileRoutesByTo {
@@ -75,14 +83,15 @@ export interface FileRoutesById {
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
   '/buscar': typeof BuscarRoute
+  '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar'
+  fullPaths: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar' | '/fornecedor/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar'
-  id: '__root__' | '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar'
+  to: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar' | '/fornecedor/$slug'
+  id: '__root__' | '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar' | '/fornecedor/$slug'
   fileRoutesById: FileRoutesById
 }
 
@@ -93,6 +102,7 @@ export interface RootRouteChildren {
   MeuPerfilRoute: typeof MeuPerfilRoute
   PainelRoute: typeof PainelRoute
   BuscarRoute: typeof BuscarRoute
+  FornecedorSlugRoute: typeof FornecedorSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -125,6 +135,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MeuPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fornecedor/$slug': {
+      id: '/fornecedor/$slug'
+      path: '/fornecedor/$slug'
+      fullPath: '/fornecedor/$slug'
+      preLoaderRoute: typeof FornecedorSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/buscar': {
       id: '/buscar'
       path: '/buscar'
@@ -149,6 +166,7 @@ const rootRouteChildren: RootRouteChildren = {
   MeuPerfilRoute,
   PainelRoute,
   BuscarRoute,
+  FornecedorSlugRoute,
 }
 
 export const routeTree = rootRouteImport
