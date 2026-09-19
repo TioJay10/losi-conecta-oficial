@@ -16,11 +16,42 @@ function AdminPage() {
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; city: string | null; state: string | null; verified: boolean; active: boolean }>>([]);
   const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews">("overview");
-  const [users, setUsers] = useState<Array<{ id:string; full_name:string|null; user_type:string; city:string|null; state:string|null }>>([]);
-  const [businesses, setBusinesses] = useState<Array<{ id:string; business_name:string; city:string|null; state:string|null; verified:boolean; active:boolean }>>([]);
   const [categories, setCategories] = useState<Array<{ id:string; name:string; slug:string; active:boolean }>>([]);
   const [services, setServices] = useState<Array<{ id:string; name:string; description:string|null; active:boolean; business:{business_name:string}|null; category:{name:string}|null }>>([]);
   const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) { navigate({ to: "/entrar" }); return; }
+      const currentUser = sessionData.session.user;
+      const { data, error } = await supabase.from("profiles").select("full_name,user_type").eq("id", currentUser.id).maybeSingle();
+      if (!mounted) return;
+      if (error || !data) { await supabase.auth.signOut(); navigate({ to: "/entrar" }); return; }
+      if (data.user_type !== "admin") { navigate({ to: "/painel" }); return; }
+      setUser(currentUser);
+      setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
+      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult] = await Promise.all([
+        supabase.from("profiles").select("id,full_name,user_type,city,state").order("created_at",{ascending:false}),
+        supabase.from("business_profiles").select("id,business_name,city,state,verified,active").order("created_at",{ascending:false}),
+        supabase.from("categories").select("id,name,slug,active").order("name"),
+        supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
+        supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
+      ]);
+      if (!mounted) return;
+      setUsers((usersResult.data ?? []) as typeof users);
+      setBusinesses((businessesResult.data ?? []) as typeof businesses);
+      setCategories((categoriesResult.data ?? []) as typeof categories);
+      setServices((servicesResult.data ?? []) as unknown as typeof services);
+      setReviews((reviewsResult.data ?? []) as unknown as typeof reviews);
+      setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
+      setLoading(false);
+    }
+    load();
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
+    return () => { mounted = false; listener.subscription.unsubscribe(); };
+  }, [navigate]);
+
   async function updateBusiness(id: string, changes: { verified?: boolean; active?: boolean }) {
     const { error } = await supabase.from("business_profiles").update(changes).eq("id", id);
     if (error) return;
