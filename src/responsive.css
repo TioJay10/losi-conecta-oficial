@@ -1,449 +1,92 @@
-/* LOSI CONECTA — responsive system */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* LOSI CONECTA — sistema responsivo mobile-first */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { width:100%; min-width:0; max-width:100%; }
+html { overflow-x:hidden; -webkit-text-size-adjust:100%; }
+body { margin:0; overflow-x:hidden; }
+img,svg,video,canvas { max-width:100%; height:auto; }
+button,input,textarea,select { font:inherit; max-width:100%; }
+h1,h2,h3,p { overflow-wrap:anywhere; }
+
+/* Mobile */
+.home-page,.dashboard-page,.admin-page,.profile-page { width:100%; min-width:0; max-width:100%; overflow-x:hidden; }
+
+.home-page .home-header { width:100%; height:64px!important; padding:0 16px!important; gap:12px!important; }
+.home-page .home-header .home-nav { display:none!important; }
+.home-page .home-header>a:last-child { flex:0 0 auto!important; padding:9px 13px!important; font-size:13px!important; }
+
+.home-page .home-hero { width:100%; padding:64px 20px 56px!important; }
+.home-page .home-hero h1 { width:100%; max-width:900px; margin-left:auto!important; margin-right:auto!important; font-size:clamp(34px,10vw,52px)!important; line-height:1.06!important; letter-spacing:-.045em!important; }
+.home-page .home-hero p { width:100%; max-width:700px; margin-left:auto!important; margin-right:auto!important; font-size:16px!important; line-height:1.55!important; }
+.home-page .home-hero [style*="display: flex"] { width:100%; max-width:420px; margin-left:auto!important; margin-right:auto!important; }
+.home-page .home-hero [style*="display: flex"] a { min-width:0; }
+
+.home-page .home-section,.home-page .home-dark-section { width:100%; max-width:100%; padding:56px 20px!important; }
+.home-page .home-section>*,.home-page .home-dark-section>* { min-width:0; max-width:100%; }
+.home-page .home-steps,.home-page .home-audience-grid,.home-page .home-category-grid { width:100%; max-width:100%; min-width:0; grid-template-columns:1fr!important; gap:14px!important; }
+.home-page .home-steps>*,.home-page .home-audience-grid>*,.home-page .home-category-grid>* { width:100%; min-width:0; max-width:100%; }
+.home-page .home-steps article { min-height:0!important; padding:24px!important; }
+.home-page .home-section h2,.home-page .home-dark-section h2 { font-size:clamp(30px,8.5vw,44px)!important; line-height:1.08!important; }
+.home-page .home-section p,.home-page .home-dark-section p { font-size:16px!important; line-height:1.6!important; }
+.home-page .home-category-grid>div { min-height:64px!important; padding:14px 16px!important; }
+
+.home-page .home-cta-section { width:100%; padding:16px 20px 56px!important; }
+.home-page .home-cta-card { width:100%; max-width:1060px; margin:0 auto!important; padding:28px 22px!important; flex-direction:column!important; align-items:stretch!important; gap:20px!important; border-radius:18px!important; }
+.home-page .home-cta-card h2,.home-page .home-cta-card p { max-width:100%!important; }
+.home-page .home-cta-card a { width:100%; text-align:center; }
+.home-page footer { width:100%; padding:24px 20px!important; flex-direction:column!important; align-items:flex-start!important; gap:8px!important; }
+
+.dashboard-header,.admin-header,.profile-header { width:100%; min-width:0; padding:0 16px!important; }
+.dashboard-content,.admin-content,.profile-content { width:100%!important; max-width:1100px; min-width:0; margin-left:auto!important; margin-right:auto!important; padding:36px 16px 56px!important; }
+.dashboard-grid,.admin-grid,.profile-form-grid { width:100%; min-width:0; grid-template-columns:1fr!important; gap:14px!important; }
+.dashboard-grid>*,.admin-grid>*,.profile-form-grid>* { min-width:0!important; max-width:100%!important; }
+.dashboard-content h1,.admin-content h1,.profile-content h1 { max-width:100%!important; font-size:clamp(28px,9vw,40px)!important; line-height:1.08!important; }
+.profile-page .profile-content>form { width:100%!important; min-width:0!important; padding:20px!important; overflow:hidden; }
+.profile-page input,.profile-page textarea,.profile-page select { width:100%!important; min-width:0!important; max-width:100%!important; }
+
+.auth-page { width:100%; min-width:0; min-height:100dvh!important; padding:16px!important; overflow-x:hidden; }
+.auth-page>section,.auth-page .auth-card { width:100%!important; max-width:440px!important; min-width:0!important; margin:auto!important; padding:24px 20px!important; }
+.auth-page input,.auth-page button { width:100%!important; min-width:0!important; max-width:100%!important; }
+
+/* Tablet */
+@media (width >= 600px) {
+  .home-page .home-hero { padding:82px 32px 72px!important; }
+  .home-page .home-section,.home-page .home-dark-section { padding-left:32px!important; padding-right:32px!important; }
+  .home-page .home-steps,.dashboard-grid,.admin-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  .home-page .home-category-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  .home-page .home-cta-section { padding-left:32px!important; padding-right:32px!important; }
+  .dashboard-content,.admin-content,.profile-content { padding-left:24px!important; padding-right:24px!important; }
+  .profile-form-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
 }
 
-html {
-  width: 100%;
-  min-width: 0;
-  overflow-x: hidden;
-  -webkit-text-size-adjust: 100%;
+/* Desktop */
+@media (width >= 900px) {
+  .home-page .home-header { height:72px!important; padding-left:6vw!important; padding-right:6vw!important; }
+  .home-page .home-header .home-nav { display:flex!important; }
+  .home-page .home-hero { padding:110px 24px 96px!important; }
+  .home-page .home-hero h1 { font-size:clamp(42px,7vw,76px)!important; }
+  .home-page .home-hero p { font-size:18px!important; }
+  .home-page .home-hero [style*="display: flex"] { width:auto; max-width:none; }
+  .home-page .home-section { max-width:1180px; padding:100px 6vw!important; }
+  .home-page .home-dark-section { padding:100px 6vw!important; }
+  .home-page .home-steps { grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:18px!important; }
+  .home-page .home-audience-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:18px!important; }
+  .home-page .home-category-grid { grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:12px!important; }
+  .home-page .home-cta-section { padding:20px 6vw 90px!important; }
+  .home-page .home-cta-card { flex-direction:row!important; align-items:center!important; padding:48px 52px!important; }
+  .home-page .home-cta-card a { width:auto; }
+  .dashboard-content,.admin-content,.profile-content { padding-top:56px!important; }
+  .dashboard-grid,.admin-grid { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
 }
 
-body {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  margin: 0;
-  overflow-x: hidden;
-}
-
-img,
-svg,
-video,
-canvas {
-  max-width: 100%;
-}
-
-button,
-input,
-textarea,
-select {
-  max-width: 100%;
-  min-width: 0;
-}
-
-/* TABLET */
-@media screen and (max-width: 1050px) {
-  .home-page .home-header {
-    padding-left: 24px !important;
-    padding-right: 24px !important;
-  }
-
-  .home-page .home-section {
-    padding-left: 32px !important;
-    padding-right: 32px !important;
-  }
-
-  .home-page .home-steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .home-page .home-category-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .home-page .home-dark-section {
-    padding-left: 32px !important;
-    padding-right: 32px !important;
-  }
-
-  .home-page .home-cta-section {
-    padding-left: 32px !important;
-    padding-right: 32px !important;
-  }
-
-  .home-page .home-cta-card {
-    padding: 40px !important;
-  }
-
-  .dashboard-content,
-  .admin-content,
-  .profile-content {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-}
-
-/* PHONE / SMALL TABLET */
-@media screen and (max-width: 760px) {
-  .home-page {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-
-  .home-page .home-header {
-    width: 100% !important;
-    height: 64px !important;
-    padding: 0 16px !important;
-    gap: 12px !important;
-  }
-
-  .home-page .home-header .home-nav {
-    display: none !important;
-  }
-
-  .home-page .home-header > a:last-child {
-    flex: 0 0 auto !important;
-    padding: 9px 13px !important;
-    font-size: 13px !important;
-  }
-
-  .home-page .home-hero {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 64px 20px 56px !important;
-    text-align: center !important;
-  }
-
-  .home-page .home-hero > * {
-    max-width: 100% !important;
-  }
-
-  .home-page .home-hero h1 {
-    width: 100% !important;
-    max-width: 600px !important;
-    margin: 0 auto !important;
-    font-size: clamp(34px, 10vw, 52px) !important;
-    line-height: 1.06 !important;
-    letter-spacing: -0.045em !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .home-page .home-hero p {
-    width: 100% !important;
-    max-width: 560px !important;
-    margin: 22px auto 0 !important;
-    font-size: 16px !important;
-    line-height: 1.55 !important;
-  }
-
-  .home-page .home-hero .home-hero-actions {
-    width: 100% !important;
-    max-width: 420px !important;
-    margin: 30px auto 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
-
-  .home-page .home-hero .home-hero-actions a {
-    width: 100% !important;
-    display: block !important;
-    text-align: center !important;
-  }
-
-  .home-page .home-section {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 56px 20px !important;
-    margin: 0 !important;
-  }
-
-  .home-page .home-section > *,
-  .home-page .home-section > div:first-child {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .home-page .home-section h2,
-  .home-page .home-section h3,
-  .home-page .home-section p {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .home-page .home-section h2 {
-    font-size: clamp(30px, 8.5vw, 42px) !important;
-    line-height: 1.08 !important;
-  }
-
-  .home-page .home-section p {
-    font-size: 16px !important;
-    line-height: 1.6 !important;
-  }
-
-  .home-page .home-steps,
-  .home-page .home-audience-grid,
-  .home-page .home-category-grid {
-    width: 100% !important;
-    max-width: 100% !important;
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
-  .home-page .home-steps article,
-  .home-page .home-audience-grid article,
-  .home-page .home-category-grid > div {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-
-  .home-page .home-steps article {
-    min-height: auto !important;
-    padding: 24px !important;
-  }
-
-  .home-page .home-dark-section {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 56px 20px !important;
-  }
-
-  .home-page .home-dark-section > *,
-  .home-page .home-dark-section .home-audience-grid {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .home-page .home-dark-section h2,
-  .home-page .home-dark-section p {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .home-page .home-dark-section h2 {
-    font-size: clamp(31px, 9vw, 44px) !important;
-  }
-
-  .home-page .home-audience-grid article {
-    padding: 24px !important;
-  }
-
-  .home-page .home-cta-section {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 16px 20px 56px !important;
-  }
-
-  .home-page .home-cta-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 28px 22px !important;
-    margin: 0 !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 20px !important;
-    border-radius: 18px !important;
-  }
-
-  .home-page .home-cta-card h2,
-  .home-page .home-cta-card p {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .home-page .home-cta-card a {
-    width: 100% !important;
-    text-align: center !important;
-  }
-
-  .home-page footer {
-    width: 100% !important;
-    padding: 24px 20px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 8px !important;
-  }
-
-  /* DASHBOARD / ADMIN / PROFILE */
-  .dashboard-page,
-  .admin-page,
-  .profile-page {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-
-  .dashboard-header,
-  .admin-header,
-  .profile-header {
-    width: 100% !important;
-    height: 64px !important;
-    padding: 0 16px !important;
-    gap: 12px !important;
-  }
-
-  .dashboard-content,
-  .admin-content,
-  .profile-content {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 32px 16px 56px !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .dashboard-content > *,
-  .admin-content > *,
-  .profile-content > * {
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  .dashboard-grid,
-  .admin-grid,
-  .profile-form-grid {
-    width: 100% !important;
-    max-width: 100% !important;
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
-  .dashboard-content h1,
-  .admin-content h1,
-  .profile-content h1 {
-    width: 100% !important;
-    max-width: 100% !important;
-    font-size: clamp(28px, 9vw, 40px) !important;
-    line-height: 1.08 !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .dashboard-content h2,
-  .dashboard-content h3,
-  .dashboard-content p,
-  .admin-content h2,
-  .admin-content h3,
-  .admin-content p,
-  .profile-content h2,
-  .profile-content h3,
-  .profile-content p {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .dashboard-content .card,
-  .admin-content .card,
-  .profile-content > form {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-
-  .profile-page .profile-content > form {
-    padding: 20px !important;
-  }
-
-  .profile-page .profile-form-grid {
-    gap: 14px !important;
-  }
-
-  .profile-page input,
-  .profile-page textarea,
-  .profile-page select {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  /* AUTH */
-  .auth-page {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: 100dvh !important;
-    padding: 16px !important;
-    overflow-x: hidden !important;
-  }
-
-  .auth-page > section,
-  .auth-page .auth-card {
-    width: 100% !important;
-    max-width: 440px !important;
-    min-width: 0 !important;
-    padding: 24px 20px !important;
-    margin: 0 auto !important;
-  }
-
-  .auth-page h1 {
-    width: 100% !important;
-    max-width: 100% !important;
-    font-size: 27px !important;
-    line-height: 1.15 !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .auth-page p,
-  .auth-page label {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-  }
-
-  .auth-page input,
-  .auth-page button {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  .auth-page .link,
-  .auth-page .home,
-  .auth-page .inlineLink {
-    width: auto !important;
-  }
-}
-
-/* VERY SMALL PHONES */
-@media screen and (max-width: 390px) {
-  .home-page .home-header {
-    padding: 0 12px !important;
-  }
-
-  .home-page .home-header > a:first-child {
-    font-size: 16px !important;
-    letter-spacing: .05em !important;
-  }
-
-  .home-page .home-header > a:last-child {
-    padding: 8px 11px !important;
-    font-size: 12px !important;
-  }
-
-  .home-page .home-hero,
-  .home-page .home-section,
-  .home-page .home-dark-section {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
-  .home-page .home-hero h1 {
-    font-size: 34px !important;
-  }
-
-  .home-page .home-cta-section {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-
-  .dashboard-content,
-  .admin-content,
-  .profile-content {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  .auth-page {
-    padding: 10px !important;
-  }
-
-  .auth-page > section,
-  .auth-page .auth-card {
-    padding: 22px 16px !important;
-  }
+/* Very small phones */
+@media (width <= 390px) {
+  .home-page .home-header { padding:0 12px!important; }
+  .home-page .home-header>a:first-child { font-size:16px!important; }
+  .home-page .home-header>a:last-child { padding:8px 10px!important; font-size:12px!important; }
+  .home-page .home-hero,.home-page .home-section,.home-page .home-dark-section { padding-left:16px!important; padding-right:16px!important; }
+  .home-page .home-hero h1 { font-size:34px!important; }
+  .home-page .home-cta-section { padding-left:16px!important; padding-right:16px!important; }
+  .dashboard-content,.admin-content,.profile-content { padding-left:12px!important; padding-right:12px!important; }
+  .auth-page { padding:10px!important; }
+  .auth-page>section,.auth-page .auth-card { padding:22px 16px!important; }
 }
