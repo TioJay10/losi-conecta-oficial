@@ -1,0 +1,6 @@
+{
+  "startCommand": "npm run dev:stackblitz",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
