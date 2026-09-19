@@ -139,7 +139,7 @@ function ProviderPage() {
             {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
             {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
           </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>{<button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>}{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}</div>
+          <div className="provider-profile-actions"><button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}</div>
         </div>
       </section>
 
@@ -155,10 +155,10 @@ function ProviderPage() {
             <div className="provider-profile-card">
               <div className="catalog-kicker">PORTFÓLIO</div>
               <h2>Trabalhos realizados</h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginTop: 18 }}>
+              <div className="provider-portfolio-grid">
                 {business.portfolio_urls.map((url, index) => (
-                  <a key={url + index} href={url} target="_blank" rel="noreferrer" style={{ display: "block", borderRadius: 12, overflow: "hidden", border: "1px solid #e7e9f0", aspectRatio: "4 / 3", background: "#f3f4f8" }}>
-                    <img src={url} alt={"Trabalho " + (index + 1) + " de " + business.business_name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  <a key={url + index} href={url} target="_blank" rel="noreferrer" className="provider-portfolio-item">
+                    <img src={url} alt={"Trabalho " + (index + 1) + " de " + business.business_name} />
                   </a>
                 ))}
               </div>
