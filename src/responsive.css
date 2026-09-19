@@ -110,3 +110,24 @@ h1,h2,h3,p { overflow-wrap:anywhere; }
 @media(max-width:799px){.provider-hero-cover{height:200px}.provider-hero-content{padding:0 20px 24px;align-items:flex-start;flex-wrap:wrap}.provider-hero-logo{width:84px;height:84px;flex-basis:84px;margin-top:-42px;border-width:4px;font-size:30px}.provider-hero-title{padding-top:10px;min-width:calc(100% - 106px)}.provider-profile-contact{width:100%;text-align:center}.provider-profile-content{grid-template-columns:1fr;padding:28px 20px 60px}.provider-profile-side{grid-row:1}.provider-profile-main{grid-row:2}}
 @media(max-width:390px){.provider-hero-content,.provider-profile-content{padding-left:16px;padding-right:16px}.provider-hero-cover{height:170px}}
 \n.provider-profile-link{display:block;text-align:center;text-decoration:none;border:1px solid #dfe2ea;color:#4f46c7;background:#fff;border-radius:9px;padding:10px 12px;font-size:13px;font-weight:850;margin-bottom:8px}\n
+/* Gestão de serviços no perfil */
+.service-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (width <= 599px) {
+  .service-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .service-actions {
+    width: 100%;
+  }
+
+  .service-actions button {
+    flex: 1;
+  }
+}
