@@ -178,6 +178,7 @@ function SearchPage() {
                   <p>{business.description || "Profissional ou empresa para eventos cadastrada no LOSI CONECTA."}</p>
                   {serviceNames.length > 0 && <div className="provider-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
                   <div className="provider-actions">
+                    <button type="button" className="provider-save" onClick={() => toggleFavorite(business.id)} disabled={favoriteBusy === business.id}>{favoriteBusy === business.id ? "..." : favoriteIds.includes(business.id) ? "Salvo" : "Salvar"}</button>
                     <Link to={"/fornecedor/" + business.slug} className="provider-profile-link">Ver perfil</Link>
                     {whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="provider-primary">Conversar pelo WhatsApp</a> : <span className="provider-disabled">Contato ainda não informado</span>}
                   </div>
