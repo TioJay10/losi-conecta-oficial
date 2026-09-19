@@ -163,7 +163,7 @@ function SearchPage() {
               <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label="Ordenar resultados">
                 <option value="relevance">Mais relevantes</option>
                 <option value="rating">Melhor avaliados</option>
-                <option value="saved">Meus salvos</option>
+                <option value="saved">Salvos primeiro</option>
                 <option value="az">Nome: A–Z</option>
               </select>
             </label>
@@ -175,9 +175,9 @@ function SearchPage() {
         {error && <div className="catalog-message catalog-error">{error}</div>}
         {!loading && !error && results.length === 0 && (
           <div className="catalog-empty">
-            <strong>Ainda não encontramos fornecedores com esses filtros.</strong>
-            <p>Experimente outra categoria, cidade ou termo de busca.</p>
-            <Link to="/entrar">Quero cadastrar minha empresa</Link>
+            <strong>{sortBy === "saved" ? "Você ainda não tem fornecedores salvos." : "Ainda não encontramos fornecedores com esses filtros."}</strong>
+            <p>{sortBy === "saved" ? "Salve fornecedores durante sua pesquisa para encontrá-los novamente no seu painel." : "Experimente outra categoria, cidade ou termo de busca."}</p>
+            <Link to={sortBy === "saved" ? "/buscar" : "/entrar"}>{sortBy === "saved" ? "Continuar pesquisando" : "Quero cadastrar minha empresa"}</Link>
           </div>
         )}
         {(search || city || categoryId) && (
