@@ -21,6 +21,8 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootShell,
   component: RootComponent,
+  errorComponent: RootErrorComponent,
+  notFoundComponent: NotFoundComponent,
 });
 
 function RootShell({ children }: { children: ReactNode }) {
@@ -39,4 +41,67 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   return <Outlet />;
+}
+
+function RootErrorComponent() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        background: "#f7f8fc",
+        color: "#172033",
+        fontFamily: "Arial, sans-serif",
+        textAlign: "center",
+      }}
+    >
+      <section style={{ maxWidth: 520 }}>
+        <strong style={{ color: "#4f46c7", letterSpacing: ".08em" }}>LOSI CONECTA</strong>
+        <h1 style={{ margin: "14px 0 8px" }}>Não foi possível carregar esta página.</h1>
+        <p style={{ color: "#687386", lineHeight: 1.6 }}>
+          Ocorreu um erro inesperado. Recarregue a página e tente novamente.
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          style={{
+            border: 0,
+            borderRadius: 10,
+            padding: "12px 18px",
+            background: "#4f46c7",
+            color: "#fff",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          Recarregar
+        </button>
+      </section>
+    </main>
+  );
+}
+
+function NotFoundComponent() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        background: "#f7f8fc",
+        color: "#172033",
+        fontFamily: "Arial, sans-serif",
+        textAlign: "center",
+      }}
+    >
+      <section>
+        <strong style={{ color: "#4f46c7", letterSpacing: ".08em" }}>LOSI CONECTA</strong>
+        <h1 style={{ margin: "14px 0 8px" }}>Página não encontrada.</h1>
+        <a href="/" style={{ color: "#4f46c7", fontWeight: 700 }}>Voltar para o início</a>
+      </section>
+    </main>
+  );
 }
