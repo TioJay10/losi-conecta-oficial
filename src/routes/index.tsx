@@ -35,7 +35,7 @@ function HomePage() {
         </p>
 
         <div style={styles.heroActions}>
-          <Link to="/entrar" style={styles.primaryButton}>Começar agora</Link>
+          <Link to="/buscar" style={styles.primaryButton}>Encontrar fornecedores</Link>
           <a href="#como-funciona" style={styles.secondaryButton}>Entender como funciona</a>
         </div>
 
