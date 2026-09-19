@@ -11,7 +11,7 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ full_name: string | null; user_type: "professional" | "admin" } | null>(null);
-  const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
+  const [hasBusinessProfile, setHasBusinessProfile] = useState(false);\n  const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -147,6 +147,6 @@ const styles: Record<string, React.CSSProperties> = {
   onboardingTitle: { margin: "8px 0 6px", fontSize: 24 },
   onboardingText: { margin: 0, color: "#687386", lineHeight: 1.55, maxWidth: 650 },
   primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
-  center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
+  savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },\n  center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
 };
 
