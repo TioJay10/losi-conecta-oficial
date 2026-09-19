@@ -25,6 +25,9 @@ function ProviderPage() {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewMessage, setReviewMessage] = useState("");
   const [reviewing, setReviewing] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteBusy, setFavoriteBusy] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -68,7 +71,7 @@ function ProviderPage() {
     );
   }
 
-  async function submitReview(event: React.FormEvent) {
+  async function toggleFavorite() {\n    if (!userId) {\n      window.location.href = "/entrar";\n      return;\n    }\n    setFavoriteBusy(true);\n    const result = isFavorite\n      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", business.id)\n      : await supabase.from("favorites").insert({ user_id: userId, business_id: business.id });\n    if (!result.error) setIsFavorite(!isFavorite);\n    setFavoriteBusy(false);\n  }\n\n  async function submitReview(event: React.FormEvent) {
     event.preventDefault();
     setReviewMessage("");
     setReviewing(true);
@@ -127,7 +130,7 @@ function ProviderPage() {
             {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
             {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
           </div>
-          {whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>{<button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>}{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}</div>
         </div>
       </section>
 
