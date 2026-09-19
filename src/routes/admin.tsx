@@ -18,6 +18,8 @@ function AdminPage() {
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
   const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews">("overview");
   const [dataError, setDataError] = useState("");
+  const [businessSearch, setBusinessSearch] = useState("");
+  const [businessStatusFilter, setBusinessStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [categories, setCategories] = useState<Array<{ id:string; name:string; slug:string; active:boolean }>>([]);
   const [services, setServices] = useState<Array<{ id:string; name:string; description:string|null; active:boolean; business:{business_name:string}|null; category:{name:string}|null }>>([]);
   const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);
@@ -90,6 +92,16 @@ function AdminPage() {
     { id: "categories" as const, label: "Categorias", count: stats.categories },
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
   ];
+  const pendingBusinesses = businesses.filter((item) => item.approval_status === "pending");
+  const approvedBusinesses = businesses.filter((item) => item.approval_status === "approved");
+  const activeBusinesses = businesses.filter((item) => item.active);
+  const visibleReviews = reviews.filter((item) => item.active);
+  const averageRating = visibleReviews.length ? visibleReviews.reduce((sum, item) => sum + item.rating, 0) / visibleReviews.length : 0;
+  const filteredBusinesses = businesses.filter((item) => {
+    const query = businessSearch.trim().toLocaleLowerCase("pt-BR");
+    const matchesSearch = !query || [item.business_name, item.city ?? "", item.state ?? ""].join(" ").toLocaleLowerCase("pt-BR").includes(query);
+    return matchesSearch && (businessStatusFilter === "all" || item.approval_status === businessStatusFilter);
+  });
   const sectionTitle = section === "overview" ? "Visão geral" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : "Avaliações recebidas";
 
   return (
@@ -111,19 +123,46 @@ function AdminPage() {
           <p style={styles.text}>{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>
           {dataError && <div className="admin-data-error">Não foi possível carregar alguns dados: {dataError}</div>}
           {section === "overview" ? (
+            <>
+            <div className="admin-metrics-grid">
+              <div className="admin-metric"><span>Usuários</span><strong>{stats.users}</strong><small>contas cadastradas</small></div>
+              <div className="admin-metric"><span>Empresas</span><strong>{stats.businesses}</strong><small>{activeBusinesses.length} ativas</small></div>
+              <div className="admin-metric"><span>Pendentes</span><strong>{pendingBusinesses.length}</strong><small>aguardando análise</small></div>
+              <div className="admin-metric"><span>Aprovadas</span><strong>{approvedBusinesses.length}</strong><small>publicadas</small></div>
+              <div className="admin-metric"><span>Serviços</span><strong>{stats.services}</strong><small>cadastrados</small></div>
+              <div className="admin-metric"><span>Avaliação média</span><strong>{averageRating ? averageRating.toFixed(1) : "—"}</strong><small>{visibleReviews.length} visíveis</small></div>
+            </div>
+            {pendingBusinesses.length > 0 && (
+              <section className="admin-pending-panel">
+                <div className="admin-section-head"><div><div style={styles.badge}>AÇÃO NECESSÁRIA</div><h2 style={{margin:"10px 0 4px"}}>Fornecedores aguardando análise</h2><p style={{...styles.text,margin:0}}>Revise os perfis pendentes diretamente desta tela.</p></div><button style={styles.backButton} onClick={() => { setSection("businesses"); setBusinessStatusFilter("pending"); window.history.replaceState(null, "", "/admin?section=businesses&status=pending"); }}>Ver todos</button></div>
+                <div className="admin-pending-list">
+                  {pendingBusinesses.slice(0, 5).map((item) => <article className="admin-pending-item" key={item.id}><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button></div></article>)}
+                </div>
+              </section>
+            )}
             <div className="admin-grid" style={styles.grid}>
               <button style={styles.cardButton} onClick={() => { setSection("users"); window.history.replaceState(null, "", "/admin?section=users"); }}><strong>Usuários <em>{stats.users}</em></strong><span>Contas cadastradas na plataforma.</span></button>
               <button style={styles.cardButton} onClick={() => { setSection("businesses"); window.history.replaceState(null, "", "/admin?section=businesses"); }}><strong>Empresas <em>{stats.businesses}</em></strong><span>Perfis comerciais e aprovação.</span></button>
               <button style={styles.cardButton} onClick={() => { setSection("services"); window.history.replaceState(null, "", "/admin?section=services"); }}><strong>Serviços <em>{stats.services}</em></strong><span>Serviços publicados pelos profissionais.</span></button>
               <button style={styles.cardButton} onClick={() => { setSection("categories"); window.history.replaceState(null, "", "/admin?section=categories"); }}><strong>Categorias <em>{stats.categories}</em></strong><span>Organização do catálogo.</span></button>
               <button style={styles.cardButton} onClick={() => { setSection("reviews"); window.history.replaceState(null, "", "/admin?section=reviews"); }}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Moderação das avaliações.</span></button>
-              <div style={styles.card}><strong>Próximos módulos</strong><span>Métricas, planos e configurações da plataforma.</span></div>
+              <div style={styles.card}><strong>Operação</strong><span>Use a fila de pendentes para analisar novos fornecedores e manter o catálogo atualizado.</span></div>
             </div>
+            </>
           ) : (
             <section className="admin-table-section">
               <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}>Visão geral</button></div>
               {section === "users" ? <div className="admin-list">{users.length === 0 ? <div className="admin-empty">Nenhum usuário encontrado.</div> : users.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.full_name || "Usuário sem nome"}</strong><span>{item.user_type === "admin" ? "Administrador" : "Profissional"}{item.city ? " · " + item.city : ""}{item.state ? " - " + item.state : ""}</span></div><span className="admin-id">ID: {item.id.slice(0,8)}…</span></div></article>)}</div>
-              : section === "businesses" ? <div className="admin-list">{businesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
+              : section === "businesses" ? <div>
+                <div className="admin-filters">
+                  <input value={businessSearch} onChange={(e) => setBusinessSearch(e.target.value)} placeholder="Buscar empresa, cidade ou estado..." aria-label="Buscar empresas" />
+                  <select value={businessStatusFilter} onChange={(e) => setBusinessStatusFilter(e.target.value as typeof businessStatusFilter)} aria-label="Filtrar status">
+                    <option value="all">Todos os status</option><option value="pending">Pendentes</option><option value="approved">Aprovadas</option><option value="rejected">Rejeitadas</option>
+                  </select>
+                  <span className="admin-filter-count">{filteredBusinesses.length} resultado(s)</span>
+                </div>
+                <div className="admin-list">{filteredBusinesses.length === 0 ? <div className="admin-empty">Nenhuma empresa encontrada com esses filtros.</div> : filteredBusinesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button>{item.approval_status !== "approved" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button>}{item.approval_status !== "rejected" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button>}<button style={styles.actionButton} onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
+              </div>
               : section === "categories" ? <div className="admin-list">{categories.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.slug} · {item.active ? "Ativa" : "Inativa"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("categories").update({active:next}).eq("id",item.id);if(!error)setCategories(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               : section === "services" ? <div className="admin-list">{services.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.business?.business_name || "Empresa não informada"} · {item.category?.name || "Sem categoria"} · {item.active ? "Ativo" : "Inativo"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("services").update({active:next}).eq("id",item.id);if(!error)setServices(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               : <div className="admin-list">{reviews.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{"★".repeat(item.rating)} · {item.business?.business_name || "Empresa"}</strong><span>{item.reviewer?.full_name || "Usuário"} · {item.comment || "Sem comentário"} · {item.active ? "Visível" : "Oculta"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={()=>updateReview(item.id,{active:!item.active})}>{item.active ? "Ocultar" : "Publicar"}</button><button style={styles.actionButton} onClick={()=>deleteReview(item.id)}>Excluir</button></div></div></article>)}</div>}
