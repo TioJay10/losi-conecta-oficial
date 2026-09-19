@@ -74,8 +74,8 @@ function AdminPage() {
   if (!user) return null;
 
   return (
-    <main style={styles.page}>
-      <header style={styles.header}>
+    <main className="admin-page" style={styles.page}>
+      <header className="admin-header" style={styles.header}>
         <div>
           <div style={styles.logo}>LOSI <span>CONECTA</span></div>
           <div style={styles.subtitle}>PAINEL ADMINISTRATIVO</div>
@@ -83,12 +83,12 @@ function AdminPage() {
         <button onClick={logout} style={styles.logout}>Sair</button>
       </header>
 
-      <section style={styles.content}>
+      <section className="admin-content" style={styles.content}>
         <div style={styles.badge}>ADMINISTRADOR</div>
         <h1>Olá, {name}.</h1>
         <p style={styles.text}>Este é o centro de gestão do LOSI CONECTA.</p>
 
-        <div style={styles.grid}>
+        <div className="admin-grid" style={styles.grid}>
           <div style={styles.card}><strong>Usuários</strong><span>Gerenciar contas profissionais.</span></div>
           <div style={styles.card}><strong>Empresas</strong><span>Revisar e verificar perfis comerciais.</span></div>
           <div style={styles.card}><strong>Categorias</strong><span>Organizar as áreas de atuação.</span></div>
