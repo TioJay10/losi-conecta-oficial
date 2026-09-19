@@ -11,7 +11,7 @@ function AdminPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);\n  const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
 
   useEffect(() => {
     let mounted = true;
@@ -89,11 +89,11 @@ function AdminPage() {
         <p style={styles.text}>Este é o centro de gestão do LOSI CONECTA.</p>
 
         <div className="admin-grid" style={styles.grid}>
-          <div style={styles.card}><strong>Usuários</strong><span>Gerenciar contas profissionais.</span></div>
-          <div style={styles.card}><strong>Empresas</strong><span>Revisar e verificar perfis comerciais.</span></div>
-          <div style={styles.card}><strong>Categorias</strong><span>Organizar as áreas de atuação.</span></div>
-          <div style={styles.card}><strong>Serviços</strong><span>Gerenciar serviços cadastrados.</span></div>
-          <div style={styles.card}><strong>Avaliações</strong><span>Moderá-las quando essa função estiver disponível.</span></div>
+          <div style={styles.card}><strong>Usuários <em>{stats.users}</em></strong><span>Contas cadastradas na plataforma.</span></div>
+          <div style={styles.card}><strong>Empresas <em>{stats.businesses}</em></strong><span>Perfis comerciais cadastrados.</span></div>
+          <div style={styles.card}><strong>Categorias <em>{stats.categories}</em></strong><span>Categorias ativas e cadastradas.</span></div>
+          <div style={styles.card}><strong>Serviços <em>{stats.services}</em></strong><span>Serviços cadastrados pelos fornecedores.</span></div>
+          <div style={styles.card}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Avaliações registradas pelos usuários.</span></div>
           <div style={styles.card}><strong>Métricas</strong><span>Acompanhar o crescimento da plataforma.</span></div>
         </div>
       </section>
