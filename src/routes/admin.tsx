@@ -173,7 +173,7 @@ function AdminPage() {
           <p style={styles.text}>{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>
           {dataError && <div className="admin-data-error">Não foi possível carregar alguns dados: {dataError}</div>}
           {section === "overview" ? (
-            <>
+            <div className="admin-overview-content">
             <div className="admin-metrics-grid">
               <div className="admin-metric"><span>Usuários</span><strong>{stats.users}</strong><small>contas cadastradas</small></div>
               <div className="admin-metric"><span>Empresas</span><strong>{stats.businesses}</strong><small>{activeBusinesses.length} ativas</small></div>
@@ -198,7 +198,7 @@ function AdminPage() {
               <button style={styles.cardButton} onClick={() => { setSection("reviews"); window.history.replaceState(null, "", "/admin?section=reviews"); }}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Moderação das avaliações.</span></button>
               <div style={styles.card}><strong>Operação</strong><span>Use a fila de pendentes para analisar novos fornecedores e manter o catálogo atualizado.</span></div>
             </div>
-            </>
+            </div>
           ) : (
             <section className="admin-table-section">
               <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}>Visão geral</button></div>
@@ -236,9 +236,9 @@ function AdminPage() {
                       <div className="admin-plan-checks"><label><input name="highlighted" type="checkbox" defaultChecked={plan.highlighted} /> Destacar plano</label><label><input name="active" type="checkbox" defaultChecked={plan.active} /> Plano ativo</label></div>
                       <button type="submit" style={styles.actionButton} disabled={planSavingId === plan.id}>{planSavingId === plan.id ? "Salvando..." : "Salvar alterações"}</button>
                     </form>
-                  ) : (<>
-                    <h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "Grátis" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>{plan.description || `Plano ${plan.active ? "ativo" : "inativo"} para fornecedores.`}</p><div className="admin-plan-meta"><span>{plan.active ? "Ativo" : "Inativo"}</span>{plan.highlighted && <span>Destacado</span>}</div>
-                  </>)}
+                  ) : (
+                    <div className="admin-plan-summary"><h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "Grátis" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>{plan.description || `Plano ${plan.active ? "ativo" : "inativo"} para fornecedores.`}</p><div className="admin-plan-meta"><span>{plan.active ? "Ativo" : "Inativo"}</span>{plan.highlighted && <span>Destacado</span>}</div>
+                  </div>)}
                 </article>)}
                 <section className="admin-commercial-subscriptions">
                   <div style={styles.badge}>ATIVAÇÃO MANUAL</div>
