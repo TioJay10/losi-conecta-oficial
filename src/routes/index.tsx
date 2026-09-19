@@ -7,13 +7,13 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   return (
-    <main style={styles.page}>
-      <header style={styles.header}>
+    <main className="home-page" style={styles.page}>
+      <header className="home-header" style={styles.header}>
         <Link to="/" style={styles.logo}>
           LOSI <span>CONECTA</span>
         </Link>
 
-        <nav style={styles.nav}>
+        <nav className="home-nav" style={styles.nav}>
           <a href="#como-funciona" style={styles.navLink}>Como funciona</a>
           <a href="#para-quem" style={styles.navLink}>Para quem é</a>
           <a href="#categorias" style={styles.navLink}>Categorias</a>
@@ -22,7 +22,7 @@ function HomePage() {
         <Link to="/entrar" style={styles.headerButton}>Entrar</Link>
       </header>
 
-      <section style={styles.hero}>
+      <section className="home-hero" style={styles.hero}>
         <div style={styles.heroGlow} />
         <div style={styles.eyebrow}>A REDE DE PROFISSIONAIS PARA EVENTOS</div>
         <h1 style={styles.heroTitle}>
@@ -44,7 +44,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section id="como-funciona" style={styles.section}>
+      <section id="como-funciona" className="home-section" style={styles.section}>
         <div style={styles.sectionIntro}>
           <div style={styles.sectionKicker}>COMO FUNCIONA</div>
           <h2 style={styles.sectionTitle}>Do que você precisa ao contato com o fornecedor.</h2>
@@ -54,14 +54,14 @@ function HomePage() {
           </p>
         </div>
 
-        <div style={styles.steps}>
+        <div className="home-steps" style={styles.steps}>
           <Step number="01" title="Encontre" text="Pesquise por serviço, categoria e localização para descobrir profissionais que atendem ao que seu evento precisa." />
           <Step number="02" title="Conheça" text="Veja o perfil profissional, serviços oferecidos, descrição, portfólio, localização e informações de contato." />
           <Step number="03" title="Conecte" text="Quando encontrar o profissional ideal, entre em contato diretamente pelo WhatsApp e avance para a negociação." />
         </div>
       </section>
 
-      <section id="para-quem" style={styles.darkSection}>
+      <section id="para-quem" className="home-dark-section" style={styles.darkSection}>
         <div style={styles.darkIntro}>
           <div style={styles.sectionKickerLight}>PARA QUEM É</div>
           <h2 style={styles.darkTitle}>Um ponto de encontro para o mercado de eventos.</h2>
@@ -71,7 +71,7 @@ function HomePage() {
           </p>
         </div>
 
-        <div style={styles.audienceGrid}>
+        <div className="home-audience-grid" style={styles.audienceGrid}>
           <Audience
             title="Quem organiza"
             text="Encontre fornecedores e profissionais para festas, eventos corporativos, ativações, passeios e outras experiências."
@@ -85,7 +85,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section id="categorias" style={styles.section}>
+      <section id="categorias" className="home-section home-categories-section" style={styles.section}>
         <div style={styles.sectionIntro}>
           <div style={styles.sectionKicker}>O QUE VOCÊ PODE ENCONTRAR</div>
           <h2 style={styles.sectionTitle}>Profissionais de diferentes áreas do evento.</h2>
@@ -95,7 +95,7 @@ function HomePage() {
           </p>
         </div>
 
-        <div style={styles.categoryGrid}>
+        <div className="home-category-grid" style={styles.categoryGrid}>
           {[
             "Recreação e entretenimento",
             "Fotografia e vídeo",
@@ -114,8 +114,8 @@ function HomePage() {
         </div>
       </section>
 
-      <section style={styles.ctaSection}>
-        <div style={styles.ctaCard}>
+      <section className="home-cta-section" style={styles.ctaSection}>
+        <div className="home-cta-card" style={styles.ctaCard}>
           <div>
             <div style={styles.sectionKickerLight}>LOSI CONECTA</div>
             <h2 style={styles.ctaTitle}>Seu próximo evento começa com as conexões certas.</h2>
