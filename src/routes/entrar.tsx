@@ -1,0 +1,175 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { FormEvent, useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+
+export const Route = createFileRoute("/entrar")({
+  component: AuthPage,
+});
+
+type Mode = "login" | "signup" | "recovery";
+
+function AuthPage() {
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<Mode>("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: "/painel" });
+    });
+  }, [navigate]);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    setError("");
+
+    if (!supabase) {
+      setError("O sistema ainda não está conectado às variáveis do Supabase no ambiente do aplicativo.");
+      setLoading(false);
+      return;
+    }
+
+    if (mode === "recovery") {
+      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/entrar",
+      });
+      if (recoveryError) setError(recoveryError.message);
+      else setMessage("Se este e-mail estiver cadastrado, enviaremos as instruções para redefinir sua senha.");
+      setLoading(false);
+      return;
+    }
+
+    if (mode === "signup") {
+      if (password.length < 6) {
+        setError("A senha precisa ter pelo menos 6 caracteres.");
+        setLoading(false);
+        return;
+      }
+
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { full_name: name.trim() },
+          emailRedirectTo: window.location.origin + "/painel",
+        },
+      });
+
+      if (signupError) {
+        setError(signupError.message);
+      } else if (data.session) {
+        navigate({ to: "/painel" });
+      } else {
+        setMessage("Cadastro realizado. Verifique seu e-mail para confirmar a conta antes de entrar.");
+        setMode("login");
+      }
+
+      setLoading(false);
+      return;
+    }
+
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    if (loginError) {
+      setError("E-mail ou senha inválidos.");
+    } else if (data.session) {
+      navigate({ to: "/painel" });
+    }
+
+    setLoading(false);
+  }
+
+  const title =
+    mode === "login" ? "Entrar no LOSI CONECTA" :
+    mode === "signup" ? "Criar sua conta" :
+    "Recuperar senha";
+
+  return (
+    <main style={styles.page}>
+      <section style={styles.card}>
+        <div style={styles.brand}>LOSI <span>CONECTA</span></div>
+        <div style={styles.eyebrow}>PROFISSIONAIS DE EVENTOS</div>
+        <h1 style={styles.title}>{title}</h1>
+        <p style={styles.subtitle}>
+          {mode === "login" && "Acesse sua conta para encontrar e conectar-se a fornecedores."}
+          {mode === "signup" && "Crie seu acesso para fazer parte da rede de profissionais."}
+          {mode === "recovery" && "Informe seu e-mail para receber as instruções de acesso."}
+        </p>
+
+        <form onSubmit={submit} style={styles.form}>
+          {mode === "signup" && (
+            <label style={styles.label}>
+              Nome
+              <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Seu nome" style={styles.input} />
+            </label>
+          )}
+
+          <label style={styles.label}>
+            E-mail
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="voce@email.com" autoComplete="email" style={styles.input} />
+          </label>
+
+          {mode !== "recovery" && (
+            <label style={styles.label}>
+              Senha
+              <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={6} placeholder="Mínimo de 6 caracteres" autoComplete={mode === "login" ? "current-password" : "new-password"} style={styles.input} />
+            </label>
+          )}
+
+          {error && <div style={styles.error}>{error}</div>}
+          {message && <div style={styles.success}>{message}</div>}
+
+          <button disabled={loading} type="submit" style={styles.button}>
+            {loading ? "Aguarde..." : mode === "login" ? "Entrar" : mode === "signup" ? "Criar conta" : "Enviar instruções"}
+          </button>
+        </form>
+
+        {mode === "login" && (
+          <button style={styles.link} onClick={() => { setMode("recovery"); setError(""); setMessage(""); }}>
+            Esqueci minha senha
+          </button>
+        )}
+
+        <div style={styles.footer}>
+          {mode === "login" ? (
+            <>Ainda não tem conta? <button style={styles.inlineLink} onClick={() => { setMode("signup"); setError(""); setMessage(""); }}>Criar conta</button></>
+          ) : (
+            <><button style={styles.inlineLink} onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Voltar para entrar</button></>
+          )}
+        </div>
+
+        <button style={styles.home} onClick={() => navigate({ to: "/" })}>← Voltar para o início</button>
+      </section>
+    </main>
+  );
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "#f5f6fa", padding: 24, fontFamily: "Arial, sans-serif", color: "#172033" },
+  card: { width: "100%", maxWidth: 440, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 20, padding: 36, boxSizing: "border-box", boxShadow: "0 18px 50px rgba(23,32,51,.08)" },
+  brand: { fontSize: 21, fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
+  title: { fontSize: 30, lineHeight: 1.15, margin: "14px 0 8px" },
+  eyebrow: { marginTop: 24, fontSize: 11, fontWeight: 800, letterSpacing: ".14em", color: "#7a8191" },
+  subtitle: { color: "#687386", lineHeight: 1.5, margin: "0 0 24px" },
+  form: { display: "grid", gap: 16 },
+  label: { display: "grid", gap: 7, fontSize: 13, fontWeight: 700 },
+  input: { width: "100%", boxSizing: "border-box", border: "1px solid #dfe2ea", borderRadius: 10, padding: "12px 13px", fontSize: 15, outline: "none" },
+  button: { border: 0, borderRadius: 10, padding: "13px 16px", background: "#4f46c7", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" },
+  link: { display: "block", margin: "18px auto 0", border: 0, background: "transparent", color: "#4f46c7", fontWeight: 700, cursor: "pointer" },
+  inlineLink: { border: 0, background: "transparent", padding: 0, color: "#4f46c7", fontWeight: 700, cursor: "pointer" },
+  footer: { marginTop: 22, textAlign: "center", color: "#687386", fontSize: 14 },
+  home: { display: "block", margin: "22px auto 0", border: 0, background: "transparent", color: "#687386", cursor: "pointer" },
+  error: { background: "#fff1f1", color: "#a32f2f", borderRadius: 9, padding: "10px 12px", fontSize: 13, lineHeight: 1.4 },
+  success: { background: "#eefaf3", color: "#237345", borderRadius: 9, padding: "10px 12px", fontSize: 13, lineHeight: 1.4 },
+};
