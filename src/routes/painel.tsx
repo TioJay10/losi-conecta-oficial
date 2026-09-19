@@ -114,7 +114,7 @@ const styles: Record<string, React.CSSProperties> = {
   badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
   text: { color: "#687386", fontSize: 17 },
   grid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16, marginTop: 32 },
-  card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 24, lineHeight: 1.6 },
+  card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 24, lineHeight: 1.6 },\n  cardButton: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 24, lineHeight: 1.6, textAlign: "left", cursor: "pointer", font: "inherit", color: "inherit" },
   center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
 };
 
