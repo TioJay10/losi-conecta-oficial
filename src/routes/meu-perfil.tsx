@@ -181,13 +181,13 @@ function BusinessProfilePage() {
   if (loading) return <main style={styles.center}>Carregando seu perfil...</main>;
 
   return (
-    <main style={styles.page}>
-      <header style={styles.header}>
+    <main className="profile-page" style={styles.page}>
+      <header className="profile-header" style={styles.header}>
         <button onClick={() => navigate({ to: "/painel" })} style={styles.back}>← Painel</button>
         <div style={styles.logo}>LOSI <span>CONECTA</span></div>
       </header>
 
-      <section style={styles.content}>
+      <section className="profile-content" style={styles.content}>
         <div style={styles.heading}>
           <div>
             <div style={styles.badge}>PERFIL COMERCIAL</div>
@@ -198,7 +198,7 @@ function BusinessProfilePage() {
 
         <form onSubmit={saveProfile} style={styles.card}>
           <h2>Informações da empresa</h2>
-          <div style={styles.formGrid}>
+          <div className="profile-form-grid" style={styles.formGrid}>
             <Field label="Nome comercial *" value={form.business_name} onChange={(v) => update("business_name", v)} />
             <Field label="WhatsApp" value={form.whatsapp} onChange={(v) => update("whatsapp", v)} />
             <Field label="Telefone" value={form.phone} onChange={(v) => update("phone", v)} />
