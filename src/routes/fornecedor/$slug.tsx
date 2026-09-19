@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
@@ -32,6 +33,8 @@ function ProviderPage() {
   useEffect(() => {
     let mounted = true;
     async function load() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (mounted) setUserId(sessionData.session?.user.id ?? null);
       const { data, error: queryError } = await supabase
         .from("business_profiles")
         .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,services(id,name,description,categories(name))")
@@ -52,7 +55,13 @@ function ProviderPage() {
             .eq("business_id", loaded.id)
             .eq("active", true)
             .order("created_at", { ascending: false });
-          if (mounted) setReviews((reviewData ?? []) as unknown as Review[]);
+          if (mounted) {
+            setReviews((reviewData ?? []) as unknown as Review[]);
+            if (sessionData.session) {
+              const { data: favoriteData } = await supabase.from("favorites").select("business_id").eq("user_id", sessionData.session.user.id).eq("business_id", loaded.id).maybeSingle();
+              if (mounted) setIsFavorite(Boolean(favoriteData));
+            }
+          }
         }
       }
       setLoading(false);
