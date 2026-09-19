@@ -160,7 +160,7 @@ function DashboardPage() {
             <h2 style={{margin:"10px 0 6px"}}>{currentPlan ? currentPlan.name : "Plano gratuito"}</h2>
             <p style={{...styles.text,marginTop:0}}>{currentPlan?.ends_at ? "Seu plano está ativo até " + new Date(currentPlan.ends_at).toLocaleDateString("pt-BR") + "." : "Comece gratuitamente e conheça opções para aumentar a visibilidade do seu negócio."}</p>
           </div>
-          <div className="dashboard-plan-grid">{plans.filter(p => p.billing_period !== "free").map(plan => <div className="dashboard-plan-card" key={plan.id}><strong>{plan.name}</strong><span>{plan.price_cents === 0 ? "Grátis" : "R$ " + (plan.price_cents/100).toFixed(2).replace(".",",") + "/mês"}</span><small>{plan.description || "Mais recursos para seu perfil."}</small></div>)}</div>
+          <div className="dashboard-plan-grid">{plans.filter(p => p.billing_period !== "free").map(plan => <div className="dashboard-plan-card" key={plan.id}><strong>{plan.name}</strong><span>{plan.price_cents === 0 ? "Grátis" : "R$ " + (plan.price_cents/100).toFixed(2).replace(".",",") + "/mês"}</span><small>{plan.description || "Mais recursos para seu perfil."}</small><a className="dashboard-plan-contract" href={`https://wa.me/5511988187354?text=${encodeURIComponent("Olá! Tenho interesse em contratar o plano " + plan.name + " do LOSI CONECTA.")}`} target="_blank" rel="noreferrer">Quero contratar</a></div>)}</div>
         </section>
         {savedBusinesses.length > 0 && (
           <section style={{ marginTop: 42 }}>
