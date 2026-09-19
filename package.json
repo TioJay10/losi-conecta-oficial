@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite dev --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "dev:stackblitz": "npx vite@7.3.0 --host 0.0.0.0 --port 5173"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.38",
