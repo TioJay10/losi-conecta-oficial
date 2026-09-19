@@ -61,6 +61,10 @@ function DashboardPage() {
         .eq("owner_id", currentUser.id)
         .maybeSingle();
 
+      const { data: plansRows } = await supabase.from("plans").select("id,name,description,price_cents,billing_period,highlighted").eq("active",true).order("price_cents");
+      if (mounted) setPlans((plansRows ?? []) as typeof plans);
+      if (business?.id) { const { data: sub } = await supabase.from("business_subscriptions").select("ends_at,plan:plans(name)").eq("business_id", business.id).eq("status","active").maybeSingle(); const planData = Array.isArray(sub?.plan) ? sub?.plan[0] : sub?.plan; if (planData && mounted) setCurrentPlan({name: planData.name, ends_at: sub?.ends_at ?? null}); }
+
       const { data: favoriteRows } = await supabase.from("favorites").select("business_id").eq("user_id", currentUser.id);
       const ids = (favoriteRows ?? []).map((row) => row.business_id);
       if (ids.length) {
