@@ -15,6 +15,7 @@ function DashboardPage() {
   const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
   const [plans, setPlans] = useState<Array<{id:string;name:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean}>>([]);
   const [currentPlan, setCurrentPlan] = useState<{name:string;ends_at:string|null}|null>(null);
+  const [quotesSentThisMonth, setQuotesSentThisMonth] = useState(0);
   const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,7 +73,21 @@ function DashboardPage() {
 
       const { data: plansRows } = await supabase.from("plans").select("id,name,description,price_cents,billing_period,highlighted").eq("active",true).order("price_cents");
       if (mounted) setPlans((plansRows ?? []) as typeof plans);
-      if (business?.id) { const { data: sub } = await supabase.from("business_subscriptions").select("ends_at,plan:plans(name)").eq("business_id", business.id).eq("status","active").maybeSingle(); const planData = Array.isArray(sub?.plan) ? sub?.plan[0] : sub?.plan; if (planData && mounted) setCurrentPlan({name: planData.name, ends_at: sub?.ends_at ?? null}); }
+      if (business?.id) {
+        const { data: sub } = await supabase.from("business_subscriptions").select("ends_at,plan:plans(name)").eq("business_id", business.id).eq("status","active").maybeSingle();
+        const planData = Array.isArray(sub?.plan) ? sub?.plan[0] : sub?.plan;
+        if (planData && mounted) setCurrentPlan({name: planData.name, ends_at: sub?.ends_at ?? null});
+
+        const firstDay = new Date();
+        firstDay.setDate(1);
+        firstDay.setHours(0, 0, 0, 0);
+        const { count: quoteCount } = await supabase.from("quotes")
+          .select("id", { count: "exact", head: true })
+          .eq("business_id", business.id)
+          .not("sent_at", "is", null)
+          .gte("sent_at", firstDay.toISOString());
+        if (mounted) setQuotesSentThisMonth(quoteCount ?? 0);
+      }
 
       const { data: favoriteRows } = await supabase.from("favorites").select("business_id").eq("user_id", currentUser.id);
       const ids = (favoriteRows ?? []).map((row) => row.business_id);
@@ -149,6 +164,10 @@ function DashboardPage() {
               <strong>Meus serviços</strong>
               <span>Atualize sua empresa, apresentação, serviços, imagens e localização.</span>
             </button>
+            <button type="button" onClick={() => navigate({ to: "/orcamentos" })} style={styles.cardButton}>
+              <strong>Orçamentos</strong>
+              <span>Receba solicitações, envie propostas e acompanhe seus orçamentos.</span>
+            </button>
           </div>
         )}
 
@@ -160,6 +179,17 @@ function DashboardPage() {
               <p style={{ ...styles.text, marginTop: 0 }}>{businessStatus === "approved" ? "Seu perfil está disponível para quem pesquisa fornecedores no LOSI CONECTA." : businessStatus === "rejected" ? "Revise as informações solicitadas e salve novamente para enviar uma nova análise." : "A administração está analisando seus dados. Você pode continuar atualizando seu perfil enquanto aguarda."}</p>
             </div>
             <button type="button" onClick={() => navigate({ to: "/meus-servicos" })} style={styles.secondary}>Gerenciar empresa</button>
+          </section>
+        )}
+
+        {hasBusinessProfile && (
+          <section className="dashboard-status" style={styles.statusSection}>
+            <div>
+              <div style={styles.badge}>ORÇAMENTOS</div>
+              <h2 style={{ margin: "10px 0 6px" }}>{quotesSentThisMonth}</h2>
+              <p style={{ ...styles.text, marginTop: 0 }}>orçamentos enviados neste mês pela sua empresa.</p>
+            </div>
+            <button type="button" onClick={() => navigate({ to: "/orcamentos" })} style={styles.secondary}>Gerenciar orçamentos</button>
           </section>
         )}
 
