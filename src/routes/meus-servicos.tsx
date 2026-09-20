@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FormEvent, useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
@@ -403,27 +404,27 @@ function BusinessServicesPage() {
     setMessage("Serviço excluído.");
   }
 
-  if (loading) return <main style={styles.center}>Carregando seus serviços...</main>;
+  if (loading) return <main className="business-services-loading">Carregando seus serviços...</main>;
 
   const onboardingStep = !business ? 1 : services.length === 0 ? 2 : 3;
 
   return (
-    <main className="profile-page" style={styles.page}>
-      <header className="profile-header" style={styles.header}>
-        <button onClick={() => navigate({ to: "/painel" })} style={styles.back}>← Voltar ao painel</button>
-        <div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div>
+    <main className="profile-page business-services-page">
+      <header className="profile-header business-services-header">
+        <button className="profile-back" onClick={() => navigate({ to: "/painel" })}>← Voltar ao painel</button>
+        <div className="profile-logo mobile-centered-brand">LOSI <span>CONECTA</span></div>
       </header>
 
-      <section className="profile-content" style={styles.content}>
-        <div style={styles.heading}>
+      <section className="profile-content business-services-content">
+        <div className="business-services-heading">
           <div>
-            <div style={styles.badge}>EMPRESA E SERVIÇOS</div>
+            <div className="profile-badge">EMPRESA E SERVIÇOS</div>
             <h1>Meus serviços</h1>
-            <p style={styles.text}>
+            <p className="profile-page-text">
               Atualize as informações da sua empresa e os serviços que serão exibidos no seu perfil público.
             </p>
             {business && (
-              <div style={styles.statusBox}>
+              <div className="business-status-box">
                 <strong>Status do perfil:</strong>{" "}
                 {business.approval_status === "approved"
                   ? "Aprovado e publicado"
@@ -435,15 +436,15 @@ function BusinessServicesPage() {
           </div>
         </div>
 
-        <div className="onboarding-steps" style={styles.steps}>
+        <div className="onboarding-steps">
           <Step number="1" title="Empresa" active={onboardingStep === 1} done={onboardingStep > 1} />
           <Step number="2" title="Serviços" active={onboardingStep === 2} done={onboardingStep > 2} />
           <Step number="3" title="Análise" active={onboardingStep === 3} done={false} />
         </div>
 
-        <form onSubmit={saveBusiness} style={styles.card}>
+        <form onSubmit={saveBusiness} className="business-services-card">
           <h2>Informações da empresa</h2>
-          <div className="profile-form-grid" style={styles.formGrid}>
+          <div className="profile-form-grid business-services-form-grid">
             <Field label="Nome comercial *" value={form.business_name} onChange={(v) => update("business_name", v)} />
             <Field label="WhatsApp" value={form.whatsapp} onChange={(v) => update("whatsapp", v)} />
             <Field label="Telefone comercial" value={form.phone} onChange={(v) => update("phone", v)} />
@@ -453,19 +454,19 @@ function BusinessServicesPage() {
             <Field label="Estado" value={form.state} onChange={(v) => update("state", v)} />
             <div>
               <Field label="Endereço" value={form.address} onChange={(v) => update("address", v)} />
-              <button type="button" onClick={useCurrentLocation} disabled={locationSaving} style={styles.locationButton}>
+              <button type="button" onClick={useCurrentLocation} disabled={locationSaving} className="business-location-button">
                 {locationSaving
                   ? "Obtendo localização..."
                   : coordinates.latitude !== null
                     ? "Localização cadastrada ✓"
                     : "Usar minha localização atual"}
               </button>
-              <p style={styles.hint}>Usada somente para calcular a distância no filtro por raio.</p>
+              <p className="business-hint">Usada somente para calcular a distância no filtro por raio.</p>
             </div>
 
             <div>
               <Field label="URL da logo" value={form.logo_url} onChange={(v) => update("logo_url", v)} />
-              <label style={styles.uploadButton}>
+              <label className="business-upload-button">
                 {uploading === "logo" ? "Enviando..." : "Enviar logo"}
                 <input
                   type="file"
@@ -483,7 +484,7 @@ function BusinessServicesPage() {
 
             <div>
               <Field label="URL da capa" value={form.cover_url} onChange={(v) => update("cover_url", v)} />
-              <label style={styles.uploadButton}>
+              <label className="business-upload-button">
                 {uploading === "cover" ? "Enviando..." : "Enviar capa"}
                 <input
                   type="file"
@@ -500,16 +501,16 @@ function BusinessServicesPage() {
             </div>
           </div>
 
-          <label style={styles.label}>Portfólio de imagens</label>
+          <label className="business-field-label">Portfólio de imagens</label>
           <textarea
             value={form.portfolio_urls}
             onChange={(e) => update("portfolio_urls", e.target.value)}
-            style={styles.textarea}
+            className="business-textarea"
             rows={4}
             placeholder="Cole uma URL de imagem por linha. Ex.: https://site.com/foto.jpg"
           />
-          <p style={styles.hint}>Até 12 imagens. Você pode enviar arquivos diretamente ou colar links públicos.</p>
-          <label style={styles.uploadButton}>
+          <p className="business-hint">Até 12 imagens. Você pode enviar arquivos diretamente ou colar links públicos.</p>
+          <label className="business-upload-button">
             {uploading === "portfolio" ? "Enviando imagem..." : "Adicionar imagem ao portfólio"}
             <input
               type="file"
@@ -524,36 +525,36 @@ function BusinessServicesPage() {
             />
           </label>
 
-          <label style={styles.label}>Descrição da empresa</label>
+          <label className="business-field-label">Descrição da empresa</label>
           <textarea
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
-            style={styles.textarea}
+            className="business-textarea"
             rows={5}
             placeholder="Conte o que sua empresa oferece..."
           />
 
-          <button disabled={saving} style={styles.primary}>
+          <button className="business-primary" disabled={saving}>
             {saving ? "Salvando..." : "Salvar informações da empresa"}
           </button>
         </form>
 
-        <form onSubmit={editingServiceId ? saveService : addService} style={styles.card}>
-          <div style={styles.servicesHeader}>
+        <form onSubmit={editingServiceId ? saveService : addService} className="business-services-card">
+          <div className="business-services-head">
             <div>
-              <div style={styles.badge}>SERVIÇOS</div>
-              <h2 style={{ margin: "10px 0 6px" }}>
+              <div className="profile-badge">SERVIÇOS</div>
+              <h2 className="business-section-title">
                 {editingServiceId ? "Editar serviço" : "Adicionar serviço"}
               </h2>
-              <p style={styles.text}>Cada descrição de serviço pode ter no máximo 150 caracteres.</p>
+              <p className="profile-page-text">Cada descrição de serviço pode ter no máximo 150 caracteres.</p>
             </div>
-            <span style={styles.count}>{services.length}</span>
+            <span className="business-count">{services.length}</span>
           </div>
 
-          <div style={styles.formGrid}>
+          <div className="business-services-form-grid">
             <div>
-              <label style={styles.label}>Categoria</label>
-              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={styles.input}>
+              <label className="business-field-label">Categoria</label>
+              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="business-field-input">
                 {categories.length === 0 && <option value="">Nenhuma categoria cadastrada</option>}
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>{category.name}</option>
@@ -563,49 +564,49 @@ function BusinessServicesPage() {
             <Field label="Nome do serviço" value={serviceName} onChange={setServiceName} />
           </div>
 
-          <label style={styles.label}>Descrição do serviço</label>
+          <label className="business-field-label">Descrição do serviço</label>
           <textarea
             value={serviceDescription}
             maxLength={150}
             onChange={(e) => setServiceDescription(e.target.value.slice(0, 150))}
-            style={styles.textarea}
+            className="business-textarea"
             rows={3}
             placeholder="Descreva esse serviço..."
           />
-          <div style={styles.actions}>
-            <button disabled={!business} style={styles.secondary}>
+          <div className="business-actions">
+            <button disabled={!business} className="business-secondary">
               {editingServiceId ? "Salvar alterações" : "Cadastrar serviço"}
             </button>
             {editingServiceId && (
-              <button type="button" onClick={cancelEditService} style={styles.cancel}>Cancelar</button>
+              <button type="button" onClick={cancelEditService} className="business-cancel">Cancelar</button>
             )}
           </div>
-          {!business && <p style={styles.hint}>Primeiro salve as informações da empresa.</p>}
+          {!business && <p className="business-hint">Primeiro salve as informações da empresa.</p>}
         </form>
 
-        <section style={styles.card}>
-          <div style={styles.servicesHeader}>
+        <section className="business-services-card">
+          <div className="business-services-head">
             <div>
-              <h2 style={{ marginBottom: 6 }}>Serviços cadastrados</h2>
-              <p style={styles.text}>Eles aparecem no seu perfil público e nas buscas do LOSI CONECTA.</p>
+              <h2 className="business-section-title no-top">Serviços cadastrados</h2>
+              <p className="profile-page-text">Eles aparecem no seu perfil público e nas buscas do LOSI CONECTA.</p>
             </div>
-            <span style={styles.count}>{services.length}</span>
+            <span className="business-count">{services.length}</span>
           </div>
 
           {services.length === 0 ? (
-            <div style={styles.empty}>Nenhum serviço cadastrado ainda.</div>
+            <div className="business-empty">Nenhum serviço cadastrado ainda.</div>
           ) : (
-            <div style={styles.serviceList}>
+            <div className="business-service-list">
               {services.map((service) => (
-                <article key={service.id} style={styles.serviceItem}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={styles.serviceCategory}>{service.category_name ?? "Sem categoria"}</div>
-                    <h3 style={styles.serviceTitle}>{service.name}</h3>
-                    {service.description && <p style={styles.serviceDescription}>{service.description}</p>}
+                <article key={service.id} className="business-service-item">
+                  <div className="business-service-main">
+                    <div className="business-service-category">{service.category_name ?? "Sem categoria"}</div>
+                    <h3 className="business-service-title">{service.name}</h3>
+                    {service.description && <p className="business-service-description">{service.description}</p>}
                   </div>
-                  <div style={styles.serviceActions}>
-                    <button type="button" onClick={() => startEditService(service)} style={styles.smallButton}>Editar</button>
-                    <button type="button" onClick={() => deleteService(service)} style={styles.deleteButton}>Excluir</button>
+                  <div className="business-service-actions">
+                    <button type="button" onClick={() => startEditService(service)} className="business-small-button">Editar</button>
+                    <button type="button" onClick={() => deleteService(service)} className="business-delete-button">Excluir</button>
                   </div>
                 </article>
               ))}
@@ -614,18 +615,18 @@ function BusinessServicesPage() {
         </section>
 
         {business && (
-          <div style={styles.bottomActions}>
+          <div className="business-bottom-actions">
             <button
               type="button"
               onClick={() => navigate({ to: "/fornecedor/$slug", params: { slug: business.slug } })}
-              style={styles.publicButton}
+              className="business-public-button"
             >
               Ver meu perfil público →
             </button>
           </div>
         )}
 
-        {message && <div style={styles.message}>{message}</div>}
+        {message && <div className="business-message">{message}</div>}
       </section>
     </main>
   );
@@ -633,11 +634,11 @@ function BusinessServicesPage() {
 
 function Step({ number, title, active, done }: { number: string; title: string; active: boolean; done: boolean }) {
   return (
-    <div className={active ? "onboarding-step active" : "onboarding-step"} style={styles.step}>
-      <span style={done ? styles.stepNumberDone : active ? styles.stepNumberActive : styles.stepNumber}>
+    <div className={active ? "onboarding-step active" : "onboarding-step"}>
+      <span className={done ? "business-step-number done" : active ? "business-step-number active" : "business-step-number"}>
         {done ? "✓" : number}
       </span>
-      <span style={active ? styles.stepTitleActive : styles.stepTitle}>{title}</span>
+      <span className={active ? "business-step-title active" : "business-step-title"}>{title}</span>
     </div>
   );
 }
@@ -645,54 +646,9 @@ function Step({ number, title, active, done }: { number: string; title: string; 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <div>
-      <label style={styles.label}>{label}</label>
-      <input value={value} onChange={(e) => onChange(e.target.value)} style={styles.input} />
+      <label className="business-field-label">{label}</label>
+      <input value={value} onChange={(e) => onChange(e.target.value)} className="business-field-input" />
     </div>
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  page: { minHeight: "100vh", background: "#f7f8fc", color: "#172033", fontFamily: "Arial, sans-serif" },
-  header: { height: 72, background: "#fff", borderBottom: "1px solid #e7e9f0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px" },
-  logo: { fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
-  back: { border: 0, background: "transparent", cursor: "pointer", color: "#566074", fontSize: 14 },
-  content: { maxWidth: 1000, margin: "0 auto", padding: "48px 24px 80px" },
-  heading: { marginBottom: 28 },
-  statusBox: { marginTop: 14, padding: "12px 14px", borderRadius: 10, background: "#f3f4ff", border: "1px solid #dfe0ff", color: "#4f46c7", fontSize: 14 },
-  steps: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 22 },
-  step: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "13px 14px", display: "flex", alignItems: "center", gap: 10 },
-  stepNumber: { width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", background: "#f1f2f6", color: "#7b8292", fontSize: 12, fontWeight: 800, flexShrink: 0 },
-  stepNumberActive: { width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", background: "#ebe9ff", color: "#4f46c7", fontSize: 12, fontWeight: 800, flexShrink: 0 },
-  stepNumberDone: { width: 26, height: 26, borderRadius: 999, display: "grid", placeItems: "center", background: "#eaf7ef", color: "#237345", fontSize: 12, fontWeight: 800, flexShrink: 0 },
-  stepTitle: { color: "#7b8292", fontSize: 13, fontWeight: 700 },
-  stepTitleActive: { color: "#172033", fontSize: 13, fontWeight: 800 },
-  badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
-  text: { color: "#687386", fontSize: 16, lineHeight: 1.5 },
-  card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 28, marginBottom: 18 },
-  formGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 18, marginBottom: 18 },
-  actions: { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" },
-  cancel: { border: "1px solid #dfe2ea", background: "#fff", color: "#566074", borderRadius: 9, padding: "11px 18px", fontWeight: 700, cursor: "pointer" },
-  servicesHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 18 },
-  count: { minWidth: 34, height: 34, borderRadius: 999, display: "grid", placeItems: "center", background: "#ebe9ff", color: "#4f46c7", fontWeight: 800 },
-  empty: { border: "1px dashed #dfe2ea", borderRadius: 12, padding: 22, color: "#8a91a3", textAlign: "center" },
-  serviceList: { display: "grid", gap: 10 },
-  serviceItem: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, padding: 16, border: "1px solid #e7e9f0", borderRadius: 12 },
-  serviceCategory: { fontSize: 11, fontWeight: 800, color: "#4f46c7", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 5 },
-  serviceTitle: { margin: 0, fontSize: 16 },
-  serviceDescription: { margin: "6px 0 0", color: "#687386", fontSize: 13, lineHeight: 1.45 },
-  serviceActions: { display: "flex", gap: 8, flexShrink: 0 },
-  smallButton: { border: "1px solid #dfe2ea", background: "#fff", color: "#4f46c7", borderRadius: 8, padding: "8px 11px", fontWeight: 700, cursor: "pointer" },
-  deleteButton: { border: "1px solid #f0d7d7", background: "#fff", color: "#b44747", borderRadius: 8, padding: "8px 11px", fontWeight: 700, cursor: "pointer" },
-  publicButton: { display: "block", border: 0, background: "transparent", color: "#4f46c7", fontWeight: 800, cursor: "pointer" },
-  label: { display: "block", fontSize: 13, fontWeight: 700, color: "#465066", marginBottom: 7 },
-  input: { width: "100%", boxSizing: "border-box", padding: "12px 13px", border: "1px solid #dfe2ea", borderRadius: 9, fontSize: 14, background: "#fff" },
-  textarea: { width: "100%", boxSizing: "border-box", padding: "12px 13px", border: "1px solid #dfe2ea", borderRadius: 9, fontSize: 14, resize: "vertical", fontFamily: "inherit", marginBottom: 18 },
-  primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer" },
-  secondary: { border: "1px solid #4f46c7", background: "#fff", color: "#4f46c7", borderRadius: 9, padding: "11px 18px", fontWeight: 700, cursor: "pointer" },
-  message: { background: "#fff", border: "1px solid #dfe2ea", borderRadius: 12, padding: 16, color: "#465066" },
-  hint: { color: "#8a91a3", fontSize: 13 },
-  uploadButton: { display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: -8, marginBottom: 16, padding: "9px 13px", border: "1px solid #dfe2ea", borderRadius: 9, background: "#fff", color: "#4f46c7", fontSize: 13, fontWeight: 800, cursor: "pointer" },
-  locationButton: { display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: 2, marginBottom: 4, padding: "9px 13px", border: "1px solid #dfe2ea", borderRadius: 9, background: "#f8f9fb", color: "#3f4852", fontSize: 13, fontWeight: 800, cursor: "pointer" },
-  bottomActions: { display: "flex", justifyContent: "center", margin: "4px 0 18px" },
-  center: { minHeight: "100vh", display: "grid", placeItems: "center", color: "#687386", fontFamily: "Arial, sans-serif" },
-};
