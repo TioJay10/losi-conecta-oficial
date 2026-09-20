@@ -568,5 +568,6 @@ const styles: Record<string, React.CSSProperties> = {
   message: { background: "#fff", border: "1px solid #dfe2ea", borderRadius: 12, padding: 16, color: "#465066" },
   hint: { color: "#8a91a3", fontSize: 13 },
   uploadButton: { display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: -8, marginBottom: 16, padding: "9px 13px", border: "1px solid #dfe2ea", borderRadius: 9, background: "#fff", color: "#4f46c7", fontSize: 13, fontWeight: 800, cursor: "pointer" },
+  locationButton: { display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: 2, marginBottom: 4, padding: "9px 13px", border: "1px solid #dfe2ea", borderRadius: 9, background: "#f8f9fb", color: "#3f4852", fontSize: 13, fontWeight: 800, cursor: "pointer" },
   center: { minHeight: "100vh", display: "grid", placeItems: "center", color: "#687386", fontFamily: "Arial, sans-serif" },
 };
