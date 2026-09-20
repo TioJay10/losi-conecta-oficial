@@ -157,7 +157,7 @@ function AdminPage() {
   }
 
   function categorySlug(value: string) {
-    return value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   }
 
   async function createCategory(event: FormEvent<HTMLFormElement>) {
