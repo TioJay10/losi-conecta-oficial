@@ -468,3 +468,49 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* WHATSAPP — compartilhamento de orçamentos sem alterar o fluxo existente */
+.quote-history-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.quotes-whatsapp {
+  border: 1px solid #25d366;
+  border-radius: 9px;
+  background: #fff;
+  color: #15803d;
+  padding: 10px 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.quotes-whatsapp:hover {
+  background: #f0fdf4;
+}
+
+.quotes-whatsapp:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.quote-client-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+@media only screen and (max-width: 768px) {
+  .quote-history-actions {
+    justify-content: flex-start;
+  }
+
+  .quote-client-actions {
+    justify-content: flex-start;
+  }
+}
