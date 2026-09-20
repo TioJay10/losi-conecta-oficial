@@ -28,6 +28,8 @@ function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [userBusinessSlug, setUserBusinessSlug] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [favoriteBusy, setFavoriteBusy] = useState<string | null>(null);
 
@@ -38,9 +40,16 @@ function SearchPage() {
       const currentUserId = sessionData.session?.user.id ?? null;
       if (currentUserId) {
         setUserId(currentUserId);
-        const { data: favoriteData } = await supabase.from("favorites").select("business_id").eq("user_id", currentUserId);
-        if (mounted) setFavoriteIds((favoriteData ?? []).map((item) => item.business_id));
+        const [{ data: favoriteData }, { data: ownBusiness }] = await Promise.all([
+          supabase.from("favorites").select("business_id").eq("user_id", currentUserId),
+          supabase.from("business_profiles").select("slug").eq("owner_id", currentUserId).maybeSingle(),
+        ]);
+        if (mounted) {
+          setFavoriteIds((favoriteData ?? []).map((item) => item.business_id));
+          setUserBusinessSlug(ownBusiness?.slug ?? null);
+        }
       }
+      if (mounted) setAuthLoading(false);
       const [businessResult, categoryResult] = await Promise.all([
         supabase
           .from("business_profiles")
@@ -200,7 +209,28 @@ function SearchPage() {
     <main className="catalog-page">
       <header className="catalog-header">
         <Link to="/" className="catalog-logo">LOSI <span>CONECTA</span></Link>
-        <Link to="/entrar" className="catalog-login">Entrar</Link>
+        <div className="catalog-header-actions">
+          {userId && userBusinessSlug && (
+            <Link to="/fornecedor/$slug" params={{ slug: userBusinessSlug }} className="catalog-profile-link">
+              Ver meu perfil
+            </Link>
+          )}
+          {userId ? (
+            <button
+              type="button"
+              className="catalog-login catalog-logout"
+              disabled={authLoading}
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/buscar";
+              }}
+            >
+              Sair
+            </button>
+          ) : (
+            <Link to="/entrar" className="catalog-login">Entrar</Link>
+          )}
+        </div>
       </header>
       <section className="catalog-hero">
         <div className="catalog-kicker">ENCONTRE PROFISSIONAIS PARA SEU EVENTO</div>
