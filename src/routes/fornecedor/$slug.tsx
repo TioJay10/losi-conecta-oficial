@@ -29,6 +29,11 @@ function ProviderPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteBusy, setFavoriteBusy] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("tentativa_de_golpe");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportMessage, setReportMessage] = useState("");
+  const [reporting, setReporting] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -156,6 +161,46 @@ function ProviderPage() {
   const whatsapp = digits ? "https://wa.me/" + (digits.startsWith("55") ? digits : "55" + digits) + "?text=" + encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA.") : null;
   const canRequestQuote = Boolean(userId && userId !== business.owner_id);
 
+  async function submitSupplierReport(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (reporting) return;
+    setReporting(true);
+    setReportMessage("");
+
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const currentUser = userData.user;
+      if (!currentUser) {
+        window.location.href = "/entrar";
+        return;
+      }
+
+      const { error: reportError } = await supabase.from("supplier_reports").insert({
+        business_id: business.id,
+        reporter_id: currentUser.id,
+        reason: reportReason,
+        details: reportDetails.trim() ? reportDetails.trim().slice(0, 1000) : null,
+      });
+
+      if (reportError) {
+        if (reportError.code === "23505") {
+          setReportMessage("Você já enviou uma denúncia com este motivo para este fornecedor.");
+        } else if (reportError.code === "42501") {
+          setReportMessage("Não foi possível registrar esta denúncia.");
+        } else {
+          setReportMessage(reportError.message || "Não foi possível registrar esta denúncia.");
+        }
+        return;
+      }
+
+      setReportReason("tentativa_de_golpe");
+      setReportDetails("");
+      setReportMessage("Denúncia enviada. Obrigado por nos ajudar a manter o LOSI CONECTA seguro.");
+    } finally {
+      setReporting(false);
+    }
+  }
+
   function openQuoteRequest() {
     if (!userId) {
       window.location.href = "/entrar";
@@ -224,7 +269,7 @@ function ProviderPage() {
             {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
             {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
           </div>
-          <div className="provider-profile-actions"><button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>{canRequestQuote && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}</div>
+          <div className="provider-profile-actions"><button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>{canRequestQuote && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}<button type="button" className="provider-profile-report" onClick={() => { setReportOpen(true); setReportMessage(""); }}>Denunciar fornecedor</button></div>
         </div>
       </section>
 
@@ -267,6 +312,35 @@ function ProviderPage() {
                 <button type="submit">Enviar solicitação de orçamento</button>
               </form>
               {reviewMessage && <small>{reviewMessage}</small>}
+            </div>
+          )}
+
+          {reportOpen && (
+            <div className="provider-profile-card provider-report-card">
+              <div className="catalog-kicker">SEGURANÇA</div>
+              <h2>Denunciar fornecedor</h2>
+              <p>Selecione o motivo da denúncia. Use este canal apenas para situações relacionadas a este fornecedor.</p>
+              <form className="provider-report-form" onSubmit={submitSupplierReport}>
+                <label>Motivo
+                  <select value={reportReason} onChange={(e) => setReportReason(e.target.value)}>
+                    <option value="tentativa_de_golpe">Tentativa de golpe</option>
+                    <option value="perfil_falso">Perfil falso</option>
+                    <option value="cobranca_suspeita">Cobrança suspeita</option>
+                    <option value="servico_nao_realizado">Serviço não realizado</option>
+                    <option value="comportamento_inadequado">Comportamento inadequado</option>
+                    <option value="dados_falsos">Dados falsos</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </label>
+                <label>Detalhes (opcional)
+                  <textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} maxLength={1000} rows={4} placeholder="Explique brevemente o que aconteceu..." />
+                </label>
+                <div className="provider-report-actions">
+                  <button type="button" className="quotes-secondary" onClick={() => { setReportOpen(false); setReportMessage(""); }}>Cancelar</button>
+                  <button type="submit" className="provider-profile-report-submit" disabled={reporting}>{reporting ? "Enviando..." : "Enviar denúncia"}</button>
+                </div>
+                {reportMessage && <small>{reportMessage}</small>}
+              </form>
             </div>
           )}
 
