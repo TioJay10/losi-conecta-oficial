@@ -131,8 +131,8 @@ function DashboardPage() {
                 Depois da aprovação, ele ficará disponível no catálogo.
               </p>
             </div>
-            <button onClick={() => navigate({ to: "/meu-perfil" })} style={styles.primary}>
-              Criar meu perfil →
+            <button onClick={() => navigate({ to: "/meus-servicos" })} style={styles.primary}>
+              Criar perfil da empresa →
             </button>
           </section>
         ) : (
