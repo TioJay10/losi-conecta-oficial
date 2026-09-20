@@ -69,185 +69,73 @@ function SearchPage() {
       setLoading(false);
     }
     loadCatalog();
-    return () => { mounted = false; };
-  }, []);
-
-  function distanceInKm(latitude1: number, longitude1: number, latitude2: number, longitude2: number) {
-    const earthRadiusKm = 6371;
-    const dLat = (latitude2 - latitude1) * Math.PI / 180;
-    const dLon = (longitude2 - longitude1) * Math.PI / 180;
-    const lat1 = latitude1 * Math.PI / 180;
-    const lat2 = latitude2 * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
-  function requestLocation() {
-    if (!navigator.geolocation) {
-      setLocationMessage("Seu navegador não oferece localização.");
-      return;
-    }
-    setLocationLoading(true);
-    setLocationMessage("");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-        setLocationLoading(false);
-        setLocationMessage("");
-      },
-      () => {
-        setUserLocation(null);
-        setRadiusKm(null);
-        setLocationLoading(false);
-        setLocationMessage("Permita o acesso à sua localização para usar a busca por raio.");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
-  }
-
-  useEffect(() => {
-    if (radiusKm !== null && !userLocation && !locationLoading) requestLocation();
-  }, [radiusKm]);
-
-  const results = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
-    const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
-    return businesses.filter((business) => {
-      const searchable = [
-        business.business_name, business.description ?? "", business.city ?? "", business.state ?? "",
-        ...business.services.map((service) => service.name),
-        ...business.services.map((service) => service.categories?.name ?? ""),
-      ].join(" ").toLocaleLowerCase("pt-BR");
-      return (
-        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
-        (!normalizedCity || (business.city ?? "").toLocaleLowerCase("pt-BR").includes(normalizedCity)) &&
-        (!categoryId || business.services.some((service) => service.category_id === categoryId)) &&
-        (radiusKm === null || (userLocation && business.latitude !== null && business.longitude !== null && distanceInKm(userLocation.latitude, userLocation.longitude, business.latitude, business.longitude) <= radiusKm))
-      );
-    });
-  }, [businesses, search, city, categoryId, radiusKm, userLocation]);
-
-  const scoredResults = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("pt-BR");
-    const tokens = query.split(/\s+/).map((token) => token.trim()).filter((token) => token.length >= 2);
-
-    function normalize(value: string) {
-      return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
-    }
-
-    function score(business: Business) {
-      if (!tokens.length) return 0;
-      const name = normalize(business.business_name);
-      const description = normalize(business.description ?? "");
-      const cityName = normalize(business.city ?? "");
-      const serviceNames = business.services.map((service) => normalize(service.name));
-      const categoryNames = business.services.map((service) => normalize(service.categories?.name ?? ""));
-      let total = 0;
-      for (const token of tokens) {
-        if (name.includes(token)) total += 40;
-        if (serviceNames.some((value) => value.includes(token))) total += 30;
-        if (categoryNames.some((value) => value.includes(token))) total += 25;
-        if (description.includes(token)) total += 10;
-        if (cityName.includes(token)) total += 5;
-      }
-      if (query && name === query) total += 50;
-      return total;
-    }
-
-    return results.map((business) => ({ business, searchScore: score(business) }));
-  }, [results, search]);
-
-  const sortedResults = useMemo(() => {
-    const copy = [...scoredResults];
-    const rating = (business: Business) =>
-      business.reviews.length
-        ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length
-        : 0;
-    if (sortBy === "rating") {
-      return copy.sort((a, b) => rating(b.business) - rating(a.business) || a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
-    }
-    if (sortBy === "az") {
-      return copy.sort((a, b) => a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
-    }
-    if (sortBy === "saved") {
-      return copy.sort((a, b) => Number(favoriteIds.includes(b.business.id)) - Number(favoriteIds.includes(a.business.id))).map((item) => item.business);
-    }
-    return copy.sort((a, b) =>
-      b.searchScore - a.searchScore ||
-      Number(b.business.verified) - Number(a.business.verified) ||
-      rating(b.business) - rating(a.business) ||
-      a.business.business_name.localeCompare(b.business.business_name, "pt-BR")
-    ).map((item) => item.business);
-  }, [scoredResults, sortBy, favoriteIds]);
-
-  async function toggleFavorite(businessId: string) {
-    if (!userId) {
-      window.location.href = "/entrar";
-      return;
-    }
-    setFavoriteBusy(businessId);
-    const isFavorite = favoriteIds.includes(businessId);
-    const result = isFavorite
-      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", businessId)
-      : await supabase.from("favorites").insert({ user_id: userId, business_id: businessId });
-    if (!result.error) {
-      setFavoriteIds((current) => isFavorite ? current.filter((id) => id !== businessId) : [...current, businessId]);
-    }
-    setFavoriteBusy(null);
-  }
-
-  function whatsappUrl(business: Business) {
-    const raw = business.whatsapp || business.phone || "";
-    const digits = raw.replace(/\D/g, "");
-    if (!digits) return null;
-    const number = digits.startsWith("55") ? digits : "55" + digits;
-    const text = encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA e gostaria de saber mais sobre os serviços.");
-    return "https://wa.me/" + number + "?text=" + text;
-  }
-
-  return (
-    <main className="catalog-page">
-      <header className="catalog-header">
-        <Link to="/" className="catalog-logo">LOSI <span>CONECTA</span></Link>
-        <div className="catalog-header-actions">
-          {userId && userBusinessSlug && (
-            <Link to="/painel" className="catalog-profile-link">
-              Ver meu perfil
-            </Link>
-          )}
-          {userId ? (
-            <button
-              type="button"
-              className="catalog-login catalog-logout"
-              disabled={authLoading}
-              onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/entrar";
-              }}
-            >
-              Sair
-            </button>
-          ) : (
-            <Link to="/entrar" className="catalog-login">Entrar</Link>
-          )}
+    return (
+    <main className="marketplace-page">
+      <header className="marketplace-header">
+        <div className="marketplace-header-inner">
+          <Link to="/" className="marketplace-logo" aria-label="LOSI CONECTA">LOSI <span>CONECTA</span></Link>
+          <div className="marketplace-main-search">
+            <input
+              id="marketplace-search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar fornecedores, serviços ou categorias"
+              aria-label="Buscar fornecedores, serviços ou categorias"
+            />
+            <button type="button" onClick={() => document.getElementById("marketplace-search")?.focus()} aria-label="Buscar">⌕</button>
+          </div>
+          <div className="marketplace-header-actions">
+            {userId && userBusinessSlug && <Link to="/painel" className="marketplace-account">Minha conta</Link>}
+            {userId ? (
+              <button type="button" className="marketplace-account" disabled={authLoading} onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}>Sair</button>
+            ) : (
+              <Link to="/entrar" className="marketplace-account">Entrar</Link>
+            )}
+          </div>
         </div>
       </header>
-      <section className="catalog-hero">
-        <div className="catalog-kicker">ENCONTRE PROFISSIONAIS PARA SEU EVENTO</div>
-        <h1>Encontre o fornecedor que seu evento precisa.</h1>
-        <p>Pesquise por serviço, categoria ou localização e conheça profissionais cadastrados no LOSI CONECTA.</p>
-        <div className="catalog-search">
-          <div className="catalog-field catalog-search-field">
-            <label htmlFor="catalog-search">O que você procura?</label>
-            <input id="catalog-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Ex.: recreação, fotógrafo, DJ..." />
+
+      <nav className="marketplace-category-bar" aria-label="Categorias">
+        <div className="marketplace-category-inner">
+          <button type="button" className={!categoryId ? "active" : ""} onClick={() => setCategoryId("")}>Todos</button>
+          {categories.slice(0, 8).map((category) => (
+            <button type="button" key={category.id} className={categoryId === category.id ? "active" : ""} onClick={() => setCategoryId(category.id)}>
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <section className="marketplace-search-panel">
+        <div className="marketplace-breadcrumb">LOSI CONECTA <span>›</span> Encontrar fornecedor</div>
+        <h1>Encontre fornecedores para o seu evento</h1>
+        <p>Compare profissionais e empresas por serviço, categoria e localização.</p>
+        <div className="marketplace-filter-row">
+          <div className="marketplace-filter-main">
+            <label htmlFor="marketplace-service">O que você procura?</label>
+            <input id="marketplace-service" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Ex.: DJ, recreação, decoração, fotografia..." />
           </div>
-          <div className="catalog-field">
-            <label htmlFor="catalog-city">Cidade</label>
-            <input id="catalog-city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Ex.: Cotia" />
+          <div className="marketplace-filter-field">
+            <label htmlFor="marketplace-city">Localização</label>
+            <input id="marketplace-city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Cidade ou região" />
           </div>
-          <div className="catalog-field">
-            <label htmlFor="catalog-radius">Encontrar por raio</label>
-            <select id="catalog-radius" value={radiusKm ?? ""} onChange={(event) => {
+          <div className="marketplace-filter-field">
+            <label htmlFor="marketplace-category">Categoria</label>
+            <select id="marketplace-category" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
+              <option value="">Todas</option>
+              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+            </select>
+          </div>
+          <button type="button" className="marketplace-search-button" onClick={() => document.getElementById("marketplace-service")?.focus()}>Buscar</button>
+        </div>
+      </section>
+
+      <main className="marketplace-content">
+        <aside className="marketplace-sidebar">
+          <div className="marketplace-sidebar-title">Filtrar resultados</div>
+          <div className="marketplace-filter-group">
+            <label htmlFor="marketplace-radius">Distância</label>
+            <select id="marketplace-radius" value={radiusKm ?? ""} onChange={(event) => {
               const value = event.target.value;
               setRadiusKm(value ? Number(value) : null);
               if (!value) { setUserLocation(null); setLocationMessage(""); }
@@ -261,24 +149,28 @@ function SearchPage() {
               <option value="100">Até 100 km</option>
             </select>
           </div>
-          <div className="catalog-field">
-            <label htmlFor="catalog-category">Categoria</label>
-            <select id="catalog-category" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-              <option value="">Todas as categorias</option>
-              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-            </select>
+          <div className="marketplace-filter-group">
+            <div className="marketplace-filter-label">Categorias</div>
+            <button type="button" className={!categoryId ? "selected" : ""} onClick={() => setCategoryId("")}>Todas as categorias</button>
+            {categories.map((category) => (
+              <button type="button" key={category.id} className={categoryId === category.id ? "selected" : ""} onClick={() => setCategoryId(category.id)}>{category.name}</button>
+            ))}
           </div>
-        </div>
-      </section>
-      <section className="catalog-results">
-        <div className="catalog-results-head">
-          <div className="catalog-results-heading">
-            <div className="catalog-kicker">FORNECEDORES</div>
-            <h2>{loading ? "Carregando..." : String(results.length) + " fornecedor" + (results.length === 1 ? "" : "es") + " encontrado" + (results.length === 1 ? "" : "s")}</h2>
-          </div>
-          <div className="catalog-results-tools">
-            <label className="catalog-sort">
-              <span>Ordenar</span>
+          {(search || city || categoryId || radiusKm !== null) && (
+            <button type="button" className="marketplace-clear-all" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); setRadiusKm(null); setUserLocation(null); setLocationMessage(""); }}>
+              Limpar filtros
+            </button>
+          )}
+        </aside>
+
+        <section className="marketplace-results">
+          <div className="marketplace-results-top">
+            <div>
+              <div className="marketplace-results-context">{loading ? "CARREGANDO" : results.length + " RESULTADO" + (results.length === 1 ? "" : "S")}</div>
+              <h2>{search ? "Fornecedores para "" + search + """ : "Fornecedores em destaque"}</h2>
+            </div>
+            <label className="marketplace-sort">
+              <span>Ordenar por</span>
               <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label="Ordenar resultados">
                 <option value="relevance">Mais relevantes</option>
                 <option value="rating">Melhor avaliados</option>
@@ -286,71 +178,62 @@ function SearchPage() {
                 <option value="az">Nome: A–Z</option>
               </select>
             </label>
-            {(search || city || categoryId || radiusKm !== null) && (
-              <button className="catalog-clear" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); setRadiusKm(null); setUserLocation(null); setLocationMessage(""); }}>Limpar filtros</button>
-            )}
           </div>
-        </div>
-        {locationLoading && <div className="catalog-message">Obtendo sua localização para filtrar por raio...</div>}
-        {locationMessage && <div className="catalog-message catalog-error">{locationMessage}</div>}
-        {error && <div className="catalog-message catalog-error">{error}</div>}
-        {!loading && !error && results.length === 0 && (
-          <div className="catalog-empty">
-            <strong>{sortBy === "saved" ? "Você ainda não tem fornecedores salvos." : "Ainda não encontramos fornecedores com esses filtros."}</strong>
-            <p>{sortBy === "saved" ? "Salve fornecedores durante sua pesquisa para encontrá-los novamente no seu painel." : "Experimente outra categoria, cidade ou termo de busca."}</p>
-            <Link to={sortBy === "saved" ? "/buscar" : "/entrar"}>{sortBy === "saved" ? "Continuar pesquisando" : "Quero cadastrar minha empresa"}</Link>
-          </div>
-        )}
-        {(search || city || categoryId || radiusKm !== null) && (
-          <div className="catalog-active-filters" aria-label="Filtros ativos">
-            {search && <span>Busca: {search}</span>}
-            {city && <span>Cidade: {city}</span>}
-            {categoryId && <span>Categoria: {categories.find((category) => category.id === categoryId)?.name}</span>}
-            {radiusKm !== null && <span>Raio: até {radiusKm} km</span>}
-          </div>
-        )}
-        <div className="catalog-grid">
-          {sortedResults.map((business) => {
-            const whatsapp = whatsappUrl(business);
-            const serviceNames = business.services.map((service) => service.name).filter(Boolean).slice(0, 3);
-            return (
-              <article className="provider-card" key={business.id}>
-                <div className="provider-cover">
-                  {business.cover_url && <img src={business.cover_url} alt="" />}
-                  <div className="provider-logo">
-                    {business.logo_url ? <img src={business.logo_url} alt={business.business_name} /> : <span>{business.business_name.slice(0, 1).toUpperCase()}</span>}
+
+          {locationLoading && <div className="marketplace-message">Obtendo sua localização para filtrar por raio...</div>}
+          {locationMessage && <div className="marketplace-message marketplace-error">{locationMessage}</div>}
+          {error && <div className="marketplace-message marketplace-error">{error}</div>}
+
+          {(search || city || categoryId || radiusKm !== null) && (
+            <div className="marketplace-active-filters" aria-label="Filtros ativos">
+              {search && <span>Busca: {search}</span>}
+              {city && <span>Localização: {city}</span>}
+              {categoryId && <span>Categoria: {categories.find((category) => category.id === categoryId)?.name}</span>}
+              {radiusKm !== null && <span>Até {radiusKm} km</span>}
+            </div>
+          )}
+
+          {!loading && !error && results.length === 0 && (
+            <div className="marketplace-empty">
+              <strong>{sortBy === "saved" ? "Você ainda não tem fornecedores salvos." : "Nenhum fornecedor encontrado."}</strong>
+              <p>{sortBy === "saved" ? "Salve fornecedores durante sua pesquisa para encontrá-los novamente." : "Tente remover um filtro ou pesquisar por outro serviço ou cidade."}</p>
+            </div>
+          )}
+
+          <div className="marketplace-grid">
+            {sortedResults.map((business) => {
+              const whatsapp = whatsappUrl(business);
+              const serviceNames = business.services.map((service) => service.name).filter(Boolean).slice(0, 3);
+              const avg = business.reviews.length ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length : 0;
+              return (
+                <article className="marketplace-card" key={business.id}>
+                  <div className="marketplace-card-media">
+                    {business.cover_url ? <img src={business.cover_url} alt="" /> : <div className="marketplace-card-media-fallback" />}
+                    <button type="button" className={"marketplace-favorite " + (favoriteIds.includes(business.id) ? "saved" : "")} onClick={() => toggleFavorite(business.id)} disabled={favoriteBusy === business.id} aria-label={favoriteIds.includes(business.id) ? "Remover dos salvos" : "Salvar fornecedor"}>
+                      {favoriteIds.includes(business.id) ? "♥" : "♡"}
+                    </button>
                   </div>
-                </div>
-                <div className="provider-body">
-                  <div className="provider-title-row">
-                    <h3>{business.business_name}</h3>
-                    {business.verified && <span className="provider-verified">Verificado</span>}
-                  </div>
-                  {(business.city || business.state) && (
-                    <div className="provider-location">
-                      {business.city}{business.city && business.state ? " — " : ""}{business.state}
+                  <div className="marketplace-card-body">
+                    <div className="marketplace-card-heading">
+                      <h3>{business.business_name}</h3>
+                      {business.verified && <span className="marketplace-verified">Verificado</span>}
                     </div>
-                  )}
-                  {business.reviews.length > 0 && (() => {
-                    const avg = business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length;
-                    return <div className="provider-card-rating" aria-label={avg.toFixed(1) + " de 5, " + business.reviews.length + " avaliações"}>
-                      <strong>★ {avg.toFixed(1)}</strong>
-                      <span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span>
-                    </div>;
-                  })()}
-                  <p>{business.description || "Profissional ou empresa para eventos cadastrada no LOSI CONECTA."}</p>
-                  {serviceNames.length > 0 && <div className="provider-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
-                  <div className="provider-actions">
-                    <button type="button" className="provider-save" onClick={() => toggleFavorite(business.id)} disabled={favoriteBusy === business.id}>{favoriteBusy === business.id ? "..." : favoriteIds.includes(business.id) ? "Salvo" : "Salvar"}</button>
-                    <Link to={"/fornecedor/" + business.slug} className="provider-profile-link">Ver perfil</Link>
-                    {whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="provider-primary">Conversar pelo WhatsApp</a> : <span className="provider-disabled">Contato ainda não informado</span>}
+                    {(business.city || business.state) && <div className="marketplace-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
+                    {business.reviews.length > 0 && <div className="marketplace-rating"><strong>★ {avg.toFixed(1)}</strong><span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span></div>}
+                    <p>{business.description || "Profissional ou empresa para eventos cadastrada no LOSI CONECTA."}</p>
+                    {serviceNames.length > 0 && <div className="marketplace-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
+                    <div className="marketplace-card-footer">
+                      <Link to={"/fornecedor/" + business.slug} className="marketplace-profile-link">Ver fornecedor</Link>
+                      {whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="marketplace-contact">WhatsApp</a> : <span className="marketplace-no-contact">Contato não informado</span>}
+                    </div>
                   </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      </main>
     </main>
   );
+
 }
