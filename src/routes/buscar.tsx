@@ -211,7 +211,7 @@ function SearchPage() {
         <Link to="/" className="catalog-logo">LOSI <span>CONECTA</span></Link>
         <div className="catalog-header-actions">
           {userId && userBusinessSlug && (
-            <Link to="/fornecedor/$slug" params={{ slug: userBusinessSlug }} className="catalog-profile-link">
+            <Link to="/painel" className="catalog-profile-link">
               Ver meu perfil
             </Link>
           )}
