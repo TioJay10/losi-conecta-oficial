@@ -4804,3 +4804,38 @@ textarea:focus,
     flex: 0 0 auto !important;
   }
 }
+
+
+/* AJUSTE FINAL — ADMIN MOBILE */
+@media only screen and (max-width: 768px) {
+  /* Remove o subtítulo do topo somente no celular */
+  .admin-page .admin-header > div:first-child > div:last-child {
+    display: none !important;
+  }
+
+  /* LOSI CONECTA do admin em branco */
+  .admin-page .admin-header .mobile-centered-brand,
+  .admin-page .admin-header .mobile-centered-brand span {
+    color: #ffffff !important;
+  }
+
+  /* Sair do painel fica somente dentro do menu hambúrguer */
+  .admin-page .admin-header .admin-logout {
+    display: none !important;
+  }
+
+  .admin-page .admin-sidebar .admin-sidebar-logout {
+    display: block !important;
+  }
+}
+
+/* No desktop, mantém o botão Sair no topo */
+@media only screen and (min-width: 769px) {
+  .admin-page .admin-header .admin-logout {
+    display: inline-flex !important;
+  }
+
+  .admin-page .admin-sidebar .admin-sidebar-logout {
+    display: block !important;
+  }
+}
