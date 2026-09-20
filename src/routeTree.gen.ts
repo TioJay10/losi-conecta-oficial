@@ -122,6 +122,8 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   MeuPerfilRoute: typeof MeuPerfilRoute
   PainelRoute: typeof PainelRoute
+  MeusServicosRoute: typeof MeusServicosRoute
+  OrcamentosRoute: typeof OrcamentosRoute
   BuscarRoute: typeof BuscarRoute
   FornecedorSlugRoute: typeof FornecedorSlugRoute
 }
