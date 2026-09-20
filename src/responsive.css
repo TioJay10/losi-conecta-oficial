@@ -850,3 +850,395 @@ h1,h2,h3,h4,p,span,a,label{overflow-wrap:break-word}
 .admin-item-actions{grid-template-columns:1fr!important}
 .admin-user-form{padding:18px 13px!important}
 }
+
+/* =========================================================
+   LOSI CONECTA — identidade EXECUTIVA PREMIUM
+   Cinza grafite, superfícies neutras e densidade profissional
+   ========================================================= */
+
+:root{
+  --exec-bg:#f3f4f6;
+  --exec-surface:#ffffff;
+  --exec-surface-soft:#f8f9fa;
+  --exec-border:#dfe3e8;
+  --exec-border-strong:#cbd1d8;
+  --exec-text:#20252b;
+  --exec-text-soft:#5f6873;
+  --exec-muted:#7a838e;
+  --exec-dark:#252a31;
+  --exec-dark-hover:#171b20;
+  --exec-focus:#7b8490;
+  --exec-shadow:0 8px 28px rgba(25,30,36,.055);
+}
+
+/* Base visual */
+body{
+  background:var(--exec-bg);
+  color:var(--exec-text);
+}
+
+button,input,select,textarea{
+  border-radius:8px;
+}
+
+input,select,textarea{
+  color:var(--exec-text);
+  background:#fff;
+  border:1px solid var(--exec-border);
+  box-shadow:0 1px 2px rgba(20,25,30,.025);
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:#9aa2ab;
+  box-shadow:0 0 0 3px rgba(94,104,116,.10);
+  outline:none;
+}
+
+textarea{
+  min-height:112px!important;
+  max-height:240px;
+  resize:vertical;
+  line-height:1.5;
+}
+
+input,select{
+  min-height:44px;
+}
+
+label{
+  color:#4e5762;
+}
+
+/* Reduz campos gigantes criados por estilos inline */
+.profile-page textarea,
+.auth-page textarea,
+.dashboard-page textarea,
+.admin-page textarea{
+  min-height:112px!important;
+  height:auto!important;
+}
+
+.profile-page input,
+.profile-page select,
+.profile-page textarea{
+  font-size:14px!important;
+}
+
+.profile-page textarea{
+  min-height:118px!important;
+}
+
+.admin-page input,
+.admin-page select,
+.admin-page textarea{
+  font-size:13px!important;
+}
+
+/* Superfícies principais */
+.dashboard-page,
+.profile-page,
+.admin-page,
+.catalog-page,
+.provider-page{
+  background:var(--exec-bg)!important;
+  color:var(--exec-text)!important;
+}
+
+/* Cabeçalhos */
+.catalog-header,
+.dashboard-header,
+.profile-header,
+.admin-header{
+  background:rgba(255,255,255,.97)!important;
+  border-color:var(--exec-border)!important;
+  box-shadow:0 1px 8px rgba(20,25,30,.025);
+}
+
+.catalog-logo,
+.dashboard-header a,
+.profile-header a{
+  color:var(--exec-dark);
+}
+
+.catalog-logo span{
+  color:var(--exec-dark)!important;
+}
+
+/* Botões principais: executivo, sem aparência "app de IA" */
+.catalog-login,
+.provider-primary,
+.provider-profile-contact,
+.dashboard-page .primary,
+.profile-page .primary,
+.admin-page .primary,
+.auth-page button[type="submit"]{
+  background:var(--exec-dark)!important;
+  color:#fff!important;
+  border-color:var(--exec-dark)!important;
+  box-shadow:none!important;
+}
+
+.catalog-login:hover,
+.provider-primary:hover,
+.provider-profile-contact:hover,
+.dashboard-page .primary:hover,
+.profile-page .primary:hover,
+.admin-page .primary:hover,
+.auth-page button[type="submit"]:hover{
+  background:var(--exec-dark-hover)!important;
+}
+
+/* Cards */
+.catalog-search,
+.provider-card,
+.provider-profile-card,
+.catalog-empty,
+.catalog-message,
+.admin-table-section,
+.admin-commercial-card,
+.admin-commercial-subscriptions,
+.admin-pending-panel,
+.dashboard-page .card,
+.profile-page form,
+.auth-page .auth-card{
+  border-color:var(--exec-border)!important;
+  box-shadow:var(--exec-shadow)!important;
+}
+
+/* Catálogo */
+.catalog-hero{
+  background:linear-gradient(180deg,#fff 0%,#f3f4f6 100%)!important;
+}
+
+.catalog-kicker{
+  color:#68717c!important;
+}
+
+.catalog-hero h1,
+.catalog-results-head h2{
+  color:var(--exec-dark)!important;
+}
+
+.catalog-hero p,
+.provider-body p,
+.provider-location{
+  color:var(--exec-text-soft)!important;
+}
+
+.catalog-search{
+  background:#fff!important;
+}
+
+.catalog-field label,
+.catalog-sort{
+  color:#59636e!important;
+}
+
+.catalog-active-filters span,
+.provider-verified,
+.provider-services span{
+  background:#eef0f2!important;
+  color:#4e5863!important;
+}
+
+.catalog-clear,
+.provider-actions .provider-save,
+.provider-profile-link{
+  color:#3f4852!important;
+  background:#fff!important;
+  border-color:#cfd4da!important;
+}
+
+.catalog-clear:hover,
+.provider-actions .provider-save:hover,
+.provider-profile-link:hover{
+  background:#f3f4f5!important;
+  border-color:#b9c0c8!important;
+}
+
+/* Cards de fornecedor */
+.provider-card{
+  border-radius:12px!important;
+  box-shadow:0 4px 18px rgba(25,30,36,.045)!important;
+}
+
+.provider-cover{
+  background:linear-gradient(135deg,#dfe2e6,#f0f1f3)!important;
+}
+
+.provider-logo{
+  color:#343b43!important;
+}
+
+.provider-primary{
+  border-radius:8px!important;
+}
+
+.provider-disabled{
+  color:#7c858f!important;
+  border-color:#d9dde2!important;
+}
+
+/* Perfil público */
+.provider-hero{
+  background:#fff!important;
+  border-color:var(--exec-border)!important;
+}
+
+.provider-hero-cover{
+  background:linear-gradient(135deg,#d8dce1,#eef0f2)!important;
+}
+
+.provider-hero-title h1,
+.provider-profile-card h2{
+  color:var(--exec-dark)!important;
+}
+
+.provider-service-list article,
+.provider-review-list article{
+  border-color:var(--exec-border)!important;
+  background:#fff;
+}
+
+.provider-service-list span{
+  background:#eef0f2!important;
+  color:#505963!important;
+}
+
+.provider-profile-card a{
+  color:#4b5560!important;
+}
+
+/* Admin */
+.admin-page{
+  background:#f1f3f5!important;
+}
+
+.admin-sidebar{
+  background:#f8f9fa!important;
+  border-color:#dfe3e7!important;
+}
+
+.admin-menu button{
+  color:#59636e!important;
+}
+
+.admin-menu button.active{
+  background:#e7eaed!important;
+  color:#242a31!important;
+  box-shadow:inset 3px 0 0 #4c545d!important;
+}
+
+.admin-menu button.active em,
+.admin-menu button em{
+  background:#e5e8eb!important;
+  color:#5e6873!important;
+}
+
+.admin-metric:before{
+  background:#59636e!important;
+}
+
+.admin-metric:nth-child(2):before,
+.admin-metric:nth-child(3):before,
+.admin-metric:nth-child(4):before,
+.admin-metric:nth-child(5):before,
+.admin-metric:nth-child(6):before{
+  background:#858e98!important;
+}
+
+.admin-item-actions button:hover{
+  background:#f0f2f4!important;
+  border-color:#c6ccd2!important;
+  color:#343b43!important;
+}
+
+/* Perfil comercial: campos menores e mais refinados */
+.profile-page .profile-content>form{
+  max-width:100%!important;
+}
+
+.profile-page .profile-content>form input,
+.profile-page .profile-content>form select{
+  height:44px!important;
+}
+
+.profile-page .profile-content>form textarea{
+  min-height:116px!important;
+  max-height:220px!important;
+}
+
+.profile-page .service-item,
+.profile-page .profile-content .service-item{
+  border-color:var(--exec-border)!important;
+}
+
+/* Login */
+.auth-page{
+  background:linear-gradient(145deg,#eef0f2,#f7f7f8)!important;
+}
+
+.auth-page .auth-card{
+  border:1px solid var(--exec-border)!important;
+  box-shadow:0 18px 50px rgba(25,30,36,.08)!important;
+}
+
+.auth-page .auth-card input{
+  height:46px!important;
+}
+
+.auth-page .auth-card input::placeholder{
+  color:#9aa1a9;
+}
+
+/* Mobile: densidade confortável sem caixas enormes */
+@media(max-width:599px){
+  body{
+    font-size:14px;
+  }
+
+  input,select{
+    min-height:44px!important;
+  }
+
+  textarea{
+    min-height:104px!important;
+    max-height:200px!important;
+  }
+
+  .catalog-search{
+    border-radius:12px!important;
+    box-shadow:0 6px 22px rgba(25,30,36,.05)!important;
+  }
+
+  .provider-card,
+  .provider-profile-card,
+  .admin-table-section,
+  .admin-commercial-card,
+  .admin-commercial-subscriptions{
+    border-radius:11px!important;
+  }
+
+  .profile-page .profile-content>form{
+    padding:18px 15px!important;
+    border-radius:12px!important;
+  }
+
+  .admin-user-form{
+    border-radius:12px!important;
+  }
+}
+
+/* Telefones pequenos: nunca deixar formulário encostar nas bordas */
+@media(max-width:390px){
+  .auth-page .auth-card,
+  .profile-page .profile-content>form,
+  .admin-user-form{
+    border-radius:10px!important;
+  }
+
+  input,select{
+    min-height:43px!important;
+  }
+}
