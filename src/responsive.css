@@ -1561,3 +1561,39 @@ textarea:focus,
     padding-right:11px!important;
   }
 }
+
+
+/* Ajuste final — cards de fornecedor mais compactos */
+.catalog-grid{gap:12px!important}
+.provider-card{border-radius:12px!important}
+.provider-cover{height:88px!important}
+.provider-logo{left:13px!important;bottom:-19px!important;width:54px!important;height:54px!important;border-radius:11px!important;border-width:3px!important}
+.provider-body{padding:29px 14px 13px!important}
+.provider-title-row{gap:7px!important}
+.provider-title-row h3{font-size:16px!important;line-height:1.15!important}
+.provider-location{font-size:11px!important;margin-top:5px!important}
+.provider-card-rating{font-size:12px!important;margin:6px 0 1px!important}
+.provider-body p{font-size:12px!important;line-height:1.4!important;margin:7px 0!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
+.provider-services{gap:5px!important;margin-bottom:10px!important}
+.provider-services span{padding:4px 6px!important;font-size:10px!important}
+.provider-actions{gap:6px!important}
+.provider-primary,.provider-profile-link,.provider-actions .provider-save{min-height:38px!important;padding:8px 10px!important;font-size:12px!important;border-radius:8px!important}
+@media(max-width:899px){
+  .provider-cover{height:84px!important}
+  .provider-logo{width:52px!important;height:52px!important;bottom:-18px!important}
+  .provider-body{padding:28px 13px 12px!important}
+}
+@media(max-width:599px){
+  .catalog-grid{gap:10px!important}
+  .provider-cover{height:100px!important}
+  .provider-logo{left:12px!important;width:54px!important;height:54px!important;bottom:-19px!important}
+  .provider-body{padding:29px 13px 13px!important}
+  .provider-title-row h3{font-size:16px!important}
+  .provider-primary,.provider-profile-link,.provider-actions .provider-save{min-height:42px!important;width:100%!important}
+}
+@media(max-width:390px){
+  .provider-cover{height:88px!important}
+  .provider-logo{width:50px!important;height:50px!important;bottom:-17px!important}
+  .provider-body{padding:27px 11px 11px!important}
+  .provider-primary,.provider-profile-link,.provider-actions .provider-save{min-height:40px!important;font-size:11px!important}
+}
