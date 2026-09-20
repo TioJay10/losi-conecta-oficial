@@ -3569,3 +3569,98 @@ textarea:focus,
     bottom:auto!important;
   }
 }
+
+
+/* ADMIN DARK GLASS — force all remaining card/panel surfaces away from white */
+.admin-page .admin-table-section,
+.admin-page .admin-list,
+.admin-page .admin-list-item,
+.admin-page .admin-pending-panel,
+.admin-page .admin-pending-item,
+.admin-page .admin-card,
+.admin-page .admin-review-card,
+.admin-page .admin-commercial-card,
+.admin-page .admin-commercial-subscriptions,
+.admin-page .admin-category-toolbar,
+.admin-page .admin-category-create,
+.admin-page .admin-user-form,
+.admin-page .admin-grid > div,
+.admin-page .admin-grid > button,
+.admin-page .admin-plan-editor,
+.admin-page .admin-plan-summary,
+.admin-page .admin-commercial-activation,
+.admin-page .admin-commercial-activation > *,
+.admin-page [class*="card"] {
+  background: linear-gradient(145deg, rgba(35,28,72,.96), rgba(20,16,48,.94)) !important;
+  color: #f7f4ff !important;
+  border-color: rgba(184,166,255,.18) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.22) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+
+.admin-page .admin-table-section *,
+.admin-page .admin-card *,
+.admin-page .admin-review-card *,
+.admin-page .admin-commercial-card *,
+.admin-page .admin-commercial-subscriptions *,
+.admin-page .admin-category-toolbar *,
+.admin-page .admin-category-create *,
+.admin-page .admin-user-form *,
+.admin-page .admin-plan-editor *,
+.admin-page .admin-plan-summary * {
+  border-color: rgba(184,166,255,.14);
+}
+
+.admin-page .admin-list-item,
+.admin-page .admin-pending-item {
+  background: rgba(42,34,82,.72) !important;
+}
+
+.admin-page .admin-list-item:hover,
+.admin-page .admin-pending-item:hover,
+.admin-page .admin-grid > button:hover {
+  background: rgba(82,52,150,.58) !important;
+}
+
+.admin-page .admin-table-section h2,
+.admin-page .admin-table-section h3,
+.admin-page .admin-card h2,
+.admin-page .admin-card h3,
+.admin-page .admin-review-card h2,
+.admin-page .admin-review-card h3,
+.admin-page .admin-commercial-card h2,
+.admin-page .admin-commercial-card h3,
+.admin-page .admin-commercial-subscriptions h2,
+.admin-page .admin-category-toolbar strong,
+.admin-page .admin-users-toolbar strong,
+.admin-page .admin-plan-summary h2 {
+  color: #ffffff !important;
+}
+
+.admin-page .admin-table-section p,
+.admin-page .admin-card p,
+.admin-page .admin-review-card p,
+.admin-page .admin-commercial-card p,
+.admin-page .admin-commercial-subscriptions p,
+.admin-page .admin-plan-summary p,
+.admin-page .admin-table-section span,
+.admin-page .admin-card span {
+  color: #c9c2dc !important;
+}
+
+.admin-page .admin-table-section input,
+.admin-page .admin-table-section select,
+.admin-page .admin-table-section textarea,
+.admin-page .admin-card input,
+.admin-page .admin-card select,
+.admin-page .admin-card textarea {
+  background: rgba(7,5,20,.78) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(184,166,255,.22) !important;
+}
+
+.admin-page .admin-table-section input::placeholder,
+.admin-page .admin-card input::placeholder {
+  color: #938aa8 !important;
+}
