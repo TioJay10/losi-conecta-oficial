@@ -9,7 +9,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; address: string | null; logo_url: string | null;
-  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[]; owner_id: string;
+  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[]; owner_id: string; created_at: string;
 };
 
 export const Route = createFileRoute("/fornecedor/$slug")({
@@ -34,6 +34,7 @@ function ProviderPage() {
   const [reportDetails, setReportDetails] = useState("");
   const [reportMessage, setReportMessage] = useState("");
   const [reporting, setReporting] = useState(false);
+  const [reputation, setReputation] = useState({ score: 0, level: 1, reviews: 0, negativeReviews: 0, completedServices: 0, reports: 0, blocked: false });
 
   useEffect(() => {
     let mounted = true;
@@ -42,7 +43,7 @@ function ProviderPage() {
       if (mounted) setUserId(sessionData.session?.user.id ?? null);
       const { data, error: queryError } = await supabase
         .from("business_profiles")
-        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,services(id,name,description,categories(name))")
+        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,created_at,services(id,name,description,categories(name))")
         .eq("slug", slug)
         .eq("active", true)
         .maybeSingle();
@@ -62,6 +63,29 @@ function ProviderPage() {
             .order("created_at", { ascending: false });
           if (mounted) {
             setReviews((reviewData ?? []) as unknown as Review[]);
+
+            const [{ data: ownerData }, { count: reportCount }, { count: acceptedCount }] = await Promise.all([
+              supabase.from("profiles").select("blocked").eq("id", loaded.owner_id).maybeSingle(),
+              supabase.from("supplier_reports").select("id", { count: "exact", head: true }).eq("business_id", loaded.id),
+              supabase.from("quotes").select("id", { count: "exact", head: true }).eq("business_id", loaded.id).eq("status", "accepted"),
+            ]);
+            const activeReviews = (reviewData ?? []) as unknown as Review[];
+            const negativeReviews = activeReviews.filter(review => review.rating <= 2).length;
+            const reports = reportCount ?? 0;
+            const completedServices = acceptedCount ?? 0;
+            const blocked = Boolean((ownerData as { blocked?: boolean } | null)?.blocked);
+            const monthsOnPlatform = Math.max(0, (Date.now() - new Date(loaded.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+            let score = 20;
+            score += Math.min(25, Math.floor(monthsOnPlatform / 3) * 5);
+            score += Math.min(25, completedServices * 5);
+            score += activeReviews.length ? Math.round((activeReviews.reduce((sum, review) => sum + review.rating, 0) / activeReviews.length) * 5) : 0;
+            score -= negativeReviews * 8;
+            score -= reports * 12;
+            if (blocked) score -= 40;
+            score = Math.max(0, Math.min(100, score));
+            const level = score < 20 ? 1 : score < 40 ? 2 : score < 60 ? 3 : score < 80 ? 4 : 5;
+            if (mounted) setReputation({ score, level, reviews: activeReviews.length, negativeReviews, completedServices, reports, blocked });
+
             if (sessionData.session) {
               const { data: favoriteData } = await supabase.from("favorites").select("business_id").eq("user_id", sessionData.session.user.id).eq("business_id", loaded.id).maybeSingle();
               if (mounted) setIsFavorite(Boolean(favoriteData));
@@ -160,6 +184,9 @@ function ProviderPage() {
   const digits = rawPhone.replace(/\D/g, "");
   const whatsapp = digits ? "https://wa.me/" + (digits.startsWith("55") ? digits : "55" + digits) + "?text=" + encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA.") : null;
   const canRequestQuote = Boolean(userId && userId !== business.owner_id);
+  const reputationLabel = reputation.level === 1 ? "Atenção" : reputation.level === 2 ? "Inicial" : reputation.level === 3 ? "Boa" : reputation.level === 4 ? "Muito boa" : "Excelente";
+  const reputationClass = `level-${reputation.level}`;
+
 
   async function submitSupplierReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -268,6 +295,13 @@ function ProviderPage() {
             <h1>{business.business_name}</h1>
             {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
             {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
+            <div className="provider-reputation">
+              <div className="provider-reputation-head"><strong>Reputação do fornecedor</strong><span>{reputationLabel}</span></div>
+              <div className="provider-reputation-bar" aria-label={`Reputação: ${reputationLabel}`}>
+                {[1,2,3,4,5].map(level => <span key={level} className={`${reputationClass} ${level <= reputation.level ? "filled" : ""}`} />)}
+              </div>
+              <div className="provider-reputation-meta"><span>{reputation.reviews} {reputation.reviews === 1 ? "avaliação" : "avaliações"}</span><span>{reputation.completedServices} {reputation.completedServices === 1 ? "serviço registrado" : "serviços registrados"}</span></div>
+            </div>
           </div>
           <div className="provider-profile-actions"><button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>{canRequestQuote && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}<button type="button" className="provider-profile-report" onClick={() => { setReportOpen(true); setReportMessage(""); }}>Denunciar fornecedor</button></div>
         </div>
