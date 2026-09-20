@@ -15,9 +15,9 @@ function AdminPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
-  const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean }>>([]);
-  const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
-  const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews" | "commercial">("overview");
+  const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
+  const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
+  const [section, setSection] = useState<"overview" | "security" | "users" | "businesses" | "categories" | "services" | "reviews" | "commercial">("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [plans, setPlans] = useState<Array<{id:string;name:string;slug:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean;active:boolean}>>([]);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
@@ -43,7 +43,7 @@ function AdminPage() {
   const [createUserSuccess, setCreateUserSuccess] = useState("");
   const [categories, setCategories] = useState<Array<{ id:string; name:string; slug:string; active:boolean }>>([]);
   const [services, setServices] = useState<Array<{ id:string; name:string; description:string|null; active:boolean; business:{business_name:string}|null; category:{name:string}|null }>>([]);
-  const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);
+  const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);\n  const [supplierReports, setSupplierReports] = useState<Array<{ id:string; business_id:string; reporter_id:string; reason:string; details:string|null; created_at:string; business:{business_name:string; owner_id:string}|null; reporter:{full_name:string|null}|null }>>([]);\n  const [securitySearch, setSecuritySearch] = useState("");
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -56,17 +56,17 @@ function AdminPage() {
       if (data.user_type !== "admin") { navigate({ to: "/painel" }); return; }
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
-      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult] = await Promise.all([
-        supabase.from("profiles").select("id,full_name,user_type,city,state,blocked").order("created_at",{ascending:false}),
-        supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,verified,active,approval_status").order("created_at",{ascending:false}),
+      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult] = await Promise.all([
+        supabase.from("profiles").select("id,full_name,user_type,city,state,blocked,phone,created_at").order("created_at",{ascending:false}),
+        supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
-        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").order("created_at",{ascending:false}),
+        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").order("created_at",{ascending:false}),\n        supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
       ]);
       if (!mounted) return;
-      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult].find((result) => result.error)?.error;
+      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, reportsResult].find((result) => result.error)?.error;
       if (firstError) setDataError(firstError.message);
       setUsers((usersResult.data ?? []) as typeof users);
       setBusinesses((businessesResult.data ?? []) as typeof businesses);
@@ -74,13 +74,13 @@ function AdminPage() {
       setServices((servicesResult.data ?? []) as unknown as typeof services);
       setReviews((reviewsResult.data ?? []) as unknown as typeof reviews);
       setPlans((plansResult.data ?? []) as typeof plans);
-      setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);
+      setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);\n      setSupplierReports((reportsResult.data ?? []) as unknown as typeof supplierReports);
       setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
       setLoading(false);
     }
     load();
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["overview","users","businesses","categories","services","reviews","commercial"].includes(requestedSection)) {
+    if (requestedSection && ["overview","security","users","businesses","categories","services","reviews","commercial"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -263,7 +263,7 @@ function AdminPage() {
   if (!user) return null;
 
   const menu = [
-    { id: "overview" as const, label: "Visão geral" },
+    { id: "overview" as const, label: "Visão geral" },\n    { id: "security" as const, label: "Central de segurança" },
     { id: "users" as const, label: "Usuários", count: stats.users },
     { id: "businesses" as const, label: "Empresas", count: stats.businesses },
     { id: "services" as const, label: "Serviços", count: stats.services },
@@ -282,7 +282,7 @@ function AdminPage() {
     return matchesSearch && (businessStatusFilter === "all" || item.approval_status === businessStatusFilter);
   });
   const selectedBusiness = selectedBusinessId ? businesses.find((item) => item.id === selectedBusinessId) ?? null : null;
-  const sectionTitle = section === "overview" ? "Visão geral" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
+  const sectionTitle = section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
 
   return (
     <main className="admin-page" style={styles.page}>
@@ -337,7 +337,48 @@ function AdminPage() {
             </div>
             </div>
           ) : (
-            <section className="admin-table-section">
+  
+          ) : section === "security" ? (
+            <div className="admin-security-center">
+              <div className="admin-security-hero"><div><div style={styles.badge}>SEGURANÇA</div><h2>Central de segurança</h2><p>Monitore contas em risco, denúncias novas, contas bloqueadas e perfis aguardando verificação.</p></div><span className="admin-security-status">MONITORAMENTO ATIVO</span></div>
+              {(() => {
+                const normalizePhone = (value: string | null | undefined) => (value ?? "").replace(/\D/g, "");
+                const phoneCounts = users.reduce<Record<string, number>>((acc, item) => { const phone=normalizePhone(item.phone); if(phone) acc[phone]=(acc[phone]||0)+1; return acc; }, {});
+                const reportCounts = supplierReports.reduce<Record<string, number>>((acc, item) => { acc[item.business_id]=(acc[item.business_id]||0)+1; return acc; }, {});
+                const blockedUsers=users.filter(item=>item.blocked);
+                const pendingVerification=businesses.filter(item=>item.approval_status==="pending");
+                const riskUsers=users.map(item=>{ const reasons:string[]=[]; const phone=normalizePhone(item.phone); if(phone&&phoneCounts[phone]>1) reasons.push("Telefone associado a outra conta"); if(Date.now()-new Date(item.created_at).getTime()<2*60*60*1000) reasons.push("Conta criada há menos de 2 horas"); const business=businesses.find(b=>b.owner_id===item.id); const reports=business?(reportCounts[business.id]||0):0; if(reports>=4) reasons.push(`${reports} denúncias recebidas`); if(reports>=2) reasons.push("Comportamento considerado anormal"); return {item,reasons}; }).filter(x=>x.reasons.length>0||x.item.blocked);
+                const riskBusinesses=businesses.map(business=>{ const reports=reportCounts[business.id]||0; const reasons:string[]=[]; if(reports>0) reasons.push(`${reports} denúncia${reports===1?"":"s"} recebida${reports===1?"":"s"}`); if(business.approval_status==="pending") reasons.push("Perfil aguardando verificação"); if(!business.verified) reasons.push("Perfil ainda não verificado"); return {business,reasons}; }).filter(x=>x.reasons.length>0);
+                const search=securitySearch.trim().toLocaleLowerCase("pt-BR");
+                const matches=(v:string)=>!search||v.toLocaleLowerCase("pt-BR").includes(search);
+                const visibleUsers=riskUsers.filter(({item,reasons})=>matches(`${item.full_name??""} ${item.city??""} ${reasons.join(" ")}`));
+                const visibleBusinesses=riskBusinesses.filter(({business,reasons})=>matches(`${business.business_name} ${business.city??""} ${reasons.join(" ")}`));
+                const newReports=supplierReports.filter(r=>Date.now()-new Date(r.created_at).getTime()<=7*24*60*60*1000);
+                return <>
+                  <div className="admin-security-metrics"><article><span>Contas em risco</span><strong>{riskUsers.length+riskBusinesses.length}</strong></article><article><span>Denúncias novas</span><strong>{newReports.length}</strong></article><article><span>Contas bloqueadas</span><strong>{blockedUsers.length}</strong></article><article><span>Perfil aguardando verificação</span><strong>{pendingVerification.length}</strong></article></div>
+                  <div className="admin-security-toolbar"><input value={securitySearch} onChange={event=>setSecuritySearch(event.target.value)} placeholder="Buscar conta, fornecedor ou motivo..." aria-label="Buscar riscos de segurança" /></div>
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>CONTAS EM RISCO</div><h3>Contas que exigem atenção</h3></div><span>{visibleUsers.length+visibleBusinesses.length} encontrado(s)</span></div><div className="admin-security-list">
+                    {visibleUsers.map(({item,reasons})=><article className="admin-security-card" key={`user-${item.id}`}><div className="admin-security-card-main"><strong>{item.full_name||"Usuário sem nome"}</strong><span>{item.user_type==="admin"?"Administrador":"Profissional"}{item.city?` · ${item.city}`:""}{item.state?` - ${item.state}`:""}</span><div className="admin-security-reasons">{reasons.map(reason=><span key={reason}>{reason}</span>)}</div></div><div className="admin-security-actions">{item.blocked?<button type="button" style={styles.actionButton} onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button>:<button type="button" className="admin-security-danger" onClick={()=>manageUser(item.id,"block")}>Suspender / bloquear</button>}</div></article>)}
+                    {visibleBusinesses.map(({business,reasons})=><article className="admin-security-card" key={`business-${business.id}`}><div className="admin-security-card-main"><strong>{business.business_name}</strong><span>Fornecedor{business.city?` · ${business.city}`:""}{business.state?` - ${business.state}`:""}</span><div className="admin-security-reasons">{reasons.map(reason=><span key={reason}>{reason}</span>)}</div></div><div className="admin-security-actions">{business.approval_status!=="approved"&&<button type="button" style={styles.actionButton} onClick={()=>updateBusiness(business.id,{approval_status:"approved",verified:true,active:true})}>Aprovar</button>}<button type="button" style={styles.actionButton} onClick={()=>updateBusiness(business.id,{approval_status:"pending",verified:false})}>Solicitar verificação</button>{business.active&&<button type="button" className="admin-security-danger" onClick={()=>updateBusiness(business.id,{active:false})}>Suspender / bloquear</button>}</div></article>)}
+                    {visibleUsers.length===0&&visibleBusinesses.length===0&&<div className="admin-empty">Nenhum sinal de risco encontrado.</div>}
+                  </div></section>
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>DENÚNCIAS NOVAS</div><h3>Últimas denúncias</h3></div><span>{newReports.length} nos últimos 7 dias</span></div><div className="admin-security-list">
+                    {newReports.slice(0,20).map(report=><article className="admin-security-card" key={report.id}><div className="admin-security-card-main"><strong>{report.business?.business_name||"Fornecedor"}</strong><span>{report.reporter?.full_name||"Usuário"} · {new Date(report.created_at).toLocaleString("pt-BR")}</span><div className="admin-security-reasons"><span>{report.reason.replaceAll("_"," ")}</span></div>{report.details&&<p>{report.details}</p>}</div><div className="admin-security-actions"><button type="button" style={styles.actionButton} onClick={()=>{setSection("businesses");setSelectedBusinessId(report.business_id);window.history.replaceState(null,"","/admin?section=businesses");}}>Analisar fornecedor</button></div></article>)}
+                    {newReports.length===0&&<div className="admin-empty">Nenhuma denúncia nova nos últimos 7 dias.</div>}
+                  </div></section>
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>CONTAS BLOQUEADAS</div><h3>Contas atualmente bloqueadas</h3></div><span>{blockedUsers.length}</span></div><div className="admin-security-list">
+                    {blockedUsers.map(item=><article className="admin-security-card" key={item.id}><div className="admin-security-card-main"><strong>{item.full_name||"Usuário sem nome"}</strong><span>Conta bloqueada{item.city?` · ${item.city}`:""}</span></div><div className="admin-security-actions"><button type="button" style={styles.actionButton} onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button></div></article>)}
+                    {blockedUsers.length===0&&<div className="admin-empty">Nenhuma conta bloqueada.</div>}
+                  </div></section>
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>AGUARDANDO VERIFICAÇÃO</div><h3>Perfis aguardando verificação</h3></div><span>{pendingVerification.length}</span></div><div className="admin-security-list">
+                    {pendingVerification.map(business=><article className="admin-security-card" key={business.id}><div className="admin-security-card-main"><strong>{business.business_name}</strong><span>{business.city||"Localização não informada"}{business.state?` - ${business.state}`:""}</span></div><div className="admin-security-actions"><button type="button" style={styles.actionButton} onClick={()=>{setSection("businesses");setSelectedBusinessId(business.id);window.history.replaceState(null,"","/admin?section=businesses");}}>Analisar</button><button type="button" style={styles.actionButton} onClick={()=>updateBusiness(business.id,{approval_status:"approved",verified:true,active:true})}>Aprovar</button></div></article>)}
+                    {pendingVerification.length===0&&<div className="admin-empty">Nenhum perfil aguardando verificação.</div>}
+                  </div></section>
+                </>;
+              })()}
+            </div>
+          ) : (
+            <section className="admin-table-section"><section className="admin-table-section">
               <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}>Visão geral</button></div>
               {section === "users" ? <div className="admin-inline-list">
                 <div className="admin-users-toolbar">
