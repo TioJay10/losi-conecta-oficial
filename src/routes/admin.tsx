@@ -352,7 +352,7 @@ function AdminPage() {
                       <button type="submit" style={styles.actionButton} disabled={planSavingId === plan.id}>{planSavingId === plan.id ? "Salvando..." : "Salvar alterações"}</button>
                     </form>
                   ) : (
-                    <div className="admin-plan-summary"><h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "Grátis" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>{plan.description || `Plano ${plan.active ? "ativo" : "inativo"} para fornecedores.`}</p><div className="admin-plan-meta"><span>{plan.active ? "Ativo" : "Inativo"}</span>{plan.highlighted && <span>Destacado</span>}</div>
+                    <div className="admin-plan-summary"><h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "R$ 0,00" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>{plan.description || (plan.active ? "Plano disponível para fornecedores." : "Plano atualmente desativado.")}</p><div className="admin-plan-meta"><span>{plan.active ? "Ativo" : "Inativo"}</span>{plan.highlighted && <span>Destacado</span>}</div>
                   </div>)}
                 </article>)}
                 <section className="admin-commercial-subscriptions">
@@ -365,10 +365,10 @@ function AdminPage() {
                         <div className="admin-item-main"><div><strong>{business.business_name}</strong><span>{business.city || "Localização não informada"}{business.state ? " - " + business.state : ""}</span></div>
                           <div className="admin-item-actions">
                             <select aria-label={`Plano para ${business.business_name}`}  value={activationPlanByBusiness[business.id] ?? ""} onChange={(event) => setActivationPlanByBusiness((current) => ({ ...current, [business.id]: event.target.value }))}>
-                              <option value="">Selecionar plano</option>
-                              {plans.filter((plan) => plan.billing_period !== "free" && plan.active).map((plan) => <option key={plan.id} value={plan.id}>{plan.name} — R$ {(plan.price_cents / 100).toFixed(2).replace(".", ",")}</option>)}
+                              <option value="">Escolha um plano pago</option>
+                              {plans.filter((plan) => plan.billing_period !== "free" && plan.active).map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · R$ {(plan.price_cents / 100).toFixed(2).replace(".", ",")}</option>)}
                             </select>
-                            <button type="button" style={styles.actionButton} disabled={!activationPlanByBusiness[business.id] || activatingBusinessId === business.id} onClick={() => activateSubscription(business.id, activationPlanByBusiness[business.id])}>{activatingBusinessId === business.id ? "Ativando..." : "Ativar plano"}</button>
+                            <button type="button" style={styles.actionButton} disabled={!activationPlanByBusiness[business.id] || activatingBusinessId === business.id} onClick={() => activateSubscription(business.id, activationPlanByBusiness[business.id])}>{activatingBusinessId === business.id ? "Ativando..." : "Confirmar ativação"}</button>
                           </div>
                         </div>
                       </div>
