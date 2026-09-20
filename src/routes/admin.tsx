@@ -295,6 +295,9 @@ function AdminPage() {
           <nav className="admin-menu">
             {menu.map(item => <button key={item.id} className={section === item.id ? "active" : ""} onClick={() => { setSection(item.id); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}
           </nav>
+          <div className="admin-sidebar-logout">
+            <button type="button" onClick={logout}>Sair do painel</button>
+          </div>
         </aside>
         <section className="admin-content" style={styles.content}>
           <div style={styles.badge}>ADMINISTRADOR</div>
