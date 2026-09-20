@@ -434,9 +434,9 @@ function AdminPage() {
                   <h2>Ativar plano após pagamento</h2>
                   <p style={styles.text}>Confirme o pagamento pelo WhatsApp antes de selecionar o fornecedor e ativar o plano.</p>
                   <div className="admin-commercial-activation">
-                    {businesses.filter((business) => business.approval_status === "approved" && business.active).map((business) => (
+                    {businesses.map((business) => (
                       <div className="admin-list-item" key={business.id}>
-                        <div className="admin-item-main"><div><strong>{business.business_name}</strong><span>{business.city || "Localização não informada"}{business.state ? " - " + business.state : ""}</span></div>
+                        <div className="admin-item-main"><div><strong>{business.business_name}</strong><span>{business.city || "Localização não informada"}{business.state ? " - " + business.state : ""} · {business.approval_status === "approved" ? "Aprovado" : business.approval_status === "rejected" ? "Rejeitado" : "Aguardando análise"} · {business.active ? "Ativo" : "Inativo"}</span></div>
                           <div className="admin-item-actions">
                             <select aria-label={`Plano para ${business.business_name}`}  value={activationPlanByBusiness[business.id] ?? ""} onChange={(event) => setActivationPlanByBusiness((current) => ({ ...current, [business.id]: event.target.value }))}>
                               <option value="">Escolha um plano pago</option>
