@@ -411,7 +411,7 @@ function BusinessServicesPage() {
     <main className="profile-page" style={styles.page}>
       <header className="profile-header" style={styles.header}>
         <button onClick={() => navigate({ to: "/painel" })} style={styles.back}>← Voltar ao painel</button>
-        <div style={styles.logo}>LOSI <span>CONECTA</span></div>
+        <div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div>
       </header>
 
       <section className="profile-content" style={styles.content}>
