@@ -1251,3 +1251,21 @@ label{
 .provider-cover>img{border-radius:16px 16px 0 0;display:block}
 @media(max-width:899px){.catalog-search{grid-template-columns:1fr 1fr!important}.catalog-search-field{grid-column:1/-1!important}}
 @media(max-width:599px){.catalog-search{grid-template-columns:1fr!important}.catalog-search-field{grid-column:auto!important}.provider-card{overflow:visible!important}.provider-cover{overflow:visible!important}}
+
+
+/* Cards de fornecedor — mais compactos e CTA refinado */
+.catalog-grid{gap:16px}
+.provider-card{border-radius:14px}
+.provider-cover{height:112px!important}
+.provider-logo{left:16px;bottom:-22px;width:62px;height:62px;border-radius:14px;border-width:3px}
+.provider-body{padding:34px 17px 17px}
+.provider-title-row h3{font-size:18px}
+.provider-body p{font-size:13px;margin:10px 0}
+.provider-services{margin-bottom:14px}
+.provider-primary,.provider-profile-link{min-height:42px;display:flex;align-items:center;justify-content:center;border-radius:9px;padding:10px 12px;font-size:13px;font-weight:800;transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
+.provider-profile-link{border:1px solid #d8dbea;background:#fff;color:#4f46c7;margin-bottom:7px;box-shadow:0 2px 8px rgba(23,32,51,.04)}
+.provider-profile-link:hover{background:#f7f6ff;border-color:#c8c5ed;box-shadow:0 5px 14px rgba(23,32,51,.08);transform:translateY(-1px)}
+.provider-primary:hover{box-shadow:0 5px 14px rgba(23,32,51,.12);transform:translateY(-1px)}
+@media(max-width:899px){.catalog-grid{gap:14px}.provider-cover{height:105px!important}.provider-logo{width:58px;height:58px;bottom:-20px}.provider-body{padding:31px 15px 15px}}
+@media(max-width:599px){.catalog-grid{gap:12px}.provider-cover{height:120px!important}.provider-logo{left:14px;width:60px;height:60px;bottom:-21px}.provider-body{padding:33px 15px 15px}.provider-title-row{gap:7px}.provider-title-row h3{font-size:17px}.provider-primary,.provider-profile-link{width:100%;min-height:44px}.provider-actions{gap:7px}}
+@media(max-width:390px){.provider-cover{height:105px!important}.provider-body{padding:31px 13px 13px}.provider-logo{width:56px;height:56px;bottom:-19px}.provider-primary,.provider-profile-link{min-height:42px;font-size:12px}}
