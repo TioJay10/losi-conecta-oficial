@@ -1287,7 +1287,7 @@ a {
 
 .admin-page {
   min-height: 100vh;
-  background: #f4f5f9 !important;
+  background: #f5f6fb !important;
   color: #172033 !important;
   font-family: Arial, sans-serif;
   overflow-x: hidden;
@@ -1303,6 +1303,7 @@ a {
   padding: 0 28px !important;
   background: #ffffff !important;
   border-bottom: 1px solid #e4e7ef;
+  box-shadow: 0 2px 14px rgba(17, 21, 43, .04);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1341,9 +1342,9 @@ a {
 }
 
 .admin-page .admin-shell {
-  min-height: calc(100vh - 76px);
+  min-height: calc(100dvh - 76px);
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 252px minmax(0, 1fr);
   align-items: stretch;
 }
 
@@ -1351,8 +1352,8 @@ a {
   position: sticky;
   top: 76px;
   height: calc(100vh - 76px);
-  padding: 24px 14px;
-  background: #171a2b !important;
+  padding: 28px 14px 20px;
+  background: linear-gradient(180deg, #171b35 0%, #11152b 100%) !important;
   color: #fff;
   overflow-y: auto;
 }
@@ -1387,7 +1388,7 @@ a {
 }
 
 .admin-page .admin-menu button:hover { background: #23273c; color: #fff; }
-.admin-page .admin-menu button.active { background: #5544c7; color: #fff; }
+.admin-page .admin-menu button.active { background: linear-gradient(135deg, #5b4be7 0%, #7147d8 100%); color: #fff; }
 
 .admin-page .admin-sidebar-logout {
   width: 100%;
