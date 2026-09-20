@@ -4403,3 +4403,81 @@ textarea:focus,
     padding-left: 58px !important;
   }
 }
+
+
+/* FINAL MOBILE MENU OVERRIDE */
+@media only screen and (max-width: 768px) {
+  html, body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .admin-page #admin-mobile-menu {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 12px !important;
+    left: 12px !important;
+    z-index: 2147483647 !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    border: 2px solid rgba(255,255,255,.25) !important;
+    border-radius: 10px !important;
+    background: #7133ee !important;
+    color: #fff !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.45) !important;
+  }
+
+  .admin-page #admin-mobile-menu span {
+    display: block !important;
+    visibility: visible !important;
+    width: 24px !important;
+    height: 3px !important;
+    min-height: 3px !important;
+    background: #fff !important;
+    border-radius: 3px !important;
+  }
+
+  .admin-page .admin-mobile-menu-overlay {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10499 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    background: rgba(0,0,0,.55) !important;
+  }
+
+  .admin-page .admin-sidebar {
+    z-index: 10500 !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .admin-page #admin-mobile-menu {
+    top: 10px !important;
+    left: 9px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .admin-page #admin-mobile-menu span {
+    width: 23px !important;
+  }
+}
