@@ -2546,3 +2546,67 @@ textarea:focus,
     min-height:40px;
   }
 }
+
+/* Gestão de usuários — bloqueio e remoção */
+.admin-user-status{
+  display:inline-flex!important;
+  align-items:center;
+  width:max-content;
+  margin-top:6px!important;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px!important;
+  font-weight:800!important;
+  line-height:1.2!important;
+}
+.admin-user-status-blocked{
+  color:#b42318!important;
+  background:#fff1f0;
+  border:1px solid #f5c2bd;
+}
+.admin-user-block,
+.admin-user-unblock,
+.admin-user-delete{
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 11px;
+  border-radius:8px;
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease;
+}
+.admin-user-block{
+  color:#8a4b00;
+  background:#fff8e8;
+  border:1px solid #f0d49b;
+}
+.admin-user-block:hover{background:#fff0c9;border-color:#e7c27a;transform:translateY(-1px)}
+.admin-user-unblock{
+  color:#1769e0;
+  background:#eaf3ff;
+  border:1px solid #b9d2fb;
+}
+.admin-user-unblock:hover{background:#dcecff;border-color:#9ec2f8;transform:translateY(-1px)}
+.admin-user-delete{
+  color:#b42318;
+  background:#fff;
+  border:1px solid #efb4ae;
+}
+.admin-user-delete:hover{background:#fff1f0;border-color:#df8d84;transform:translateY(-1px)}
+@media(max-width:599px){
+  .admin-user-block,.admin-user-unblock,.admin-user-delete{
+    flex:1 1 auto;
+    min-width:0;
+    min-height:40px;
+  }
+}
+@media(max-width:390px){
+  .admin-user-block,.admin-user-unblock,.admin-user-delete{
+    width:100%;
+  }
+}
