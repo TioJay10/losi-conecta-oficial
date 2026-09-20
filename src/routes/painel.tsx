@@ -71,6 +71,12 @@ function DashboardPage() {
         .eq("owner_id", currentUser.id)
         .maybeSingle();
 
+      if (mounted) {
+        setBusinessStatus(
+          (business?.approval_status as "pending" | "approved" | "rejected" | null) ?? null,
+        );
+      }
+
       const { data: plansRows } = await supabase.from("plans").select("id,name,description,price_cents,billing_period,highlighted").eq("active",true).order("price_cents");
       if (mounted) setPlans((plansRows ?? []) as typeof plans);
       if (business?.id) {
