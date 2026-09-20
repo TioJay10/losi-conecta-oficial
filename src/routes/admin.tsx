@@ -287,13 +287,14 @@ function AdminPage() {
   return (
     <main className="admin-page" style={styles.page}>
       <header className="admin-header" style={styles.header}>
-        <button type="button" className="admin-mobile-menu-button" aria-label={mobileMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
+        <button type="button" id="admin-mobile-menu" className="admin-mobile-menu-button" aria-label={mobileMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
           <span></span><span></span><span></span>
         </button>
         <div><div style={styles.logo}>LOSI <span>CONECTA</span></div><div style={styles.subtitle}>PAINEL ADMINISTRATIVO</div></div>
         <button type="button" className="admin-logout" onClick={logout}>Sair do painel</button>
       </header>
       <div className="admin-shell">
+        {mobileMenuOpen && <button type="button" className="admin-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
         <aside className={`admin-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
           <div className="admin-sidebar-title">GESTÃO</div>
           <nav className="admin-menu">
