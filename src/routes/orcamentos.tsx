@@ -1,0 +1,372 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { supabase } from "../lib/supabase";
+
+type RequestRow = {
+  id: string;
+  business_id: string;
+  requester_id: string;
+  service_id: string | null;
+  client_name: string;
+  client_email: string | null;
+  client_phone: string | null;
+  event_title: string;
+  event_date: string | null;
+  event_location: string | null;
+  description: string | null;
+  status: string;
+  created_at: string;
+  services?: { name: string } | null;
+};
+
+type QuoteRow = {
+  id: string;
+  request_id: string;
+  business_id: string;
+  client_id: string;
+  subtotal: number;
+  discount: number;
+  total: number;
+  validity_until: string | null;
+  notes: string | null;
+  status: string;
+  sent_at: string | null;
+  created_at: string;
+  quote_items?: { id: string; description: string; quantity: number; unit_price: number; total: number }[];
+  quote_requests?: RequestRow;
+};
+
+type ItemDraft = { description: string; quantity: string; unit_price: string };
+
+export const Route = createFileRoute("/orcamentos")({
+  component: QuotesPage,
+});
+
+function money(value: number) {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function statusLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending: "Aguardando orçamento",
+    quoted: "Orçamento enviado",
+    accepted: "Aceito",
+    rejected: "Recusado",
+    cancelled: "Cancelado",
+    expired: "Expirado",
+    draft: "Rascunho",
+    sent: "Enviado",
+    viewed: "Visualizado",
+  };
+  return labels[status] || status;
+}
+
+function QuotesPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [businessName, setBusinessName] = useState("");
+  const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [quotes, setQuotes] = useState<QuoteRow[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
+  const [items, setItems] = useState<ItemDraft[]>([{ description: "", quantity: "1", unit_price: "" }]);
+  const [discount, setDiscount] = useState("0");
+  const [validityUntil, setValidityUntil] = useState("");
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [sentThisMonth, setSentThisMonth] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentUser = sessionData.session?.user;
+      if (!currentUser) {
+        navigate({ to: "/entrar" });
+        return;
+      }
+
+      const { data: business } = await supabase
+        .from("business_profiles")
+        .select("id,business_name")
+        .eq("owner_id", currentUser.id)
+        .maybeSingle();
+
+      if (!mounted) return;
+      setUserId(currentUser.id);
+
+      if (business?.id) {
+        setBusinessId(business.id);
+        setBusinessName(business.business_name);
+
+        const [{ data: requestRows }, { data: quoteRows }] = await Promise.all([
+          supabase.from("quote_requests")
+            .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+            .eq("business_id", business.id)
+            .order("created_at", { ascending: false }),
+          supabase.from("quotes")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+            .eq("business_id", business.id)
+            .order("created_at", { ascending: false }),
+        ]);
+
+        if (mounted) {
+          setRequests((requestRows ?? []) as unknown as RequestRow[]);
+          setQuotes((quoteRows ?? []) as unknown as QuoteRow[]);
+        }
+
+        const firstDay = new Date();
+        firstDay.setDate(1);
+        firstDay.setHours(0, 0, 0, 0);
+        const { count } = await supabase.from("quotes")
+          .select("id", { count: "exact", head: true })
+          .eq("business_id", business.id)
+          .not("sent_at", "is", null)
+          .gte("sent_at", firstDay.toISOString());
+
+        if (mounted) setSentThisMonth(count ?? 0);
+      } else {
+        const { data: received } = await supabase
+          .from("quotes")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+          .eq("client_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        if (mounted) setQuotes((received ?? []) as unknown as QuoteRow[]);
+      }
+
+      if (mounted) setLoading(false);
+    }
+
+    load();
+    return () => { mounted = false; };
+  }, [navigate]);
+
+  const subtotal = useMemo(
+    () => items.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0), 0),
+    [items],
+  );
+  const discountValue = Math.max(0, Number(discount) || 0);
+  const total = Math.max(0, subtotal - discountValue);
+
+  function updateItem(index: number, field: keyof ItemDraft, value: string) {
+    setItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
+  }
+
+  function resetForm() {
+    setSelectedRequest(null);
+    setItems([{ description: "", quantity: "1", unit_price: "" }]);
+    setDiscount("0");
+    setValidityUntil("");
+    setNotes("");
+  }
+
+  async function sendQuote(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedRequest || !businessId || !userId || saving) return;
+    setMessage("");
+    setSaving(true);
+
+    const validItems = items
+      .map((item) => ({
+        description: item.description.trim(),
+        quantity: Number(item.quantity) || 0,
+        unit_price: Number(item.unit_price) || 0,
+      }))
+      .filter((item) => item.description && item.quantity > 0);
+
+    if (!validItems.length) {
+      setMessage("Adicione pelo menos um item ao orçamento.");
+      setSaving(false);
+      return;
+    }
+
+    const { data: quote, error: quoteError } = await supabase.from("quotes").insert({
+      request_id: selectedRequest.id,
+      business_id: businessId,
+      client_id: selectedRequest.requester_id,
+      subtotal,
+      discount: discountValue,
+      total,
+      validity_until: validityUntil || null,
+      notes: notes.trim() || null,
+      status: "sent",
+      sent_at: new Date().toISOString(),
+    }).select("id").single();
+
+    if (quoteError || !quote) {
+      setMessage(quoteError?.message || "Não foi possível criar o orçamento.");
+      setSaving(false);
+      return;
+    }
+
+    const { error: itemsError } = await supabase.from("quote_items").insert(
+      validItems.map((item) => ({
+        quote_id: quote.id,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total: item.quantity * item.unit_price,
+      })),
+    );
+
+    if (itemsError) {
+      await supabase.from("quotes").delete().eq("id", quote.id);
+      setMessage(itemsError.message || "Não foi possível salvar os itens do orçamento.");
+      setSaving(false);
+      return;
+    }
+
+    await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", selectedRequest.id);
+    const refreshed = await supabase
+      .from("quotes")
+      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false });
+
+    setQuotes((refreshed.data ?? []) as unknown as QuoteRow[]);
+    setRequests((current) => current.map((request) => request.id === selectedRequest.id ? { ...request, status: "quoted" } : request));
+    setSentThisMonth((value) => value + 1);
+    resetForm();
+    setMessage("Orçamento enviado com sucesso para o cliente.");
+    setSaving(false);
+  }
+
+  async function respondToQuote(quote: QuoteRow, status: "accepted" | "rejected") {
+    const { error } = await supabase.from("quotes").update({
+      status,
+      responded_at: new Date().toISOString(),
+    }).eq("id", quote.id).eq("client_id", userId);
+    if (!error) {
+      setQuotes((current) => current.map((item) => item.id === quote.id ? { ...item, status } : item));
+    }
+  }
+
+  if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
+
+  const providerMode = Boolean(businessId);
+  const pendingRequests = requests.filter((request) => request.status === "pending");
+
+  return (
+    <main className="quotes-page">
+      <header className="quotes-header">
+        <Link to="/" className="catalog-logo">LOSI <span>CONECTA</span></Link>
+        <Link to="/painel" className="quotes-back">Voltar ao painel</Link>
+      </header>
+
+      <section className="quotes-content">
+        <div className="quotes-kicker">ORÇAMENTOS</div>
+        <h1>{providerMode ? "Orçamentos da sua empresa" : "Meus orçamentos"}</h1>
+        <p className="quotes-intro">{providerMode ? "Receba solicitações, monte propostas e acompanhe o que já foi enviado aos seus clientes." : "Acompanhe os orçamentos enviados pelos fornecedores que você contatou."}</p>
+
+        {providerMode ? (
+          <>
+            <div className="quotes-metrics">
+              <article><span>Enviados este mês</span><strong>{sentThisMonth}</strong></article>
+              <article><span>Aguardando orçamento</span><strong>{pendingRequests.length}</strong></article>
+              <article><span>Total de orçamentos</span><strong>{quotes.length}</strong></article>
+            </div>
+
+            {message && <div className="quotes-message">{message}</div>}
+
+            {selectedRequest ? (
+              <form className="quote-builder" onSubmit={sendQuote}>
+                <div className="quote-builder-head">
+                  <div>
+                    <div className="quotes-kicker">NOVO ORÇAMENTO</div>
+                    <h2>{selectedRequest.event_title}</h2>
+                    <p>Cliente: <strong>{selectedRequest.client_name}</strong>{selectedRequest.client_phone ? " · " + selectedRequest.client_phone : ""}</p>
+                  </div>
+                  <button type="button" className="quotes-secondary" onClick={resetForm}>Cancelar</button>
+                </div>
+                <div className="quote-builder-grid">
+                  <div>
+                    <label>Itens do orçamento</label>
+                    {items.map((item, index) => (
+                      <div className="quote-item-row" key={index}>
+                        <input value={item.description} onChange={(e) => updateItem(index, "description", e.target.value)} placeholder="Descrição do serviço/item" />
+                        <input value={item.quantity} onChange={(e) => updateItem(index, "quantity", e.target.value)} type="number" min="0.01" step="0.01" placeholder="Qtd." />
+                        <input value={item.unit_price} onChange={(e) => updateItem(index, "unit_price", e.target.value)} type="number" min="0" step="0.01" placeholder="Valor unitário" />
+                        {items.length > 1 && <button type="button" className="quote-remove-item" onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>}
+                      </div>
+                    ))}
+                    <button type="button" className="quotes-secondary" onClick={() => setItems((current) => [...current, { description: "", quantity: "1", unit_price: "" }])}>+ Adicionar item</button>
+                  </div>
+                  <div className="quote-side-fields">
+                    <label>Desconto<input type="number" min="0" step="0.01" value={discount} onChange={(e) => setDiscount(e.target.value)} /></label>
+                    <label>Validade<input type="date" value={validityUntil} onChange={(e) => setValidityUntil(e.target.value)} /></label>
+                    <label>Observações<textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Condições, prazo, formas de pagamento..." /></label>
+                  </div>
+                </div>
+                <div className="quote-total-box">
+                  <span>Subtotal <strong>{money(subtotal)}</strong></span>
+                  <span>Desconto <strong>{money(discountValue)}</strong></span>
+                  <span>Total <strong>{money(total)}</strong></span>
+                </div>
+                <button className="quotes-primary" type="submit" disabled={saving}>{saving ? "Enviando..." : "Enviar orçamento ao cliente"}</button>
+              </form>
+            ) : (
+              <section className="quotes-section">
+                <div className="quotes-section-head"><div><div className="quotes-kicker">SOLICITAÇÕES</div><h2>Pedidos de orçamento</h2></div></div>
+                {pendingRequests.length === 0 ? <div className="quotes-empty">Nenhuma solicitação aguardando orçamento.</div> : (
+                  <div className="quote-request-list">
+                    {pendingRequests.map((request) => (
+                      <article key={request.id} className="quote-request-card">
+                        <div>
+                          <span className="quote-status pending">{statusLabel(request.status)}</span>
+                          <h3>{request.event_title}</h3>
+                          <strong>{request.client_name}</strong>
+                          <p>{request.event_date ? new Date(request.event_date + "T12:00:00").toLocaleDateString("pt-BR") + " · " : ""}{request.event_location || "Local não informado"}</p>
+                          {request.description && <p>{request.description}</p>}
+                        </div>
+                        <button className="quotes-primary" type="button" onClick={() => setSelectedRequest(request)}>Fazer orçamento</button>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            <section className="quotes-section">
+              <div className="quotes-section-head"><div><div className="quotes-kicker">HISTÓRICO</div><h2>Orçamentos enviados</h2></div></div>
+              {quotes.length === 0 ? <div className="quotes-empty">Você ainda não enviou nenhum orçamento.</div> : (
+                <div className="quote-history-list">
+                  {quotes.map((quote) => (
+                    <article key={quote.id} className="quote-history-card">
+                      <div><span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span><h3>{quote.quote_requests?.event_title || "Orçamento"}</h3><p>Cliente: {quote.quote_requests?.client_name || "—"}</p></div>
+                      <strong>{money(Number(quote.total))}</strong>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          </>
+        ) : (
+          <section className="quotes-section">
+            <div className="quotes-section-head"><div><div className="quotes-kicker">RECEBIDOS</div><h2>Orçamentos enviados para você</h2></div></div>
+            {quotes.length === 0 ? <div className="quotes-empty">Você ainda não recebeu nenhum orçamento.</div> : (
+              <div className="quote-history-list">
+                {quotes.map((quote) => (
+                  <article key={quote.id} className="quote-client-card">
+                    <div>
+                      <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
+                      <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
+                      <p>{quote.quote_requests?.event_location || "Local não informado"}{quote.validity_until ? " · válido até " + new Date(quote.validity_until + "T12:00:00").toLocaleDateString("pt-BR") : ""}</p>
+                      {quote.notes && <p>{quote.notes}</p>}
+                      <div className="quote-client-items">{(quote.quote_items ?? []).map((item) => <div key={item.id}><span>{item.description} × {item.quantity}</span><strong>{money(Number(item.total))}</strong></div>)}</div>
+                    </div>
+                    <div className="quote-client-total"><span>Total</span><strong>{money(Number(quote.total))}</strong>{(quote.status === "sent" || quote.status === "viewed") && <div><button className="quotes-primary" type="button" onClick={() => respondToQuote(quote, "accepted")}>Aceitar</button><button className="quotes-secondary" type="button" onClick={() => respondToQuote(quote, "rejected")}>Recusar</button></div>}</div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+      </section>
+    </main>
+  );
+}
