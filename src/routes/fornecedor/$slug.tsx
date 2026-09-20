@@ -9,7 +9,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; address: string | null; logo_url: string | null;
-  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[];
+  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[]; owner_id: string;
 };
 
 export const Route = createFileRoute("/fornecedor/$slug")({
@@ -37,7 +37,7 @@ function ProviderPage() {
       if (mounted) setUserId(sessionData.session?.user.id ?? null);
       const { data, error: queryError } = await supabase
         .from("business_profiles")
-        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,services(id,name,description,categories(name))")
+        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,services(id,name,description,categories(name))")
         .eq("slug", slug)
         .eq("active", true)
         .maybeSingle();
@@ -154,6 +154,54 @@ function ProviderPage() {
   const rawPhone = business.whatsapp || business.phone || "";
   const digits = rawPhone.replace(/\D/g, "");
   const whatsapp = digits ? "https://wa.me/" + (digits.startsWith("55") ? digits : "55" + digits) + "?text=" + encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA.") : null;
+  const canRequestQuote = Boolean(userId && userId !== business.owner_id);
+
+  function openQuoteRequest() {
+    if (!userId) {
+      window.location.href = "/entrar";
+      return;
+    }
+    const target = document.getElementById("provider-quote-request");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function submitQuoteRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const { data: userData } = await supabase.auth.getUser();
+    const currentUser = userData.user;
+    if (!currentUser) {
+      window.location.href = "/entrar";
+      return;
+    }
+
+    const payload = {
+      business_id: business.id,
+      requester_id: currentUser.id,
+      service_id: String(form.get("service_id") || "") || null,
+      client_name: String(form.get("client_name") || "").trim(),
+      client_email: String(form.get("client_email") || "").trim() || currentUser.email || null,
+      client_phone: String(form.get("client_phone") || "").trim() || null,
+      event_title: String(form.get("event_title") || "").trim(),
+      event_date: String(form.get("event_date") || "") || null,
+      event_location: String(form.get("event_location") || "").trim() || null,
+      description: String(form.get("description") || "").trim() || null,
+    };
+
+    if (!payload.client_name || !payload.event_title) {
+      setReviewMessage("Informe seu nome e o tipo de evento para solicitar o orçamento.");
+      return;
+    }
+
+    const { error: requestError } = await supabase.from("quote_requests").insert(payload);
+    if (requestError) {
+      setReviewMessage(requestError.message || "Não foi possível enviar a solicitação.");
+      return;
+    }
+
+    event.currentTarget.reset();
+    setReviewMessage("Solicitação enviada. O fornecedor poderá preparar seu orçamento pelo LOSI CONECTA.");
+  }
 
   return (
     <main className="provider-page">
@@ -176,7 +224,7 @@ function ProviderPage() {
             {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
             {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
           </div>
-          <div className="provider-profile-actions"><button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}</div>
+          <div className="provider-profile-actions"><button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>{canRequestQuote && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}</div>
         </div>
       </section>
 
@@ -199,6 +247,26 @@ function ProviderPage() {
                   </a>
                 ))}
               </div>
+            </div>
+          )}
+
+          {canRequestQuote && (
+            <div id="provider-quote-request" className="provider-profile-card provider-quote-request-card">
+              <div className="catalog-kicker">ORÇAMENTO</div>
+              <h2>Solicitar orçamento</h2>
+              <p>Envie os detalhes do seu evento. O fornecedor poderá responder com um orçamento diretamente pelo LOSI CONECTA.</p>
+              <form className="provider-quote-form" onSubmit={submitQuoteRequest}>
+                <label>Seu nome<input name="client_name" required placeholder="Nome completo" /></label>
+                <label>E-mail<input name="client_email" type="email" placeholder="seu@email.com" /></label>
+                <label>Telefone / WhatsApp<input name="client_phone" placeholder="(11) 99999-9999" /></label>
+                <label>Serviço<select name="service_id"><option value="">Selecione o serviço</option>{business.services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label>
+                <label>Tipo de evento<input name="event_title" required placeholder="Ex.: Festa infantil, evento corporativo..." /></label>
+                <label>Data do evento<input name="event_date" type="date" /></label>
+                <label>Local do evento<input name="event_location" placeholder="Cidade / espaço / endereço" /></label>
+                <label>Detalhes<textarea name="description" rows={4} placeholder="Quantidade de pessoas, horário, necessidades e outras informações..." /></label>
+                <button type="submit">Enviar solicitação de orçamento</button>
+              </form>
+              {reviewMessage && <small>{reviewMessage}</small>}
             </div>
           )}
 
