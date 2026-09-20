@@ -600,3 +600,37 @@
     flex: 1;
   }
 }
+
+
+/* ALERTA DE SEGURANÇA NO PEDIDO DE ORÇAMENTO */
+.provider-quote-safety-warning {
+  margin: 18px 0 20px;
+  padding: 15px 16px;
+  border: 1px solid #ead9a8;
+  border-radius: 10px;
+  background: #fff9e8;
+  color: #5f4a18;
+}
+
+.provider-quote-safety-warning strong {
+  color: #4f3b0d;
+}
+
+.provider-quote-safety-warning > strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.provider-quote-safety-warning p {
+  margin: 6px 0;
+  color: #5f4a18;
+  line-height: 1.5;
+}
+
+.provider-quote-safety-warning span {
+  display: block;
+  margin-top: 9px;
+  color: #6f5a28;
+  font-size: 12px;
+  line-height: 1.5;
+}
