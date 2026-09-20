@@ -290,6 +290,9 @@ function AdminPage() {
         <button type="button" className="admin-logout" onClick={logout}>Sair do painel</button>
       </header>
       <div className="admin-shell">
+        <button type="button" className="admin-mobile-menu-button" aria-label="Abrir menu administrativo" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
         <aside className="admin-sidebar">
           <div className="admin-sidebar-title">GESTÃO</div>
           <nav className="admin-menu">
