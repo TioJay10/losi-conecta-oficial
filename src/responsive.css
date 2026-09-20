@@ -1597,3 +1597,67 @@ textarea:focus,
   .provider-body{padding:27px 11px 11px!important}
   .provider-primary,.provider-profile-link,.provider-actions .provider-save{min-height:40px!important;font-size:11px!important}
 }
+
+/* Header da busca — perfil e sessão */
+.catalog-header-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  min-width:0;
+}
+.catalog-profile-link,
+.catalog-logout{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:9px 14px;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:800;
+  text-decoration:none;
+  white-space:nowrap;
+  box-sizing:border-box;
+}
+.catalog-profile-link{
+  border:1px solid #d8dbea;
+  background:#fff;
+  color:#1769e0;
+}
+.catalog-profile-link:hover{
+  background:#eaf3ff;
+  border-color:#b9d2fb;
+}
+.catalog-logout{
+  border:1px solid transparent;
+  background:var(--losi-gradient);
+  color:#fff;
+  cursor:pointer;
+  font-family:inherit;
+}
+.catalog-logout:hover{box-shadow:0 5px 14px rgba(23,32,51,.14);transform:translateY(-1px)}
+.catalog-logout:disabled{opacity:.65;cursor:wait;transform:none}
+@media(max-width:599px){
+  .catalog-header{gap:8px!important}
+  .catalog-header-actions{gap:6px}
+  .catalog-profile-link,
+  .catalog-logout,
+  .catalog-header-actions .catalog-login{
+    min-height:38px;
+    padding:8px 10px;
+    font-size:12px;
+  }
+}
+@media(max-width:390px){
+  .catalog-header{padding-left:12px!important;padding-right:12px!important}
+  .catalog-header-actions{gap:5px}
+  .catalog-profile-link,
+  .catalog-logout,
+  .catalog-header-actions .catalog-login{
+    min-height:36px;
+    padding:7px 8px;
+    font-size:11px;
+  }
+  .catalog-logo{font-size:17px!important}
+}
