@@ -37,6 +37,13 @@ type QuoteRow = {
   quote_requests?: RequestRow;
 };
 
+type BusinessContact = {
+  id: string;
+  business_name: string;
+  whatsapp: string | null;
+  phone: string | null;
+};
+
 type ItemDraft = { description: string; quantity: string; unit_price: string };
 
 export const Route = createFileRoute("/orcamentos")({
@@ -70,6 +77,7 @@ function QuotesPage() {
   const [businessName, setBusinessName] = useState("");
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [quotes, setQuotes] = useState<QuoteRow[]>([]);
+  const [businessContacts, setBusinessContacts] = useState<Record<string, BusinessContact>>({});
   const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
   const [items, setItems] = useState<ItemDraft[]>([{ description: "", quantity: "1", unit_price: "" }]);
   const [discount, setDiscount] = useState("0");
@@ -136,7 +144,23 @@ function QuotesPage() {
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
-        if (mounted) setQuotes((received ?? []) as unknown as QuoteRow[]);
+        if (mounted) {
+          setQuotes((received ?? []) as unknown as QuoteRow[]);
+
+          const businessIds = [...new Set((received ?? []).map((quote: any) => quote.business_id).filter(Boolean))];
+          if (businessIds.length > 0) {
+            const { data: businesses } = await supabase
+              .from("business_profiles")
+              .select("id,business_name,whatsapp,phone")
+              .in("id", businessIds);
+
+            const contacts = (businesses ?? []).reduce<Record<string, BusinessContact>>((map, business) => {
+              map[business.id] = business as BusinessContact;
+              return map;
+            }, {});
+            setBusinessContacts(contacts);
+          }
+        }
       }
 
       if (mounted) setLoading(false);
@@ -234,6 +258,64 @@ function QuotesPage() {
     resetForm();
     setMessage("Orçamento enviado com sucesso para o cliente.");
     setSaving(false);
+  }
+
+  function normalizeWhatsAppNumber(value: string | null | undefined) {
+    const digits = (value ?? "").replace(/\\D/g, "");
+    if (!digits) return "";
+    if (digits.startsWith("55")) return digits;
+    if (digits.length === 10 || digits.length === 11) return "55" + digits;
+    return digits;
+  }
+
+  function formatQuoteDate(value: string | null) {
+    return value ? new Date(value + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada";
+  }
+
+  function buildQuoteWhatsAppMessage(quote: QuoteRow, recipientName: string, senderName: string) {
+    const request = quote.quote_requests;
+    const itemLines = (quote.quote_items ?? [])
+      .map((item) => "• " + item.quantity + "x " + item.description + " — " + money(Number(item.total)))
+      .join("\\n");
+
+    return [
+      "Olá, " + recipientName + "! Segue o orçamento solicitado para seu evento.",
+      "",
+      "Fornecedor: " + senderName,
+      "Evento: " + (request?.event_title || "Não informado"),
+      "Data: " + formatQuoteDate(request?.event_date ?? null),
+      request?.event_location ? "Local: " + request.event_location : "",
+      "",
+      "Itens:",
+      itemLines || "• Itens conforme orçamento no LOSI CONECTA",
+      "",
+      "Subtotal: " + money(Number(quote.subtotal)),
+      "Desconto: " + money(Number(quote.discount)),
+      "TOTAL: " + money(Number(quote.total)),
+      quote.validity_until ? "Validade: " + formatQuoteDate(quote.validity_until) : "",
+      quote.notes ? "Observações: " + quote.notes : "",
+      "",
+      "Orçamento enviado pelo LOSI CONECTA.",
+    ].filter(Boolean).join("\\n");
+  }
+
+  function openWhatsApp(phone: string | null | undefined, text: string) {
+    const number = normalizeWhatsAppNumber(phone);
+    if (!number) {
+      setMessage("O telefone/WhatsApp do cliente não foi informado neste orçamento.");
+      return;
+    }
+    window.open("https://wa.me/" + number + "?text=" + encodeURIComponent(text), "_blank", "noopener,noreferrer");
+  }
+
+  function shareQuoteOnWhatsApp(quote: QuoteRow) {
+    const business = businessContacts[quote.business_id];
+    const message = buildQuoteWhatsAppMessage(
+      quote,
+      "cliente",
+      business?.business_name || "Fornecedor",
+    );
+    window.open("https://wa.me/?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
   }
 
   async function respondToQuote(quote: QuoteRow, status: "accepted" | "rejected") {
@@ -338,7 +420,21 @@ function QuotesPage() {
                   {quotes.map((quote) => (
                     <article key={quote.id} className="quote-history-card">
                       <div><span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span><h3>{quote.quote_requests?.event_title || "Orçamento"}</h3><p>Cliente: {quote.quote_requests?.client_name || "—"}</p></div>
-                      <strong>{money(Number(quote.total))}</strong>
+                      <div className="quote-history-actions">
+                        <strong>{money(Number(quote.total))}</strong>
+                        <button
+                          className="quotes-whatsapp"
+                          type="button"
+                          onClick={() => openWhatsApp(
+                            quote.quote_requests?.client_phone,
+                            buildQuoteWhatsAppMessage(quote, quote.quote_requests?.client_name || "cliente", businessName),
+                          )}
+                          disabled={!normalizeWhatsAppNumber(quote.quote_requests?.client_phone)}
+                          title={!normalizeWhatsAppNumber(quote.quote_requests?.client_phone) ? "WhatsApp do cliente não informado" : "Enviar orçamento pelo WhatsApp"}
+                        >
+                          Enviar pelo WhatsApp
+                        </button>
+                      </div>
                     </article>
                   ))}
                 </div>
@@ -359,7 +455,16 @@ function QuotesPage() {
                       {quote.notes && <p>{quote.notes}</p>}
                       <div className="quote-client-items">{(quote.quote_items ?? []).map((item) => <div key={item.id}><span>{item.description} × {item.quantity}</span><strong>{money(Number(item.total))}</strong></div>)}</div>
                     </div>
-                    <div className="quote-client-total"><span>Total</span><strong>{money(Number(quote.total))}</strong>{(quote.status === "sent" || quote.status === "viewed") && <div><button className="quotes-primary" type="button" onClick={() => respondToQuote(quote, "accepted")}>Aceitar</button><button className="quotes-secondary" type="button" onClick={() => respondToQuote(quote, "rejected")}>Recusar</button></div>}</div>
+                    <div className="quote-client-total">
+                      <span>Total</span>
+                      <strong>{money(Number(quote.total))}</strong>
+                      <div className="quote-client-actions">
+                        <button className="quotes-whatsapp" type="button" onClick={() => shareQuoteOnWhatsApp(quote)}>
+                          Compartilhar no WhatsApp
+                        </button>
+                        {(quote.status === "sent" || quote.status === "viewed") && <><button className="quotes-primary" type="button" onClick={() => respondToQuote(quote, "accepted")}>Aceitar</button><button className="quotes-secondary" type="button" onClick={() => respondToQuote(quote, "rejected")}>Recusar</button></>}
+                      </div>
+                    </div>
                   </article>
                 ))}
               </div>
