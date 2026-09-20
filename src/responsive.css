@@ -1249,3 +1249,30 @@ a {
     gap: 12px !important;
   }
 }
+
+
+@media only screen and (max-width: 768px) {
+  /* Os cards de serviços usam estilos inline; estes overrides evitam ações espremidas */
+  .profile-page .profile-content section article {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .profile-page .profile-content section article > div:last-child {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px !important;
+    flex-shrink: 1 !important;
+  }
+
+  .profile-page .profile-content section article > div:last-child button {
+    width: 100% !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .profile-page .profile-content section article > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+}
