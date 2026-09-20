@@ -4482,3 +4482,59 @@ textarea:focus,
   }
 }
 
+
+
+/* FORNECEDOR — planos comerciais em linha, com identificação acima */
+.dashboard-page .dashboard-commercial {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.dashboard-page .dashboard-commercial > div:first-child {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 18px !important;
+}
+
+.dashboard-page .dashboard-commercial > div:first-child .dashboard-commercial-head {
+  display: block !important;
+}
+
+.dashboard-page .dashboard-commercial .dashboard-plan-grid {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+}
+
+.dashboard-page .dashboard-commercial .dashboard-plan-card {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+}
+
+.dashboard-page .dashboard-commercial .dashboard-plan-contract {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-top: auto !important;
+  text-align: center !important;
+}
+
+@media (max-width: 768px) {
+  .dashboard-page .dashboard-commercial .dashboard-plan-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-page .dashboard-commercial .dashboard-plan-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
