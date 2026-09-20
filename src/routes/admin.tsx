@@ -44,7 +44,8 @@ function AdminPage() {
   const [categories, setCategories] = useState<Array<{ id:string; name:string; slug:string; active:boolean }>>([]);
   const [services, setServices] = useState<Array<{ id:string; name:string; description:string|null; active:boolean; business:{business_name:string}|null; category:{name:string}|null }>>([]);
   const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);
-  const [supplierReports, setSupplierReports] = useState<Array<{ id:string; business_id:string; reporter_id:string; reason:string; details:string|null; created_at:string; business:{business_name:string; owner_id:string}|null; reporter:{full_name:string|null}|null }>>([]);\n  const [securitySearch, setSecuritySearch] = useState("");
+  const [supplierReports, setSupplierReports] = useState<Array<{ id:string; business_id:string; reporter_id:string; reason:string; details:string|null; created_at:string; business:{business_name:string; owner_id:string}|null; reporter:{full_name:string|null}|null }>>([]);
+  const [securitySearch, setSecuritySearch] = useState("");
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -64,7 +65,8 @@ function AdminPage() {
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
-        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").order("created_at",{ascending:false}),\n        supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
+        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").order("created_at",{ascending:false}),
+        supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
       ]);
       if (!mounted) return;
       const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, reportsResult].find((result) => result.error)?.error;
@@ -75,7 +77,8 @@ function AdminPage() {
       setServices((servicesResult.data ?? []) as unknown as typeof services);
       setReviews((reviewsResult.data ?? []) as unknown as typeof reviews);
       setPlans((plansResult.data ?? []) as typeof plans);
-      setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);\n      setSupplierReports((reportsResult.data ?? []) as unknown as typeof supplierReports);
+      setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);
+      setSupplierReports((reportsResult.data ?? []) as unknown as typeof supplierReports);
       setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
       setLoading(false);
     }
@@ -264,7 +267,8 @@ function AdminPage() {
   if (!user) return null;
 
   const menu = [
-    { id: "overview" as const, label: "Visão geral" },\n    { id: "security" as const, label: "Central de segurança" },
+    { id: "overview" as const, label: "Visão geral" },
+    { id: "security" as const, label: "Central de segurança" },
     { id: "users" as const, label: "Usuários", count: stats.users },
     { id: "businesses" as const, label: "Empresas", count: stats.businesses },
     { id: "services" as const, label: "Serviços", count: stats.services },
