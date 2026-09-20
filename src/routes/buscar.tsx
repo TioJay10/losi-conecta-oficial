@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -15,6 +15,7 @@ type Business = {
 export const Route = createFileRoute("/buscar")({ component: SearchPage });
 
 function SearchPage() {
+  const navigate = useNavigate();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
@@ -221,8 +222,12 @@ function SearchPage() {
               className="catalog-login catalog-logout"
               disabled={authLoading}
               onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/buscar";
+                const { error: signOutError } = await supabase.auth.signOut();
+                if (signOutError) return;
+                setUserId(null);
+                setUserBusinessSlug(null);
+                setFavoriteIds([]);
+                await navigate({ to: "/buscar" });
               }}
             >
               Sair
