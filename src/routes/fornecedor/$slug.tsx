@@ -300,6 +300,12 @@ function ProviderPage() {
               <div className="catalog-kicker">ORÇAMENTO</div>
               <h2>Solicitar orçamento</h2>
               <p>Envie os detalhes do seu evento. O fornecedor poderá responder com um orçamento diretamente pelo LOSI CONECTA.</p>
+              <div className="provider-quote-safety-warning" role="alert">
+                <strong>⚠️ Atenção à sua segurança</strong>
+                <p>O LOSI CONECTA <strong>nunca solicita pagamentos por WhatsApp, e-mail ou telefone.</strong></p>
+                <p>Dentro do aplicativo, o LOSI CONECTA também <strong>não solicita PIX para liberar orçamento, perfil, pagamento ou serviço.</strong></p>
+                <span>Se alguém pedir um PIX dizendo representar o LOSI CONECTA para liberar ou enviar um orçamento, não faça o pagamento e denuncie o fornecedor.</span>
+              </div>
               <form className="provider-quote-form" onSubmit={submitQuoteRequest}>
                 <label>Seu nome<input name="client_name" required placeholder="Nome completo" /></label>
                 <label>E-mail<input name="client_email" type="email" placeholder="seu@email.com" /></label>
