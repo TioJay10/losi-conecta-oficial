@@ -93,37 +93,61 @@ function ProviderPage() {
     setFavoriteBusy(false);
   }
 
-  async function submitReview(event: React.FormEvent) {
+  async function submitReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (reviewing) return;
     setReviewMessage("");
     setReviewing(true);
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      setReviewMessage("Entre na sua conta para avaliar este fornecedor.");
-      setReviewing(false);
-      return;
-    }
-    const { error: insertError } = await supabase.from("reviews").insert({
-      business_id: business.id,
-      reviewer_id: sessionData.session.user.id,
-      rating: reviewRating,
-      comment: reviewComment.trim() || null,
-    });
-    if (insertError) {
-      setReviewMessage(insertError.code === "23505" ? "Você já avaliou este fornecedor." : "Não foi possível publicar sua avaliação.");
-    } else {
+
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const currentUser = userData.user;
+
+      if (userError || !currentUser) {
+        setReviewMessage("Sua sessão não está ativa. Entre na sua conta e tente novamente.");
+        return;
+      }
+
+      const comment = reviewComment.trim();
+      const { error: insertError } = await supabase.from("reviews").insert({
+        business_id: business.id,
+        reviewer_id: currentUser.id,
+        rating: Math.min(5, Math.max(1, reviewRating)),
+        comment: comment ? comment.slice(0, 500) : null,
+        active: true,
+      });
+
+      if (insertError) {
+        if (insertError.code === "23505") {
+          setReviewMessage("Você já avaliou este fornecedor.");
+        } else if (insertError.code === "42501") {
+          setReviewMessage("Sua conta não tem permissão para publicar esta avaliação.");
+        } else {
+          setReviewMessage(insertError.message || "Não foi possível publicar sua avaliação.");
+        }
+        return;
+      }
+
       setReviewComment("");
       setReviewRating(5);
-      const { data: reviewData } = await supabase
+
+      const { data: reviewData, error: reviewLoadError } = await supabase
         .from("reviews")
         .select("id,rating,comment,created_at,reviewer:profiles(full_name)")
         .eq("business_id", business.id)
         .eq("active", true)
         .order("created_at", { ascending: false });
+
+      if (reviewLoadError) {
+        setReviewMessage("Avaliação publicada, mas não foi possível atualizar a lista agora.");
+        return;
+      }
+
       setReviews((reviewData ?? []) as unknown as Review[]);
-      setReviewMessage("Avaliação publicada.");
+      setReviewMessage("Avaliação publicada com sucesso.");
+    } finally {
+      setReviewing(false);
     }
-    setReviewing(false);
   }
 
   const averageRating = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
