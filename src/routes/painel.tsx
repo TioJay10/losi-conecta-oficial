@@ -143,11 +143,11 @@ function DashboardPage() {
             </button>
             <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.cardButton}>
               <strong>Meu perfil</strong>
-              <span>Atualize sua apresentação, contatos e informações comerciais.</span>
+              <span>Atualize somente suas informações pessoais e dados da sua conta.</span>
             </button>
-            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.cardButton}>
+            <button type="button" onClick={() => navigate({ to: "/meus-servicos" })} style={styles.cardButton}>
               <strong>Meus serviços</strong>
-              <span>Cadastre, edite e organize os serviços oferecidos pela sua empresa.</span>
+              <span>Atualize sua empresa, apresentação, serviços, imagens e localização.</span>
             </button>
           </div>
         )}
@@ -159,7 +159,7 @@ function DashboardPage() {
               <h2 style={{ margin: "10px 0 6px" }}>{businessStatus === "approved" ? "Perfil aprovado e publicado" : businessStatus === "rejected" ? "Perfil precisa de ajustes" : "Perfil em análise"}</h2>
               <p style={{ ...styles.text, marginTop: 0 }}>{businessStatus === "approved" ? "Seu perfil está disponível para quem pesquisa fornecedores no LOSI CONECTA." : businessStatus === "rejected" ? "Revise as informações solicitadas e salve novamente para enviar uma nova análise." : "A administração está analisando seus dados. Você pode continuar atualizando seu perfil enquanto aguarda."}</p>
             </div>
-            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.secondary}>Gerenciar perfil</button>
+            <button type="button" onClick={() => navigate({ to: "/meus-servicos" })} style={styles.secondary}>Gerenciar empresa</button>
           </section>
         )}
 
