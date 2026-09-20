@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import type { CSSProperties } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
@@ -127,50 +126,50 @@ function DashboardPage() {
     navigate({ to: "/entrar" });
   }
 
-  if (loading) return <main style={styles.center}>Carregando sua conta...</main>;
+  if (loading) return <main className="dashboard-loading">Carregando sua conta...</main>;
   if (!user || !profile) return null;
 
   return (
-    <main className="dashboard-page" style={styles.page}>
-      <header className="dashboard-header" style={styles.header}>
-        <div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div>
-        <button onClick={logout} style={styles.logout}>Sair</button>
+    <main className="dashboard-page">
+      <header className="dashboard-header">
+        <div className="dashboard-logo mobile-centered-brand">LOSI <span>CONECTA</span></div>
+        <button className="dashboard-logout" onClick={logout}>Sair</button>
       </header>
 
-      <section className="dashboard-content" style={styles.content}>
-        <div style={styles.badge}>PROFISSIONAL</div>
+      <section className="dashboard-content">
+        <div className="dashboard-badge">PROFISSIONAL</div>
         <h1>Olá, {profile.full_name || user.email?.split("@")[0] || "profissional"}.</h1>
-        <p style={styles.text}>Sua conta profissional está autenticada e conectada ao LOSI CONECTA.</p>
+        <p className="dashboard-text">Sua conta profissional está autenticada e conectada ao LOSI CONECTA.</p>
 
         {!hasBusinessProfile ? (
-          <section style={styles.onboarding}>
+          <section className="dashboard-onboarding">
             <div>
-              <div style={styles.onboardingLabel}>PRIMEIRO PASSO</div>
-              <h2 style={styles.onboardingTitle}>Crie seu perfil comercial</h2>
-              <p style={styles.onboardingText}>
+              <div className="dashboard-onboarding-label">PRIMEIRO PASSO</div>
+              <h2 className="dashboard-onboarding-title">Crie seu perfil comercial</h2>
+              <p className="dashboard-onboarding-text">
                 Apresente sua empresa, cadastre seus serviços e envie seu perfil para análise da administração.
                 Depois da aprovação, ele ficará disponível no catálogo.
               </p>
             </div>
-            <button onClick={() => navigate({ to: "/meus-servicos" })} style={styles.primary}>
+            <button className="dashboard-primary" onClick={() => navigate({ to: "/meus-servicos" })}>
               Criar perfil da empresa →
             </button>
           </section>
         ) : (
-          <div className="dashboard-grid" style={styles.grid}>
-            <button type="button" onClick={() => navigate({ to: "/buscar" })} style={styles.cardButton}>
+          <div className="dashboard-grid">
+            <button type="button" onClick={() => navigate({ to: "/buscar" })}>
               <strong>Encontrar fornecedores</strong>
               <span>Pesquise profissionais e empresas para seus eventos.</span>
             </button>
-            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })} style={styles.cardButton}>
+            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })}>
               <strong>Meu perfil</strong>
               <span>Atualize somente suas informações pessoais e dados da sua conta.</span>
             </button>
-            <button type="button" onClick={() => navigate({ to: "/meus-servicos" })} style={styles.cardButton}>
+            <button type="button" onClick={() => navigate({ to: "/meus-servicos" })}>
               <strong>Meus serviços</strong>
               <span>Atualize sua empresa, apresentação, serviços, imagens e localização.</span>
             </button>
-            <button type="button" onClick={() => navigate({ to: "/orcamentos" })} style={styles.cardButton}>
+            <button type="button" onClick={() => navigate({ to: "/orcamentos" })}>
               <strong>Orçamentos</strong>
               <span>Receba solicitações, envie propostas e acompanhe seus orçamentos.</span>
             </button>
@@ -178,43 +177,43 @@ function DashboardPage() {
         )}
 
         {hasBusinessProfile && businessStatus && (
-          <section className="dashboard-status" style={styles.statusSection}>
+          <section className="dashboard-status">
             <div>
-              <div style={styles.badge}>STATUS DO PERFIL</div>
-              <h2 style={{ margin: "10px 0 6px" }}>{businessStatus === "approved" ? "Perfil aprovado e publicado" : businessStatus === "rejected" ? "Perfil precisa de ajustes" : "Perfil em análise"}</h2>
-              <p style={{ ...styles.text, marginTop: 0 }}>{businessStatus === "approved" ? "Seu perfil está disponível para quem pesquisa fornecedores no LOSI CONECTA." : businessStatus === "rejected" ? "Revise as informações solicitadas e salve novamente para enviar uma nova análise." : "A administração está analisando seus dados. Você pode continuar atualizando seu perfil enquanto aguarda."}</p>
+              <div className="dashboard-badge">STATUS DO PERFIL</div>
+              <h2 className="dashboard-status-title">{businessStatus === "approved" ? "Perfil aprovado e publicado" : businessStatus === "rejected" ? "Perfil precisa de ajustes" : "Perfil em análise"}</h2>
+              <p className="dashboard-text dashboard-status-text">{businessStatus === "approved" ? "Seu perfil está disponível para quem pesquisa fornecedores no LOSI CONECTA." : businessStatus === "rejected" ? "Revise as informações solicitadas e salve novamente para enviar uma nova análise." : "A administração está analisando seus dados. Você pode continuar atualizando seu perfil enquanto aguarda."}</p>
             </div>
-            <button type="button" onClick={() => navigate({ to: "/meus-servicos" })} style={styles.secondary}>Gerenciar empresa</button>
+            <button type="button" onClick={() => navigate({ to: "/meus-servicos" })} className="dashboard-secondary">Gerenciar empresa</button>
           </section>
         )}
 
         {hasBusinessProfile && (
-          <section className="dashboard-status" style={styles.statusSection}>
+          <section className="dashboard-status">
             <div>
-              <div style={styles.badge}>ORÇAMENTOS</div>
-              <h2 style={{ margin: "10px 0 6px" }}>{quotesSentThisMonth}</h2>
-              <p style={{ ...styles.text, marginTop: 0 }}>orçamentos enviados neste mês pela sua empresa.</p>
+              <div className="dashboard-badge">ORÇAMENTOS</div>
+              <h2 className="dashboard-status-title">{quotesSentThisMonth}</h2>
+              <p className="dashboard-text dashboard-status-text">orçamentos enviados neste mês pela sua empresa.</p>
             </div>
-            <button type="button" onClick={() => navigate({ to: "/orcamentos" })} style={styles.secondary}>Gerenciar orçamentos</button>
+            <button type="button" onClick={() => navigate({ to: "/orcamentos" })} className="dashboard-secondary">Gerenciar orçamentos</button>
           </section>
         )}
 
-        <section className="dashboard-commercial" style={styles.statusSection}>
+        <section className="dashboard-commercial dashboard-status">
           <div>
-            <div style={styles.badge}>PLANOS PARA FORNECEDORES</div>
-            <h2 style={{margin:"10px 0 6px"}}>{currentPlan ? currentPlan.name : "Plano gratuito"}</h2>
-            <p style={{...styles.text,marginTop:0}}>{currentPlan?.ends_at ? "Seu plano está ativo até " + new Date(currentPlan.ends_at).toLocaleDateString("pt-BR") + "." : "Comece gratuitamente e conheça opções para aumentar a visibilidade do seu negócio."}</p>
+            <div className="dashboard-badge">PLANOS PARA FORNECEDORES</div>
+            <h2 className="dashboard-status-title">{currentPlan ? currentPlan.name : "Plano gratuito"}</h2>
+            <p className="dashboard-text dashboard-status-text">{currentPlan?.ends_at ? "Seu plano está ativo até " + new Date(currentPlan.ends_at).toLocaleDateString("pt-BR") + "." : "Comece gratuitamente e conheça opções para aumentar a visibilidade do seu negócio."}</p>
           </div>
           <div className="dashboard-plan-grid">{plans.filter(p => p.billing_period !== "free").map(plan => <div className="dashboard-plan-card" key={plan.id}><strong>{plan.name}</strong><span>{plan.price_cents === 0 ? "Grátis" : "R$ " + (plan.price_cents/100).toFixed(2).replace(".",",") + "/mês"}</span><small>{plan.description || "Mais recursos para seu perfil."}</small><a className="dashboard-plan-contract" href={`https://wa.me/5511988187354?text=${encodeURIComponent("Olá! Tenho interesse em contratar o plano " + plan.name + " do LOSI CONECTA.")}`} target="_blank" rel="noreferrer">Quero contratar</a></div>)}</div>
         </section>
         {savedBusinesses.length > 0 && (
-          <section style={{ marginTop: 42 }}>
-            <div style={styles.badge}>SALVOS</div>
-            <h2 style={{ margin: "10px 0 6px" }}>Fornecedores salvos</h2>
-            <p style={{ ...styles.text, marginTop: 0 }}>Seus fornecedores favoritos ficam reunidos aqui.</p>
-            <div style={{ display: "grid", gap: 10, marginTop: 18 }}>
+          <section className="dashboard-saved">
+            <div className="dashboard-badge">SALVOS</div>
+            <h2 className="dashboard-status-title">Fornecedores salvos</h2>
+            <p className="dashboard-text dashboard-status-text">Seus fornecedores favoritos ficam reunidos aqui.</p>
+            <div className="dashboard-saved-list">
               {savedBusinesses.map((business) => (
-                <Link key={business.id} to={"/fornecedor/" + business.slug} style={styles.savedCard}>
+                <Link key={business.id} to={"/fornecedor/" + business.slug} className="dashboard-saved-card">
                   <strong>{business.business_name}</strong>
                   <span>{business.city}{business.city && business.state ? " — " : ""}{business.state}</span>
                 </Link>
@@ -226,26 +225,4 @@ function DashboardPage() {
     </main>
   );
 }
-
-const styles: Record<string, CSSProperties> = {
-  page: { minHeight: "100vh", background: "#f7f8fc", color: "#172033", fontFamily: "Arial, sans-serif" },
-  header: { height: 72, background: "#fff", borderBottom: "1px solid #e7e9f0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px", boxSizing: "border-box" },
-  logo: { fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
-  logout: { border: "1px solid #dfe2ea", background: "#fff", borderRadius: 9, padding: "9px 14px", cursor: "pointer" },
-  content: { maxWidth: 1000, margin: "0 auto", padding: "60px 24px" },
-  badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
-  text: { color: "#687386", fontSize: 17 },
-  grid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16, marginTop: 32 },
-  card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 24, lineHeight: 1.6 },
-  cardButton: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 24, lineHeight: 1.6, textAlign: "left", cursor: "pointer", display: "grid", gap: 8, color: "#172033" },
-  onboarding: { marginTop: 32, background: "#fff", border: "1px solid #dfe2ea", borderRadius: 18, padding: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, boxShadow: "0 12px 35px rgba(23,32,51,.05)" },
-  onboardingLabel: { fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7" },
-  onboardingTitle: { margin: "8px 0 6px", fontSize: 24 },
-  onboardingText: { margin: 0, color: "#687386", lineHeight: 1.55, maxWidth: 650 },
-  primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
-  secondary: { border: "1px solid #dfe2ea", background: "#fff", color: "#4f46c7", borderRadius: 9, padding: "11px 16px", fontWeight: 800, cursor: "pointer", whiteSpace: "nowrap" },
-  statusSection: { marginTop: 24, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 22, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18 },
-  savedCard: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 12, padding: "16px 18px", display: "flex", justifyContent: "space-between", gap: 12, textDecoration: "none", color: "#172033" },
-  center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
-};
 
