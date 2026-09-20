@@ -69,7 +69,143 @@ function SearchPage() {
       setLoading(false);
     }
     loadCatalog();
-    return (
+    return () => { mounted = false; };
+  }, []);
+
+  function distanceInKm(latitude1: number, longitude1: number, latitude2: number, longitude2: number) {
+    const earthRadiusKm = 6371;
+    const dLat = (latitude2 - latitude1) * Math.PI / 180;
+    const dLon = (longitude2 - longitude1) * Math.PI / 180;
+    const lat1 = latitude1 * Math.PI / 180;
+    const lat2 = latitude2 * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function requestLocation() {
+    if (!navigator.geolocation) {
+      setLocationMessage("Seu navegador não oferece localização.");
+      return;
+    }
+    setLocationLoading(true);
+    setLocationMessage("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setLocationLoading(false);
+        setLocationMessage("");
+      },
+      () => {
+        setUserLocation(null);
+        setRadiusKm(null);
+        setLocationLoading(false);
+        setLocationMessage("Permita o acesso à sua localização para usar a busca por raio.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
+  }
+
+  useEffect(() => {
+    if (radiusKm !== null && !userLocation && !locationLoading) requestLocation();
+  }, [radiusKm, userLocation, locationLoading]);
+
+  const results = useMemo(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
+    const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
+    return businesses.filter((business) => {
+      const searchable = [
+        business.business_name, business.description ?? "", business.city ?? "", business.state ?? "",
+        ...business.services.map((service) => service.name),
+        ...business.services.map((service) => service.categories?.name ?? ""),
+      ].join(" ").toLocaleLowerCase("pt-BR");
+      return (
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedCity || (business.city ?? "").toLocaleLowerCase("pt-BR").includes(normalizedCity)) &&
+        (!categoryId || business.services.some((service) => service.category_id === categoryId)) &&
+        (radiusKm === null || Boolean(userLocation && business.latitude !== null && business.longitude !== null && distanceInKm(userLocation.latitude, userLocation.longitude, business.latitude, business.longitude) <= radiusKm))
+      );
+    });
+  }, [businesses, search, city, categoryId, radiusKm, userLocation]);
+
+  const scoredResults = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase("pt-BR");
+    const tokens = query.split(/\s+/).map((token) => token.trim()).filter((token) => token.length >= 2);
+
+    function normalize(value: string) {
+      return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR");
+    }
+
+    function score(business: Business) {
+      if (!tokens.length) return 0;
+      const name = normalize(business.business_name);
+      const description = normalize(business.description ?? "");
+      const cityName = normalize(business.city ?? "");
+      const serviceNames = business.services.map((service) => normalize(service.name));
+      const categoryNames = business.services.map((service) => normalize(service.categories?.name ?? ""));
+      let total = 0;
+      for (const token of tokens) {
+        if (name.includes(token)) total += 40;
+        if (serviceNames.some((value) => value.includes(token))) total += 30;
+        if (categoryNames.some((value) => value.includes(token))) total += 25;
+        if (description.includes(token)) total += 10;
+        if (cityName.includes(token)) total += 5;
+      }
+      if (query && name === query) total += 50;
+      return total;
+    }
+
+    return results.map((business) => ({ business, searchScore: score(business) }));
+  }, [results, search]);
+
+  const sortedResults = useMemo(() => {
+    const copy = [...scoredResults];
+    const rating = (business: Business) =>
+      business.reviews.length
+        ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length
+        : 0;
+    if (sortBy === "rating") {
+      return copy.sort((a, b) => rating(b.business) - rating(a.business) || a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
+    }
+    if (sortBy === "az") {
+      return copy.sort((a, b) => a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
+    }
+    if (sortBy === "saved") {
+      return copy.sort((a, b) => Number(favoriteIds.includes(b.business.id)) - Number(favoriteIds.includes(a.business.id))).map((item) => item.business);
+    }
+    return copy.sort((a, b) =>
+      b.searchScore - a.searchScore ||
+      Number(b.business.verified) - Number(a.business.verified) ||
+      rating(b.business) - rating(a.business) ||
+      a.business.business_name.localeCompare(b.business.business_name, "pt-BR")
+    ).map((item) => item.business);
+  }, [scoredResults, sortBy, favoriteIds]);
+
+  async function toggleFavorite(businessId: string) {
+    if (!userId) {
+      window.location.href = "/entrar";
+      return;
+    }
+    setFavoriteBusy(businessId);
+    const isFavorite = favoriteIds.includes(businessId);
+    const result = isFavorite
+      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", businessId)
+      : await supabase.from("favorites").insert({ user_id: userId, business_id: businessId });
+    if (!result.error) {
+      setFavoriteIds((current) => isFavorite ? current.filter((id) => id !== businessId) : [...current, businessId]);
+    }
+    setFavoriteBusy(null);
+  }
+
+  function whatsappUrl(business: Business) {
+    const raw = business.whatsapp || business.phone || "";
+    const digits = raw.replace(/\D/g, "");
+    if (!digits) return null;
+    const number = digits.startsWith("55") ? digits : "55" + digits;
+    const text = encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA e gostaria de saber mais sobre os serviços.");
+    return "https://wa.me/" + number + "?text=" + text;
+  }
+
+  return (
     <main className="marketplace-page">
       <header className="marketplace-header">
         <div className="marketplace-header-inner">
