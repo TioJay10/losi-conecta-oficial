@@ -9,7 +9,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; address: string | null; logo_url: string | null;
-  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[]; owner_id: string; created_at: string;
+  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[]; owner_id: string; created_at: string; reputation_report_count: number; reputation_service_count: number;
 };
 
 export const Route = createFileRoute("/fornecedor/$slug")({
@@ -43,7 +43,7 @@ function ProviderPage() {
       if (mounted) setUserId(sessionData.session?.user.id ?? null);
       const { data, error: queryError } = await supabase
         .from("business_profiles")
-        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,created_at,services(id,name,description,categories(name))")
+        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,created_at,reputation_report_count,reputation_service_count,services(id,name,description,categories(name))")
         .eq("slug", slug)
         .eq("active", true)
         .maybeSingle();
@@ -64,15 +64,11 @@ function ProviderPage() {
           if (mounted) {
             setReviews((reviewData ?? []) as unknown as Review[]);
 
-            const [{ data: ownerData }, { count: reportCount }, { count: acceptedCount }] = await Promise.all([
-              supabase.from("profiles").select("blocked").eq("id", loaded.owner_id).maybeSingle(),
-              supabase.from("supplier_reports").select("id", { count: "exact", head: true }).eq("business_id", loaded.id),
-              supabase.from("quotes").select("id", { count: "exact", head: true }).eq("business_id", loaded.id).eq("status", "accepted"),
-            ]);
+            const { data: ownerData } = await supabase.from("profiles").select("blocked").eq("id", loaded.owner_id).maybeSingle();
             const activeReviews = (reviewData ?? []) as unknown as Review[];
             const negativeReviews = activeReviews.filter(review => review.rating <= 2).length;
-            const reports = reportCount ?? 0;
-            const completedServices = acceptedCount ?? 0;
+            const reports = loaded.reputation_report_count ?? 0;
+            const completedServices = loaded.reputation_service_count ?? 0;
             const blocked = Boolean((ownerData as { blocked?: boolean } | null)?.blocked);
             const monthsOnPlatform = Math.max(0, (Date.now() - new Date(loaded.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
             let score = 20;
