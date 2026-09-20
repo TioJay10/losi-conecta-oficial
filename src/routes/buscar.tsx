@@ -9,7 +9,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; logo_url: string | null; cover_url: string | null;
-  verified: boolean; services: Service[]; reviews: ReviewSummary[];
+  verified: boolean; latitude: number | null; longitude: number | null; services: Service[]; reviews: ReviewSummary[];
 };
 
 export const Route = createFileRoute("/buscar")({ component: SearchPage });
@@ -20,6 +20,10 @@ function SearchPage() {
   const [search, setSearch] = useState("");
   const [city, setCity] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationMessage, setLocationMessage] = useState("");
   const [sortBy, setSortBy] = useState("relevance");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,7 +44,7 @@ function SearchPage() {
       const [businessResult, categoryResult] = await Promise.all([
         supabase
           .from("business_profiles")
-          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,services(id,name,category_id,categories(name)),reviews(rating)")
+          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,latitude,longitude,services(id,name,category_id,categories(name)),reviews(rating)")
           .eq("active", true)
           .eq("approval_status", "approved")
           .order("business_name"),
@@ -59,6 +63,43 @@ function SearchPage() {
     return () => { mounted = false; };
   }, []);
 
+  function distanceInKm(latitude1: number, longitude1: number, latitude2: number, longitude2: number) {
+    const earthRadiusKm = 6371;
+    const dLat = (latitude2 - latitude1) * Math.PI / 180;
+    const dLon = (longitude2 - longitude1) * Math.PI / 180;
+    const lat1 = latitude1 * Math.PI / 180;
+    const lat2 = latitude2 * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function requestLocation() {
+    if (!navigator.geolocation) {
+      setLocationMessage("Seu navegador não oferece localização.");
+      return;
+    }
+    setLocationLoading(true);
+    setLocationMessage("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setLocationLoading(false);
+        setLocationMessage("");
+      },
+      () => {
+        setUserLocation(null);
+        setRadiusKm(null);
+        setLocationLoading(false);
+        setLocationMessage("Permita o acesso à sua localização para usar a busca por raio.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
+  }
+
+  useEffect(() => {
+    if (radiusKm !== null && !userLocation && !locationLoading) requestLocation();
+  }, [radiusKm]);
+
   const results = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
     const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
@@ -71,10 +112,11 @@ function SearchPage() {
       return (
         (!normalizedSearch || searchable.includes(normalizedSearch)) &&
         (!normalizedCity || (business.city ?? "").toLocaleLowerCase("pt-BR").includes(normalizedCity)) &&
-        (!categoryId || business.services.some((service) => service.category_id === categoryId))
+        (!categoryId || business.services.some((service) => service.category_id === categoryId)) &&
+        (radiusKm === null || (userLocation && business.latitude !== null && business.longitude !== null && distanceInKm(userLocation.latitude, userLocation.longitude, business.latitude, business.longitude) <= radiusKm))
       );
     });
-  }, [businesses, search, city, categoryId]);
+  }, [businesses, search, city, categoryId, radiusKm, userLocation]);
 
   const scoredResults = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("pt-BR");
@@ -174,6 +216,22 @@ function SearchPage() {
             <input id="catalog-city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Ex.: Cotia" />
           </div>
           <div className="catalog-field">
+            <label htmlFor="catalog-radius">Encontrar por raio</label>
+            <select id="catalog-radius" value={radiusKm ?? ""} onChange={(event) => {
+              const value = event.target.value;
+              setRadiusKm(value ? Number(value) : null);
+              if (!value) { setUserLocation(null); setLocationMessage(""); }
+            }}>
+              <option value="">Qualquer distância</option>
+              <option value="1">Até 1 km</option>
+              <option value="5">Até 5 km</option>
+              <option value="10">Até 10 km</option>
+              <option value="25">Até 25 km</option>
+              <option value="50">Até 50 km</option>
+              <option value="100">Até 100 km</option>
+            </select>
+          </div>
+          <div className="catalog-field">
             <label htmlFor="catalog-category">Categoria</label>
             <select id="catalog-category" value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
               <option value="">Todas as categorias</option>
@@ -198,11 +256,13 @@ function SearchPage() {
                 <option value="az">Nome: A–Z</option>
               </select>
             </label>
-            {(search || city || categoryId) && (
-              <button className="catalog-clear" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); }}>Limpar filtros</button>
+            {(search || city || categoryId || radiusKm !== null) && (
+              <button className="catalog-clear" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); setRadiusKm(null); setUserLocation(null); setLocationMessage(""); }}>Limpar filtros</button>
             )}
           </div>
         </div>
+        {locationLoading && <div className="catalog-message">Obtendo sua localização para filtrar por raio...</div>}
+        {locationMessage && <div className="catalog-message catalog-error">{locationMessage}</div>}
         {error && <div className="catalog-message catalog-error">{error}</div>}
         {!loading && !error && results.length === 0 && (
           <div className="catalog-empty">
@@ -211,11 +271,12 @@ function SearchPage() {
             <Link to={sortBy === "saved" ? "/buscar" : "/entrar"}>{sortBy === "saved" ? "Continuar pesquisando" : "Quero cadastrar minha empresa"}</Link>
           </div>
         )}
-        {(search || city || categoryId) && (
+        {(search || city || categoryId || radiusKm !== null) && (
           <div className="catalog-active-filters" aria-label="Filtros ativos">
             {search && <span>Busca: {search}</span>}
             {city && <span>Cidade: {city}</span>}
             {categoryId && <span>Categoria: {categories.find((category) => category.id === categoryId)?.name}</span>}
+            {radiusKm !== null && <span>Raio: até {radiusKm} km</span>}
           </div>
         )}
         <div className="catalog-grid">
