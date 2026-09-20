@@ -3664,3 +3664,174 @@ textarea:focus,
 .admin-page .admin-card input::placeholder {
   color: #938aa8 !important;
 }
+
+
+/* ADMIN FINAL POLISH — clean headings, dark result counters and aligned header */
+.admin-page .admin-content > .admin-page-title,
+.admin-page .admin-section-head > .admin-page-title {
+  background: transparent !important;
+}
+
+/* Section title/badge areas are transparent; only the actual cards carry glass */
+.admin-page .admin-table-section > .admin-section-head {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 0 16px !important;
+}
+
+.admin-page .admin-table-section > .admin-section-head > div {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Result counters must blend into the dark interface */
+.admin-page .admin-filter-count {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 30px !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  background: rgba(116,55,244,.16) !important;
+  border: 1px solid rgba(181,164,255,.18) !important;
+  color: #d9d1ee !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+/* Toolbar/result areas stay dark glass, never white */
+.admin-page .admin-filters,
+.admin-page .admin-simple-filter {
+  background: rgba(27,21,57,.88) !important;
+  border: 1px solid rgba(181,164,255,.16) !important;
+}
+
+/* Header brand and administrative label are separated and aligned */
+.admin-page .admin-header {
+  min-height: 72px !important;
+  padding: 10px 28px !important;
+  gap: 20px !important;
+}
+
+.admin-page .admin-header > div:first-child {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  min-width: 0 !important;
+}
+
+.admin-page .admin-header > div:first-child > div:first-child {
+  flex: 0 0 auto !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.admin-page .admin-header > div:first-child > div:last-child {
+  margin: 0 !important;
+  padding-left: 14px !important;
+  border-left: 1px solid rgba(181,164,255,.22) !important;
+  color: #bdb4d3 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+.admin-page .admin-header .admin-logout,
+.admin-page .admin-header button {
+  flex: 0 0 auto !important;
+  min-width: 68px !important;
+  min-height: 38px !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(181,164,255,.20) !important;
+  color: #f5f2ff !important;
+  font-weight: 800 !important;
+}
+
+.admin-page .admin-header .admin-logout:hover,
+.admin-page .admin-header button:hover {
+  background: rgba(116,55,244,.22) !important;
+  border-color: rgba(181,164,255,.34) !important;
+}
+
+/* Buttons: dark glass by default, clear hierarchy for primary actions */
+.admin-page button {
+  font-family: inherit !important;
+}
+
+.admin-page .admin-item-actions button,
+.admin-page .admin-action-button,
+.admin-page .admin-back-button {
+  min-height: 36px !important;
+  padding: 8px 12px !important;
+}
+
+.admin-page .admin-primary-button,
+.admin-page .admin-commercial-activation .admin-item-actions button {
+  background: linear-gradient(135deg,#7133ee,#8d3af6) !important;
+  border: 0 !important;
+  color: #fff !important;
+  box-shadow: 0 7px 18px rgba(92,35,204,.28) !important;
+}
+
+.admin-page .admin-secondary-button,
+.admin-page .admin-item-actions button,
+.admin-page [style*="actionButton"],
+.admin-page [style*="backButton"] {
+  background: rgba(255,255,255,.07) !important;
+  border: 1px solid rgba(181,164,255,.20) !important;
+  color: #eeeaff !important;
+}
+
+.admin-page .admin-secondary-button:hover,
+.admin-page .admin-item-actions button:hover,
+.admin-page [style*="actionButton"]:hover,
+.admin-page [style*="backButton"]:hover {
+  background: rgba(116,55,244,.22) !important;
+  color: #fff !important;
+}
+
+/* Headings in overview/cards never receive a filled background */
+.admin-page .admin-grid > button strong,
+.admin-page .admin-grid > div strong {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+.admin-page .admin-grid > button em,
+.admin-page .admin-grid > div em {
+  background: rgba(116,55,244,.16) !important;
+  color: #cdbaff !important;
+  border: 1px solid rgba(181,164,255,.16) !important;
+}
+
+/* Keep the administrator badge readable without turning it into a white card */
+.admin-page .admin-content > .admin-badge,
+.admin-page .admin-section-head > .admin-badge {
+  background: transparent !important;
+  color: #bba8ff !important;
+  border: 0 !important;
+}
+
+/* Prevent accidental white surfaces inside the admin workspace */
+.admin-page .admin-table-section,
+.admin-page .admin-overview-content,
+.admin-page .admin-inline-list {
+  color: #f5f2ff !important;
+}
+
+@media(max-width:599px){
+  .admin-page .admin-header {
+    padding: 10px 14px !important;
+    gap: 10px !important;
+  }
+  .admin-page .admin-header > div:first-child {
+    gap: 9px !important;
+  }
+  .admin-page .admin-header > div:first-child > div:last-child {
+    padding-left: 9px !important;
+    font-size: 9px !important;
+  }
+}
