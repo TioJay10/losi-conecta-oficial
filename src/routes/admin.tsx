@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
-import type { CSSProperties } from "react";
 import { supabase } from "../lib/supabase";
 
 export const Route = createFileRoute("/admin")({
@@ -263,7 +262,7 @@ function AdminPage() {
     navigate({ to: "/entrar" });
   }
 
-  if (loading) return <main style={styles.center}>Carregando administração...</main>;
+  if (loading) return <main className="admin-loading">Carregando administração...</main>;
   if (!user) return null;
 
   const menu = [
@@ -290,12 +289,12 @@ function AdminPage() {
   const sectionTitle = section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
 
   return (
-    <main className="admin-page" style={styles.page}>
-      <header className="admin-header" style={styles.header}>
+    <main className="admin-page">
+      <header className="admin-header">
         <button type="button" id="admin-mobile-menu" className="admin-mobile-menu-button" aria-label={mobileMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
           <span></span><span></span><span></span>
         </button>
-        <div><div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div><div className="admin-mobile-subtitle" style={styles.subtitle}>PAINEL ADMINISTRATIVO</div></div>
+        <div><div className="mobile-centered-brand">LOSI <span>CONECTA</span></div><div className="admin-mobile-subtitle">PAINEL ADMINISTRATIVO</div></div>
         <button type="button" className="admin-logout" onClick={logout}>Sair do painel</button>
       </header>
       <div className="admin-shell">
@@ -309,10 +308,10 @@ function AdminPage() {
             <button type="button" onClick={logout}>Sair do painel</button>
           </div>
         </aside>
-        <section className="admin-content" style={styles.content}>
-          <div style={styles.badge}>ADMINISTRADOR</div>
+        <section className="admin-content">
+          <div className="admin-badge">ADMINISTRADOR</div>
           <h1>{section === "overview" ? `Olá, ${name}.` : sectionTitle}</h1>
-          <p style={styles.text}>{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>
+          <p className="admin-text">{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>
           {dataError && <div className="admin-data-error">Não foi possível carregar alguns dados: {dataError}</div>}
           {section === "overview" ? (
             <div className="admin-overview-content">
@@ -326,24 +325,24 @@ function AdminPage() {
             </div>
             {pendingBusinesses.length > 0 && (
               <section className="admin-pending-panel">
-                <div className="admin-section-head"><div><div style={styles.badge}>AÇÃO NECESSÁRIA</div><h2 style={{margin:"10px 0 4px"}}>Fornecedores aguardando análise</h2><p style={{...styles.text,margin:0}}>Revise os perfis pendentes diretamente desta tela.</p></div><button style={styles.backButton} onClick={() => { setSection("businesses"); setBusinessStatusFilter("pending"); window.history.replaceState(null, "", "/admin?section=businesses&status=pending"); }}>Ver todos</button></div>
+                <div className="admin-section-head"><div><div className="admin-badge">AÇÃO NECESSÁRIA</div><h2 className="admin-section-title">Fornecedores aguardando análise</h2><p className="admin-text admin-text-compact">Revise os perfis pendentes diretamente desta tela.</p></div><button className="admin-back-button" onClick={() => { setSection("businesses"); setBusinessStatusFilter("pending"); window.history.replaceState(null, "", "/admin?section=businesses&status=pending"); }}>Ver todos</button></div>
                 <div className="admin-pending-list">
-                  {pendingBusinesses.slice(0, 5).map((item) => <article className="admin-pending-item" key={item.id}><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button></div></article>)}
+                  {pendingBusinesses.slice(0, 5).map((item) => <article className="admin-pending-item" key={item.id}><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""}</span></div><div className="admin-item-actions"><button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button><button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button></div></article>)}
                 </div>
               </section>
             )}
-            <div className="admin-grid" style={styles.grid}>
-              <button style={styles.cardButton} onClick={() => { setSection("users"); window.history.replaceState(null, "", "/admin?section=users"); }}><strong>Usuários <em>{stats.users}</em></strong><span>Contas cadastradas na plataforma.</span></button>
-              <button style={styles.cardButton} onClick={() => { setSection("businesses"); window.history.replaceState(null, "", "/admin?section=businesses"); }}><strong>Empresas <em>{stats.businesses}</em></strong><span>Perfis comerciais e aprovação.</span></button>
-              <button style={styles.cardButton} onClick={() => { setSection("services"); window.history.replaceState(null, "", "/admin?section=services"); }}><strong>Serviços <em>{stats.services}</em></strong><span>Serviços publicados pelos profissionais.</span></button>
-              <button style={styles.cardButton} onClick={() => { setSection("categories"); window.history.replaceState(null, "", "/admin?section=categories"); }}><strong>Categorias <em>{stats.categories}</em></strong><span>Organização do catálogo.</span></button>
-              <button style={styles.cardButton} onClick={() => { setSection("reviews"); window.history.replaceState(null, "", "/admin?section=reviews"); }}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Moderação das avaliações.</span></button>
-              <div style={styles.card}><strong>Operação</strong><span>Use a fila de pendentes para analisar novos fornecedores e manter o catálogo atualizado.</span></div>
+            <div className="admin-grid" >
+              <button className="admin-overview-card" onClick={() => { setSection("users"); window.history.replaceState(null, "", "/admin?section=users"); }}><strong>Usuários <em>{stats.users}</em></strong><span>Contas cadastradas na plataforma.</span></button>
+              <button className="admin-overview-card" onClick={() => { setSection("businesses"); window.history.replaceState(null, "", "/admin?section=businesses"); }}><strong>Empresas <em>{stats.businesses}</em></strong><span>Perfis comerciais e aprovação.</span></button>
+              <button className="admin-overview-card" onClick={() => { setSection("services"); window.history.replaceState(null, "", "/admin?section=services"); }}><strong>Serviços <em>{stats.services}</em></strong><span>Serviços publicados pelos profissionais.</span></button>
+              <button className="admin-overview-card" onClick={() => { setSection("categories"); window.history.replaceState(null, "", "/admin?section=categories"); }}><strong>Categorias <em>{stats.categories}</em></strong><span>Organização do catálogo.</span></button>
+              <button className="admin-overview-card" onClick={() => { setSection("reviews"); window.history.replaceState(null, "", "/admin?section=reviews"); }}><strong>Avaliações <em>{stats.reviews}</em></strong><span>Moderação das avaliações.</span></button>
+              <div className="admin-operation-card"><strong>Operação</strong><span>Use a fila de pendentes para analisar novos fornecedores e manter o catálogo atualizado.</span></div>
             </div>
             </div>
           ) : section === "security" ? (
             <div className="admin-security-center">
-              <div className="admin-security-hero"><div><div style={styles.badge}>SEGURANÇA</div><h2>Central de segurança</h2><p>Monitore contas em risco, denúncias novas, contas bloqueadas e perfis aguardando verificação.</p></div><span className="admin-security-status">MONITORAMENTO ATIVO</span></div>
+              <div className="admin-security-hero"><div><div className="admin-badge">SEGURANÇA</div><h2>Central de segurança</h2><p>Monitore contas em risco, denúncias novas, contas bloqueadas e perfis aguardando verificação.</p></div><span className="admin-security-status">MONITORAMENTO ATIVO</span></div>
               {(() => {
                 const normalizePhone = (value: string | null | undefined) => (value ?? "").replace(/\D/g, "");
                 const phoneCounts = users.reduce<Record<string, number>>((acc, item) => { const phone=normalizePhone(item.phone); if(phone) acc[phone]=(acc[phone]||0)+1; return acc; }, {});
@@ -360,21 +359,21 @@ function AdminPage() {
                 return <>
                   <div className="admin-security-metrics"><article><span>Contas em risco</span><strong>{riskUsers.length+riskBusinesses.length}</strong></article><article><span>Denúncias novas</span><strong>{newReports.length}</strong></article><article><span>Contas bloqueadas</span><strong>{blockedUsers.length}</strong></article><article><span>Perfil aguardando verificação</span><strong>{pendingVerification.length}</strong></article></div>
                   <div className="admin-security-toolbar"><input value={securitySearch} onChange={event=>setSecuritySearch(event.target.value)} placeholder="Buscar conta, fornecedor ou motivo..." aria-label="Buscar riscos de segurança" /></div>
-                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>CONTAS EM RISCO</div><h3>Contas que exigem atenção</h3></div><span>{visibleUsers.length+visibleBusinesses.length} encontrado(s)</span></div><div className="admin-security-list">
-                    {visibleUsers.map(({item,reasons})=><article className="admin-security-card" key={`user-${item.id}`}><div className="admin-security-card-main"><strong>{item.full_name||"Usuário sem nome"}</strong><span>{item.user_type==="admin"?"Administrador":"Profissional"}{item.city?` · ${item.city}`:""}{item.state?` - ${item.state}`:""}</span><div className="admin-security-reasons">{reasons.map(reason=><span key={reason}>{reason}</span>)}</div></div><div className="admin-security-actions">{item.blocked?<button type="button" style={styles.actionButton} onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button>:<button type="button" className="admin-security-danger" onClick={()=>manageUser(item.id,"block")}>Suspender / bloquear</button>}</div></article>)}
-                    {visibleBusinesses.map(({business,reasons})=><article className="admin-security-card" key={`business-${business.id}`}><div className="admin-security-card-main"><strong>{business.business_name}</strong><span>Fornecedor{business.city?` · ${business.city}`:""}{business.state?` - ${business.state}`:""}</span><div className="admin-security-reasons">{reasons.map(reason=><span key={reason}>{reason}</span>)}</div></div><div className="admin-security-actions">{business.approval_status!=="approved"&&<button type="button" style={styles.actionButton} onClick={()=>updateBusiness(business.id,{approval_status:"approved",verified:true,active:true})}>Aprovar</button>}<button type="button" style={styles.actionButton} onClick={()=>updateBusiness(business.id,{approval_status:"pending",verified:false})}>Solicitar verificação</button>{business.active&&<button type="button" className="admin-security-danger" onClick={()=>updateBusiness(business.id,{active:false})}>Suspender / bloquear</button>}</div></article>)}
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div className="admin-badge">CONTAS EM RISCO</div><h3>Contas que exigem atenção</h3></div><span>{visibleUsers.length+visibleBusinesses.length} encontrado(s)</span></div><div className="admin-security-list">
+                    {visibleUsers.map(({item,reasons})=><article className="admin-security-card" key={`user-${item.id}`}><div className="admin-security-card-main"><strong>{item.full_name||"Usuário sem nome"}</strong><span>{item.user_type==="admin"?"Administrador":"Profissional"}{item.city?` · ${item.city}`:""}{item.state?` - ${item.state}`:""}</span><div className="admin-security-reasons">{reasons.map(reason=><span key={reason}>{reason}</span>)}</div></div><div className="admin-security-actions">{item.blocked?<button type="button" className="admin-action-button" onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button>:<button type="button" className="admin-security-danger" onClick={()=>manageUser(item.id,"block")}>Suspender / bloquear</button>}</div></article>)}
+                    {visibleBusinesses.map(({business,reasons})=><article className="admin-security-card" key={`business-${business.id}`}><div className="admin-security-card-main"><strong>{business.business_name}</strong><span>Fornecedor{business.city?` · ${business.city}`:""}{business.state?` - ${business.state}`:""}</span><div className="admin-security-reasons">{reasons.map(reason=><span key={reason}>{reason}</span>)}</div></div><div className="admin-security-actions">{business.approval_status!=="approved"&&<button type="button" className="admin-action-button" onClick={()=>updateBusiness(business.id,{approval_status:"approved",verified:true,active:true})}>Aprovar</button>}<button type="button" className="admin-action-button" onClick={()=>updateBusiness(business.id,{approval_status:"pending",verified:false})}>Solicitar verificação</button>{business.active&&<button type="button" className="admin-security-danger" onClick={()=>updateBusiness(business.id,{active:false})}>Suspender / bloquear</button>}</div></article>)}
                     {visibleUsers.length===0&&visibleBusinesses.length===0&&<div className="admin-empty">Nenhum sinal de risco encontrado.</div>}
                   </div></section>
-                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>DENÚNCIAS NOVAS</div><h3>Últimas denúncias</h3></div><span>{newReports.length} nos últimos 7 dias</span></div><div className="admin-security-list">
-                    {newReports.slice(0,20).map(report=><article className="admin-security-card" key={report.id}><div className="admin-security-card-main"><strong>{report.business?.business_name||"Fornecedor"}</strong><span>{report.reporter?.full_name||"Usuário"} · {new Date(report.created_at).toLocaleString("pt-BR")}</span><div className="admin-security-reasons"><span>{report.reason.replaceAll("_"," ")}</span></div>{report.details&&<p>{report.details}</p>}</div><div className="admin-security-actions"><button type="button" style={styles.actionButton} onClick={()=>{setSection("businesses");setSelectedBusinessId(report.business_id);window.history.replaceState(null,"","/admin?section=businesses");}}>Analisar fornecedor</button></div></article>)}
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div className="admin-badge">DENÚNCIAS NOVAS</div><h3>Últimas denúncias</h3></div><span>{newReports.length} nos últimos 7 dias</span></div><div className="admin-security-list">
+                    {newReports.slice(0,20).map(report=><article className="admin-security-card" key={report.id}><div className="admin-security-card-main"><strong>{report.business?.business_name||"Fornecedor"}</strong><span>{report.reporter?.full_name||"Usuário"} · {new Date(report.created_at).toLocaleString("pt-BR")}</span><div className="admin-security-reasons"><span>{report.reason.replaceAll("_"," ")}</span></div>{report.details&&<p>{report.details}</p>}</div><div className="admin-security-actions"><button type="button" className="admin-action-button" onClick={()=>{setSection("businesses");setSelectedBusinessId(report.business_id);window.history.replaceState(null,"","/admin?section=businesses");}}>Analisar fornecedor</button></div></article>)}
                     {newReports.length===0&&<div className="admin-empty">Nenhuma denúncia nova nos últimos 7 dias.</div>}
                   </div></section>
-                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>CONTAS BLOQUEADAS</div><h3>Contas atualmente bloqueadas</h3></div><span>{blockedUsers.length}</span></div><div className="admin-security-list">
-                    {blockedUsers.map(item=><article className="admin-security-card" key={item.id}><div className="admin-security-card-main"><strong>{item.full_name||"Usuário sem nome"}</strong><span>Conta bloqueada{item.city?` · ${item.city}`:""}</span></div><div className="admin-security-actions"><button type="button" style={styles.actionButton} onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button></div></article>)}
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div className="admin-badge">CONTAS BLOQUEADAS</div><h3>Contas atualmente bloqueadas</h3></div><span>{blockedUsers.length}</span></div><div className="admin-security-list">
+                    {blockedUsers.map(item=><article className="admin-security-card" key={item.id}><div className="admin-security-card-main"><strong>{item.full_name||"Usuário sem nome"}</strong><span>Conta bloqueada{item.city?` · ${item.city}`:""}</span></div><div className="admin-security-actions"><button type="button" className="admin-action-button" onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button></div></article>)}
                     {blockedUsers.length===0&&<div className="admin-empty">Nenhuma conta bloqueada.</div>}
                   </div></section>
-                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div style={styles.badge}>AGUARDANDO VERIFICAÇÃO</div><h3>Perfis aguardando verificação</h3></div><span>{pendingVerification.length}</span></div><div className="admin-security-list">
-                    {pendingVerification.map(business=><article className="admin-security-card" key={business.id}><div className="admin-security-card-main"><strong>{business.business_name}</strong><span>{business.city||"Localização não informada"}{business.state?` - ${business.state}`:""}</span></div><div className="admin-security-actions"><button type="button" style={styles.actionButton} onClick={()=>{setSection("businesses");setSelectedBusinessId(business.id);window.history.replaceState(null,"","/admin?section=businesses");}}>Analisar</button><button type="button" style={styles.actionButton} onClick={()=>updateBusiness(business.id,{approval_status:"approved",verified:true,active:true})}>Aprovar</button></div></article>)}
+                  <section className="admin-security-section"><div className="admin-security-section-head"><div><div className="admin-badge">AGUARDANDO VERIFICAÇÃO</div><h3>Perfis aguardando verificação</h3></div><span>{pendingVerification.length}</span></div><div className="admin-security-list">
+                    {pendingVerification.map(business=><article className="admin-security-card" key={business.id}><div className="admin-security-card-main"><strong>{business.business_name}</strong><span>{business.city||"Localização não informada"}{business.state?` - ${business.state}`:""}</span></div><div className="admin-security-actions"><button type="button" className="admin-action-button" onClick={()=>{setSection("businesses");setSelectedBusinessId(business.id);window.history.replaceState(null,"","/admin?section=businesses");}}>Analisar</button><button type="button" className="admin-action-button" onClick={()=>updateBusiness(business.id,{approval_status:"approved",verified:true,active:true})}>Aprovar</button></div></article>)}
                     {pendingVerification.length===0&&<div className="admin-empty">Nenhum perfil aguardando verificação.</div>}
                   </div></section>
                 </>;
@@ -382,7 +381,7 @@ function AdminPage() {
             </div>
           ) : (
             <section className="admin-table-section">
-              <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}>Visão geral</button></div>
+              <div className="admin-section-head"><div className="admin-badge">{sectionTitle.toUpperCase()}</div><button className="admin-back-button" onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}>Visão geral</button></div>
               {section === "users" ? <div className="admin-inline-list">
                 <div className="admin-users-toolbar">
                   <div>
@@ -455,18 +454,18 @@ function AdminPage() {
                 {selectedBusiness && (
                   <div className="admin-review-card">
                     <div className="admin-section-head">
-                      <div><div style={styles.badge}>ANÁLISE DO FORNECEDOR</div><h2 style={{margin:"10px 0 4px"}}>{selectedBusiness.business_name}</h2><p style={{...styles.text,margin:0}}>{selectedBusiness.city || "Localização não informada"}{selectedBusiness.state ? " - " + selectedBusiness.state : ""}</p></div>
-                      <button style={styles.backButton} onClick={() => setSelectedBusinessId(null)}>Fechar análise</button>
+                      <div><div className="admin-badge">ANÁLISE DO FORNECEDOR</div><h2 className="admin-section-title">{selectedBusiness.business_name}</h2><p className="admin-text admin-text-compact">{selectedBusiness.city || "Localização não informada"}{selectedBusiness.state ? " - " + selectedBusiness.state : ""}</p></div>
+                      <button className="admin-back-button" onClick={() => setSelectedBusinessId(null)}>Fechar análise</button>
                     </div>
                     <div className="admin-review-media">{selectedBusiness.cover_url && <img src={selectedBusiness.cover_url} alt="" className="admin-review-cover" />}{selectedBusiness.logo_url && <img src={selectedBusiness.logo_url} alt="" className="admin-review-logo" />}</div><div className="admin-review-status"><span>Status: <strong>{selectedBusiness.approval_status === "approved" ? "Aprovada" : selectedBusiness.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</strong></span><span>{selectedBusiness.verified ? "Verificada" : "Não verificada"} · {selectedBusiness.active ? "Ativa" : "Inativa"}</span></div>
-                    <div className="admin-item-actions"><button style={styles.actionButton} onClick={() => updateBusiness(selectedBusiness.id,{approval_status:"approved"})}>Aprovar fornecedor</button><button style={styles.actionButton} onClick={() => updateBusiness(selectedBusiness.id,{approval_status:"rejected"})}>Rejeitar fornecedor</button></div>
+                    <div className="admin-item-actions"><button className="admin-action-button" onClick={() => updateBusiness(selectedBusiness.id,{approval_status:"approved"})}>Aprovar fornecedor</button><button className="admin-action-button" onClick={() => updateBusiness(selectedBusiness.id,{approval_status:"rejected"})}>Rejeitar fornecedor</button></div>
                   </div>
                 )}
-                <div className="admin-list">{filteredBusinesses.length === 0 ? <div className="admin-empty">Nenhuma empresa encontrada com esses filtros.</div> : filteredBusinesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={() => setSelectedBusinessId(item.id)}>Analisar</button><button style={styles.actionButton} onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button>{item.approval_status !== "approved" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button>}{item.approval_status !== "rejected" && <button style={styles.actionButton} onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button>}<button style={styles.actionButton} onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
+                <div className="admin-list">{filteredBusinesses.length === 0 ? <div className="admin-empty">Nenhuma empresa encontrada com esses filtros.</div> : filteredBusinesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button className="admin-action-button" onClick={() => setSelectedBusinessId(item.id)}>Analisar</button><button className="admin-action-button" onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button>{item.approval_status !== "approved" && <button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button>}{item.approval_status !== "rejected" && <button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button>}<button className="admin-action-button" onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               </div>
               : section === "commercial" ? <div className="admin-commercial-grid">
                 {plans.map(plan => <article className="admin-commercial-card" key={plan.id}>
-                  <div className="admin-commercial-card-head"><span>{plan.billing_period === "free" ? "PLANO GRATUITO" : "PLANO PAGO"}</span><button type="button" style={styles.actionButton} onClick={() => setEditingPlanId(editingPlanId === plan.id ? null : plan.id)}>{editingPlanId === plan.id ? "Fechar" : "Editar plano"}</button></div>
+                  <div className="admin-commercial-card-head"><span>{plan.billing_period === "free" ? "PLANO GRATUITO" : "PLANO PAGO"}</span><button type="button" className="admin-action-button" onClick={() => setEditingPlanId(editingPlanId === plan.id ? null : plan.id)}>{editingPlanId === plan.id ? "Fechar" : "Editar plano"}</button></div>
                   {editingPlanId === plan.id ? (
                     <form className="admin-plan-editor" onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); const rawPrice = String(form.get("price_cents") || "0").replace(",", "."); updatePlan(plan.id, { name: String(form.get("name") || "").trim(), slug: String(form.get("slug") || "").trim(), description: String(form.get("description") || "").trim(), price_cents: Math.max(0, Math.round(Number(rawPrice) * 100)), billing_period: String(form.get("billing_period") || "monthly"), highlighted: form.get("highlighted") === "on", active: form.get("active") === "on" }); }}>
                       <label>Nome<input name="name" defaultValue={plan.name} required /></label>
@@ -475,16 +474,16 @@ function AdminPage() {
                       <label>Preço mensal (R$)<input name="price_cents" type="number" min="0" step="0.01" defaultValue={(plan.price_cents / 100).toFixed(2)} /></label>
                       <label>Periodicidade<select name="billing_period" defaultValue={plan.billing_period}><option value="free">Grátis</option><option value="monthly">Mensal</option><option value="quarterly">Trimestral</option><option value="yearly">Anual</option></select></label>
                       <div className="admin-plan-checks"><label><input name="highlighted" type="checkbox" defaultChecked={plan.highlighted} /> Destacar plano</label><label><input name="active" type="checkbox" defaultChecked={plan.active} /> Plano ativo</label></div>
-                      <button type="submit" style={styles.actionButton} disabled={planSavingId === plan.id}>{planSavingId === plan.id ? "Salvando..." : "Salvar alterações"}</button>
+                      <button type="submit" className="admin-action-button" disabled={planSavingId === plan.id}>{planSavingId === plan.id ? "Salvando..." : "Salvar alterações"}</button>
                     </form>
                   ) : (
                     <div className="admin-plan-summary"><h2>{plan.name}</h2><strong>{plan.price_cents === 0 ? "R$ 0,00" : `R$ ${(plan.price_cents/100).toFixed(2).replace(".",",")}/mês`}</strong><p>{plan.description || (plan.active ? "Plano disponível para fornecedores." : "Plano atualmente desativado.")}</p><div className="admin-plan-meta"><span>{plan.active ? "Ativo" : "Inativo"}</span>{plan.highlighted && <span>Destacado</span>}</div>
                   </div>)}
                 </article>)}
                 <section className="admin-commercial-subscriptions">
-                  <div style={styles.badge}>ATIVAÇÃO MANUAL</div>
+                  <div className="admin-badge">ATIVAÇÃO MANUAL</div>
                   <h2>Ativar plano após pagamento</h2>
-                  <p style={styles.text}>Confirme o pagamento pelo WhatsApp antes de selecionar o fornecedor e ativar o plano.</p>
+                  <p className="admin-text">Confirme o pagamento pelo WhatsApp antes de selecionar o fornecedor e ativar o plano.</p>
                   <div className="admin-commercial-activation">
                     {businesses.map((business) => (
                       <div className="admin-list-item" key={business.id}>
@@ -494,15 +493,15 @@ function AdminPage() {
                               <option value="">Escolha um plano pago</option>
                               {plans.filter((plan) => plan.billing_period !== "free" && plan.active).map((plan) => <option key={plan.id} value={plan.id}>{plan.name} · R$ {(plan.price_cents / 100).toFixed(2).replace(".", ",")}</option>)}
                             </select>
-                            <button type="button" style={styles.actionButton} disabled={!activationPlanByBusiness[business.id] || activatingBusinessId === business.id} onClick={() => activateSubscription(business.id, activationPlanByBusiness[business.id])}>{activatingBusinessId === business.id ? "Ativando..." : "Confirmar ativação"}</button>
+                            <button type="button" className="admin-action-button" disabled={!activationPlanByBusiness[business.id] || activatingBusinessId === business.id} onClick={() => activateSubscription(business.id, activationPlanByBusiness[business.id])}>{activatingBusinessId === business.id ? "Ativando..." : "Confirmar ativação"}</button>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div style={{marginTop:24}}>
-                    <div style={styles.badge}>ASSINATURAS</div><h2>Fornecedores com plano</h2>
-                    {subscriptions.length === 0 ? <p style={styles.text}>Nenhuma assinatura ativa ou registrada.</p> : subscriptions.map(item => <div className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business?.business_name || "Fornecedor"}</strong><span>{item.plan?.name || "Plano"} · {item.status}{item.ends_at ? ` · até ${new Date(item.ends_at).toLocaleDateString("pt-BR")}` : ""}</span></div></div></div>)}
+                  <div className="admin-subscriptions-section">
+                    <div className="admin-badge">ASSINATURAS</div><h2>Fornecedores com plano</h2>
+                    {subscriptions.length === 0 ? <p className="admin-text">Nenhuma assinatura ativa ou registrada.</p> : subscriptions.map(item => <div className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business?.business_name || "Fornecedor"}</strong><span>{item.plan?.name || "Plano"} · {item.status}{item.ends_at ? ` · até ${new Date(item.ends_at).toLocaleDateString("pt-BR")}` : ""}</span></div></div></div>)}
                   </div>
                 </section>
               </div>
@@ -533,7 +532,7 @@ function AdminPage() {
                           <span className={item.active ? "admin-category-status admin-category-status-active" : "admin-category-status admin-category-status-inactive"}>{item.active ? "Ativado" : "Desativada"}</span>
                         </div>
                         <div className="admin-item-actions">
-                          <button type="button" style={styles.actionButton} onClick={async () => {
+                          <button type="button" className="admin-action-button" onClick={async () => {
                             const next = !item.active;
                             const { error } = await supabase.from("categories").update({ active: next }).eq("id", item.id);
                             if (!error) setCategories(current => current.map(x => x.id === item.id ? { ...x, active: next } : x));
@@ -545,8 +544,8 @@ function AdminPage() {
                   ))}
                 </div>
               </div>
-               : section === "services" ? <div className="admin-inline-list"><div className="admin-filters admin-simple-filter"><input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder="Buscar serviço ou fornecedor..." aria-label="Buscar serviços" /><span className="admin-filter-count">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.business?.business_name || "Empresa não informada"} · {item.category?.name || "Sem categoria"} · {item.active ? "Ativo" : "Inativo"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={async()=>{const next=!item.active;const {error}=await supabase.from("services").update({active:next}).eq("id",item.id);if(!error)setServices(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div></div>
-              : <div><div className="admin-filters admin-simple-filter"><input value={reviewSearch} onChange={(e) => setReviewSearch(e.target.value)} placeholder="Buscar avaliação, fornecedor ou autor..." aria-label="Buscar avaliações" /><span className="admin-filter-count">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{"★".repeat(item.rating)} · {item.business?.business_name || "Empresa"}</strong><span>{item.reviewer?.full_name || "Usuário"} · {item.comment || "Sem comentário"} · {item.active ? "Visível" : "Oculta"}</span></div><div className="admin-item-actions"><button style={styles.actionButton} onClick={()=>updateReview(item.id,{active:!item.active})}>{item.active ? "Ocultar" : "Publicar"}</button><button style={styles.actionButton} onClick={()=>deleteReview(item.id)}>Excluir</button></div></div></article>)}</div></div>}
+               : section === "services" ? <div className="admin-inline-list"><div className="admin-filters admin-simple-filter"><input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder="Buscar serviço ou fornecedor..." aria-label="Buscar serviços" /><span className="admin-filter-count">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{services.filter(item => `${item.name} ${item.business?.business_name ?? ""} ${item.category?.name ?? ""}`.toLocaleLowerCase("pt-BR").includes(serviceSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.name}</strong><span>{item.business?.business_name || "Empresa não informada"} · {item.category?.name || "Sem categoria"} · {item.active ? "Ativo" : "Inativo"}</span></div><div className="admin-item-actions"><button className="admin-action-button" onClick={async()=>{const next=!item.active;const {error}=await supabase.from("services").update({active:next}).eq("id",item.id);if(!error)setServices(cur=>cur.map(x=>x.id===item.id?{...x,active:next}:x));}}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div></div>
+              : <div><div className="admin-filters admin-simple-filter"><input value={reviewSearch} onChange={(e) => setReviewSearch(e.target.value)} placeholder="Buscar avaliação, fornecedor ou autor..." aria-label="Buscar avaliações" /><span className="admin-filter-count">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).length} resultado(s)</span></div><div className="admin-list">{reviews.filter(item => `${item.comment ?? ""} ${item.business?.business_name ?? ""} ${item.reviewer?.full_name ?? ""}`.toLocaleLowerCase("pt-BR").includes(reviewSearch.trim().toLocaleLowerCase("pt-BR"))).map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{"★".repeat(item.rating)} · {item.business?.business_name || "Empresa"}</strong><span>{item.reviewer?.full_name || "Usuário"} · {item.comment || "Sem comentário"} · {item.active ? "Visível" : "Oculta"}</span></div><div className="admin-item-actions"><button className="admin-action-button" onClick={()=>updateReview(item.id,{active:!item.active})}>{item.active ? "Ocultar" : "Publicar"}</button><button className="admin-action-button" onClick={()=>deleteReview(item.id)}>Excluir</button></div></div></article>)}</div></div>}
             </section>
           )}
         </section>
@@ -555,19 +554,3 @@ function AdminPage() {
   );
 }
 
-const styles: Record<string, CSSProperties> = {
-  page: { minHeight: "100vh", background: "#f7f8fc", color: "#172033", fontFamily: "Arial, sans-serif" },
-  header: { minHeight: 76, background: "#fff", borderBottom: "1px solid #e7e9f0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 32px", boxSizing: "border-box" },
-  logo: { fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
-  subtitle: { marginTop: 4, fontSize: 10, fontWeight: 800, letterSpacing: ".14em", color: "#8a91a3" },
-  logout: { border: "1px solid #dfe2ea", background: "#fff", borderRadius: 9, padding: "9px 14px", cursor: "pointer" },
-  content: { maxWidth: 1100, margin: "0 auto", padding: "56px 24px" },
-  badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
-  text: { color: "#687386", fontSize: 17 },
-  grid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16, marginTop: 32 },
-  actionButton: { border: "1px solid #dfe2ea", background: "#fff", borderRadius: 8, padding: "8px 10px", cursor: "pointer", fontSize: 12, fontWeight: 700 },
-  cardButton: { minHeight: 120, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 22, display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box", textAlign: "left", cursor: "pointer", font: "inherit", color: "inherit" },
-  backButton: { border: "1px solid #dfe2ea", background: "#fff", borderRadius: 9, padding: "9px 14px", cursor: "pointer" },
-  card: { minHeight: 120, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 14, padding: 22, display: "flex", flexDirection: "column", gap: 10, boxSizing: "border-box" },
-  center: { minHeight: "100vh", display: "grid", placeItems: "center", fontFamily: "Arial, sans-serif", color: "#687386" },
-};
