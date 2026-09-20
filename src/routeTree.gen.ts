@@ -11,6 +11,8 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as MeusServicosRouteImport } from './routes/meus-servicos'
+import { Route as OrcamentosRouteImport } from './routes/orcamentos'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
 
@@ -44,6 +46,18 @@ const FornecedorSlugRoute = FornecedorSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const MeusServicosRoute = MeusServicosRouteImport.update({
+  id: '/meus-servicos',
+  path: '/meus-servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const OrcamentosRoute = OrcamentosRouteImport.update({
+  id: '/orcamentos',
+  path: '/orcamentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const BuscarRoute = BuscarRouteImport.update({
   id: '/buscar',
   path: '/buscar',
@@ -62,6 +76,8 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/meus-servicos': typeof MeusServicosRoute
+  '/orcamentos': typeof OrcamentosRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -72,6 +88,8 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/meus-servicos': typeof MeusServicosRoute
+  '/orcamentos': typeof OrcamentosRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -83,6 +101,8 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/meus-servicos': typeof MeusServicosRoute
+  '/orcamentos': typeof OrcamentosRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -157,6 +177,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meus-servicos': {
+      id: '/meus-servicos'
+      path: '/meus-servicos'
+      fullPath: '/meus-servicos'
+      preLoaderRoute: typeof MeusServicosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orcamentos': {
+      id: '/orcamentos'
+      path: '/orcamentos'
+      fullPath: '/orcamentos'
+      preLoaderRoute: typeof OrcamentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -166,6 +200,8 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute,
   MeuPerfilRoute,
   PainelRoute,
+  MeusServicosRoute,
+  OrcamentosRoute,
   BuscarRoute,
   FornecedorSlugRoute,
 }
