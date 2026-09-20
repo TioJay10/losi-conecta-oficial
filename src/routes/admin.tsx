@@ -290,7 +290,7 @@ function AdminPage() {
         <button type="button" id="admin-mobile-menu" className="admin-mobile-menu-button" aria-label={mobileMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
           <span></span><span></span><span></span>
         </button>
-        <div><div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div><div style={styles.subtitle}>PAINEL ADMINISTRATIVO</div></div>
+        <div><div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div><div className="admin-mobile-subtitle" style={styles.subtitle}>PAINEL ADMINISTRATIVO</div></div>
         <button type="button" className="admin-logout" onClick={logout}>Sair do painel</button>
       </header>
       <div className="admin-shell">
