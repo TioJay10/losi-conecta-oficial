@@ -341,8 +341,6 @@ function AdminPage() {
               <div style={styles.card}><strong>Operação</strong><span>Use a fila de pendentes para analisar novos fornecedores e manter o catálogo atualizado.</span></div>
             </div>
             </div>
-          ) : (
-  
           ) : section === "security" ? (
             <div className="admin-security-center">
               <div className="admin-security-hero"><div><div style={styles.badge}>SEGURANÇA</div><h2>Central de segurança</h2><p>Monitore contas em risco, denúncias novas, contas bloqueadas e perfis aguardando verificação.</p></div><span className="admin-security-status">MONITORAMENTO ATIVO</span></div>
