@@ -51,9 +51,10 @@ function AdminPage() {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) { navigate({ to: "/entrar" }); return; }
       const currentUser = sessionData.session.user;
-      const { data, error } = await supabase.from("profiles").select("full_name,user_type").eq("id", currentUser.id).maybeSingle();
+      const { data, error } = await supabase.from("profiles").select("full_name,user_type,blocked").eq("id", currentUser.id).maybeSingle();
       if (!mounted) return;
       if (error || !data) { await supabase.auth.signOut(); navigate({ to: "/entrar" }); return; }
+      if (data.blocked) { await supabase.auth.signOut(); navigate({ to: "/entrar" }); return; }
       if (data.user_type !== "admin") { navigate({ to: "/painel" }); return; }
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
@@ -118,17 +119,25 @@ function AdminPage() {
 
   async function updateBusiness(id: string, changes: { verified?: boolean; active?: boolean; approval_status?: "pending" | "approved" | "rejected" }) {
     const { error } = await supabase.from("business_profiles").update(changes).eq("id", id);
-    if (error) return;
+    if (error) {
+      setDataError(error.message || "Não foi possível atualizar a empresa.");
+      return;
+    }
     setBusinesses((current) => current.map((item) => item.id === id ? { ...item, ...changes } : item));
+    setDataError("");
   }
 
   async function updatePlan(id: string, changes: { name: string; slug: string; description: string; price_cents: number; billing_period: string; highlighted: boolean; active: boolean }) {
     setPlanSavingId(id);
     const { data, error } = await supabase.from("plans").update(changes).eq("id", id).select("id,name,slug,description,price_cents,billing_period,highlighted,active").maybeSingle();
     setPlanSavingId(null);
-    if (error || !data) return;
+    if (error || !data) {
+      setDataError(error?.message || "Não foi possível salvar o plano.");
+      return;
+    }
     setPlans((current) => current.map((item) => item.id === id ? data as typeof item : item));
     setEditingPlanId(null);
+    setDataError("");
   }
 
   async function activateSubscription(businessId: string, planId: string) {
@@ -149,7 +158,10 @@ function AdminPage() {
       : await supabase.from("business_subscriptions").insert({ business_id: businessId, ...payload }).select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").single();
 
     setActivatingBusinessId(null);
-    if (result.error || !result.data) return;
+    if (result.error || !result.data) {
+      setDataError(result.error?.message || "Não foi possível ativar a assinatura.");
+      return;
+    }
     const updated = result.data as unknown as typeof subscriptions[number];
     setSubscriptions((current) => existing ? current.map((item) => item.id === existing.id ? updated : item) : [updated, ...current]);
     setActivationPlanByBusiness((current) => ({ ...current, [businessId]: "" }));
