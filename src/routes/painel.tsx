@@ -41,7 +41,7 @@ function DashboardPage() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name,user_type")
+        .select("full_name,user_type,blocked")
         .eq("id", currentUser.id)
         .maybeSingle();
 
@@ -56,6 +56,13 @@ function DashboardPage() {
       if (!data) {
         setLoading(false);
         console.error("Perfil do usuário não encontrado:", currentUser.id);
+        return;
+      }
+
+      if (data.blocked) {
+        await supabase.auth.signOut();
+        setLoading(false);
+        navigate({ to: "/entrar" });
         return;
       }
 
