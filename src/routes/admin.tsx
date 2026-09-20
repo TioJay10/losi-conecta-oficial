@@ -15,7 +15,7 @@ function AdminPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
-  const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null }>>([]);
+  const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
   const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews" | "commercial">("overview");
   const [plans, setPlans] = useState<Array<{id:string;name:string;slug:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean;active:boolean}>>([]);
@@ -56,7 +56,7 @@ function AdminPage() {
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
       const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult] = await Promise.all([
-        supabase.from("profiles").select("id,full_name,user_type,city,state").order("created_at",{ascending:false}),
+        supabase.from("profiles").select("id,full_name,user_type,city,state,blocked").order("created_at",{ascending:false}),
         supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,verified,active,approval_status").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
@@ -85,6 +85,32 @@ function AdminPage() {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
     return () => { mounted = false; listener.subscription.unsubscribe(); };
   }, [navigate]);
+
+  async function manageUser(userId: string, action: "block" | "unblock" | "delete") {
+    const target = users.find((item) => item.id === userId);
+    if (!target) return;
+
+    const label = target.full_name || "este usuário";
+    if (action === "delete" && !window.confirm(`Remover ${label}? Esta ação exclui a conta e não pode ser desfeita.`)) return;
+    if (action === "block" && !window.confirm(`Bloquear ${label}? O usuário não poderá entrar no aplicativo enquanto estiver bloqueado.`)) return;
+
+    const { data, error } = await supabase.functions.invoke("admin-manage-user", {
+      body: { user_id: userId, action },
+    });
+
+    if (error || data?.error) {
+      setDataError(data?.error || error?.message || "Não foi possível alterar o usuário.");
+      return;
+    }
+
+    if (action === "delete") {
+      setUsers((current) => current.filter((item) => item.id !== userId));
+      setStats((current) => ({ ...current, users: Math.max(0, current.users - 1) }));
+    } else {
+      setUsers((current) => current.map((item) => item.id === userId ? { ...item, blocked: action === "block" } : item));
+    }
+    setDataError("");
+  }
 
   async function updateBusiness(id: string, changes: { verified?: boolean; active?: boolean; approval_status?: "pending" | "approved" | "rejected" }) {
     const { error } = await supabase.from("business_profiles").update(changes).eq("id", id);
