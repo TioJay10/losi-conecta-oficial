@@ -296,7 +296,7 @@ function QuotesPage() {
       quote.notes ? "Observações: " + quote.notes : "",
       "",
       "Orçamento enviado pelo LOSI CONECTA.",
-    ].filter(Boolean).join("\\n");
+    ].filter(Boolean).join("\n");
   }
 
   function openWhatsApp(phone: string | null | undefined, text: string) {
