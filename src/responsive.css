@@ -1975,3 +1975,19 @@ textarea:focus,
     padding-right:11px!important;
   }
 }
+
+
+/* Status das categorias — leitura rápida */
+.admin-page .admin-category-status{
+  display:block!important;
+  margin-top:5px!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  line-height:1.35!important;
+}
+.admin-page .admin-category-status-active{
+  color:#16834b!important;
+}
+.admin-page .admin-category-status-inactive{
+  color:#c9343f!important;
+}
