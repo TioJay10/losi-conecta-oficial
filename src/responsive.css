@@ -3858,3 +3858,40 @@ textarea:focus,
 .admin-page .admin-users-toolbar .admin-primary-button {
   color: #ffffff !important;
 }
+
+
+/* ADMIN BUTTON SYSTEM — all buttons use the same purple treatment as "Cadastrar usuário" */
+.admin-page button,
+.admin-page .admin-primary-button,
+.admin-page .admin-secondary-button,
+.admin-page .admin-item-actions button,
+.admin-page .admin-action-button,
+.admin-page .admin-back-button,
+.admin-page [style*="actionButton"],
+.admin-page [style*="backButton"] {
+  background: linear-gradient(135deg,#7133ee,#8d3af6) !important;
+  border: 0 !important;
+  color: #ffffff !important;
+  box-shadow: 0 7px 18px rgba(92,35,204,.28) !important;
+  font-weight: 800 !important;
+}
+
+.admin-page button:hover,
+.admin-page .admin-primary-button:hover,
+.admin-page .admin-secondary-button:hover,
+.admin-page .admin-item-actions button:hover,
+.admin-page .admin-action-button:hover,
+.admin-page .admin-back-button:hover,
+.admin-page [style*="actionButton"]:hover,
+.admin-page [style*="backButton"]:hover {
+  background: linear-gradient(135deg,#7d3cf4,#9846ff) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 9px 22px rgba(92,35,204,.38) !important;
+}
+
+.admin-page button:disabled {
+  opacity: .55 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
