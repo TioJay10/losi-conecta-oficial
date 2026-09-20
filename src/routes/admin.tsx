@@ -287,7 +287,7 @@ function AdminPage() {
     <main className="admin-page" style={styles.page}>
       <header className="admin-header" style={styles.header}>
         <div><div style={styles.logo}>LOSI <span>CONECTA</span></div><div style={styles.subtitle}>PAINEL ADMINISTRATIVO</div></div>
-        <button onClick={logout} style={styles.logout}>Sair</button>
+        <button type="button" className="admin-logout" onClick={logout}>Sair do painel</button>
       </header>
       <div className="admin-shell">
         <aside className="admin-sidebar">
