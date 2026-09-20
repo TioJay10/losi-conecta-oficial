@@ -102,55 +102,55 @@ function PersonalProfilePage() {
     setSaving(false);
   }
 
-  if (loading) return <main style={styles.center}>Carregando seu perfil...</main>;
+  if (loading) return <main className="personal-profile-loading">Carregando seu perfil...</main>;
 
   return (
-    <main className="profile-page personal-profile-page" style={styles.page}>
-      <header className="profile-header" style={styles.header}>
-        <button type="button" onClick={() => navigate({ to: "/painel" })} style={styles.back}>
+    <main className="profile-page personal-profile-page">
+      <header className="profile-header personal-profile-header">
+        <button type="button" onClick={() => navigate({ to: "/painel" })} className="profile-back">
           ← Voltar ao painel
         </button>
-        <div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div>
+        <div className="profile-logo mobile-centered-brand">LOSI <span>CONECTA</span></div>
       </header>
 
-      <section className="profile-content" style={styles.content}>
-        <div style={styles.heading}>
+      <section className="profile-content personal-profile-content">
+        <div className="personal-profile-heading">
           <div>
-            <div style={styles.badge}>MINHA CONTA</div>
+            <div className="profile-badge">MINHA CONTA</div>
             <h1>Meu perfil</h1>
-            <p style={styles.text}>
+            <p className="profile-page-text">
               Atualize somente seus dados pessoais. As informações da empresa e dos serviços ficam em “Meus serviços”.
             </p>
           </div>
         </div>
 
-        <form onSubmit={saveProfile} style={styles.card}>
-          <div style={styles.cardHeader}>
+        <form onSubmit={saveProfile} className="personal-profile-card">
+          <div className="personal-profile-card-header">
             <div>
               <h2>Informações pessoais</h2>
-              <p style={styles.hint}>Esses dados identificam você dentro da sua conta profissional.</p>
+              <p className="personal-profile-hint">Esses dados identificam você dentro da sua conta profissional.</p>
             </div>
           </div>
 
-          <div className="profile-form-grid" style={styles.formGrid}>
+          <div className="profile-form-grid personal-profile-form-grid">
             <Field label="Nome completo *" value={form.full_name} onChange={(v) => update("full_name", v)} />
             <Field label="Telefone" value={form.phone} onChange={(v) => update("phone", v)} />
             <Field label="Cidade" value={form.city} onChange={(v) => update("city", v)} />
             <Field label="Estado" value={form.state} onChange={(v) => update("state", v)} />
           </div>
 
-          <div style={styles.readOnly}>
-            <span style={styles.readOnlyLabel}>E-mail da conta</span>
+          <div className="personal-profile-readonly">
+            <span className="personal-profile-readonly-label">E-mail da conta</span>
             <strong>{user?.email || "Não informado"}</strong>
             <small>O e-mail de acesso não é alterado nesta área.</small>
           </div>
 
-          <button type="submit" disabled={saving} style={styles.primary}>
+          <button type="submit" disabled={saving} className="personal-profile-primary">
             {saving ? "Salvando..." : "Salvar informações pessoais"}
           </button>
         </form>
 
-        {message && <div style={styles.message}>{message}</div>}
+        {message && <div className="personal-profile-message">{message}</div>}
       </section>
     </main>
   );
@@ -159,30 +159,9 @@ function PersonalProfilePage() {
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <div>
-      <label style={styles.label}>{label}</label>
-      <input value={value} onChange={(e) => onChange(e.target.value)} style={styles.input} />
+      <label className="personal-profile-label">{label}</label>
+      <input value={value} onChange={(e) => onChange(e.target.value)} className="personal-profile-input" />
     </div>
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  page: { minHeight: "100vh", background: "#f7f8fc", color: "#172033", fontFamily: "Arial, sans-serif" },
-  header: { height: 72, background: "#fff", borderBottom: "1px solid #e7e9f0", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px" },
-  logo: { fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
-  back: { border: 0, background: "transparent", cursor: "pointer", color: "#566074", fontSize: 14 },
-  content: { maxWidth: 900, margin: "0 auto", padding: "48px 24px 80px" },
-  heading: { marginBottom: 24 },
-  badge: { display: "inline-block", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", color: "#4f46c7", background: "#ebe9ff", padding: "7px 10px", borderRadius: 999 },
-  text: { color: "#687386", fontSize: 16, lineHeight: 1.5 },
-  card: { background: "#fff", border: "1px solid #e7e9f0", borderRadius: 16, padding: 28, marginBottom: 18 },
-  cardHeader: { marginBottom: 20 },
-  formGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 18, marginBottom: 20 },
-  readOnly: { display: "grid", gap: 4, padding: 14, marginBottom: 20, border: "1px solid #e7e9f0", borderRadius: 10, background: "#f8f9fb" },
-  readOnlyLabel: { fontSize: 11, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase", color: "#7b8292" },
-  label: { display: "block", fontSize: 13, fontWeight: 700, color: "#465066", marginBottom: 7 },
-  input: { width: "100%", boxSizing: "border-box", padding: "12px 13px", border: "1px solid #dfe2ea", borderRadius: 9, fontSize: 14, background: "#fff" },
-  primary: { border: 0, background: "#4f46c7", color: "#fff", borderRadius: 9, padding: "12px 18px", fontWeight: 700, cursor: "pointer" },
-  message: { background: "#fff", border: "1px solid #dfe2ea", borderRadius: 12, padding: 16, color: "#465066" },
-  hint: { color: "#8a91a3", fontSize: 13, margin: "5px 0 0" },
-  center: { minHeight: "100vh", display: "grid", placeItems: "center", color: "#687386", fontFamily: "Arial, sans-serif" },
-};
