@@ -21,6 +21,8 @@ type Business = {
   slug: string;
   approval_status: "pending" | "approved" | "rejected";
   portfolio_urls: string[];
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export const Route = createFileRoute("/meu-perfil")({
@@ -37,6 +39,8 @@ function BusinessProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<"logo" | "cover" | "portfolio" | null>(null);
+  const [locationSaving, setLocationSaving] = useState(false);
+  const [coordinates, setCoordinates] = useState<{ latitude: number | null; longitude: number | null }>({ latitude: null, longitude: null });
   const [message, setMessage] = useState("");
   const [form, setForm] = useState({
     business_name: "",
@@ -94,6 +98,7 @@ function BusinessProfilePage() {
       setCategoryId(categoryResult.data?.[0]?.id ?? "");
 
       if (loaded) {
+        setCoordinates({ latitude: loaded.latitude ?? null, longitude: loaded.longitude ?? null });
         setForm({
           business_name: loaded.business_name ?? "",
           description: loaded.description ?? "",
@@ -189,6 +194,27 @@ function BusinessProfilePage() {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      setMessage("Seu navegador não oferece localização.");
+      return;
+    }
+    setLocationSaving(true);
+    setMessage("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoordinates({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setLocationSaving(false);
+        setMessage("Localização capturada. Salve o perfil para disponibilizá-la na busca por raio.");
+      },
+      () => {
+        setLocationSaving(false);
+        setMessage("Não foi possível obter sua localização. Verifique a permissão do navegador.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
+  }
+
   async function saveProfile(event: FormEvent) {
     event.preventDefault();
     if (!supabase || !user) return;
@@ -227,6 +253,8 @@ function BusinessProfilePage() {
       logo_url: form.logo_url.trim() || null,
       cover_url: form.cover_url.trim() || null,
       portfolio_urls: form.portfolio_urls.split("\n").map((url) => url.trim()).filter((url) => /^https?:\/\//i.test(url)).slice(0, 12),
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
     };
 
     const result = business
@@ -365,7 +393,7 @@ function BusinessProfilePage() {
 
         <form onSubmit={saveProfile} style={styles.card}>
           <h2>Informações da empresa</h2>
-          <div className="profile-form-grid" style={styles.formGrid}>
+              <div className="profile-form-grid" style={styles.formGrid}>
             <Field label="Nome comercial *" value={form.business_name} onChange={(v) => update("business_name", v)} />
             <Field label="WhatsApp" value={form.whatsapp} onChange={(v) => update("whatsapp", v)} />
             <Field label="Telefone" value={form.phone} onChange={(v) => update("phone", v)} />
@@ -373,7 +401,13 @@ function BusinessProfilePage() {
             <Field label="Site" value={form.website} onChange={(v) => update("website", v)} />
             <Field label="Cidade" value={form.city} onChange={(v) => update("city", v)} />
             <Field label="Estado" value={form.state} onChange={(v) => update("state", v)} />
-            <Field label="Endereço" value={form.address} onChange={(v) => update("address", v)} />
+            <div>
+              <Field label="Endereço" value={form.address} onChange={(v) => update("address", v)} />
+              <button type="button" onClick={useCurrentLocation} disabled={locationSaving} style={styles.locationButton}>
+                {locationSaving ? "Obtendo localização..." : coordinates.latitude !== null ? "Localização cadastrada ✓" : "Usar minha localização atual"}
+              </button>
+              <p style={styles.hint}>Usada somente para calcular a distância no filtro por raio.</p>
+            </div>
             <div>
               <Field label="URL da logo" value={form.logo_url} onChange={(v) => update("logo_url", v)} />
               <label style={styles.uploadButton}>
