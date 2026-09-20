@@ -1351,7 +1351,7 @@ a {
 .admin-page .admin-sidebar {
   position: sticky;
   top: 76px;
-  height: calc(100vh - 76px);
+  height: calc(100dvh - 76px);
   padding: 28px 14px 20px;
   background: linear-gradient(180deg, #171b35 0%, #11152b 100%) !important;
   color: #fff;
