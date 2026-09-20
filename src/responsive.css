@@ -4540,3 +4540,39 @@ textarea:focus,
 }
 
 
+
+
+/* LOGO MOBILE — somente centralização do nome do aplicativo */
+@media (max-width: 768px) {
+  .mobile-centered-brand {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    z-index: 20 !important;
+  }
+
+  .catalog-header .catalog-logo {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    z-index: 20 !important;
+  }
+
+  .home-page .home-header,
+  .dashboard-page .dashboard-header,
+  .profile-page .profile-header,
+  .catalog-page .catalog-header,
+  .provider-page .catalog-header,
+  .admin-page .admin-header {
+    position: relative !important;
+  }
+
+  .mobile-centered-brand span,
+  .catalog-header .catalog-logo span {
+    white-space: nowrap !important;
+  }
+}
