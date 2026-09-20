@@ -1269,3 +1269,295 @@ label{
 @media(max-width:899px){.catalog-grid{gap:14px}.provider-cover{height:105px!important}.provider-logo{width:58px;height:58px;bottom:-20px}.provider-body{padding:31px 15px 15px}}
 @media(max-width:599px){.catalog-grid{gap:12px}.provider-cover{height:120px!important}.provider-logo{left:14px;width:60px;height:60px;bottom:-21px}.provider-body{padding:33px 15px 15px}.provider-title-row{gap:7px}.provider-title-row h3{font-size:17px}.provider-primary,.provider-profile-link{width:100%;min-height:44px}.provider-actions{gap:7px}}
 @media(max-width:390px){.provider-cover{height:105px!important}.provider-body{padding:31px 13px 13px}.provider-logo{width:56px;height:56px;bottom:-19px}.provider-primary,.provider-profile-link{min-height:42px;font-size:12px}}
+
+/* =========================================================
+   LOSI CONECTA — IDENTIDADE VISUAL LOSI GESTÃO EM LAZER
+   Paleta: azul + roxo, com neutros claros para manter leitura
+   profissional em todas as telas.
+   ========================================================= */
+
+:root{
+  --losi-blue:#1769e0;
+  --losi-blue-dark:#0f4fb5;
+  --losi-blue-soft:#eaf3ff;
+  --losi-purple:#7a3ff2;
+  --losi-purple-dark:#5b22c9;
+  --losi-purple-soft:#f1ebff;
+  --losi-gradient:linear-gradient(135deg,var(--losi-blue),var(--losi-purple));
+  --losi-bg:#f6f8fc;
+  --losi-text:#1d2440;
+  --losi-text-soft:#667085;
+  --losi-border:#dfe5f0;
+}
+
+/* Base */
+body{
+  background:var(--losi-bg)!important;
+  color:var(--losi-text)!important;
+}
+
+/* Cabeçalhos */
+.catalog-header,
+.dashboard-header,
+.profile-header,
+.admin-header{
+  background:rgba(255,255,255,.97)!important;
+  border-bottom-color:var(--losi-border)!important;
+}
+
+.catalog-logo,
+.catalog-logo span{
+  color:var(--losi-blue)!important;
+}
+
+.catalog-login,
+.provider-primary,
+.provider-profile-contact,
+.dashboard-page .primary,
+.profile-page .primary,
+.admin-page .primary,
+.auth-page button[type="submit"]{
+  background:var(--losi-gradient)!important;
+  border-color:transparent!important;
+  color:#fff!important;
+}
+
+.catalog-login:hover,
+.provider-primary:hover,
+.provider-profile-contact:hover,
+.dashboard-page .primary:hover,
+.profile-page .primary:hover,
+.admin-page .primary:hover,
+.auth-page button[type="submit"]:hover{
+  background:linear-gradient(135deg,var(--losi-blue-dark),var(--losi-purple-dark))!important;
+}
+
+/* Home */
+.home-page .home-header{
+  border-bottom-color:var(--losi-border)!important;
+}
+
+.home-page .home-hero{
+  background:
+    radial-gradient(circle at 85% 15%,rgba(122,63,242,.12),transparent 32%),
+    radial-gradient(circle at 10% 20%,rgba(23,105,224,.12),transparent 30%),
+    #fff!important;
+}
+
+.home-page .home-hero h1,
+.home-page .home-section h2{
+  color:var(--losi-text)!important;
+}
+
+.home-page .home-hero h1 strong,
+.home-page .home-hero h1 span,
+.home-page .home-section strong{
+  color:var(--losi-purple)!important;
+}
+
+.home-page .home-dark-section{
+  background:linear-gradient(135deg,#102b61,#24104e)!important;
+}
+
+.home-page .home-category-grid>div:hover,
+.home-page .home-steps article:hover,
+.home-page .home-audience-grid>div:hover{
+  border-color:rgba(122,63,242,.35)!important;
+}
+
+/* Catálogo / busca */
+.catalog-page,
+.provider-page{
+  background:var(--losi-bg)!important;
+}
+
+.catalog-hero{
+  background:
+    radial-gradient(circle at 88% 12%,rgba(122,63,242,.09),transparent 28%),
+    linear-gradient(180deg,#fff 0%,var(--losi-bg) 100%)!important;
+}
+
+.catalog-kicker{
+  color:var(--losi-purple)!important;
+}
+
+.catalog-active-filters span,
+.provider-verified,
+.provider-services span{
+  background:var(--losi-purple-soft)!important;
+  color:var(--losi-purple-dark)!important;
+}
+
+.catalog-clear,
+.provider-actions .provider-save,
+.provider-profile-link{
+  color:var(--losi-purple-dark)!important;
+  border-color:#d9c9ff!important;
+  background:#fff!important;
+}
+
+.catalog-clear:hover,
+.provider-actions .provider-save:hover,
+.provider-profile-link:hover{
+  background:var(--losi-purple-soft)!important;
+  border-color:#c3a8ff!important;
+}
+
+/* Cards */
+.provider-card{
+  border-color:var(--losi-border)!important;
+  box-shadow:0 8px 26px rgba(34,49,84,.07)!important;
+}
+
+.provider-cover{
+  background:linear-gradient(135deg,#dfeaff,#eee6ff)!important;
+}
+
+.provider-logo{
+  color:var(--losi-purple)!important;
+}
+
+.provider-title-row h3{
+  color:var(--losi-text)!important;
+}
+
+.provider-location{
+  color:var(--losi-text-soft)!important;
+}
+
+.provider-primary{
+  background:var(--losi-gradient)!important;
+}
+
+.provider-primary:hover{
+  box-shadow:0 7px 18px rgba(91,34,201,.22)!important;
+}
+
+/* Perfil público */
+.provider-hero{
+  background:#fff!important;
+  border-bottom-color:var(--losi-border)!important;
+}
+
+.provider-hero-cover{
+  background:linear-gradient(135deg,#dceaff,#eee5ff)!important;
+}
+
+.provider-hero-title h1,
+.provider-profile-card h2{
+  color:var(--losi-text)!important;
+}
+
+.provider-profile-contact{
+  background:var(--losi-gradient)!important;
+}
+
+.provider-service-list span{
+  background:var(--losi-purple-soft)!important;
+  color:var(--losi-purple-dark)!important;
+}
+
+.provider-profile-card a{
+  color:var(--losi-purple-dark)!important;
+}
+
+/* Avaliações */
+.provider-review-form button{
+  background:var(--losi-gradient)!important;
+}
+
+.provider-rating-summary strong{
+  color:var(--losi-purple)!important;
+}
+
+/* Painel administrativo */
+.admin-page{
+  background:var(--losi-bg)!important;
+}
+
+.admin-sidebar{
+  background:#fff!important;
+  border-right-color:var(--losi-border)!important;
+}
+
+.admin-menu button.active{
+  background:var(--losi-purple-soft)!important;
+  color:var(--losi-purple-dark)!important;
+  box-shadow:inset 3px 0 0 var(--losi-purple)!important;
+}
+
+.admin-menu button.active em,
+.admin-menu button em{
+  background:#ece8ff!important;
+  color:var(--losi-purple-dark)!important;
+}
+
+.admin-metric:before{
+  background:var(--losi-blue)!important;
+}
+
+.admin-metric:nth-child(2):before,
+.admin-metric:nth-child(4):before,
+.admin-metric:nth-child(6):before{
+  background:var(--losi-purple)!important;
+}
+
+.admin-item-actions button:hover{
+  color:var(--losi-purple-dark)!important;
+  border-color:#cdbbfa!important;
+  background:var(--losi-purple-soft)!important;
+}
+
+/* Formulários */
+input:focus,
+select:focus,
+textarea:focus,
+.catalog-field input:focus,
+.catalog-field select:focus{
+  border-color:#a987f6!important;
+  box-shadow:0 0 0 3px rgba(122,63,242,.12)!important;
+}
+
+.auth-page{
+  background:
+    radial-gradient(circle at 15% 20%,rgba(23,105,224,.12),transparent 32%),
+    radial-gradient(circle at 85% 80%,rgba(122,63,242,.13),transparent 34%),
+    var(--losi-bg)!important;
+}
+
+.auth-page .auth-card{
+  border-color:#dfe2ed!important;
+}
+
+/* Links */
+.catalog-empty a,
+.provider-page-state a,
+.admin-page a,
+.profile-page a{
+  color:var(--losi-purple-dark);
+}
+
+/* Responsividade: preservar a identidade sem criar overflow */
+@media(max-width:599px){
+  .home-page .home-dark-section{
+    background:linear-gradient(160deg,#102b61,#24104e)!important;
+  }
+
+  .catalog-login,
+  .provider-primary,
+  .provider-profile-contact,
+  .auth-page button[type="submit"]{
+    min-height:44px;
+  }
+
+  .provider-card{
+    box-shadow:0 5px 18px rgba(34,49,84,.06)!important;
+  }
+}
+
+@media(max-width:390px){
+  .catalog-login{
+    padding-left:11px!important;
+    padding-right:11px!important;
+  }
+}
