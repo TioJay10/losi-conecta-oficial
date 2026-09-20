@@ -3415,3 +3415,157 @@ textarea:focus,
     font-size:22px!important;
   }
 }
+
+
+/* ADMIN GLASS CONTRAST + FULL HEIGHT FIX */
+.admin-page{
+  --admin-bg:#090716!important;
+  --admin-sidebar:#15112f!important;
+  --admin-panel:rgba(28,22,58,.92)!important;
+  --admin-text:#ffffff!important;
+  --admin-muted:#b8b1d0!important;
+  --admin-muted-2:#938baa!important;
+  background:
+    radial-gradient(circle at 72% 4%,rgba(116,55,244,.16),transparent 28%),
+    linear-gradient(135deg,#090716,#0d0920 72%)!important;
+}
+
+.admin-page .admin-sidebar{
+  min-height:100vh!important;
+  height:100vh!important;
+  bottom:0!important;
+  background:linear-gradient(180deg,#181331 0%,#110d27 100%)!important;
+}
+
+.admin-page .admin-sidebar-title{
+  color:#a9a2c0!important;
+}
+
+.admin-page .admin-menu button{
+  color:#c7c1d8!important;
+}
+
+.admin-page .admin-menu button:hover{
+  color:#ffffff!important;
+  background:rgba(116,55,244,.18)!important;
+}
+
+.admin-page .admin-menu button.active{
+  color:#ffffff!important;
+}
+
+.admin-page .admin-content > h1,
+.admin-page .admin-section-head h2,
+.admin-page .admin-commercial-subscriptions h2,
+.admin-page .admin-review-card h2,
+.admin-page .admin-form-heading h2,
+.admin-page .admin-plan-summary h2{
+  color:#ffffff!important;
+}
+
+.admin-page .admin-content > p,
+.admin-page .admin-section-head p,
+.admin-page .admin-commercial-subscriptions p,
+.admin-page .admin-review-card p,
+.admin-page .admin-plan-summary p,
+.admin-page .admin-category-toolbar span,
+.admin-page .admin-users-toolbar span,
+.admin-page .admin-form-heading p{
+  color:#c1bbd2!important;
+}
+
+.admin-page .admin-item-main strong,
+.admin-page .admin-plan-summary h2,
+.admin-page .admin-category-toolbar strong,
+.admin-page .admin-users-toolbar strong,
+.admin-page .admin-grid strong{
+  color:#ffffff!important;
+}
+
+.admin-page .admin-item-main span,
+.admin-page .admin-id,
+.admin-page .admin-grid span{
+  color:#b7b0c9!important;
+}
+
+.admin-page .admin-filter-count{
+  color:#aaa3bd!important;
+}
+
+.admin-page .admin-filters input,
+.admin-page .admin-filters select,
+.admin-page .admin-form-field input,
+.admin-page .admin-form-field select,
+.admin-page .admin-plan-editor input,
+.admin-page .admin-plan-editor select,
+.admin-page .admin-plan-editor textarea,
+.admin-page .admin-category-create input,
+.admin-page .admin-commercial-activation select{
+  color:#ffffff!important;
+  background:rgba(8,6,21,.72)!important;
+}
+
+.admin-page .admin-filters input::placeholder,
+.admin-page .admin-form-field input::placeholder,
+.admin-page .admin-category-create input::placeholder{
+  color:#89819f!important;
+}
+
+.admin-page .admin-form-field > span,
+.admin-page .admin-plan-editor label,
+.admin-page .admin-category-create label span,
+.admin-page .admin-plan-checks label{
+  color:#d0c9dc!important;
+}
+
+.admin-page .admin-empty{
+  color:#aaa3bd!important;
+}
+
+.admin-page .admin-review-status{
+  color:#bcb5ce!important;
+}
+
+.admin-page .admin-page,
+.admin-page .admin-list-item,
+.admin-page .admin-pending-item{
+  color:#ffffff!important;
+}
+
+.admin-page .admin-list-item,
+.admin-page .admin-pending-item{
+  background:rgba(255,255,255,.035)!important;
+}
+
+.admin-page .admin-list-item:hover,
+.admin-page .admin-pending-item:hover{
+  background:rgba(116,55,244,.12)!important;
+}
+
+.admin-page .admin-item-actions button,
+.admin-page [style*="actionButton"],
+.admin-page [style*="backButton"]{
+  color:#f1edfa!important;
+  background:rgba(255,255,255,.07)!important;
+}
+
+.admin-page .admin-secondary-button{
+  color:#e0dbea!important;
+}
+
+.admin-page .admin-commercial-card-head > span,
+.admin-page .admin-plan-meta span{
+  color:#cfc2ff!important;
+}
+
+.admin-page .admin-plan-summary > strong{
+  color:#c5aaff!important;
+}
+
+@media(max-width:599px){
+  .admin-page .admin-sidebar{
+    height:auto!important;
+    min-height:0!important;
+    bottom:auto!important;
+  }
+}
