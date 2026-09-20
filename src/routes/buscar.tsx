@@ -167,7 +167,7 @@ function SearchPage() {
           <div className="marketplace-results-top">
             <div>
               <div className="marketplace-results-context">{loading ? "CARREGANDO" : results.length + " RESULTADO" + (results.length === 1 ? "" : "S")}</div>
-              <h2>{search ? "Fornecedores para "" + search + """ : "Fornecedores em destaque"}</h2>
+              <h2>{search ? `Fornecedores para "${search}"` : "Fornecedores em destaque"}</h2>
             </div>
             <label className="marketplace-sort">
               <span>Ordenar por</span>
