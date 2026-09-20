@@ -4645,3 +4645,162 @@ textarea:focus,
     font-size: 8px !important;
   }
 }
+
+
+/* FINAL ADMIN HEADER ALIGNMENT — mobile: menu left, marca central, sair right */
+@media only screen and (max-width: 768px) {
+  .admin-page .admin-header {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 52px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    justify-content: initial !important;
+    column-gap: 8px !important;
+    width: 100% !important;
+    min-height: 78px !important;
+    height: 78px !important;
+    box-sizing: border-box !important;
+    padding: 8px 12px !important;
+  }
+
+  .admin-page .admin-header > div:first-child {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 150px) !important;
+    flex: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    text-align: center !important;
+  }
+
+  .admin-page .admin-header > div:first-child > .mobile-centered-brand {
+    position: static !important;
+    display: block !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    font-size: 15px !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+  }
+
+  .admin-page .admin-header > div:first-child > div:last-child {
+    position: static !important;
+    display: block !important;
+    width: max-content !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+    color: #bdb4d3 !important;
+    text-align: center !important;
+  }
+
+  .admin-page #admin-mobile-menu {
+    position: absolute !important;
+    top: 50% !important;
+    left: 12px !important;
+    transform: translateY(-50%) !important;
+    z-index: 11000 !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+    margin: 0 !important;
+  }
+
+  .admin-page .admin-header .admin-logout {
+    position: absolute !important;
+    top: 50% !important;
+    right: 12px !important;
+    transform: translateY(-50%) !important;
+    z-index: 11000 !important;
+    width: auto !important;
+    min-width: 92px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .admin-page .admin-header {
+    min-height: 72px !important;
+    height: 72px !important;
+    padding: 8px 10px !important;
+  }
+
+  .admin-page .admin-header > div:first-child {
+    max-width: calc(100% - 132px) !important;
+  }
+
+  .admin-page .admin-header > div:first-child > .mobile-centered-brand {
+    font-size: 14px !important;
+  }
+
+  .admin-page .admin-header > div:first-child > div:last-child {
+    display: block !important;
+    font-size: 8px !important;
+  }
+
+  .admin-page #admin-mobile-menu {
+    top: 50% !important;
+    left: 9px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .admin-page .admin-header .admin-logout {
+    top: 50% !important;
+    right: 9px !important;
+    min-width: 86px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 7px 9px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* TOP BUTTONS — entrar/sair sempre no lado direito */
+@media only screen and (max-width: 768px) {
+  .home-page .home-header,
+  .dashboard-page .dashboard-header,
+  .profile-page .profile-header,
+  .catalog-page .catalog-header,
+  .provider-page .catalog-header {
+    position: relative !important;
+  }
+
+  .home-page .home-header .home-actions,
+  .dashboard-page .dashboard-header .dashboard-actions,
+  .profile-page .profile-header .profile-actions,
+  .catalog-page .catalog-header .catalog-actions,
+  .provider-page .catalog-header .catalog-actions {
+    margin-left: auto !important;
+    justify-content: flex-end !important;
+    flex: 0 0 auto !important;
+  }
+}
