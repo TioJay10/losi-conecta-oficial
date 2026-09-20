@@ -1242,3 +1242,12 @@ label{
     min-height:43px!important;
   }
 }
+
+
+/* Busca por raio e logo dos cards */
+.catalog-search{grid-template-columns:1.4fr 1fr 1fr 1fr!important}
+.provider-card{overflow:visible!important}
+.provider-cover{overflow:visible!important;border-radius:16px 16px 0 0}
+.provider-cover>img{border-radius:16px 16px 0 0;display:block}
+@media(max-width:899px){.catalog-search{grid-template-columns:1fr 1fr!important}.catalog-search-field{grid-column:1/-1!important}}
+@media(max-width:599px){.catalog-search{grid-template-columns:1fr!important}.catalog-search-field{grid-column:auto!important}.provider-card{overflow:visible!important}.provider-cover{overflow:visible!important}}
