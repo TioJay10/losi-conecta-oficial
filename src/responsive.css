@@ -4848,3 +4848,72 @@ textarea:focus,
     visibility: hidden !important;
   }
 }
+
+
+/* BUSCAR FORNECEDOR — cabeçalho mobile sem sobreposição */
+@media only screen and (max-width: 599px) {
+  .catalog-page .catalog-header {
+    position: sticky !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 64px !important;
+    padding: 0 12px !important;
+  }
+
+  .catalog-page .catalog-header .catalog-logo {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 21 !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+  }
+
+  .catalog-page .catalog-header .catalog-header-actions {
+    position: absolute !important;
+    top: 50% !important;
+    right: 12px !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    z-index: 22 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 8px !important;
+  }
+
+  .catalog-page .catalog-header .catalog-header-actions .catalog-login {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .catalog-page .catalog-header {
+    padding: 0 9px !important;
+  }
+
+  .catalog-page .catalog-header .catalog-header-actions {
+    right: 9px !important;
+  }
+
+  .catalog-page .catalog-header .catalog-header-actions .catalog-login {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+
+  .catalog-page .catalog-header .catalog-logo {
+    font-size: 14px !important;
+  }
+}
