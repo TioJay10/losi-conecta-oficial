@@ -1836,3 +1836,102 @@ a {
   .admin-page .admin-item-actions > * { width: 100%; }
   .admin-page .admin-review-cover { height: 130px; }
 }
+
+
+/* LOSI CONECTA — busca em layout marketplace */
+.marketplace-page{min-height:100vh;background:#f4f5f8;color:#172033;font-family:Arial,Helvetica,sans-serif}
+.marketplace-header{background:#fff;border-bottom:1px solid #e2e5eb;position:sticky;top:0;z-index:40}
+.marketplace-header-inner{max-width:1280px;margin:0 auto;min-height:72px;padding:0 24px;display:grid;grid-template-columns:190px minmax(320px,1fr) auto;align-items:center;gap:24px}
+.marketplace-logo{font-weight:900;letter-spacing:-.045em;font-size:23px;color:#2436a6;text-decoration:none;white-space:nowrap}
+.marketplace-logo span{color:#703bc1}
+.marketplace-main-search{height:44px;display:flex;background:#f1f3f7;border:1px solid #d8dce5;border-radius:7px;overflow:hidden}
+.marketplace-main-search input{flex:1;min-width:0;border:0;background:transparent;padding:0 15px;font-size:14px;outline:0;color:#172033}
+.marketplace-main-search button{width:52px;border:0;background:#3f46b8;color:#fff;font-size:23px;cursor:pointer}
+.marketplace-header-actions{display:flex;align-items:center;gap:14px}
+.marketplace-account{border:0;background:transparent;color:#30384a;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap}
+.marketplace-category-bar{background:#fff;border-bottom:1px solid #e2e5eb}
+.marketplace-category-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;gap:4px;overflow-x:auto}
+.marketplace-category-inner button{border:0;background:transparent;padding:13px 14px;color:#586173;font-size:12px;font-weight:700;white-space:nowrap;border-bottom:3px solid transparent;cursor:pointer}
+.marketplace-category-inner button:hover,.marketplace-category-inner button.active{color:#3342b3;border-bottom-color:#3342b3}
+.marketplace-search-panel{max-width:1280px;margin:18px auto 0;padding:0 24px}
+.marketplace-breadcrumb{font-size:11px;color:#7a8494;font-weight:700;margin-bottom:13px}
+.marketplace-breadcrumb span{padding:0 7px;color:#b2b8c3}
+.marketplace-search-panel h1{margin:0;font-size:25px;letter-spacing:-.025em;color:#182033}
+.marketplace-search-panel>p{margin:7px 0 16px;color:#697386;font-size:13px}
+.marketplace-filter-row{background:#fff;border:1px solid #dfe3ea;border-radius:8px;padding:14px;display:grid;grid-template-columns:minmax(260px,2fr) minmax(180px,1fr) minmax(180px,1fr) 105px;gap:10px;box-shadow:0 2px 8px rgba(20,30,55,.04)}
+.marketplace-filter-row label,.marketplace-filter-group label{display:block;font-size:10px;font-weight:800;color:#626c7e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.marketplace-filter-main input,.marketplace-filter-field input,.marketplace-filter-field select,.marketplace-filter-group select{width:100%;height:40px;border:1px solid #cfd5df;border-radius:5px;background:#fff;padding:0 11px;font-size:13px;color:#172033;box-sizing:border-box;outline:none}
+.marketplace-filter-main input:focus,.marketplace-filter-field input:focus,.marketplace-filter-field select:focus,.marketplace-filter-group select:focus{border-color:#5962c9;box-shadow:0 0 0 2px rgba(89,98,201,.1)}
+.marketplace-search-button{align-self:end;height:40px;border:0;border-radius:5px;background:#4149bd;color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+.marketplace-search-button:hover{background:#343ba8}
+.marketplace-content{max-width:1280px;margin:18px auto 50px;padding:0 24px;display:grid;grid-template-columns:225px minmax(0,1fr);gap:22px}
+.marketplace-sidebar{background:#fff;border:1px solid #dfe3ea;border-radius:7px;padding:16px;height:max-content;position:sticky;top:142px}
+.marketplace-sidebar-title{font-size:15px;font-weight:800;padding-bottom:14px;border-bottom:1px solid #edf0f4}
+.marketplace-filter-group{padding:15px 0;border-bottom:1px solid #edf0f4}
+.marketplace-filter-label{font-size:11px;font-weight:800;text-transform:uppercase;color:#687285;margin-bottom:7px}
+.marketplace-filter-group button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:6px 0;color:#596376;font-size:12px;cursor:pointer}
+.marketplace-filter-group button:hover,.marketplace-filter-group button.selected{color:#3e47b7;font-weight:800}
+.marketplace-clear-all{margin-top:15px;width:100%;height:36px;background:#fff;border:1px solid #cfd5df;border-radius:5px;color:#3e47b7;font-weight:800;font-size:12px;cursor:pointer}
+.marketplace-results{min-width:0}
+.marketplace-results-top{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:13px}
+.marketplace-results-context{font-size:10px;color:#737d8d;font-weight:800;letter-spacing:.06em}
+.marketplace-results-top h2{font-size:20px;margin:4px 0 0;letter-spacing:-.02em;color:#1b2334}
+.marketplace-sort{display:flex;align-items:center;gap:8px;font-size:11px;color:#6a7485;white-space:nowrap}
+.marketplace-sort select{height:35px;border:1px solid #ccd2dc;border-radius:5px;background:#fff;padding:0 9px;color:#273044;font-size:12px}
+.marketplace-active-filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px}
+.marketplace-active-filters span{background:#eef0fb;border:1px solid #d8dcf4;color:#414aa5;border-radius:4px;padding:5px 8px;font-size:11px;font-weight:700}
+.marketplace-message{background:#fff;border:1px solid #dfe3ea;border-radius:6px;padding:12px 14px;margin-bottom:13px;font-size:12px}
+.marketplace-error{color:#a33838}
+.marketplace-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.marketplace-card{background:#fff;border:1px solid #dfe3ea;border-radius:7px;overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:border-color .15s,box-shadow .15s}
+.marketplace-card:hover{border-color:#b9c0cf;box-shadow:0 5px 18px rgba(30,40,70,.08)}
+.marketplace-card-media{height:150px;background:#e9ebf1;position:relative;overflow:hidden}
+.marketplace-card-media img{width:100%;height:100%;display:block;object-fit:cover}
+.marketplace-card-media-fallback{width:100%;height:100%;background:linear-gradient(135deg,#e8eafa,#f2edf9)}
+.marketplace-favorite{position:absolute;right:10px;top:10px;width:32px;height:32px;border:1px solid rgba(255,255,255,.85);border-radius:50%;background:#fff;color:#424b5e;font-size:18px;line-height:1;cursor:pointer;box-shadow:0 2px 7px rgba(0,0,0,.12)}
+.marketplace-favorite.saved{color:#3f46b8}
+.marketplace-card-body{padding:13px 14px 14px;display:flex;flex-direction:column;flex:1}
+.marketplace-card-heading{display:flex;align-items:flex-start;gap:7px}
+.marketplace-card-heading h3{font-size:15px;line-height:1.25;margin:0;color:#20283a;overflow-wrap:anywhere}
+.marketplace-verified{flex:none;background:#edf0ff;color:#414ab4;border-radius:3px;padding:3px 5px;font-size:8px;font-weight:800;text-transform:uppercase}
+.marketplace-location{font-size:11px;color:#697486;margin-top:6px}
+.marketplace-rating{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:10px;color:#788294}
+.marketplace-rating strong{color:#d07a12;font-size:12px}
+.marketplace-card-body>p{font-size:11px;line-height:1.5;color:#687286;margin:10px 0 9px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.marketplace-services{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:2px}
+.marketplace-services span{background:#f2f3f6;border-radius:3px;padding:4px 6px;color:#596274;font-size:9px;font-weight:700}
+.marketplace-card-footer{display:flex;align-items:center;gap:7px;border-top:1px solid #edf0f4;margin-top:12px;padding-top:11px}
+.marketplace-profile-link{color:#3f48b6;text-decoration:none;font-size:11px;font-weight:800}
+.marketplace-contact{margin-left:auto;border:1px solid #3f48b6;color:#3f48b6;border-radius:4px;padding:7px 9px;text-decoration:none;font-size:10px;font-weight:800}
+.marketplace-contact:hover{background:#f0f1fc}
+.marketplace-no-contact{margin-left:auto;color:#9aa2af;font-size:9px}
+.marketplace-empty{background:#fff;border:1px solid #dfe3ea;border-radius:7px;padding:32px;text-align:center;margin-bottom:14px}
+.marketplace-empty strong{font-size:15px;color:#252e40}
+.marketplace-empty p{font-size:12px;color:#737d8d;margin:8px 0 0}
+@media only screen and (max-width:1050px){
+  .marketplace-header-inner{grid-template-columns:165px minmax(220px,1fr) auto;gap:14px}
+  .marketplace-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .marketplace-filter-row{grid-template-columns:1fr 1fr}
+  .marketplace-search-button{grid-column:2}
+}
+@media only screen and (max-width:768px){
+  .marketplace-header{position:relative}
+  .marketplace-header-inner{grid-template-columns:1fr auto;min-height:64px;padding:0 12px}
+  .marketplace-logo{font-size:19px}
+  .marketplace-main-search{grid-column:1/-1;grid-row:2;margin-bottom:10px}
+  .marketplace-header-actions{gap:7px}
+  .marketplace-account{font-size:11px}
+  .marketplace-category-inner{padding:0 10px}
+  .marketplace-search-panel{padding:0 12px;margin-top:14px}
+  .marketplace-search-panel h1{font-size:21px}
+  .marketplace-filter-row{grid-template-columns:1fr;padding:11px}
+  .marketplace-search-button{grid-column:auto}
+  .marketplace-content{grid-template-columns:1fr;padding:0 12px;margin-top:14px}
+  .marketplace-sidebar{position:static}
+  .marketplace-filter-group button{padding:8px 0}
+  .marketplace-results-top{align-items:stretch;flex-direction:column;gap:10px}
+  .marketplace-sort{justify-content:space-between}
+  .marketplace-sort select{flex:1}
+  .marketplace-grid{grid-template-columns:1fr}
+}
+
