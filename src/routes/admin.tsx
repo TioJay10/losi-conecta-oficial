@@ -381,7 +381,7 @@ function AdminPage() {
               })()}
             </div>
           ) : (
-            <section className="admin-table-section"><section className="admin-table-section">
+            <section className="admin-table-section">
               <div className="admin-section-head"><div style={styles.badge}>{sectionTitle.toUpperCase()}</div><button style={styles.backButton} onClick={() => { setSection("overview"); window.history.replaceState(null, "", "/admin"); }}>Visão geral</button></div>
               {section === "users" ? <div className="admin-inline-list">
                 <div className="admin-users-toolbar">
