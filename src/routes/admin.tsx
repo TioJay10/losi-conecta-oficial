@@ -358,7 +358,7 @@ function AdminPage() {
                 <section className="admin-commercial-subscriptions">
                   <div style={styles.badge}>ATIVAÇÃO MANUAL</div>
                   <h2>Ativar plano após pagamento</h2>
-                  <p style={styles.text}>Selecione o fornecedor e o plano somente depois de confirmar o pagamento pelo WhatsApp.</p>
+                  <p style={styles.text}>Confirme o pagamento pelo WhatsApp antes de selecionar o fornecedor e ativar o plano.</p>
                   <div className="admin-commercial-activation">
                     {businesses.filter((business) => business.approval_status === "approved" && business.active).map((business) => (
                       <div className="admin-list-item" key={business.id}>
