@@ -514,3 +514,89 @@
     justify-content: flex-start;
   }
 }
+
+
+/* DENÚNCIA DE FORNECEDOR */
+.provider-profile-report {
+  border: 1px solid #e5d9df;
+  background: #fff;
+  color: #172033;
+}
+
+.provider-profile-report,
+.provider-profile-report-submit {
+  cursor: pointer;
+}
+
+.provider-profile-report-submit {
+  border: 0;
+  border-radius: 9px;
+  background: #4f46c7;
+  color: #fff;
+  padding: 11px 15px;
+  font-weight: 800;
+}
+
+.provider-profile-report:disabled,
+.provider-profile-report-submit:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.provider-report-card {
+  scroll-margin-top: 90px;
+}
+
+.provider-report-card > p {
+  color: #687386;
+  line-height: 1.55;
+}
+
+.provider-report-form {
+  margin-top: 18px;
+}
+
+.provider-report-form label {
+  display: grid;
+  gap: 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.provider-report-form select,
+.provider-report-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  background: #fff;
+  color: #172033;
+  padding: 10px 11px;
+  font: inherit;
+}
+
+.provider-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.provider-report-form small {
+  display: block;
+  margin-top: 12px;
+  color: #4f46c7;
+  font-weight: 700;
+}
+
+@media only screen and (max-width: 480px) {
+  .provider-report-actions {
+    justify-content: stretch;
+  }
+
+  .provider-report-actions button {
+    flex: 1;
+  }
+}
