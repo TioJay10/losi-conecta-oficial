@@ -288,7 +288,7 @@ function BusinessProfilePage() {
       business_id: business.id,
       category_id: categoryId,
       name: serviceName.trim(),
-      description: serviceDescription.trim() || null,
+      description: serviceDescription.trim().slice(0, 150) || null,
     });
 
     if (error) {
@@ -452,7 +452,7 @@ function BusinessProfilePage() {
             <Field label="Nome do serviço" value={serviceName} onChange={setServiceName} />
           </div>
           <label style={styles.label}>Descrição do serviço</label>
-          <textarea value={serviceDescription} onChange={(e) => setServiceDescription(e.target.value)} style={styles.textarea} rows={3} placeholder="Descreva esse serviço..." />
+          <textarea value={serviceDescription} maxLength={150} onChange={(e) => setServiceDescription(e.target.value.slice(0, 150))} style={styles.textarea} rows={3} placeholder="Descreva esse serviço..." />
           <div style={styles.actions}>
             <button disabled={!business} style={styles.secondary}>{editingServiceId ? "Salvar alterações" : "Cadastrar serviço"}</button>
             {editingServiceId && <button type="button" onClick={cancelEditService} style={styles.cancel}>Cancelar</button>}
