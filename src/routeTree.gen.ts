@@ -109,10 +109,10 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar' | '/fornecedor/$slug'
+  fullPaths: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar' | '/fornecedor/$slug'
-  id: '__root__' | '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/buscar' | '/fornecedor/$slug'
+  to: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
+  id: '__root__' | '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
   fileRoutesById: FileRoutesById
 }
 
