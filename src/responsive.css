@@ -3835,3 +3835,26 @@ textarea:focus,
     font-size: 9px !important;
   }
 }
+
+
+/* ADMIN USERS TOOLBAR — dark glass surface and white typography */
+.admin-page .admin-users-toolbar {
+  background: linear-gradient(145deg, rgba(35,28,72,.96), rgba(20,16,48,.94)) !important;
+  color: #f7f4ff !important;
+  border: 1px solid rgba(184,166,255,.18) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.22) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+
+.admin-page .admin-users-toolbar strong {
+  color: #ffffff !important;
+}
+
+.admin-page .admin-users-toolbar span {
+  color: #c9c2dc !important;
+}
+
+.admin-page .admin-users-toolbar .admin-primary-button {
+  color: #ffffff !important;
+}
