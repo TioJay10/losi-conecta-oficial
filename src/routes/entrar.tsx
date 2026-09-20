@@ -34,7 +34,22 @@ function AuthPage() {
         setMode("recovery");
         return;
       }
-      if (data.session) navigate({ to: "/painel" });
+      if (data.session) {
+        supabase
+          .from("profiles")
+          .select("blocked")
+          .eq("id", data.session.user.id)
+          .maybeSingle()
+          .then(({ data: profile }) => {
+            if (!mounted) return;
+            if (profile?.blocked) {
+              supabase.auth.signOut();
+              setError("Esta conta está bloqueada. Entre em contato com a administração.");
+              return;
+            }
+            navigate({ to: "/painel" });
+          });
+      }
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -47,7 +62,9 @@ function AuthPage() {
         return;
       }
       if (session && event === "SIGNED_IN" && !recoverySession) {
-        navigate({ to: "/painel" });
+        // O redirecionamento após login é tratado em submit(), depois da
+        // verificação de bloqueio da conta. Isso evita uma corrida entre
+        // onAuthStateChange e a checagem do perfil.
       }
     });
 
@@ -147,8 +164,22 @@ function AuthPage() {
       if (loginError) {
         setError(loginError.message || "E-mail ou senha inválidos.");
       } else if (data.session) {
-        setMessage("Login realizado. Abrindo seu painel...");
-        await navigate({ to: "/painel" });
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("blocked")
+          .eq("id", data.session.user.id)
+          .maybeSingle();
+
+        if (profileError) {
+          await supabase.auth.signOut();
+          setError("Não foi possível validar sua conta. Tente novamente.");
+        } else if (profile?.blocked) {
+          await supabase.auth.signOut();
+          setError("Esta conta está bloqueada. Entre em contato com a administração.");
+        } else {
+          setMessage("Login realizado. Abrindo seu painel...");
+          await navigate({ to: "/painel" });
+        }
       } else {
         setError("O Supabase não retornou uma sessão. Tente novamente.");
       }
