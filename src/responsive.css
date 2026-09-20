@@ -4839,3 +4839,12 @@ textarea:focus,
     display: block !important;
   }
 }
+
+
+/* ADMIN — esconder subtítulo do topo no mobile de forma explícita */
+@media only screen and (max-width: 768px) {
+  .admin-page .admin-header .admin-mobile-subtitle {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
