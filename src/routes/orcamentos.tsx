@@ -261,7 +261,7 @@ function QuotesPage() {
   }
 
   function normalizeWhatsAppNumber(value: string | null | undefined) {
-    const digits = (value ?? "").replace(/\\D/g, "");
+    const digits = (value ?? "").replace(/\D/g, "");
     if (!digits) return "";
     if (digits.startsWith("55")) return digits;
     if (digits.length === 10 || digits.length === 11) return "55" + digits;
@@ -276,7 +276,7 @@ function QuotesPage() {
     const request = quote.quote_requests;
     const itemLines = (quote.quote_items ?? [])
       .map((item) => "• " + item.quantity + "x " + item.description + " — " + money(Number(item.total)))
-      .join("\\n");
+      .join("\n");
 
     return [
       "Olá, " + recipientName + "! Segue o orçamento solicitado para seu evento.",
