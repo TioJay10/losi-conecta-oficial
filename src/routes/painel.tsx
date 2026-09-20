@@ -112,7 +112,7 @@ function DashboardPage() {
   return (
     <main className="dashboard-page" style={styles.page}>
       <header className="dashboard-header" style={styles.header}>
-        <div style={styles.logo}>LOSI <span>CONECTA</span></div>
+        <div className="mobile-centered-brand" style={styles.logo}>LOSI <span>CONECTA</span></div>
         <button onClick={logout} style={styles.logout}>Sair</button>
       </header>
 
