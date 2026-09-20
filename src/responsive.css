@@ -1991,3 +1991,425 @@ textarea:focus,
 .admin-page .admin-category-status-inactive{
   color:#c9343f!important;
 }
+
+
+/* =========================================================
+   ADMIN — COMERCIAL
+   Cards de planos compactos e ativação manual refinada
+   ========================================================= */
+
+.admin-page .admin-commercial-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px!important;
+  align-items:start;
+}
+
+.admin-page .admin-commercial-card{
+  min-width:0;
+  background:#fff;
+  border:1px solid var(--losi-border);
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 5px 18px rgba(34,49,84,.055);
+}
+
+.admin-page .admin-commercial-card-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  min-height:30px;
+  margin-bottom:13px;
+  padding-bottom:11px;
+  border-bottom:1px solid #edf0f5;
+}
+
+.admin-page .admin-commercial-card-head > span{
+  display:inline-flex;
+  align-items:center;
+  min-height:22px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:var(--losi-purple-soft);
+  color:var(--losi-purple-dark);
+  font-size:9px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:.08em;
+  white-space:nowrap;
+}
+
+.admin-page .admin-commercial-card-head button{
+  flex:0 0 auto;
+  min-height:34px!important;
+  padding:7px 10px!important;
+  border-radius:8px!important;
+  font-size:11px!important;
+  white-space:nowrap;
+}
+
+.admin-page .admin-plan-summary{
+  display:flex;
+  flex-direction:column;
+  min-height:142px;
+  gap:0;
+}
+
+.admin-page .admin-plan-summary h2{
+  margin:0!important;
+  color:var(--losi-text)!important;
+  font-size:18px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  letter-spacing:-.02em;
+}
+
+.admin-page .admin-plan-summary > strong{
+  display:block;
+  margin:8px 0 9px;
+  color:var(--losi-blue-dark)!important;
+  font-size:19px!important;
+  line-height:1.2!important;
+  font-weight:900!important;
+  white-space:nowrap;
+}
+
+.admin-page .admin-plan-summary p{
+  margin:0!important;
+  color:var(--losi-text-soft)!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+  min-height:36px;
+  max-width:100%;
+}
+
+.admin-page .admin-plan-meta{
+  display:flex!important;
+  align-items:center!important;
+  flex-wrap:wrap;
+  gap:6px!important;
+  margin-top:auto!important;
+  padding-top:12px;
+}
+
+.admin-page .admin-plan-meta span{
+  display:inline-flex!important;
+  align-items:center;
+  min-height:23px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#f4f6fa;
+  color:#667085;
+  font-size:10px!important;
+  font-weight:800!important;
+  line-height:1!important;
+}
+
+.admin-page .admin-plan-meta span:first-child{
+  background:#eef9f2;
+  color:#16834b;
+}
+
+.admin-page .admin-plan-editor{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-items:start;
+}
+
+.admin-page .admin-plan-editor label{
+  display:grid;
+  gap:6px;
+  min-width:0;
+  color:#384252;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.3;
+}
+
+.admin-page .admin-plan-editor label:nth-child(3){
+  grid-column:1 / -1;
+}
+
+.admin-page .admin-plan-editor input,
+.admin-page .admin-plan-editor select,
+.admin-page .admin-plan-editor textarea{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  border:1px solid #d9dfeb;
+  border-radius:8px;
+  background:#fff;
+  color:var(--losi-text);
+  padding:9px 10px;
+  font:inherit;
+  font-weight:500;
+}
+
+.admin-page .admin-plan-editor textarea{
+  resize:vertical;
+  line-height:1.45;
+}
+
+.admin-page .admin-plan-editor button{
+  grid-column:1 / -1;
+  justify-self:end;
+  min-height:38px!important;
+  padding:8px 13px!important;
+}
+
+.admin-page .admin-plan-checks{
+  grid-column:1 / -1;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:2px 0;
+}
+
+.admin-page .admin-plan-checks label{
+  display:flex!important;
+  grid-template-columns:none;
+  align-items:center;
+  gap:7px;
+  font-weight:700;
+}
+
+.admin-page .admin-plan-checks input{
+  width:15px;
+  min-width:15px;
+  height:15px;
+  margin:0;
+}
+
+.admin-page .admin-commercial-subscriptions{
+  grid-column:1 / -1;
+  background:#fff;
+  border:1px solid var(--losi-border);
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 5px 18px rgba(34,49,84,.045);
+}
+
+.admin-page .admin-commercial-subscriptions > h2{
+  margin:10px 0 5px!important;
+  color:var(--losi-text)!important;
+  font-size:19px!important;
+  line-height:1.25!important;
+  letter-spacing:-.015em;
+}
+
+.admin-page .admin-commercial-subscriptions > p{
+  margin:0 0 18px!important;
+  max-width:760px;
+  font-size:13px!important;
+  line-height:1.5!important;
+}
+
+.admin-page .admin-commercial-activation{
+  display:grid;
+  gap:8px;
+}
+
+.admin-page .admin-commercial-activation .admin-list-item{
+  padding:11px 13px!important;
+  border-radius:10px!important;
+  background:#fafbfe;
+  border:1px solid #edf0f5;
+}
+
+.admin-page .admin-commercial-activation .admin-item-main{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.admin-page .admin-commercial-activation .admin-item-main > div:first-child{
+  min-width:0;
+}
+
+.admin-page .admin-commercial-activation .admin-item-main strong{
+  display:block;
+  color:var(--losi-text);
+  font-size:13px;
+  line-height:1.3;
+}
+
+.admin-page .admin-commercial-activation .admin-item-main span{
+  display:block;
+  margin-top:4px;
+  color:var(--losi-text-soft);
+  font-size:11px;
+  line-height:1.4;
+}
+
+.admin-page .admin-commercial-activation .admin-item-actions{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto;
+}
+
+.admin-page .admin-commercial-activation select{
+  appearance:none;
+  min-width:220px;
+  min-height:40px;
+  padding:0 38px 0 12px;
+  border:1px solid #d4dbea!important;
+  border-radius:9px!important;
+  background:
+    linear-gradient(45deg,transparent 50%,#687386 50%) calc(100% - 16px) 17px/6px 6px no-repeat,
+    linear-gradient(135deg,#687386 50%,transparent 50%) calc(100% - 11px) 17px/6px 6px no-repeat,
+    #fff;
+  color:var(--losi-text)!important;
+  font-family:inherit;
+  font-size:12px!important;
+  font-weight:700!important;
+  cursor:pointer;
+  box-shadow:0 2px 5px rgba(34,49,84,.035);
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+}
+
+.admin-page .admin-commercial-activation select:hover{
+  border-color:#b9c2d3!important;
+  background-color:#fbfcff;
+}
+
+.admin-page .admin-commercial-activation select:focus{
+  outline:none;
+  border-color:#9674ec!important;
+  box-shadow:0 0 0 3px rgba(122,63,242,.11)!important;
+}
+
+.admin-page .admin-commercial-activation .admin-item-actions button{
+  min-height:40px!important;
+  padding:9px 14px!important;
+  border:0!important;
+  border-radius:9px!important;
+  background:var(--losi-gradient)!important;
+  color:#fff!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  white-space:nowrap;
+  box-shadow:0 5px 12px rgba(91,34,201,.15);
+  transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease;
+}
+
+.admin-page .admin-commercial-activation .admin-item-actions button:hover:not(:disabled){
+  transform:translateY(-1px);
+  box-shadow:0 7px 16px rgba(91,34,201,.22);
+}
+
+.admin-page .admin-commercial-activation .admin-item-actions button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+@media(max-width:899px){
+  .admin-page .admin-commercial-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .admin-page .admin-commercial-subscriptions{
+    grid-column:1 / -1;
+  }
+
+  .admin-page .admin-commercial-activation .admin-item-main{
+    align-items:stretch;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .admin-page .admin-commercial-activation .admin-item-actions{
+    width:100%;
+  }
+
+  .admin-page .admin-commercial-activation select{
+    flex:1;
+    min-width:0;
+  }
+}
+
+@media(max-width:599px){
+  .admin-page .admin-commercial-grid{
+    grid-template-columns:1fr;
+    gap:10px!important;
+  }
+
+  .admin-page .admin-commercial-card{
+    padding:14px;
+  }
+
+  .admin-page .admin-plan-summary{
+    min-height:0;
+  }
+
+  .admin-page .admin-plan-summary p{
+    min-height:0;
+  }
+
+  .admin-page .admin-commercial-card-head{
+    align-items:flex-start!important;
+  }
+
+  .admin-page .admin-commercial-card-head button{
+    min-height:32px!important;
+  }
+
+  .admin-page .admin-plan-editor{
+    grid-template-columns:1fr;
+  }
+
+  .admin-page .admin-plan-editor label:nth-child(3),
+  .admin-page .admin-plan-editor button{
+    grid-column:auto;
+  }
+
+  .admin-page .admin-plan-checks{
+    grid-column:auto;
+  }
+
+  .admin-page .admin-plan-editor button{
+    width:100%;
+  }
+
+  .admin-page .admin-commercial-subscriptions{
+    padding:16px;
+  }
+
+  .admin-page .admin-commercial-activation .admin-item-actions{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto;
+  }
+
+  .admin-page .admin-commercial-activation select{
+    width:100%;
+    min-width:0;
+  }
+
+  .admin-page .admin-commercial-activation .admin-item-actions button{
+    min-width:112px;
+  }
+}
+
+@media(max-width:390px){
+  .admin-page .admin-commercial-activation .admin-item-actions{
+    grid-template-columns:1fr;
+  }
+
+  .admin-page .admin-commercial-activation .admin-item-actions button,
+  .admin-page .admin-commercial-activation select{
+    width:100%;
+    min-height:42px;
+  }
+
+  .admin-page .admin-commercial-card-head{
+    gap:7px!important;
+  }
+
+  .admin-page .admin-commercial-card-head > span{
+    font-size:8px;
+  }
+}
