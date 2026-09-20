@@ -18,6 +18,7 @@ function AdminPage() {
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
   const [section, setSection] = useState<"overview" | "users" | "businesses" | "categories" | "services" | "reviews" | "commercial">("overview");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [plans, setPlans] = useState<Array<{id:string;name:string;slug:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean;active:boolean}>>([]);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [planSavingId, setPlanSavingId] = useState<string | null>(null);
@@ -290,13 +291,13 @@ function AdminPage() {
         <button type="button" className="admin-logout" onClick={logout}>Sair do painel</button>
       </header>
       <div className="admin-shell">
-        <button type="button" className="admin-mobile-menu-button" aria-label="Abrir menu administrativo" aria-expanded="false">
+        <button type="button" className="admin-mobile-menu-button" aria-label={mobileMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
           <span></span><span></span><span></span>
         </button>
-        <aside className="admin-sidebar">
+        <aside className={`admin-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
           <div className="admin-sidebar-title">GESTÃO</div>
           <nav className="admin-menu">
-            {menu.map(item => <button key={item.id} className={section === item.id ? "active" : ""} onClick={() => { setSection(item.id); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}
+            {menu.map(item => <button key={item.id} className={section === item.id ? "active" : ""} onClick={() => { setSection(item.id); setMobileMenuOpen(false); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}
           </nav>
           <div className="admin-sidebar-logout">
             <button type="button" onClick={logout}>Sair do painel</button>
