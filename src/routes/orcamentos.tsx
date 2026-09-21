@@ -77,6 +77,7 @@ function QuotesPage() {
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState("");
   const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [clientRequests, setClientRequests] = useState<RequestRow[]>([]);
   const [quotes, setQuotes] = useState<QuoteRow[]>([]);
   const [businessContacts, setBusinessContacts] = useState<Record<string, BusinessContact>>({});
   const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
@@ -147,15 +148,23 @@ function QuotesPage() {
         if (sentCountError) console.error("Erro ao contar orçamentos enviados no mês:", sentCountError);
         if (mounted) setSentThisMonth(count ?? 0);
       } else {
+        const { data: requested, error: requestedError } = await supabase
+          .from("quote_requests")
+          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+          .eq("requester_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
         const { data: received, error: receivedError } = await supabase
           .from("quotes")
           .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
+        if (requestedError) console.error("Erro ao carregar solicitações enviadas:", requestedError);
         if (receivedError) console.error("Erro ao carregar orçamentos recebidos:", receivedError);
 
         if (mounted) {
+          setClientRequests((requested ?? []) as unknown as RequestRow[]);
           setQuotes((received ?? []) as unknown as QuoteRow[]);
 
           const businessIds = [...new Set((received ?? []).map((quote: any) => quote.business_id).filter(Boolean))];
@@ -504,6 +513,25 @@ function QuotesPage() {
             </section>
           </>
         ) : (
+          <>
+          <section className="quotes-section">
+            <div className="quotes-section-head"><div><div className="quotes-kicker">SOLICITADOS</div><h2>Orçamentos solicitados</h2></div></div>
+            {clientRequests.length === 0 ? <div className="quotes-empty">Você ainda não solicitou nenhum orçamento.</div> : (
+              <div className="quote-request-list">
+                {clientRequests.map((request) => (
+                  <article key={request.id} className="quote-request-card">
+                    <div>
+                      <span className={"quote-status " + request.status}>{statusLabel(request.status)}</span>
+                      <h3>{request.event_title}</h3>
+                      <strong>{request.services?.name || "Serviço não informado"}</strong>
+                      <p>{request.event_date ? new Date(request.event_date + "T12:00:00").toLocaleDateString("pt-BR") + " · " : ""}{request.event_location || "Local não informado"}</p>
+                      {request.description && <p>{request.description}</p>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
           <section className="quotes-section">
             <div className="quotes-section-head"><div><div className="quotes-kicker">RECEBIDOS</div><h2>Orçamentos enviados para você</h2></div></div>
             {quotes.length === 0 ? <div className="quotes-empty">Você ainda não recebeu nenhum orçamento.</div> : (
@@ -532,6 +560,7 @@ function QuotesPage() {
               </div>
             )}
           </section>
+          </>
         )}
       </section>
     </main>
