@@ -4588,3 +4588,56 @@ a {
 .dashboard-page .dashboard-header-context {
   gap: 1px !important;
 }
+
+
+/* LOSI CONECTA — marca centralizada em todos os cabeçalhos */
+.home-page .home-header,
+.dashboard-page .dashboard-header,
+.profile-page .profile-header,
+.quotes-page .quotes-header,
+.catalog-page .catalog-header,
+.provider-page .catalog-header,
+.marketplace-page .marketplace-header,
+.admin-page .admin-header {
+  position: relative !important;
+}
+
+.home-page .home-header .mobile-centered-brand,
+.dashboard-page .dashboard-header .mobile-centered-brand,
+.profile-page .profile-header .mobile-centered-brand,
+.quotes-page .quotes-header .catalog-logo,
+.catalog-page .catalog-header .catalog-logo,
+.provider-page .catalog-header .catalog-logo,
+.marketplace-page .marketplace-header .marketplace-logo {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  z-index: 20 !important;
+}
+
+.admin-page .admin-header > div:first-of-type {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  text-align: center !important;
+  z-index: 20 !important;
+}
+
+@media (max-width: 900px) {
+  .home-page .home-header .mobile-centered-brand,
+  .dashboard-page .dashboard-header .mobile-centered-brand,
+  .profile-page .profile-header .mobile-centered-brand,
+  .quotes-page .quotes-header .catalog-logo,
+  .catalog-page .catalog-header .catalog-logo,
+  .provider-page .catalog-header .catalog-logo,
+  .marketplace-page .marketplace-header .marketplace-logo {
+    max-width: calc(100% - 150px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
