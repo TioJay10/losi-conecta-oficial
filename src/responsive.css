@@ -2195,10 +2195,33 @@ a {
 }
 
 .dashboard-main .dashboard-badge {
-  border: 1px solid rgba(214,180,106,.28);
-  background: linear-gradient(135deg, rgba(214,180,106,.13), rgba(255,255,255,.7));
+  border: 0;
+  background: transparent;
   color: #9a7029;
-  box-shadow: inset 0 1px rgba(255,255,255,.85);
+  box-shadow: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+.dashboard-main .dashboard-grid > button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px;
+  text-align: left;
+}
+.dashboard-main .dashboard-grid > button strong,
+.dashboard-main .dashboard-grid > button span {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+.dashboard-main .dashboard-grid > button strong {
+  line-height: 1.35;
+}
+.dashboard-main .dashboard-grid > button span {
+  line-height: 1.55;
 }
 .dashboard-main .dashboard-content > h1 {
   color: #101827;
