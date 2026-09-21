@@ -33,6 +33,7 @@ type QuoteRow = {
   notes: string | null;
   status: string;
   sent_at: string | null;
+  viewed_at: string | null;
   created_at: string;
   quote_items?: { id: string; description: string; quantity: number; unit_price: number; total: number }[];
   quote_requests?: RequestRow;
@@ -89,7 +90,6 @@ function QuotesPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
-  const [sentThisMonth, setSentThisMonth] = useState(0);
   const [activeMetric, setActiveMetric] = useState<"sent" | "pending" | "total" | "received" | "supplier-pending" | "supplier-sent" | null>(null);
   const [filterFrom, setFilterFrom] = useState("");
   const [filterTo, setFilterTo] = useState("");
@@ -125,7 +125,7 @@ function QuotesPage() {
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
           supabase.from("quotes")
-            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
         ]);
@@ -141,7 +141,7 @@ function QuotesPage() {
 
         const { data: receivedByUser } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -159,7 +159,6 @@ function QuotesPage() {
         firstDay.setDate(1);
         firstDay.setHours(0, 0, 0, 0);
         const requestedRowsForMonth = (requestedByUser ?? []).filter((request: any) => new Date(request.created_at) >= firstDay);
-        if (mounted) setSentThisMonth(requestedRowsForMonth.length);
       } else {
         const { data: requested, error: requestedError } = await supabase
           .from("quote_requests")
@@ -169,7 +168,7 @@ function QuotesPage() {
 
         const { data: received, error: receivedError } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -182,7 +181,6 @@ function QuotesPage() {
           const firstDay = new Date();
           firstDay.setDate(1);
           firstDay.setHours(0, 0, 0, 0);
-          setSentThisMonth((requested ?? []).filter((request: any) => new Date(request.created_at) >= firstDay).length);
 
           const businessIds = [...new Set((received ?? []).map((quote: any) => quote.business_id).filter(Boolean))];
           if (businessIds.length > 0) {
@@ -221,7 +219,7 @@ function QuotesPage() {
 
       const clientQuotesPromise = supabase
         .from("quotes")
-        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
         .eq("client_id", userId)
         .order("created_at", { ascending: false });
 
@@ -237,7 +235,6 @@ function QuotesPage() {
         const firstDay = new Date();
         firstDay.setDate(1);
         firstDay.setHours(0, 0, 0, 0);
-        setSentThisMonth((requestedResult.data ?? []).filter((request: any) => new Date(request.created_at) >= firstDay).length);
       }
 
       if (!receivedResult.error) {
@@ -253,7 +250,7 @@ function QuotesPage() {
             .order("created_at", { ascending: false }),
           supabase
             .from("quotes")
-            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
             .eq("business_id", businessId)
             .order("created_at", { ascending: false }),
         ]);
@@ -369,7 +366,7 @@ function QuotesPage() {
     }
     const refreshed = await supabase
       .from("quotes")
-      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
       .eq("business_id", businessId)
       .order("created_at", { ascending: false });
 
@@ -378,6 +375,17 @@ function QuotesPage() {
     }
     setQuotes((refreshed.data ?? []) as unknown as QuoteRow[]);
     setRequests((current) => current.map((request) => request.id === selectedRequest.id ? { ...request, status: "quoted" } : request));
+
+    const { data: refreshedClientQuotes } = await supabase
+      .from("quotes")
+      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+      .eq("client_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (refreshedClientQuotes) {
+      setClientQuotes((refreshedClientQuotes ?? []) as unknown as QuoteRow[]);
+    }
+
     resetForm();
     setMessageType("success");
     setMessage("ORÇAMENTO ENVIADO COM SUCESSO");
@@ -460,22 +468,38 @@ function QuotesPage() {
   if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
 
   const isSupplier = Boolean(businessId);
-  const pendingRequests = requests.filter((request) => request.status === "pending");
-  const sentRequestsThisMonth = clientRequests.filter((request) => {
-    const created = new Date(request.created_at);
-    const firstDay = new Date();
-    firstDay.setDate(1);
-    firstDay.setHours(0, 0, 0, 0);
-    return created >= firstDay;
-  });
 
-  const metricRequests = activeMetric === "sent"
-    ? sentRequestsThisMonth
-    : activeMetric === "pending"
-      ? clientRequests.filter((request) => request.status === "pending")
-      : [];
+  // Uma solicitação só deixa de estar "Aguardando orçamento" quando existe
+  // um orçamento vinculado a ela. O status textual da solicitação não é
+  // usado como fonte única da verdade, evitando divergência entre os painéis.
+  const clientQuoteRequestIds = new Set(clientQuotes.map((quote) => quote.request_id));
+  const supplierQuoteRequestIds = new Set(quotes.map((quote) => quote.request_id));
 
-  const metricQuotes = activeMetric === "total" ? clientQuotes : activeMetric === "supplier-sent" ? quotes : [];
+  const clientPendingRequests = clientRequests.filter(
+    (request) => !clientQuoteRequestIds.has(request.id),
+  );
+
+  const supplierPendingRequests = requests.filter(
+    (request) => !supplierQuoteRequestIds.has(request.id),
+  );
+
+  const metricRequests =
+    activeMetric === "sent"
+      ? sentRequestsThisMonth
+      : activeMetric === "pending"
+        ? clientPendingRequests
+        : activeMetric === "received"
+          ? requests
+          : activeMetric === "supplier-pending"
+            ? supplierPendingRequests
+            : [];
+
+  const metricQuotes =
+    activeMetric === "total"
+      ? clientQuotes
+      : activeMetric === "supplier-sent"
+        ? quotes
+        : [];
 
   function dateOnly(value: string | null) {
     return value ? new Date(value + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada";
@@ -494,6 +518,8 @@ function QuotesPage() {
   const availableTypes = [...new Set([
     ...clientRequests.map((request) => serviceName(request)),
     ...clientQuotes.map((quote) => serviceName(quote.quote_requests)),
+    ...requests.map((request) => serviceName(request)),
+    ...quotes.map((quote) => serviceName(quote.quote_requests)),
   ].filter((type) => type !== "Serviço não informado"))].sort();
 
   const matchesFilters = (createdAt: string, type: string) => {
@@ -537,23 +563,56 @@ function QuotesPage() {
         )}
 
         <div className="quotes-metrics">
-          {isSupplier ? <>
-            <button type="button" className={"quotes-metric-card" + (activeMetric === "received" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "received" ? null : "received")}><span>Solicitações recebidas</span><strong>{requests.length}</strong><small>Pedidos enviados para sua empresa</small></button>
-            <button type="button" className={"quotes-metric-card" + (activeMetric === "supplier-pending" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "supplier-pending" ? null : "supplier-pending")}><span>Aguardando orçamento</span><strong>{pendingRequests.length}</strong><small>Solicitações aguardando resposta</small></button>
-            <button type="button" className={"quotes-metric-card" + (activeMetric === "supplier-sent" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "supplier-sent" ? null : "supplier-sent")}><span>Orçamentos enviados</span><strong>{quotes.length}</strong><small>Propostas enviadas pela empresa</small></button>
-          </> : <>
-            <button type="button" className={"quotes-metric-card" + (activeMetric === "sent" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "sent" ? null : "sent")}><span>Enviados este mês</span><strong>{sentThisMonth}</strong><small>Ver solicitações enviadas</small></button>
-            <button type="button" className={"quotes-metric-card" + (activeMetric === "pending" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "pending" ? null : "pending")}><span>Aguardando orçamento</span><strong>{clientRequests.filter((request) => request.status === "pending").length}</strong><small>Ver o que ainda aguarda retorno</small></button>
-            <button type="button" className={"quotes-metric-card" + (activeMetric === "total" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "total" ? null : "total")}><span>Total de orçamentos</span><strong>{clientQuotes.length}</strong><small>Ver orçamentos recebidos</small></button>
-          </>}
-        </div>
+          <button
+            type="button"
+            className={"quotes-metric-card" + (activeMetric === "pending" ? " active" : "")}
+            onClick={() => setActiveMetric(activeMetric === "pending" ? null : "pending")}
+          >
+            <span>Aguardando orçamento</span>
+            <strong>{clientPendingRequests.length}</strong>
+            <small>Solicitações feitas por você sem retorno</small>
+          </button>
 
+          <button
+            type="button"
+            className={"quotes-metric-card" + (activeMetric === "total" ? " active" : "")}
+            onClick={() => setActiveMetric(activeMetric === "total" ? null : "total")}
+          >
+            <span>Orçamentos recebidos</span>
+            <strong>{clientQuotes.length}</strong>
+            <small>Propostas enviadas pelos fornecedores</small>
+          </button>
+
+          {isSupplier && (
+            <>
+              <button
+                type="button"
+                className={"quotes-metric-card" + (activeMetric === "received" ? " active" : "")}
+                onClick={() => setActiveMetric(activeMetric === "received" ? null : "received")}
+              >
+                <span>Solicitações recebidas</span>
+                <strong>{requests.length}</strong>
+                <small>Pedidos enviados para sua empresa</small>
+              </button>
+
+              <button
+                type="button"
+                className={"quotes-metric-card" + (activeMetric === "supplier-sent" ? " active" : "")}
+                onClick={() => setActiveMetric(activeMetric === "supplier-sent" ? null : "supplier-sent")}
+              >
+                <span>Orçamentos enviados</span>
+                <strong>{quotes.length}</strong>
+                <small>Propostas enviadas por você</small>
+              </button>
+            </>
+          )}
+        </div>
         {activeMetric && (
           <section className="quotes-metric-details">
             <div className="quotes-section-head">
               <div>
                 <div className="quotes-kicker">{activeMetric === "sent" || activeMetric === "supplier-sent" ? "ENVIADOS" : activeMetric === "pending" || activeMetric === "supplier-pending" ? "AGUARDANDO" : "RECEBIDOS"}</div>
-                <h2>{activeMetric === "sent" ? "Solicitações enviadas" : activeMetric === "pending" || activeMetric === "supplier-pending" ? "Solicitações aguardando orçamento" : activeMetric === "received" ? "Solicitações recebidas" : activeMetric === "supplier-sent" ? "Orçamentos enviados" : "Orçamentos recebidos"}</h2>
+                <h2>{activeMetric === "sent" ? "Solicitações enviadas" : activeMetric === "pending" ? "Solicitações aguardando orçamento" : activeMetric === "received" ? "Solicitações recebidas" : activeMetric === "supplier-pending" ? "Solicitações recebidas aguardando resposta" : activeMetric === "supplier-sent" ? "Orçamentos enviados" : "Orçamentos recebidos"}</h2>
               </div>
               <button type="button" className="quotes-secondary" onClick={closeMetric}>Fechar</button>
             </div>
@@ -582,6 +641,9 @@ function QuotesPage() {
                         <p>{activeMetric === "received" || activeMetric === "supplier-pending" ? "Solicitação recebida em" : "Solicitação enviada em"} <strong>{dateTime(request.created_at)}</strong></p>
                         <p>Data do evento: {dateOnly(request.event_date)} · {request.event_location || "Local não informado"}</p>
                         {request.description && <p>{request.description}</p>}
+                        {isSupplier && activeMetric === "supplier-pending" && (
+                          <button className="quotes-primary" type="button" onClick={() => setSelectedRequest(request)}>Fazer orçamento</button>
+                        )}
                       </div>
                     </article>
                   ))}
@@ -596,8 +658,9 @@ function QuotesPage() {
                         <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
                         <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
                         <strong>{serviceName(quote.quote_requests)}</strong>
-                        <p>Orçamento retornado em <strong>{dateTime(quote.sent_at || quote.created_at)}</strong></p>
-                        <p>Evento: {dateOnly(quote.quote_requests?.event_date ?? null)} · {quote.quote_requests?.event_location || "Local não informado"}</p>
+                        <p>Solicitação enviada em <strong>{dateTime(quote.quote_requests?.created_at ?? null)}</strong></p>
+                        <p>Orçamento recebido em <strong>{dateTime(quote.sent_at || quote.created_at)}</strong></p>
+                        <p>Data do evento: {dateOnly(quote.quote_requests?.event_date ?? null)} · {quote.quote_requests?.event_location || "Local não informado"}</p>
                         {quote.notes && <p>{quote.notes}</p>}
                       </div>
                       <div className="quote-client-total">
@@ -618,103 +681,43 @@ function QuotesPage() {
 
         {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
 
-        {isSupplier ? (
-          <>
-
-            <div className={"quotes-supplier-area " + (activeMetric || "none")}>
-            {selectedRequest ? (
-              <form className="quote-builder" onSubmit={sendQuote}>
-                <div className="quote-builder-head">
-                  <div>
-                    <div className="quotes-kicker">NOVO ORÇAMENTO</div>
-                    <h2>{selectedRequest.event_title}</h2>
-                    <p>Cliente: <strong>{selectedRequest.client_name}</strong>{selectedRequest.client_phone ? " · " + selectedRequest.client_phone : ""}</p>
-                  </div>
-                  <button type="button" className="quotes-secondary" onClick={resetForm}>Cancelar</button>
-                </div>
-                <div className="quote-builder-grid">
-                  <div>
-                    <label>Itens do orçamento</label>
-                    {items.map((item, index) => (
-                      <div className="quote-item-row" key={index}>
-                        <input value={item.description} onChange={(e) => updateItem(index, "description", e.target.value)} placeholder="Descrição do serviço/item" />
-                        <input value={item.quantity} onChange={(e) => updateItem(index, "quantity", e.target.value)} type="number" min="0.01" step="0.01" placeholder="Qtd." />
-                        <input value={item.unit_price} onChange={(e) => updateItem(index, "unit_price", e.target.value)} type="number" min="0" step="0.01" placeholder="Valor unitário" />
-                        {items.length > 1 && <button type="button" className="quote-remove-item" onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>}
-                      </div>
-                    ))}
-                    <button type="button" className="quotes-secondary" onClick={() => setItems((current) => [...current, { description: "", quantity: "1", unit_price: "" }])}>+ Adicionar item</button>
-                  </div>
-                  <div className="quote-side-fields">
-                    <label>Desconto<input type="number" min="0" step="0.01" value={discount} onChange={(e) => setDiscount(e.target.value)} /></label>
-                    <label>Validade<input type="date" value={validityUntil} onChange={(e) => setValidityUntil(e.target.value)} /></label>
-                    <label>Observações<textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Condições, prazo, formas de pagamento..." /></label>
-                  </div>
-                </div>
-                <div className="quote-total-box">
-                  <span>Subtotal <strong>{money(subtotal)}</strong></span>
-                  <span>Desconto <strong>{money(discountValue)}</strong></span>
-                  <span>Total <strong>{money(total)}</strong></span>
-                </div>
-                <button className="quotes-primary" type="submit" disabled={saving}>{saving ? "Enviando..." : "Enviar orçamento ao cliente"}</button>
-              </form>
-            ) : (
-              <section className="quotes-section">
-                <div className="quotes-section-head"><div><div className="quotes-kicker">SOLICITAÇÕES</div><h2>Pedidos de orçamento</h2></div></div>
-                {pendingRequests.length === 0 ? <div className="quotes-empty">Nenhuma solicitação aguardando orçamento.</div> : (
-                  <div className="quote-request-list">
-                    {pendingRequests.map((request) => (
-                      <article key={request.id} className="quote-request-card">
-                        <div>
-                          <span className="quote-status pending">{statusLabel(request.status)}</span>
-                          <h3>{request.event_title}</h3>
-                          <strong>{request.client_name}</strong>
-                          <p>{request.event_date ? new Date(request.event_date + "T12:00:00").toLocaleDateString("pt-BR") + " · " : ""}{request.event_location || "Local não informado"}</p>
-                          {request.description && <p>{request.description}</p>}
-                        </div>
-                        <button className="quotes-primary" type="button" onClick={() => setSelectedRequest(request)}>Fazer orçamento</button>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
-
-            <section className="quotes-section">
-              <div className="quotes-section-head"><div><div className="quotes-kicker">HISTÓRICO</div><h2>Orçamentos enviados</h2></div></div>
-              {quotes.length === 0 ? <div className="quotes-empty">Você ainda não enviou nenhum orçamento.</div> : (
-                <div className="quote-history-list">
-                  {quotes.map((quote) => (
-                    <article key={quote.id} className="quote-history-card">
-                      <div>
-                        <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
-                        <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
-                        <p>Cliente: {quote.quote_requests?.client_name || "—"}</p>
-                        <p>Orçamento enviado em <strong>{dateTime(quote.sent_at || quote.created_at)}</strong></p>
-                      </div>
-                      <div className="quote-history-actions">
-                        <strong>{money(Number(quote.total))}</strong>
-                        <button
-                          className="quotes-whatsapp"
-                          type="button"
-                          onClick={() => openWhatsApp(
-                            quote.quote_requests?.client_phone,
-                            buildQuoteWhatsAppMessage(quote, quote.quote_requests?.client_name || "cliente", businessName),
-                          )}
-                          disabled={!normalizeWhatsAppNumber(quote.quote_requests?.client_phone)}
-                          title={!normalizeWhatsAppNumber(quote.quote_requests?.client_phone) ? "WhatsApp do cliente não informado" : "Enviar orçamento pelo WhatsApp"}
-                        >
-                          Enviar pelo WhatsApp
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
+        {isSupplier && selectedRequest && (
+          <form className="quote-builder" onSubmit={sendQuote}>
+            <div className="quote-builder-head">
+              <div>
+                <div className="quotes-kicker">NOVO ORÇAMENTO</div>
+                <h2>{selectedRequest.event_title}</h2>
+                <p>Cliente: <strong>{selectedRequest.client_name}</strong>{selectedRequest.client_phone ? " · " + selectedRequest.client_phone : ""}</p>
+              </div>
+              <button type="button" className="quotes-secondary" onClick={resetForm}>Cancelar</button>
             </div>
-          </>
-        ) : null}
+            <div className="quote-builder-grid">
+              <div>
+                <label>Itens do orçamento</label>
+                {items.map((item, index) => (
+                  <div className="quote-item-row" key={index}>
+                    <input value={item.description} onChange={(e) => updateItem(index, "description", e.target.value)} placeholder="Descrição do serviço/item" />
+                    <input value={item.quantity} onChange={(e) => updateItem(index, "quantity", e.target.value)} type="number" min="0.01" step="0.01" placeholder="Qtd." />
+                    <input value={item.unit_price} onChange={(e) => updateItem(index, "unit_price", e.target.value)} type="number" min="0" step="0.01" placeholder="Valor unitário" />
+                    {items.length > 1 && <button type="button" className="quote-remove-item" onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>}
+                  </div>
+                ))}
+                <button type="button" className="quotes-secondary" onClick={() => setItems((current) => [...current, { description: "", quantity: "1", unit_price: "" }])}>+ Adicionar item</button>
+              </div>
+              <div className="quote-side-fields">
+                <label>Desconto<input type="number" min="0" step="0.01" value={discount} onChange={(e) => setDiscount(e.target.value)} /></label>
+                <label>Validade<input type="date" value={validityUntil} onChange={(e) => setValidityUntil(e.target.value)} /></label>
+                <label>Observações<textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Condições, prazo, formas de pagamento..." /></label>
+              </div>
+            </div>
+            <div className="quote-total-box">
+              <span>Subtotal <strong>{money(subtotal)}</strong></span>
+              <span>Desconto <strong>{money(discountValue)}</strong></span>
+              <span>Total <strong>{money(total)}</strong></span>
+            </div>
+            <button className="quotes-primary" type="submit" disabled={saving}>{saving ? "Enviando..." : "Enviar orçamento ao cliente"}</button>
+          </form>
+        )}
 
       </section>
     </main>
