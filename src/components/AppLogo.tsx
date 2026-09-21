@@ -9,7 +9,7 @@ type AppLogoProps = {
   "aria-label"?: string;
 };
 
-export function AppLogo({ className, children, "aria-label": ariaLabel = "LOSI CONECTA" }: AppLogoProps) {
+export function AppLogo({ className, children, style, "aria-label": ariaLabel = "LOSI CONECTA" }: AppLogoProps) {
   const navigate = useNavigate();
 
   async function handleClick(event: MouseEvent<HTMLAnchorElement>) {
@@ -43,7 +43,7 @@ export function AppLogo({ className, children, "aria-label": ariaLabel = "LOSI C
   }
 
   return (
-    <a href="/" className={className} aria-label={ariaLabel} onClick={handleClick}>
+    <a href="/" className={className} style={style} aria-label={ariaLabel} onClick={handleClick}>
       {children ?? <>LOSI <span>CONECTA</span></>}
     </a>
   );
