@@ -90,6 +90,10 @@ function QuotesPage() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [sentThisMonth, setSentThisMonth] = useState(0);
+  const [activeMetric, setActiveMetric] = useState<"sent" | "pending" | "total" | null>(null);
+  const [filterFrom, setFilterFrom] = useState("");
+  const [filterTo, setFilterTo] = useState("");
+  const [filterType, setFilterType] = useState("all");
 
   useEffect(() => {
     let mounted = true;
@@ -121,7 +125,7 @@ function QuotesPage() {
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
           supabase.from("quotes")
-            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
         ]);
@@ -137,7 +141,7 @@ function QuotesPage() {
 
         const { data: receivedByUser } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -154,14 +158,8 @@ function QuotesPage() {
         const firstDay = new Date();
         firstDay.setDate(1);
         firstDay.setHours(0, 0, 0, 0);
-        const { count, error: sentCountError } = await supabase.from("quotes")
-          .select("id", { count: "exact", head: true })
-          .eq("business_id", business.id)
-          .not("sent_at", "is", null)
-          .gte("sent_at", firstDay.toISOString());
-
-        if (sentCountError) console.error("Erro ao contar orçamentos enviados no mês:", sentCountError);
-        if (mounted) setSentThisMonth(count ?? 0);
+        const requestedRowsForMonth = (requestedByUser ?? []).filter((request: any) => new Date(request.created_at) >= firstDay);
+        if (mounted) setSentThisMonth(requestedRowsForMonth.length);
       } else {
         const { data: requested, error: requestedError } = await supabase
           .from("quote_requests")
@@ -171,7 +169,7 @@ function QuotesPage() {
 
         const { data: received, error: receivedError } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -181,6 +179,10 @@ function QuotesPage() {
         if (mounted) {
           setClientRequests((requested ?? []) as unknown as RequestRow[]);
           setClientQuotes((received ?? []) as unknown as QuoteRow[]);
+          const firstDay = new Date();
+          firstDay.setDate(1);
+          firstDay.setHours(0, 0, 0, 0);
+          setSentThisMonth((requested ?? []).filter((request: any) => new Date(request.created_at) >= firstDay).length);
 
           const businessIds = [...new Set((received ?? []).map((quote: any) => quote.business_id).filter(Boolean))];
           if (businessIds.length > 0) {
@@ -206,32 +208,46 @@ function QuotesPage() {
   }, [navigate]);
 
   useEffect(() => {
-    if (loading || businessId || !userId) return;
+    if (loading || !userId) return;
 
     let active = true;
 
-    async function refreshReceivedQuotes() {
-      const { data: received, error: receivedError } = await supabase
-        .from("quotes")
-        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
-        .eq("client_id", userId)
-        .order("created_at", { ascending: false });
+    async function refreshQuoteData() {
+      const [requestedResult, receivedResult] = await Promise.all([
+        supabase
+          .from("quote_requests")
+          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+          .eq("requester_id", userId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("quotes")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+          .eq("client_id", userId)
+          .order("created_at", { ascending: false }),
+      ]);
 
       if (!active) return;
-      if (receivedError) {
-        console.error("Erro ao atualizar orçamentos recebidos:", receivedError);
-        return;
+
+      if (!requestedResult.error) {
+        setClientRequests((requestedResult.data ?? []) as unknown as RequestRow[]);
+        const firstDay = new Date();
+        firstDay.setDate(1);
+        firstDay.setHours(0, 0, 0, 0);
+        setSentThisMonth((requestedResult.data ?? []).filter((request: any) => new Date(request.created_at) >= firstDay).length);
       }
 
-      setQuotes((received ?? []) as unknown as QuoteRow[]);
+      if (!receivedResult.error) {
+        setClientQuotes((receivedResult.data ?? []) as unknown as QuoteRow[]);
+      }
     }
 
-    const intervalId = window.setInterval(refreshReceivedQuotes, 5000);
+    refreshQuoteData();
+    const intervalId = window.setInterval(refreshQuoteData, 5000);
     return () => {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, [loading, businessId, userId]);
+  }, [loading, userId]);
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0), 0),
@@ -325,7 +341,7 @@ function QuotesPage() {
     }
     const refreshed = await supabase
       .from("quotes")
-      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
       .eq("business_id", businessId)
       .order("created_at", { ascending: false });
 
@@ -411,13 +427,69 @@ function QuotesPage() {
       return;
     }
 
-    setQuotes((current) => current.map((item) => item.id === quote.id ? { ...item, status } : item));
+    setClientQuotes((current) => current.map((item) => item.id === quote.id ? { ...item, status } : item));
   }
 
   if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
 
   const providerMode = Boolean(businessId);
   const pendingRequests = requests.filter((request) => request.status === "pending");
+  const sentRequestsThisMonth = clientRequests.filter((request) => {
+    const created = new Date(request.created_at);
+    const firstDay = new Date();
+    firstDay.setDate(1);
+    firstDay.setHours(0, 0, 0, 0);
+    return created >= firstDay;
+  });
+
+  const metricRequests = activeMetric === "sent"
+    ? sentRequestsThisMonth
+    : activeMetric === "pending"
+      ? clientRequests.filter((request) => request.status === "pending")
+      : [];
+
+  const metricQuotes = activeMetric === "total"
+    ? clientQuotes
+    : activeMetric === "pending"
+      ? clientQuotes.filter((quote) => quote.status === "sent" || quote.status === "viewed")
+      : [];
+
+  function dateOnly(value: string | null) {
+    return value ? new Date(value + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada";
+  }
+
+  function dateTime(value: string | null) {
+    return value
+      ? new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
+      : "Não informada";
+  }
+
+  function serviceName(request: RequestRow | null | undefined) {
+    return request?.services?.name || "Serviço não informado";
+  }
+
+  const availableTypes = [...new Set([
+    ...clientRequests.map((request) => serviceName(request)),
+    ...clientQuotes.map((quote) => serviceName(quote.quote_requests)),
+  ].filter((type) => type !== "Serviço não informado"))].sort();
+
+  const matchesFilters = (createdAt: string, type: string) => {
+    const date = new Date(createdAt);
+    if (filterFrom && date < new Date(filterFrom + "T00:00:00")) return false;
+    if (filterTo && date > new Date(filterTo + "T23:59:59")) return false;
+    if (filterType !== "all" && type !== filterType) return false;
+    return true;
+  };
+
+  const filteredMetricRequests = metricRequests.filter((request) =>
+    matchesFilters(request.created_at, serviceName(request))
+  );
+
+  const filteredMetricQuotes = metricQuotes.filter((quote) =>
+    matchesFilters(quote.sent_at || quote.created_at, serviceName(quote.quote_requests))
+  );
+
+  const closeMetric = () => setActiveMetric(null);
 
   return (
     <main className="quotes-page">
@@ -428,50 +500,72 @@ function QuotesPage() {
 
       <section className="quotes-content">
         <div className="quotes-kicker">ORÇAMENTOS</div>
-        <h1>{providerMode ? "Orçamentos da sua empresa" : "Meus orçamentos"}</h1>
-        <p className="quotes-intro">{providerMode ? "Receba solicitações, monte propostas e acompanhe o que já foi enviado aos seus clientes." : "Acompanhe os orçamentos enviados pelos fornecedores que você contatou."}</p>
+        <h1>Orçamentos e solicitações</h1>
+        <p className="quotes-intro">Acompanhe o que você solicitou, os orçamentos que recebeu e, quando também for fornecedor, as solicitações e propostas da sua empresa.</p>
 
-        {providerMode ? (
-          <>
-            <div className="quotes-metrics">
-              <article><span>Enviados este mês</span><strong>{sentThisMonth}</strong></article>
-              <article><span>Aguardando orçamento</span><strong>{pendingRequests.length}</strong></article>
-              <article><span>Total de orçamentos</span><strong>{quotes.length}</strong></article>
+        <div className="quotes-metrics">
+          <button type="button" className={"quotes-metric-card" + (activeMetric === "sent" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "sent" ? null : "sent")}>
+            <span>Enviados este mês</span><strong>{sentThisMonth}</strong><small>Ver solicitações enviadas</small>
+          </button>
+          <button type="button" className={"quotes-metric-card" + (activeMetric === "pending" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "pending" ? null : "pending")}>
+            <span>Aguardando orçamento</span><strong>{clientRequests.filter((request) => request.status === "pending").length}</strong><small>Ver o que ainda aguarda retorno</small>
+          </button>
+          <button type="button" className={"quotes-metric-card" + (activeMetric === "total" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "total" ? null : "total")}>
+            <span>Total de orçamentos</span><strong>{clientQuotes.length}</strong><small>Ver orçamentos recebidos</small>
+          </button>
+        </div>
+
+        {activeMetric && (
+          <section className="quotes-metric-details">
+            <div className="quotes-section-head">
+              <div>
+                <div className="quotes-kicker">{activeMetric === "sent" ? "ENVIADOS" : activeMetric === "pending" ? "AGUARDANDO" : "RECEBIDOS"}</div>
+                <h2>{activeMetric === "sent" ? "Solicitações enviadas" : activeMetric === "pending" ? "Solicitações aguardando orçamento" : "Orçamentos recebidos"}</h2>
+              </div>
+              <button type="button" className="quotes-secondary" onClick={closeMetric}>Fechar</button>
             </div>
 
-            {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
+            <div className="quotes-filters">
+              <label>De<input type="date" value={filterFrom} onChange={(event) => setFilterFrom(event.target.value)} /></label>
+              <label>Até<input type="date" value={filterTo} onChange={(event) => setFilterTo(event.target.value)} /></label>
+              <label>Tipo
+                <select value={filterType} onChange={(event) => setFilterType(event.target.value)}>
+                  <option value="all">Todos os tipos</option>
+                  {availableTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+                </select>
+              </label>
+              <button type="button" className="quotes-secondary" onClick={() => { setFilterFrom(""); setFilterTo(""); setFilterType("all"); }}>Limpar filtros</button>
+            </div>
 
-            <section className="quotes-section">
-              <div className="quotes-section-head"><div><div className="quotes-kicker">SOLICITADOS</div><h2>Orçamentos solicitados</h2></div></div>
-              {clientRequests.length === 0 ? <div className="quotes-empty">Você ainda não solicitou nenhum orçamento.</div> : (
+            {(activeMetric === "sent" || activeMetric === "pending") ? (
+              filteredMetricRequests.length === 0 ? <div className="quotes-empty">Nenhum registro encontrado com esses filtros.</div> : (
                 <div className="quote-request-list">
-                  {clientRequests.map((request) => (
+                  {filteredMetricRequests.map((request) => (
                     <article key={request.id} className="quote-request-card">
                       <div>
                         <span className={"quote-status " + request.status}>{statusLabel(request.status)}</span>
                         <h3>{request.event_title}</h3>
-                        <strong>{request.services?.name || "Serviço não informado"}</strong>
-                        <p>{request.event_date ? new Date(request.event_date + "T12:00:00").toLocaleDateString("pt-BR") + " · " : ""}{request.event_location || "Local não informado"}</p>
+                        <strong>{serviceName(request)}</strong>
+                        <p>Solicitação enviada em <strong>{dateTime(request.created_at)}</strong></p>
+                        <p>Data do evento: {dateOnly(request.event_date)} · {request.event_location || "Local não informado"}</p>
                         {request.description && <p>{request.description}</p>}
                       </div>
                     </article>
                   ))}
                 </div>
-              )}
-            </section>
-
-            <section className="quotes-section">
-              <div className="quotes-section-head"><div><div className="quotes-kicker">RECEBIDOS</div><h2>Orçamentos enviados para você</h2></div></div>
-              {clientQuotes.length === 0 ? <div className="quotes-empty">Você ainda não recebeu nenhum orçamento.</div> : (
+              )
+            ) : (
+              filteredMetricQuotes.length === 0 ? <div className="quotes-empty">Nenhum orçamento encontrado com esses filtros.</div> : (
                 <div className="quote-history-list">
-                  {clientQuotes.map((quote) => (
+                  {filteredMetricQuotes.map((quote) => (
                     <article key={quote.id} className="quote-client-card">
                       <div>
                         <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
                         <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
-                        <p>{quote.quote_requests?.event_location || "Local não informado"}{quote.validity_until ? " · válido até " + new Date(quote.validity_until + "T12:00:00").toLocaleDateString("pt-BR") : ""}</p>
+                        <strong>{serviceName(quote.quote_requests)}</strong>
+                        <p>Orçamento retornado em <strong>{dateTime(quote.sent_at || quote.created_at)}</strong></p>
+                        <p>Evento: {dateOnly(quote.quote_requests?.event_date ?? null)} · {quote.quote_requests?.event_location || "Local não informado"}</p>
                         {quote.notes && <p>{quote.notes}</p>}
-                        <div className="quote-client-items">{(quote.quote_items ?? []).map((item) => <div key={item.id}><span>{item.description} × {item.quantity}</span><strong>{money(Number(item.total))}</strong></div>)}</div>
                       </div>
                       <div className="quote-client-total">
                         <span>Total</span>
@@ -484,8 +578,15 @@ function QuotesPage() {
                     </article>
                   ))}
                 </div>
-              )}
-            </section>
+              )
+            )}
+          </section>
+        )}
+
+        {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
+
+        {providerMode ? (
+          <>
 
             {selectedRequest ? (
               <form className="quote-builder" onSubmit={sendQuote}>
@@ -573,56 +674,8 @@ function QuotesPage() {
               )}
             </section>
           </>
-        ) : (
-          <>
-          <section className="quotes-section">
-            <div className="quotes-section-head"><div><div className="quotes-kicker">SOLICITADOS</div><h2>Orçamentos solicitados</h2></div></div>
-            {clientRequests.length === 0 ? <div className="quotes-empty">Você ainda não solicitou nenhum orçamento.</div> : (
-              <div className="quote-request-list">
-                {clientRequests.map((request) => (
-                  <article key={request.id} className="quote-request-card">
-                    <div>
-                      <span className={"quote-status " + request.status}>{statusLabel(request.status)}</span>
-                      <h3>{request.event_title}</h3>
-                      <strong>{request.services?.name || "Serviço não informado"}</strong>
-                      <p>{request.event_date ? new Date(request.event_date + "T12:00:00").toLocaleDateString("pt-BR") + " · " : ""}{request.event_location || "Local não informado"}</p>
-                      {request.description && <p>{request.description}</p>}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-          <section className="quotes-section">
-            <div className="quotes-section-head"><div><div className="quotes-kicker">RECEBIDOS</div><h2>Orçamentos enviados para você</h2></div></div>
-            {quotes.length === 0 ? <div className="quotes-empty">Você ainda não recebeu nenhum orçamento.</div> : (
-              <div className="quote-history-list">
-                {quotes.map((quote) => (
-                  <article key={quote.id} className="quote-client-card">
-                    <div>
-                      <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
-                      <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
-                      <p>{quote.quote_requests?.event_location || "Local não informado"}{quote.validity_until ? " · válido até " + new Date(quote.validity_until + "T12:00:00").toLocaleDateString("pt-BR") : ""}</p>
-                      {quote.notes && <p>{quote.notes}</p>}
-                      <div className="quote-client-items">{(quote.quote_items ?? []).map((item) => <div key={item.id}><span>{item.description} × {item.quantity}</span><strong>{money(Number(item.total))}</strong></div>)}</div>
-                    </div>
-                    <div className="quote-client-total">
-                      <span>Total</span>
-                      <strong>{money(Number(quote.total))}</strong>
-                      <div className="quote-client-actions">
-                        <button className="quotes-whatsapp" type="button" onClick={() => shareQuoteOnWhatsApp(quote)}>
-                          Compartilhar no WhatsApp
-                        </button>
-                        {(quote.status === "sent" || quote.status === "viewed") && <><button className="quotes-primary" type="button" onClick={() => respondToQuote(quote, "accepted")}>Aceitar</button><button className="quotes-secondary" type="button" onClick={() => respondToQuote(quote, "rejected")}>Recusar</button></>}
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-          </>
-        )}
+        ) : null}
+
       </section>
     </main>
   );
