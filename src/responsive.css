@@ -2208,8 +2208,18 @@ a {
 .dashboard-main .dashboard-text { color: #6d7789; }
 
 .dashboard-main .dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 18px;
+  width: 100%;
   margin-top: 30px;
+  align-items: stretch;
+}
+
+.dashboard-main .dashboard-grid > button {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .dashboard-main .dashboard-grid > button,
 .dashboard-main .dashboard-status,
