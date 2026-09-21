@@ -43,7 +43,13 @@ export function AppLogo({ className, children, style, "aria-label": ariaLabel = 
   }
 
   return (
-    <a href="/" className={className} style={style} aria-label={ariaLabel} onClick={handleClick}>
+    <a
+      href="/"
+      className={className}
+      style={{ textDecoration: "none", ...style }}
+      aria-label={ariaLabel}
+      onClick={handleClick}
+    >
       {children ?? <>LOSI <span>CONECTA</span></>}
     </a>
   );
