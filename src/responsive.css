@@ -4656,3 +4656,80 @@ a {
   width: max-content !important;
   z-index: 30 !important;
 }
+
+
+/* BUSCA — cabeçalho em três zonas: marca à esquerda, busca ao centro, conta à direita */
+.marketplace-page .marketplace-header {
+  position: sticky !important;
+  top: 0 !important;
+}
+
+.marketplace-page .marketplace-header-inner {
+  position: relative !important;
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  min-height: 72px !important;
+  padding: 0 24px !important;
+  display: grid !important;
+  grid-template-columns: minmax(190px, 1fr) minmax(320px, 560px) minmax(190px, 1fr) !important;
+  align-items: center !important;
+  gap: 24px !important;
+}
+
+.marketplace-page .marketplace-logo {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  z-index: 1 !important;
+}
+
+.marketplace-page .marketplace-main-search {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  justify-self: center !important;
+}
+
+.marketplace-page .marketplace-header-actions {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  margin: 0 !important;
+}
+
+@media only screen and (max-width: 1050px) {
+  .marketplace-page .marketplace-header-inner {
+    grid-template-columns: minmax(165px, 1fr) minmax(220px, 1.5fr) minmax(150px, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .marketplace-page .marketplace-header-inner {
+    grid-template-columns: 1fr auto !important;
+    min-height: 64px !important;
+    padding: 0 12px !important;
+  }
+
+  .marketplace-page .marketplace-logo {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    font-size: 19px !important;
+  }
+
+  .marketplace-page .marketplace-main-search {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+  }
+}
