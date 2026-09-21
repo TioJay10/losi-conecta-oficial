@@ -296,14 +296,19 @@ function ProviderPage() {
           {business.cover_url && <img src={business.cover_url} alt="" />}
         </div>
         <div className="provider-hero-content">
-          <div className="provider-hero-logo">
-            {business.logo_url ? <img src={business.logo_url} alt={business.business_name} /> : <span>{business.business_name.slice(0, 1).toUpperCase()}</span>}
+          <div className="provider-hero-identity">
+            <div className="provider-hero-logo">
+              {business.logo_url ? <img src={business.logo_url} alt={business.business_name} /> : <span>{business.business_name.slice(0, 1).toUpperCase()}</span>}
+            </div>
+            <div className="provider-hero-title">
+              <div className="catalog-kicker">PERFIL PROFISSIONAL</div>
+              <h1>{business.business_name}</h1>
+              {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
+              {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
+            </div>
           </div>
-          <div className="provider-hero-title">
-            <div className="catalog-kicker">PERFIL PROFISSIONAL</div>
-            <h1>{business.business_name}</h1>
-            {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
-            {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
+
+          <div className="provider-hero-reputation">
             <div className="provider-reputation">
               <div className="provider-reputation-head"><strong>Reputação do fornecedor</strong><span>{reputationLabel}</span></div>
               <div className="provider-reputation-bar" aria-label={`Reputação: ${reputationLabel}`}>
@@ -312,8 +317,14 @@ function ProviderPage() {
               <div className="provider-reputation-meta"><span>{reputation.reviews} {reputation.reviews === 1 ? "avaliação" : "avaliações"}</span><span>{reputation.completedServices} {reputation.completedServices === 1 ? "serviço registrado" : "serviços registrados"}</span></div>
             </div>
           </div>
-          <div className="provider-profile-actions"><button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>{canRequestQuote && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}{whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}<button type="button" className="provider-profile-report" onClick={() => { setReportOpen(true); setReportMessage(""); }}>Denunciar fornecedor</button></div>
-        </div>
+
+          <div className="provider-profile-actions">
+            <button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>
+            {canRequestQuote && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}
+            {whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}
+            <button type="button" className="provider-profile-report" onClick={() => { setReportOpen(true); setReportMessage(""); }}>Denunciar fornecedor</button>
+          </div>
+        </div>        </div>
       </section>
 
       <section className="provider-profile-content">
