@@ -7137,3 +7137,99 @@ a.profile-logo:hover,
     margin-top: -24px !important;
   }
 }
+
+
+/* SOLUÇÃO DEFINITIVA — FOTO DE PERFIL SEMPRE NO PRIMEIRO PLANO */
+@media only screen and (max-width: 768px) {
+  .provider-page .provider-hero {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  /* A capa fica deliberadamente mais baixa */
+  .provider-page .provider-hero-cover {
+    position: relative !important;
+    z-index: 0 !important;
+    height: 100px !important;
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-hero-cover img {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /*
+   * O conteúdo cria uma nova camada acima da capa.
+   * translateZ(0) cria um stacking context próprio e evita
+   * que a imagem da capa atravesse a foto de perfil.
+   */
+  .provider-page .provider-hero-content {
+    position: relative !important;
+    z-index: 100 !important;
+    transform: translateZ(0) !important;
+    isolation: isolate !important;
+    overflow: visible !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .provider-page .provider-hero-identity {
+    position: relative !important;
+    z-index: 110 !important;
+    transform: translateZ(0) !important;
+    overflow: visible !important;
+  }
+
+  /* Foto menor: sempre acima da capa */
+  .provider-page .provider-hero-logo {
+    position: relative !important;
+    z-index: 999 !important;
+    transform: translateZ(1px) !important;
+    isolation: isolate !important;
+    background: #fff !important;
+    border: 5px solid #fff !important;
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-hero-logo::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: -1 !important;
+    background: #fff !important;
+  }
+
+  .provider-page .provider-hero-logo img {
+    position: relative !important;
+    z-index: 1000 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .provider-page .provider-hero-cover {
+    height: 90px !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    margin-top: -45px !important;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .provider-page .provider-hero-cover {
+    height: 85px !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    margin-top: -42px !important;
+  }
+}
