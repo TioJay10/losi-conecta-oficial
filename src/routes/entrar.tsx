@@ -260,20 +260,20 @@ function AuthPage() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "#f5f6fa", padding: 24, fontFamily: "Arial, sans-serif", color: "#172033" },
-  card: { width: "100%", maxWidth: 440, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 20, padding: 36, boxSizing: "border-box", boxShadow: "0 18px 50px rgba(23,32,51,.08)" },
-  brand: { fontSize: 21, fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
-  title: { fontSize: 30, lineHeight: 1.15, margin: "14px 0 8px" },
+  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "linear-gradient(145deg, #07111f, #0b182a)", padding: 24, fontFamily: "Arial, sans-serif", color: "#172033" },
+  card: { width: "100%", maxWidth: 440, background: "#fff", border: "1px solid rgba(214,180,106,.55)", borderRadius: 20, padding: 36, boxSizing: "border-box", boxShadow: "0 24px 60px rgba(0,0,0,.28)" },
+  brand: { fontSize: 21, fontWeight: 800, letterSpacing: ".06em", color: "#07111f" },
+  title: { fontSize: 30, lineHeight: 1.15, margin: "14px 0 8px", color: "#07111f" },
   eyebrow: { marginTop: 24, fontSize: 11, fontWeight: 800, letterSpacing: ".14em", color: "#7a8191" },
   subtitle: { color: "#687386", lineHeight: 1.5, margin: "0 0 24px" },
   form: { display: "grid", gap: 16 },
   label: { display: "grid", gap: 7, fontSize: 13, fontWeight: 700 },
   input: { width: "100%", boxSizing: "border-box", border: "1px solid #dfe2ea", borderRadius: 10, padding: "12px 13px", fontSize: 15, outline: "none" },
-  button: { border: 0, borderRadius: 10, padding: "13px 16px", background: "#4f46c7", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" },
-  link: { display: "block", margin: "18px auto 0", border: 0, background: "transparent", color: "#4f46c7", fontWeight: 700, cursor: "pointer" },
-  inlineLink: { border: 0, background: "transparent", padding: 0, color: "#4f46c7", fontWeight: 700, cursor: "pointer" },
+  button: { border: 1px solid "#d6b46a", borderRadius: 10, padding: "13px 16px", background: "linear-gradient(145deg, #0b182a, #07111f)", color: "#f0d99a", fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 8px 18px rgba(7,17,31,.16)" },
+  link: { display: "block", margin: "18px auto 0", border: 0, background: "transparent", color: "#8a6d2f", fontWeight: 700, cursor: "pointer" },
+  inlineLink: { border: 0, background: "transparent", padding: 0, color: "#8a6d2f", fontWeight: 700, cursor: "pointer" },
   footer: { marginTop: 22, textAlign: "center", color: "#687386", fontSize: 14 },
-  home: { display: "block", margin: "22px auto 0", border: 0, background: "transparent", color: "#687386", cursor: "pointer" },
+  home: { display: "block", margin: "22px auto 0", border: 0, background: "transparent", color: "#697386", cursor: "pointer" },
   error: { background: "#fff1f1", color: "#a32f2f", borderRadius: 9, padding: "10px 12px", fontSize: 13, lineHeight: 1.4 },
   success: { background: "#eefaf3", color: "#237345", borderRadius: 9, padding: "10px 12px", fontSize: 13, lineHeight: 1.4 },
 };
