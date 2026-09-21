@@ -50,17 +50,23 @@ function ProviderPage() {
 
       if (!mounted) return;
       if (queryError) {
-        setError("Não foi possível carregar este fornecedor.");
+        console.error("Erro ao carregar perfil público do fornecedor:", queryError);
+        setError("Não foi possível carregar este fornecedor: " + queryError.message);
       } else {
         const loaded = (data ?? null) as unknown as Business;
         setBusiness(loaded);
         if (loaded) {
-          const { data: reviewData } = await supabase
+          const { data: reviewData, error: reviewLoadError } = await supabase
             .from("reviews")
             .select("id,rating,comment,created_at,reviewer:profiles(full_name)")
             .eq("business_id", loaded.id)
             .eq("active", true)
             .order("created_at", { ascending: false });
+
+          if (reviewLoadError) {
+            console.error("Erro ao carregar avaliações do fornecedor:", reviewLoadError);
+          }
+
           if (mounted) {
             setReviews((reviewData ?? []) as unknown as Review[]);
 
@@ -114,7 +120,11 @@ function ProviderPage() {
     const result = isFavorite
       ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", business.id)
       : await supabase.from("favorites").insert({ user_id: userId, business_id: business.id });
-    if (!result.error) setIsFavorite(!isFavorite);
+    if (result.error) {
+      console.error("Erro ao alterar fornecedor salvo:", result.error);
+    } else {
+      setIsFavorite(!isFavorite);
+    }
     setFavoriteBusy(false);
   }
 
@@ -206,6 +216,7 @@ function ProviderPage() {
       });
 
       if (reportError) {
+        console.error("Erro ao denunciar fornecedor:", reportError);
         if (reportError.code === "23505") {
           setReportMessage("Você já enviou uma denúncia com este motivo para este fornecedor.");
         } else if (reportError.code === "42501") {
@@ -263,6 +274,7 @@ function ProviderPage() {
 
     const { error: requestError } = await supabase.from("quote_requests").insert(payload);
     if (requestError) {
+      console.error("Erro ao solicitar orçamento:", requestError);
       setReviewMessage(requestError.message || "Não foi possível enviar a solicitação.");
       return;
     }
