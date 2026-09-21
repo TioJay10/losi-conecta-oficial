@@ -4769,3 +4769,677 @@ a {
 .admin-page .admin-shell {
   padding-top: 64px !important;
 }
+
+
+/* =========================================================
+   LOSI CONECTA — RESPONSIVIDADE MOBILE GLOBAL
+   Camada final para telas pequenas. Não altera desktop.
+   ========================================================= */
+
+@media only screen and (max-width: 768px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  main,
+  section,
+  header,
+  footer,
+  article,
+  nav,
+  form,
+  div {
+    min-width: 0;
+  }
+
+  img,
+  video,
+  iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+  }
+
+  /* HOME */
+  .home-page .home-header {
+    height: 62px !important;
+    padding: 0 12px !important;
+  }
+
+  .home-page .home-header .mobile-centered-brand {
+    font-size: 15px !important;
+    max-width: calc(100% - 125px) !important;
+  }
+
+  .home-page .home-header > a:last-child {
+    padding: 9px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .home-page .home-hero {
+    padding: 72px 18px 64px !important;
+  }
+
+  .home-page .home-hero h1 {
+    font-size: clamp(34px, 10vw, 48px) !important;
+    line-height: 1.06 !important;
+    letter-spacing: -.045em !important;
+  }
+
+  .home-page .home-hero p {
+    font-size: 16px !important;
+    line-height: 1.55 !important;
+  }
+
+  .home-page .home-hero .home-hero-actions,
+  .home-page .hero-actions {
+    width: 100%;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .home-page .home-hero .home-hero-actions > *,
+  .home-page .hero-actions > * {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  .home-page .home-section,
+  .home-page .home-dark-section,
+  .home-page .home-cta-section {
+    padding: 64px 18px !important;
+  }
+
+  .home-page .home-steps,
+  .home-page .home-audience-grid,
+  .home-page .home-category-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .home-page .home-steps > *,
+  .home-page .home-audience-grid > *,
+  .home-page .home-category-grid > * {
+    width: 100%;
+  }
+
+  .home-page .home-cta-card {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    padding: 24px !important;
+  }
+
+  .home-page .home-cta-card > * {
+    width: 100%;
+  }
+
+  .home-page .home-cta-card a {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  /* CABEÇALHOS INTERNOS */
+  .profile-page .profile-header,
+  .quotes-page .quotes-header {
+    min-height: 62px !important;
+    height: auto !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+
+  .profile-page .profile-header .mobile-centered-brand,
+  .quotes-page .quotes-header .catalog-logo {
+    font-size: 15px !important;
+    max-width: calc(100% - 170px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .profile-page .profile-back,
+  .quotes-page .quotes-back {
+    max-width: 130px;
+    font-size: 12px !important;
+    padding: 8px 0 !important;
+    white-space: normal !important;
+  }
+
+  /* PAINEL */
+  .dashboard-page .dashboard-header {
+    min-height: 64px !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+
+  .dashboard-page .dashboard-header .mobile-centered-brand {
+    font-size: 15px !important;
+    max-width: calc(100% - 150px) !important;
+  }
+
+  .dashboard-page .dashboard-main,
+  .dashboard-page .dashboard-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-page .dashboard-grid,
+  .dashboard-page .dashboard-cards,
+  .dashboard-page .dashboard-actions-grid,
+  .dashboard-page .dashboard-saved-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-page .dashboard-card,
+  .dashboard-page .dashboard-status,
+  .dashboard-page .dashboard-section,
+  .dashboard-page .dashboard-action-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-page .dashboard-status {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+
+  .dashboard-page .dashboard-status button,
+  .dashboard-page .dashboard-actions button,
+  .dashboard-page .dashboard-action-card {
+    width: 100% !important;
+  }
+
+  /* BUSCA / MARKETPLACE */
+  .marketplace-page .marketplace-header-inner {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 8px !important;
+    padding: 8px 12px !important;
+    min-height: 62px !important;
+  }
+
+  .marketplace-page .marketplace-logo {
+    position: static !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    transform: none !important;
+    justify-self: start !important;
+    font-size: 16px !important;
+    max-width: 170px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .marketplace-page .marketplace-main-search {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 2px 0 4px !important;
+  }
+
+  .marketplace-page .marketplace-main-search input {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .marketplace-page .marketplace-category-inner {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 8px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .marketplace-page .marketplace-main,
+  .marketplace-page .marketplace-content,
+  .marketplace-page .marketplace-results {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .marketplace-page .marketplace-search-panel,
+  .marketplace-page .marketplace-filter-row,
+  .marketplace-page .marketplace-sidebar,
+  .marketplace-page .marketplace-card,
+  .marketplace-page .marketplace-empty {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .marketplace-page .marketplace-filter-row,
+  .marketplace-page .marketplace-filter-main,
+  .marketplace-page .marketplace-filter-fields,
+  .marketplace-page .marketplace-results-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .marketplace-page .marketplace-filter-row {
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  .marketplace-page .marketplace-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .marketplace-page .marketplace-card img {
+    width: 100% !important;
+    max-height: 210px !important;
+    object-fit: cover !important;
+  }
+
+  .marketplace-page .marketplace-card-actions,
+  .marketplace-page .marketplace-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .marketplace-page .marketplace-card-actions > *,
+  .marketplace-page .marketplace-actions > * {
+    width: 100% !important;
+  }
+
+  /* PERFIL PÚBLICO */
+  .provider-page .provider-hero,
+  .provider-page .provider-profile-content,
+  .provider-page .provider-profile-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .provider-page .provider-hero {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .provider-page .provider-profile-content {
+    padding: 14px !important;
+  }
+
+  .provider-page .provider-hero-content,
+  .provider-page .provider-profile-card {
+    padding: 18px !important;
+  }
+
+  .provider-page .provider-hero-title,
+  .provider-page .provider-profile-actions,
+  .provider-page .provider-actions,
+  .provider-page .provider-profile-actions {
+    width: 100% !important;
+  }
+
+  .provider-page .provider-profile-actions,
+  .provider-page .provider-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .provider-page .provider-profile-actions > *,
+  .provider-page .provider-actions > * {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .provider-page .provider-service-list,
+  .provider-page .provider-review-list,
+  .provider-page .provider-portfolio-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .provider-page .provider-portfolio-item img {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .provider-page .provider-quote-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* MEU PERFIL / FORMULÁRIOS */
+  .personal-profile-content,
+  .personal-profile-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .personal-profile-content {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .profile-form-grid,
+  .personal-profile-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .personal-profile-card {
+    padding: 18px !important;
+  }
+
+  .personal-profile-primary {
+    width: 100% !important;
+  }
+
+  /* MEUS SERVIÇOS */
+  .services-page .services-content,
+  .services-page .services-card,
+  .services-page .service-form,
+  .business-services-page .services-content,
+  .business-services-page .services-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .services-page .service-form-grid,
+  .business-services-page .service-form-grid,
+  .services-page .services-grid,
+  .business-services-page .services-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .services-page .service-actions,
+  .business-services-page .service-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .services-page .service-actions > *,
+  .business-services-page .service-actions > * {
+    width: 100% !important;
+  }
+
+  /* ORÇAMENTOS */
+  .quotes-page .quotes-content {
+    width: calc(100% - 24px) !important;
+    max-width: none !important;
+    padding: 28px 0 44px !important;
+  }
+
+  .quotes-page .quotes-section,
+  .quotes-page .quote-builder {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 16px !important;
+  }
+
+  .quotes-page .quotes-section-head,
+  .quotes-page .quote-builder-head {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .quotes-page .quote-builder-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .quotes-page .quote-item-row {
+    grid-template-columns: minmax(0, 1fr) 42px !important;
+  }
+
+  .quotes-page .quote-item-row input:nth-child(2),
+  .quotes-page .quote-item-row input:nth-child(3) {
+    grid-column: 1 / 2 !important;
+  }
+
+  .quotes-page .quote-item-row .quote-remove-item {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    align-self: center !important;
+  }
+
+  .quotes-page .quote-total-box {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .quotes-page .quote-request-card,
+  .quotes-page .quote-history-card,
+  .quotes-page .quote-client-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .quotes-page .quote-history-actions,
+  .quotes-page .quote-client-actions {
+    justify-content: stretch !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .quotes-page .quote-history-actions > *,
+  .quotes-page .quote-client-actions > * {
+    width: 100% !important;
+  }
+
+  /* ADMIN */
+  .admin-page .admin-shell,
+  .admin-page .admin-main,
+  .admin-page .admin-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-page .admin-main,
+  .admin-page .admin-content {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .admin-page .admin-header {
+    min-height: 64px !important;
+    height: auto !important;
+    padding: 9px 12px !important;
+  }
+
+  .admin-page .admin-header > div:first-of-type {
+    max-width: 150px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .admin-page .admin-nav,
+  .admin-page .admin-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-page .admin-nav {
+    display: flex !important;
+    gap: 6px !important;
+  }
+
+  .admin-page .admin-nav > *,
+  .admin-page .admin-sidebar button {
+    flex: 0 0 auto !important;
+  }
+
+  .admin-page .admin-grid,
+  .admin-page .admin-metrics,
+  .admin-page .admin-cards,
+  .admin-page .admin-security-metrics {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-page .admin-table-wrap,
+  .admin-page table {
+    width: 100% !important;
+  }
+
+  .admin-page .admin-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-page table {
+    min-width: 680px;
+  }
+
+  .admin-page .admin-item,
+  .admin-page .admin-card,
+  .admin-page .admin-review-card,
+  .admin-page .admin-security-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .admin-page .admin-item-actions,
+  .admin-page .admin-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .admin-page .admin-item-actions > *,
+  .admin-page .admin-actions > * {
+    width: 100% !important;
+  }
+
+  /* REGRAS UNIVERSAIS PARA COMPONENTES FLEX/GRID QUE POSSAM ESTOURAR A TELA */
+  [style*="grid-template-columns"] {
+    min-width: 0 !important;
+  }
+
+  [style*="display: flex"] {
+    min-width: 0;
+  }
+
+  [style*="grid-template-columns: repeat(3"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="grid-template-columns: repeat(4"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="grid-template-columns: repeat(5"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [style*="grid-template-columns: repeat(6"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Containers com largura fixa inline deixam de estourar o viewport */
+  [style*="width: 100%"] {
+    max-width: 100% !important;
+  }
+
+  /* Evita textos, URLs e nomes longos criando rolagem horizontal */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  span,
+  strong,
+  a,
+  label {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .home-page .home-hero {
+    padding-top: 58px !important;
+    padding-bottom: 52px !important;
+  }
+
+  .home-page .home-hero h1 {
+    font-size: 34px !important;
+  }
+
+  .home-page .home-section,
+  .home-page .home-dark-section,
+  .home-page .home-cta-section {
+    padding: 50px 14px !important;
+  }
+
+  .home-page .home-step-card,
+  .home-page .step-card,
+  .home-page .audience-card,
+  .home-page .category-card {
+    padding: 20px !important;
+  }
+
+  .marketplace-page .marketplace-logo {
+    font-size: 14px !important;
+    max-width: 145px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions a,
+  .marketplace-page .marketplace-header-actions button {
+    padding: 8px 9px !important;
+    font-size: 11px !important;
+  }
+
+  .provider-page .provider-profile-card,
+  .provider-page .provider-hero-content {
+    padding: 15px !important;
+    border-radius: 12px !important;
+  }
+
+  .admin-page .admin-main,
+  .admin-page .admin-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .admin-page .admin-section,
+  .admin-page .admin-card,
+  .admin-page .admin-security-section {
+    padding: 14px !important;
+  }
+
+  .personal-profile-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
