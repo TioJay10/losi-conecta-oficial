@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
+import { AppLogo } from "../../components/AppLogo";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
 type Review = { id: string; rating: number; comment: string | null; created_at: string; reviewer: { full_name: string | null } | null };
@@ -286,7 +287,7 @@ function ProviderPage() {
   return (
     <main className="provider-page">
       <header className="catalog-header">
-        <Link to="/" className="catalog-logo">LOSI <span>CONECTA</span></Link>
+        <AppLogo className="catalog-logo">LOSI <span>CONECTA</span></AppLogo>
         <Link to="/buscar" className="catalog-login">Buscar fornecedores</Link>
       </header>
 
