@@ -6511,3 +6511,172 @@ a {
     font-size: 10px !important;
   }
 }
+
+
+/* PERFIL PÚBLICO — ORGANIZAÇÃO DO CABEÇALHO DO FORNECEDOR */
+.provider-page .provider-hero-content {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 430px) !important;
+  grid-template-areas:
+    "identity reputation"
+    "actions actions" !important;
+  align-items: center !important;
+  gap: 20px 28px !important;
+  padding-top: 0 !important;
+  padding-bottom: 28px !important;
+}
+
+.provider-page .provider-hero-identity {
+  grid-area: identity;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 22px !important;
+  min-width: 0 !important;
+}
+
+.provider-page .provider-hero-title {
+  padding-top: 14px !important;
+  min-width: 0 !important;
+}
+
+.provider-page .provider-hero-title h1 {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+.provider-page .provider-hero-reputation {
+  grid-area: reputation;
+  min-width: 0 !important;
+  display: flex !important;
+  justify-content: stretch !important;
+}
+
+.provider-page .provider-hero-reputation .provider-reputation {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.provider-page .provider-profile-actions {
+  grid-area: actions;
+  width: 100% !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  padding-top: 2px !important;
+  border-top: 1px solid #edf0f5 !important;
+  padding-top: 18px !important;
+}
+
+.provider-page .provider-profile-actions > * {
+  min-height: 44px !important;
+  margin: 0 !important;
+}
+
+@media only screen and (max-width: 900px) {
+  .provider-page .provider-hero-content {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "identity"
+      "reputation"
+      "actions" !important;
+    gap: 18px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .provider-page .provider-hero-reputation {
+    width: 100% !important;
+  }
+
+  .provider-page .provider-profile-actions {
+    padding-top: 16px !important;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .provider-page .provider-hero-content {
+    padding: 0 16px 24px !important;
+    gap: 16px !important;
+  }
+
+  .provider-page .provider-hero-identity {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-align: center !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    width: 92px !important;
+    height: 92px !important;
+    flex: 0 0 92px !important;
+    margin-top: -46px !important;
+    border-width: 5px !important;
+    border-radius: 18px !important;
+  }
+
+  .provider-page .provider-hero-title {
+    width: 100% !important;
+    padding-top: 0 !important;
+  }
+
+  .provider-page .provider-hero-title h1 {
+    font-size: clamp(25px, 8vw, 34px) !important;
+    line-height: 1.08 !important;
+  }
+
+  .provider-page .provider-verified {
+    margin-top: 8px !important;
+  }
+
+  .provider-page .provider-location {
+    margin-top: 8px !important;
+  }
+
+  .provider-page .provider-reputation {
+    padding: 12px !important;
+  }
+
+  .provider-page .provider-reputation-head {
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .provider-page .provider-reputation-meta {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px 12px !important;
+  }
+
+  .provider-page .provider-profile-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    border-top: 1px solid #edf0f5 !important;
+    padding-top: 16px !important;
+  }
+
+  .provider-page .provider-profile-actions > * {
+    width: 100% !important;
+    min-height: 46px !important;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .provider-page .provider-hero-content {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    width: 84px !important;
+    height: 84px !important;
+    flex-basis: 84px !important;
+    margin-top: -42px !important;
+  }
+
+  .provider-page .provider-reputation-meta {
+    grid-template-columns: 1fr !important;
+  }
+}
