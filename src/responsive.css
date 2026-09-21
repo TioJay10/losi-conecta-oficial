@@ -4285,3 +4285,302 @@ a {
     top: 0 !important;
   }
 }
+
+
+/* PALETA LOSI — BUSCA E PERFIL PÚBLICO DO FORNECEDOR */
+/* Somente identidade visual: layout, responsividade e comportamento permanecem intactos. */
+.marketplace-page,
+.provider-page {
+  --losi-navy: #07111f;
+  --losi-navy-2: #0b182a;
+  --losi-gold: #d6b46a;
+  --losi-gold-soft: #f0d99a;
+  --losi-ink: #172033;
+  --losi-muted: #697386;
+  --losi-border: #e7e9f0;
+  --losi-surface: #ffffff;
+  --losi-background: #f4f5f8;
+}
+
+/* BUSCA */
+.marketplace-page {
+  background: var(--losi-background) !important;
+  color: var(--losi-ink) !important;
+}
+
+.marketplace-page .marketplace-header,
+.marketplace-page .marketplace-category-bar {
+  background: var(--losi-navy) !important;
+  border-color: rgba(214,180,106,.22) !important;
+}
+
+.marketplace-page .marketplace-logo {
+  color: var(--losi-gold-soft) !important;
+}
+
+.marketplace-page .marketplace-logo span {
+  color: #fff !important;
+}
+
+.marketplace-page .marketplace-main-search {
+  background: #fff !important;
+  border-color: rgba(214,180,106,.35) !important;
+}
+
+.marketplace-page .marketplace-main-search input {
+  background: #fff !important;
+  color: var(--losi-ink) !important;
+}
+
+.marketplace-page .marketplace-main-search button,
+.marketplace-page .marketplace-search-button {
+  background: linear-gradient(145deg, #d6b46a, #a77b2f) !important;
+  color: #101827 !important;
+}
+
+.marketplace-page .marketplace-main-search button:hover,
+.marketplace-page .marketplace-search-button:hover {
+  background: linear-gradient(145deg, #e2c681, #b88d3c) !important;
+}
+
+.marketplace-page .marketplace-account,
+.marketplace-page .marketplace-menu-link,
+.marketplace-page .marketplace-category-inner button {
+  color: #d7deea !important;
+}
+
+.marketplace-page .marketplace-account:hover,
+.marketplace-page .marketplace-menu-link:hover,
+.marketplace-page .marketplace-category-inner button:hover,
+.marketplace-page .marketplace-category-inner button.active {
+  color: var(--losi-gold-soft) !important;
+}
+
+.marketplace-page .marketplace-menu-link.active {
+  border-bottom-color: var(--losi-gold) !important;
+  background: rgba(214,180,106,.10) !important;
+}
+
+.marketplace-page .marketplace-menu-mark {
+  border-color: rgba(214,180,106,.30) !important;
+  background: rgba(255,255,255,.04) !important;
+  color: var(--losi-gold-soft) !important;
+}
+
+.marketplace-page .marketplace-search-panel h1,
+.marketplace-page .marketplace-results-top h2,
+.marketplace-page .marketplace-card-heading h3,
+.marketplace-page .marketplace-sidebar-title,
+.marketplace-page .marketplace-empty strong {
+  color: var(--losi-ink) !important;
+}
+
+.marketplace-page .marketplace-search-panel > p,
+.marketplace-page .marketplace-location,
+.marketplace-page .marketplace-card-body > p,
+.marketplace-page .marketplace-results-context,
+.marketplace-page .marketplace-sort,
+.marketplace-page .marketplace-sidebar,
+.marketplace-page .marketplace-filter-label {
+  color: var(--losi-muted) !important;
+}
+
+.marketplace-page .marketplace-filter-row,
+.marketplace-page .marketplace-sidebar,
+.marketplace-page .marketplace-card,
+.marketplace-page .marketplace-message,
+.marketplace-page .marketplace-empty {
+  background: var(--losi-surface) !important;
+  border-color: var(--losi-border) !important;
+  box-shadow: 0 10px 28px rgba(23,32,51,.055) !important;
+}
+
+.marketplace-page .marketplace-filter-main input,
+.marketplace-page .marketplace-filter-field input,
+.marketplace-page .marketplace-filter-field select,
+.marketplace-page .marketplace-filter-group select,
+.marketplace-page .marketplace-sort select {
+  background: #fff !important;
+  color: var(--losi-ink) !important;
+  border-color: #d5c49f !important;
+}
+
+.marketplace-page .marketplace-filter-main input:focus,
+.marketplace-page .marketplace-filter-field input:focus,
+.marketplace-page .marketplace-filter-field select:focus,
+.marketplace-page .marketplace-filter-group select:focus {
+  border-color: #b18a43 !important;
+  box-shadow: 0 0 0 2px rgba(214,180,106,.14) !important;
+}
+
+.marketplace-page .marketplace-active-filters span,
+.marketplace-page .marketplace-verified {
+  background: rgba(214,180,106,.14) !important;
+  border-color: rgba(214,180,106,.28) !important;
+  color: #7d5d22 !important;
+}
+
+.marketplace-page .marketplace-filter-group button.selected,
+.marketplace-page .marketplace-filter-group button:hover,
+.marketplace-page .marketplace-profile-link,
+.marketplace-page .marketplace-contact {
+  color: #8a6827 !important;
+}
+
+.marketplace-page .marketplace-contact,
+.marketplace-page .marketplace-clear-all {
+  border-color: rgba(214,180,106,.48) !important;
+  background: #fff !important;
+}
+
+.marketplace-page .marketplace-contact:hover,
+.marketplace-page .marketplace-clear-all:hover {
+  background: #fbf7ed !important;
+  border-color: rgba(214,180,106,.72) !important;
+}
+
+.marketplace-page .marketplace-card:hover {
+  border-color: rgba(214,180,106,.50) !important;
+  box-shadow: 0 14px 30px rgba(23,32,51,.09) !important;
+}
+
+/* PERFIL PÚBLICO DO FORNECEDOR */
+.provider-page {
+  background: var(--losi-background) !important;
+  color: var(--losi-ink) !important;
+}
+
+.provider-page .catalog-header {
+  background: var(--losi-navy) !important;
+  border-bottom-color: rgba(214,180,106,.22) !important;
+}
+
+.provider-page .catalog-header .catalog-logo {
+  color: var(--losi-gold-soft) !important;
+}
+
+.provider-page .catalog-header .catalog-logo span {
+  color: #fff !important;
+}
+
+.provider-page .catalog-header .catalog-login {
+  border-color: rgba(214,180,106,.42) !important;
+  background: transparent !important;
+  color: var(--losi-gold-soft) !important;
+}
+
+.provider-page .provider-hero,
+.provider-page .provider-profile-content {
+  color: var(--losi-ink) !important;
+}
+
+.provider-page .provider-hero-content,
+.provider-page .provider-profile-card {
+  border-color: var(--losi-border) !important;
+}
+
+.provider-page .provider-profile-card {
+  background: #fff !important;
+  box-shadow: 0 10px 28px rgba(23,32,51,.055) !important;
+}
+
+.provider-page .catalog-kicker {
+  color: #9a7029 !important;
+}
+
+.provider-page .provider-hero-title h1,
+.provider-page .provider-profile-card h2,
+.provider-page .provider-profile-card h3 {
+  color: var(--losi-ink) !important;
+}
+
+.provider-page .provider-location,
+.provider-page .provider-profile-card p,
+.provider-page .provider-review-list article p,
+.provider-page .provider-service-list article p {
+  color: var(--losi-muted) !important;
+}
+
+.provider-page .provider-verified {
+  background: rgba(214,180,106,.14) !important;
+  border-color: rgba(214,180,106,.28) !important;
+  color: #7d5d22 !important;
+}
+
+.provider-page .provider-profile-save,
+.provider-page .provider-profile-contact,
+.provider-page .provider-profile-quote,
+.provider-page .provider-review-form button,
+.provider-page .provider-profile-report-submit {
+  background: var(--losi-navy) !important;
+  border-color: var(--losi-navy) !important;
+  color: #fff !important;
+}
+
+.provider-page .provider-profile-save:hover,
+.provider-page .provider-profile-contact:hover,
+.provider-page .provider-profile-quote:hover,
+.provider-page .provider-review-form button:hover,
+.provider-page .provider-profile-report-submit:hover {
+  background: var(--losi-navy-2) !important;
+  border-color: var(--losi-gold) !important;
+}
+
+.provider-page .provider-profile-report,
+.provider-page .quotes-secondary {
+  background: #fff !important;
+  border-color: rgba(214,180,106,.42) !important;
+  color: #8a6827 !important;
+}
+
+.provider-page .provider-profile-report:hover,
+.provider-page .quotes-secondary:hover {
+  background: #fbf7ed !important;
+  border-color: rgba(214,180,106,.68) !important;
+}
+
+.provider-page .provider-portfolio-item,
+.provider-page .provider-service-list article,
+.provider-page .provider-review-list article {
+  border-color: var(--losi-border) !important;
+}
+
+.provider-page .provider-reputation {
+  background: #fff !important;
+  border-color: rgba(214,180,106,.25) !important;
+}
+
+.provider-page .provider-reputation-head strong {
+  color: var(--losi-ink) !important;
+}
+
+.provider-page .provider-reputation-head span {
+  color: #9a7029 !important;
+}
+
+.provider-page .provider-reputation-meta {
+  color: var(--losi-muted) !important;
+}
+
+.provider-page .provider-quote-safety-warning {
+  background: #fff9e8 !important;
+  border-color: rgba(214,180,106,.42) !important;
+  color: #5f4a18 !important;
+}
+
+.provider-page .provider-review-form select,
+.provider-page .provider-review-form textarea,
+.provider-page .provider-report-form select,
+.provider-page .provider-report-form textarea,
+.provider-page .provider-quote-form input,
+.provider-page .provider-quote-form select,
+.provider-page .provider-quote-form textarea {
+  background: #fff !important;
+  color: var(--losi-ink) !important;
+  border-color: #d5c49f !important;
+}
+
+/* PAINEL — reduzir o espaço entre ÁREA EXCLUSIVA e Seu espaço profissional */
+.dashboard-page .dashboard-header-context {
+  gap: 1px !important;
+}
