@@ -3222,3 +3222,10 @@ a {
     font-size: 15px;
   }
 }
+
+
+/* MEU PERFIL — centralização do conteúdo principal */
+.personal-profile-content {
+  margin-left: auto;
+  margin-right: auto;
+}
