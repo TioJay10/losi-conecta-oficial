@@ -2771,3 +2771,88 @@ a {
     padding-right: 10px !important;
   }
 }
+
+/* =========================================================
+   ESTABILIZAÇÃO FINAL — layout global e responsividade
+   ========================================================= */
+html,body{width:100%;min-width:0;margin:0}
+body{overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+input,select,textarea,button{box-sizing:border-box;max-width:100%}
+button,a{overflow-wrap:anywhere}
+.home-page,.catalog-page,.marketplace-page,.provider-page,.dashboard-page,.personal-profile-page,.profile-page,.quotes-page,.services-page,.business-services-page,.admin-page{width:100%;min-width:0;overflow-x:clip}
+.home-page .home-header,.dashboard-page .dashboard-header,.personal-profile-page .profile-header,.profile-page .profile-header,.quotes-page .quotes-header{min-width:0;box-sizing:border-box}
+.home-page .home-header>*,.dashboard-page .dashboard-header>*,.personal-profile-page .profile-header>*,.profile-page .profile-header>*{min-width:0}
+.catalog-page .catalog-header,.catalog-page .catalog-content,.catalog-page .catalog-search,.catalog-page .catalog-results,.catalog-page .catalog-grid,.marketplace-page .marketplace-header-inner,.marketplace-page .marketplace-search-panel,.marketplace-page .marketplace-content,.provider-page .provider-hero-content,.provider-page .provider-profile-content,.dashboard-page .dashboard-main,.dashboard-page .dashboard-content,.personal-profile-page .profile-content,.profile-page .profile-content,.quotes-page .quotes-content{min-width:0;max-width:100%;box-sizing:border-box}
+.catalog-page .catalog-card,.catalog-page .catalog-result-card,.catalog-page .provider-card,.marketplace-page .marketplace-card,.provider-page .provider-profile-card,.dashboard-page .dashboard-grid>*,.dashboard-page .dashboard-status>*,.dashboard-page .dashboard-plan-grid>*,.personal-profile-page .profile-content>*,.profile-page .profile-content>*{min-width:0;max-width:100%}
+.marketplace-page .marketplace-card-heading,.marketplace-page .marketplace-card-footer,.provider-page .provider-review-head,.provider-page .provider-service-list article>div,.quotes-page .quotes-section-head,.quotes-page .quote-builder-head{min-width:0;flex-wrap:wrap}
+.marketplace-page .marketplace-card-footer>*{min-width:0;max-width:100%}
+.provider-page .provider-service-list article>div>*{min-width:0;max-width:100%}
+.provider-page .provider-portfolio-grid{grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr))}
+.dashboard-page .dashboard-header,.dashboard-page .dashboard-header-right,.dashboard-page .dashboard-header-user,.dashboard-page .dashboard-header-user>div{min-width:0}
+.dashboard-page .dashboard-header-user small,.dashboard-page .dashboard-header-user strong{display:block;overflow-wrap:anywhere}
+.personal-profile-page form,.profile-page form{min-width:0;max-width:100%}
+.profile-page .serviceItem,.profile-page .serviceActions,.profile-page .actions{min-width:0;max-width:100%}
+.profile-page .serviceItem>*{min-width:0;max-width:100%}
+.quotes-page .quotes-content{padding-left:clamp(12px,3vw,32px);padding-right:clamp(12px,3vw,32px)}
+.quotes-page .quotes-metrics,.quotes-page .quotes-section,.quotes-page .quote-builder,.quotes-page .quote-request-card,.quotes-page .quote-history-card,.quotes-page .quote-client-card{min-width:0;max-width:100%}
+.quotes-page table{width:100%;max-width:100%;display:block;overflow-x:auto}
+.quotes-page th,.quotes-page td{overflow-wrap:anywhere}
+.admin-page .admin-content,.admin-page .admin-section-head,.admin-page .admin-overview-grid,.admin-page .admin-grid,.admin-page .admin-stats-grid,.admin-page .admin-metrics-grid,.admin-page .admin-commercial-grid,.admin-page .admin-list,.admin-page .admin-filters,.admin-page .admin-form-grid{min-width:0}
+.admin-page .admin-content>*{min-width:0;max-width:1180px}
+.admin-page .admin-section-head>*,.admin-page .admin-category-toolbar>*,.admin-page .admin-commercial-card-head>*{min-width:0;max-width:100%}
+.admin-page .admin-item-main,.admin-page .admin-pending-item,.admin-page .admin-users-toolbar,.admin-page .admin-form-actions{min-width:0}
+.admin-page .admin-item-actions,.admin-page .admin-form-actions{flex-wrap:wrap}
+.admin-page .admin-item-actions>*,.admin-page .admin-form-actions>*{max-width:100%}
+
+@media (max-width:768px){
+  .home-page .home-header,.dashboard-page .dashboard-header,.personal-profile-page .profile-header,.profile-page .profile-header,.quotes-page .quotes-header{width:100%;min-width:0}
+  .home-page .home-header,.dashboard-page .dashboard-header,.personal-profile-page .profile-header,.profile-page .profile-header{padding-left:12px!important;padding-right:12px!important}
+  .home-page .home-header .mobile-centered-brand,.dashboard-page .dashboard-header .mobile-centered-brand,.personal-profile-page .profile-header .mobile-centered-brand,.profile-page .profile-header .mobile-centered-brand{max-width:calc(100% - 150px);overflow:hidden;text-overflow:ellipsis}
+  .home-page .home-content,.dashboard-page .dashboard-content,.personal-profile-page .profile-content,.profile-page .profile-content,.quotes-page .quotes-content{width:100%!important;max-width:100%!important}
+  .dashboard-page .dashboard-content,.personal-profile-page .profile-content,.profile-page .profile-content{padding-left:12px!important;padding-right:12px!important}
+  .dashboard-page .dashboard-header-user>div{display:none}
+  .dashboard-page .dashboard-header-right{gap:7px}
+  .dashboard-page .dashboard-header-user>span{display:inline-flex;flex:0 0 34px;width:34px;height:34px;align-items:center;justify-content:center}
+  .dashboard-page .dashboard-sidebar{width:min(280px,86vw);max-width:86vw}
+  .marketplace-page .marketplace-header-inner{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+  .marketplace-page .marketplace-main-search{grid-column:1/-1;width:100%}
+  .marketplace-page .marketplace-content{grid-template-columns:1fr!important;gap:14px}
+  .marketplace-page .marketplace-grid{grid-template-columns:1fr!important}
+  .marketplace-page .marketplace-sidebar{position:static;width:100%}
+  .marketplace-page .marketplace-filter-row{grid-template-columns:1fr!important}
+  .marketplace-page .marketplace-search-button{grid-column:auto!important;width:100%}
+  .provider-page .provider-hero-cover{height:190px}
+  .provider-page .provider-hero-content{display:grid;grid-template-columns:82px minmax(0,1fr);align-items:end;gap:12px;padding:0 16px 22px}
+  .provider-page .provider-hero-logo{width:82px;height:82px;flex-basis:82px;margin-top:-41px;border-width:4px}
+  .provider-page .provider-hero-title{padding-top:12px}
+  .provider-page .provider-hero-title h1{font-size:clamp(25px,8vw,36px)}
+  .provider-page .provider-profile-content{grid-template-columns:1fr;padding:22px 12px 60px;gap:14px}
+  .provider-page .provider-profile-card{padding:18px;border-radius:13px}
+  .provider-page .provider-portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .quotes-page .quotes-header{min-height:64px;height:auto;padding:10px 12px;gap:10px}
+  .quotes-page .quotes-header .catalog-logo{max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .quotes-page .quotes-header .quotes-back{max-width:48%;text-align:right}
+  .quotes-page .quotes-metrics{grid-template-columns:1fr!important}
+  .quotes-page .quotes-section,.quotes-page .quote-builder{padding:16px;border-radius:13px}
+  .quotes-page .quotes-section-head,.quotes-page .quote-builder-head{display:flex;align-items:flex-start;flex-direction:column}
+  .admin-page .admin-content{width:100%!important;max-width:none!important;margin:0!important;padding:22px 14px 48px!important}
+  .admin-page .admin-filters,.admin-page .admin-form-grid,.admin-page .admin-category-create{grid-template-columns:1fr!important}
+  .admin-page .admin-form-field-wide{grid-column:auto!important}
+  .admin-page .admin-commercial-grid,.admin-page .admin-overview-grid,.admin-page .admin-grid,.admin-page .admin-stats-grid,.admin-page .admin-metrics-grid{grid-template-columns:1fr!important}
+  .admin-page .admin-pending-item,.admin-page .admin-item-main{display:flex;flex-direction:column;align-items:stretch}
+  .admin-page .admin-item-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .admin-page .admin-item-actions>*{width:100%}
+}
+@media (max-width:480px){
+  .home-page .home-header .mobile-centered-brand,.dashboard-page .dashboard-header .mobile-centered-brand,.personal-profile-page .profile-header .mobile-centered-brand,.profile-page .profile-header .mobile-centered-brand{max-width:calc(100% - 125px);font-size:13px!important}
+  .provider-page .provider-hero-content{grid-template-columns:70px minmax(0,1fr);padding-left:12px;padding-right:12px}
+  .provider-page .provider-hero-logo{width:70px;height:70px;flex-basis:70px;margin-top:-35px}
+  .provider-page .provider-profile-content{padding-left:10px;padding-right:10px}
+  .provider-page .provider-profile-card{padding:15px}
+  .provider-page .provider-portfolio-grid{grid-template-columns:1fr}
+  .quotes-page .quotes-content{padding-left:10px;padding-right:10px}
+  .quotes-page .quotes-section,.quotes-page .quote-builder{padding:14px}
+  .admin-page .admin-content{padding-left:10px!important;padding-right:10px!important}
+  .admin-page .admin-item-actions{grid-template-columns:1fr!important}
+}
