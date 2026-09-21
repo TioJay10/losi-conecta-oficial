@@ -3,8 +3,6 @@ import { FormEvent, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { supabase } from "../lib/supabase";
 
-const APP_URL = "https://losi-conecta-oficial.vercel.app";
-
 export const Route = createFileRoute("/entrar")({
   component: AuthPage,
 });
