@@ -93,8 +93,16 @@ function BusinessServicesPage() {
 
       if (!mounted) return;
 
-      if (businessResult.error || categoryResult.error) {
-        setMessage("Não foi possível carregar os dados. Tente novamente.");
+      if (businessResult.error) {
+        console.error("Erro ao carregar empresa do fornecedor:", businessResult.error);
+        setMessage("Não foi possível carregar os dados da empresa: " + businessResult.error.message);
+      }
+
+      if (categoryResult.error) {
+        console.error("Erro ao carregar categorias dos serviços:", categoryResult.error);
+        setMessage((current) =>
+          current || "Não foi possível carregar as categorias dos serviços: " + categoryResult.error.message
+        );
       }
 
       const loaded = businessResult.data as Business | null;
