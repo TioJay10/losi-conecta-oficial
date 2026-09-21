@@ -6991,3 +6991,66 @@ a.profile-logo:hover,
 .app-logo:hover {
   text-decoration: none !important;
 }
+
+
+/* CORREÇÃO — CAPA NÃO PODE COBRIR A FOTO DE PERFIL NO MOBILE */
+@media only screen and (max-width: 768px) {
+  .provider-page .provider-hero {
+    overflow: visible !important;
+  }
+
+  .provider-page .provider-hero-cover {
+    position: relative !important;
+    z-index: 1 !important;
+    height: clamp(150px, 32vw, 210px) !important;
+  }
+
+  .provider-page .provider-hero-cover img {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .provider-page .provider-hero-content {
+    position: relative !important;
+    z-index: 5 !important;
+    margin-top: 0 !important;
+  }
+
+  .provider-page .provider-hero-identity {
+    position: relative !important;
+    z-index: 6 !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .provider-page .provider-hero-cover {
+    height: 170px !important;
+  }
+
+  .provider-page .provider-hero-content {
+    padding-top: 8px !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    margin-top: -34px !important;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .provider-page .provider-hero-cover {
+    height: 160px !important;
+  }
+
+  .provider-page .provider-hero-content {
+    padding-top: 10px !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    margin-top: -28px !important;
+  }
+}
