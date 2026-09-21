@@ -213,17 +213,21 @@ function QuotesPage() {
     let active = true;
 
     async function refreshQuoteData() {
+      const clientRequestsPromise = supabase
+        .from("quote_requests")
+        .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+        .eq("requester_id", userId)
+        .order("created_at", { ascending: false });
+
+      const clientQuotesPromise = supabase
+        .from("quotes")
+        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+        .eq("client_id", userId)
+        .order("created_at", { ascending: false });
+
       const [requestedResult, receivedResult] = await Promise.all([
-        supabase
-          .from("quote_requests")
-          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
-          .eq("requester_id", userId)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
-          .eq("client_id", userId)
-          .order("created_at", { ascending: false }),
+        clientRequestsPromise,
+        clientQuotesPromise,
       ]);
 
       if (!active) return;
@@ -238,6 +242,30 @@ function QuotesPage() {
 
       if (!receivedResult.error) {
         setClientQuotes((receivedResult.data ?? []) as unknown as QuoteRow[]);
+      }
+
+      if (businessId) {
+        const [supplierRequestsResult, supplierQuotesResult] = await Promise.all([
+          supabase
+            .from("quote_requests")
+            .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+            .eq("business_id", businessId)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("quotes")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+            .eq("business_id", businessId)
+            .order("created_at", { ascending: false }),
+        ]);
+
+        if (!active) return;
+
+        if (!supplierRequestsResult.error) {
+          setRequests((supplierRequestsResult.data ?? []) as unknown as RequestRow[]);
+        }
+        if (!supplierQuotesResult.error) {
+          setQuotes((supplierQuotesResult.data ?? []) as unknown as QuoteRow[]);
+        }
       }
     }
 
@@ -432,7 +460,7 @@ function QuotesPage() {
 
   if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
 
-  const providerMode = Boolean(businessId);
+  const isSupplier = Boolean(businessId);
   const pendingRequests = requests.filter((request) => request.status === "pending");
   const sentRequestsThisMonth = clientRequests.filter((request) => {
     const created = new Date(request.created_at);
@@ -585,8 +613,17 @@ function QuotesPage() {
 
         {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
 
-        {providerMode ? (
+        {isSupplier ? (
           <>
+
+            <div className="quotes-supplier-area">
+              <div className="quotes-section-head">
+                <div>
+                  <div className="quotes-kicker">ÁREA DO FORNECEDOR</div>
+                  <h2>Receber solicitações e enviar orçamentos</h2>
+                  <p>Esta área aparece porque sua conta também possui um perfil de fornecedor.</p>
+                </div>
+              </div>
 
             {selectedRequest ? (
               <form className="quote-builder" onSubmit={sendQuote}>
@@ -652,7 +689,12 @@ function QuotesPage() {
                 <div className="quote-history-list">
                   {quotes.map((quote) => (
                     <article key={quote.id} className="quote-history-card">
-                      <div><span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span><h3>{quote.quote_requests?.event_title || "Orçamento"}</h3><p>Cliente: {quote.quote_requests?.client_name || "—"}</p></div>
+                      <div>
+                        <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
+                        <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
+                        <p>Cliente: {quote.quote_requests?.client_name || "—"}</p>
+                        <p>Orçamento enviado em <strong>{dateTime(quote.sent_at || quote.created_at)}</strong></p>
+                      </div>
                       <div className="quote-history-actions">
                         <strong>{money(Number(quote.total))}</strong>
                         <button
@@ -673,6 +715,7 @@ function QuotesPage() {
                 </div>
               )}
             </section>
+            </div>
           </>
         ) : null}
 
