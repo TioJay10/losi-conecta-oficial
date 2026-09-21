@@ -111,7 +111,7 @@ function QuotesPage() {
         setBusinessId(business.id);
         setBusinessName(business.business_name);
 
-        const [{ data: requestRows }, { data: quoteRows }] = await Promise.all([
+        const [{ data: requestRows, error: requestsError }, { data: quoteRows, error: quotesError }] = await Promise.all([
           supabase.from("quote_requests")
             .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
             .eq("business_id", business.id)
@@ -122,20 +122,27 @@ function QuotesPage() {
             .order("created_at", { ascending: false }),
         ]);
 
+        if (requestsError) console.error("Erro ao carregar solicitações de orçamento:", requestsError);
+        if (quotesError) console.error("Erro ao carregar orçamentos enviados:", quotesError);
+
         if (mounted) {
           setRequests((requestRows ?? []) as unknown as RequestRow[]);
           setQuotes((quoteRows ?? []) as unknown as QuoteRow[]);
+          if (requestsError || quotesError) {
+            setMessage("Não foi possível carregar todos os dados de orçamento. Tente atualizar a página.");
+          }
         }
 
         const firstDay = new Date();
         firstDay.setDate(1);
         firstDay.setHours(0, 0, 0, 0);
-        const { count } = await supabase.from("quotes")
+        const { count, error: sentCountError } = await supabase.from("quotes")
           .select("id", { count: "exact", head: true })
           .eq("business_id", business.id)
           .not("sent_at", "is", null)
           .gte("sent_at", firstDay.toISOString());
 
+        if (sentCountError) console.error("Erro ao contar orçamentos enviados no mês:", sentCountError);
         if (mounted) setSentThisMonth(count ?? 0);
       } else {
         const { data: received } = await supabase
@@ -143,6 +150,8 @@ function QuotesPage() {
           .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
+
+        if (receivedError) console.error("Erro ao carregar orçamentos recebidos:", receivedError);
 
         if (mounted) {
           setQuotes((received ?? []) as unknown as QuoteRow[]);
@@ -223,6 +232,7 @@ function QuotesPage() {
     }).select("id").single();
 
     if (quoteError || !quote) {
+      console.error("Erro ao criar orçamento:", quoteError);
       setMessage(quoteError?.message || "Não foi possível criar o orçamento.");
       setSaving(false);
       return;
@@ -239,19 +249,31 @@ function QuotesPage() {
     );
 
     if (itemsError) {
+      console.error("Erro ao salvar itens do orçamento:", itemsError);
       await supabase.from("quotes").delete().eq("id", quote.id);
       setMessage(itemsError.message || "Não foi possível salvar os itens do orçamento.");
       setSaving(false);
       return;
     }
 
-    await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", selectedRequest.id);
+    const { error: requestStatusError } = await supabase
+      .from("quote_requests")
+      .update({ status: "quoted" })
+      .eq("id", selectedRequest.id)
+      .eq("business_id", businessId);
+
+    if (requestStatusError) {
+      console.error("Erro ao atualizar status da solicitação:", requestStatusError);
+    }
     const refreshed = await supabase
       .from("quotes")
       .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
       .eq("business_id", businessId)
       .order("created_at", { ascending: false });
 
+    if (refreshed.error) {
+      console.error("Erro ao atualizar histórico de orçamentos:", refreshed.error);
+    }
     setQuotes((refreshed.data ?? []) as unknown as QuoteRow[]);
     setRequests((current) => current.map((request) => request.id === selectedRequest.id ? { ...request, status: "quoted" } : request));
     setSentThisMonth((value) => value + 1);
@@ -323,9 +345,14 @@ function QuotesPage() {
       status,
       responded_at: new Date().toISOString(),
     }).eq("id", quote.id).eq("client_id", userId);
-    if (!error) {
-      setQuotes((current) => current.map((item) => item.id === quote.id ? { ...item, status } : item));
+
+    if (error) {
+      console.error("Erro ao responder orçamento:", error);
+      setMessage(error.message || "Não foi possível atualizar o orçamento.");
+      return;
     }
+
+    setQuotes((current) => current.map((item) => item.id === quote.id ? { ...item, status } : item));
   }
 
   if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
