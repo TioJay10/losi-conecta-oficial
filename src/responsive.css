@@ -5411,3 +5411,102 @@ a {
     max-height: calc(100vh - 64px);
   }
 }
+
+
+/* ADMIN — contraste claro no conteúdo e campos de busca */
+@media (min-width: 901px) {
+  .admin-page .admin-content {
+    color: #172033;
+  }
+
+  .admin-page .admin-content p,
+  .admin-page .admin-content span,
+  .admin-page .admin-content small,
+  .admin-page .admin-content label,
+  .admin-page .admin-content .admin-text,
+  .admin-page .admin-content .admin-filter-count,
+  .admin-page .admin-content .admin-id {
+    color: #526174;
+  }
+
+  .admin-page .admin-content h1,
+  .admin-page .admin-content h2,
+  .admin-page .admin-content h3,
+  .admin-page .admin-content strong,
+  .admin-page .admin-content b {
+    color: #172033;
+  }
+
+  .admin-page .admin-content .admin-badge,
+  .admin-page .admin-content .admin-stat-card strong,
+  .admin-page .admin-content .admin-metric strong {
+    color: #2563eb;
+  }
+
+  /* Campos de busca e filtros: fundo claro, nunca preto */
+  .admin-page .admin-filters input,
+  .admin-page .admin-filters select,
+  .admin-page .admin-security-toolbar input,
+  .admin-page .admin-form-field input,
+  .admin-page .admin-form-field select,
+  .admin-page .admin-form-field textarea,
+  .admin-page .admin-plan-editor input,
+  .admin-page .admin-plan-editor select,
+  .admin-page .admin-plan-editor textarea,
+  .admin-page .admin-commercial-activation select {
+    background: #ffffff !important;
+    color: #172033 !important;
+    border: 1px solid #d7dee8 !important;
+    box-shadow: none;
+  }
+
+  .admin-page .admin-filters input::placeholder,
+  .admin-page .admin-security-toolbar input::placeholder,
+  .admin-page .admin-form-field input::placeholder,
+  .admin-page .admin-form-field textarea::placeholder,
+  .admin-page .admin-plan-editor input::placeholder {
+    color: #8a97a8 !important;
+    opacity: 1;
+  }
+
+  .admin-page .admin-filters input:focus,
+  .admin-page .admin-filters select:focus,
+  .admin-page .admin-security-toolbar input:focus,
+  .admin-page .admin-form-field input:focus,
+  .admin-page .admin-form-field select:focus,
+  .admin-page .admin-form-field textarea:focus,
+  .admin-page .admin-plan-editor input:focus,
+  .admin-page .admin-plan-editor select:focus,
+  .admin-page .admin-plan-editor textarea:focus {
+    background: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+    outline: none;
+  }
+
+  .admin-page .admin-content option {
+    background: #ffffff;
+    color: #172033;
+  }
+
+  /* Cards claros para separar informação do fundo cinza */
+  .admin-page .admin-content .admin-card,
+  .admin-page .admin-content .admin-review-card,
+  .admin-page .admin-content .admin-commercial-card,
+  .admin-page .admin-content .admin-commercial-subscriptions,
+  .admin-page .admin-content .admin-subscriptions-section,
+  .admin-page .admin-content .admin-list-item,
+  .admin-page .admin-content .admin-overview-card,
+  .admin-page .admin-content .admin-operation-card,
+  .admin-page .admin-content .admin-pending-panel,
+  .admin-page .admin-content .admin-metric,
+  .admin-page .admin-content .admin-security-section,
+  .admin-page .admin-content .admin-security-card,
+  .admin-page .admin-content .admin-category-toolbar,
+  .admin-page .admin-content .admin-category-create,
+  .admin-page .admin-content .admin-stat-card {
+    background: #ffffff;
+    border-color: #e1e6ee;
+    box-shadow: 0 8px 24px rgba(15,23,42,.06);
+  }
+}
