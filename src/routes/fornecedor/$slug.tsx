@@ -36,7 +36,7 @@ function ProviderPage() {
   const [reportMessage, setReportMessage] = useState("");
   const [reporting, setReporting] = useState(false);
   const [quoteMessage, setQuoteMessage] = useState("");
-  const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "">("");
+  const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
   const [reputation, setReputation] = useState({ score: 0, level: 1, reviews: 0, negativeReviews: 0, completedServices: 0, reports: 0, blocked: false });
 
   useEffect(() => {
@@ -249,11 +249,16 @@ function ProviderPage() {
 
   async function submitQuoteRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const { data: userData } = await supabase.auth.getUser();
+    if (quoteMessageType === "sending") return;
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    setQuoteMessage("");
+    setQuoteMessageType("sending");
+    const { data: userData, error: userError } = await supabase.auth.getUser();
     const currentUser = userData.user;
-    if (!currentUser) {
-      window.location.href = "/entrar";
+    if (userError || !currentUser) {
+      setQuoteMessageType("error");
+      setQuoteMessage("NÃO FOI POSSÍVEL SOLICITAR O ORÇAMENTO");
       return;
     }
 
@@ -284,7 +289,6 @@ function ProviderPage() {
       return;
     }
 
-    const formElement = event.currentTarget;
     formElement.reset();
     setQuoteMessageType("success");
     setQuoteMessage("ORÇAMENTO ENVIADO COM SUCESSO");
@@ -375,7 +379,7 @@ function ProviderPage() {
                 <label>Data do evento<input name="event_date" type="date" /></label>
                 <label>Local do evento<input name="event_location" placeholder="Cidade / espaço / endereço" /></label>
                 <label>Detalhes<textarea name="description" rows={4} placeholder="Quantidade de pessoas, horário, necessidades e outras informações..." /></label>
-                <button type="submit">Enviar solicitação de orçamento</button>
+                <button type="submit" disabled={quoteMessageType === "sending"}>{quoteMessageType === "sending" ? "Enviando..." : "Enviar solicitação de orçamento"}</button>
               </form>
               {quoteMessage && <small className={"provider-quote-message " + quoteMessageType} role="status">{quoteMessage}</small>}
             </div>
