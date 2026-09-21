@@ -4265,3 +4265,23 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* PAINEL — ajuste fino do bloco ÁREA EXCLUSIVA no cabeçalho */
+.dashboard-page .dashboard-header-context {
+  position: relative !important;
+  top: 5px !important;
+  align-self: center !important;
+  justify-content: center !important;
+}
+
+.dashboard-page .dashboard-header-context span,
+.dashboard-page .dashboard-header-context strong {
+  line-height: 1.25 !important;
+}
+
+@media only screen and (max-width: 768px) {
+  .dashboard-page .dashboard-header-context {
+    top: 0 !important;
+  }
+}
