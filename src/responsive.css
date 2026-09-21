@@ -4641,3 +4641,18 @@ a {
     text-overflow: ellipsis !important;
   }
 }
+
+
+/* HOME — centralização absoluta do LOSI CONECTA */
+.home-page .home-header .mobile-centered-brand {
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  display: block !important;
+  width: max-content !important;
+  z-index: 30 !important;
+}
