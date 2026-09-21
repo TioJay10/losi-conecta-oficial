@@ -17,7 +17,8 @@ function DashboardPage() {
   const [quotesSentThisMonth, setQuotesSentThisMonth] = useState(0);
   const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
-  const [loading, setLoading] = useState(true);\n  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -191,7 +192,8 @@ function DashboardPage() {
 
   return (
     <main className="dashboard-page">
-      {mobileMenuOpen && <button type="button" className="dashboard-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}\n      <aside className={`dashboard-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
+      {mobileMenuOpen && <button type="button" className="dashboard-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
+      <aside className={`dashboard-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
         <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
         <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
         <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
@@ -218,7 +220,10 @@ function DashboardPage() {
       </aside>
 
       <div className="dashboard-main">
-        <header className="dashboard-header">\n          <button type="button" className="dashboard-mobile-menu-button" onClick={() => setMobileMenuOpen((value) => !value)} aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileMenuOpen}>\n            <span></span><span></span><span></span>\n          </button>
+        <header className="dashboard-header">
+          <button type="button" className="dashboard-mobile-menu-button" onClick={() => setMobileMenuOpen((value) => !value)} aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileMenuOpen}>
+            <span></span><span></span><span></span>
+          </button>
           <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>Seu espaço profissional</strong></div>
           <div className="dashboard-header-right">
             <div className="dashboard-header-user">
