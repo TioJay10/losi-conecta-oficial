@@ -17,7 +17,7 @@ function DashboardPage() {
   const [quotesSentThisMonth, setQuotesSentThisMonth] = useState(0);
   const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);\n  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -191,23 +191,23 @@ function DashboardPage() {
 
   return (
     <main className="dashboard-page">
-      <aside className="dashboard-sidebar">
+      {mobileMenuOpen && <button type="button" className="dashboard-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}\n      <aside className={`dashboard-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
         <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
         <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
         <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
-          <button type="button" className="dashboard-nav-item active" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <button type="button" className="dashboard-nav-item active" onClick={() => { setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
             <span className="dashboard-nav-mark">01</span><span><strong>Visão geral</strong><small>Resumo da conta</small></span>
           </button>
-          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/buscar" })}>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/buscar" }); }}>
             <span className="dashboard-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span>
           </button>
-          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/meu-perfil" })}>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/meu-perfil" }); }}>
             <span className="dashboard-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span>
           </button>
-          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/meus-servicos" })}>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/meus-servicos" }); }}>
             <span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span>
           </button>
-          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/orcamentos" })}>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/orcamentos" }); }}>
             <span className="dashboard-nav-mark">05</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
           </button>
         </nav>
@@ -218,7 +218,7 @@ function DashboardPage() {
       </aside>
 
       <div className="dashboard-main">
-        <header className="dashboard-header">
+        <header className="dashboard-header">\n          <button type="button" className="dashboard-mobile-menu-button" onClick={() => setMobileMenuOpen((value) => !value)} aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileMenuOpen}>\n            <span></span><span></span><span></span>\n          </button>
           <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>Seu espaço profissional</strong></div>
           <div className="dashboard-header-right">
             <div className="dashboard-header-user">
