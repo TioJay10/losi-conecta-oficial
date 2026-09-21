@@ -71,11 +71,15 @@ function DashboardPage() {
         return;
       }
 
-      const { data: business } = await supabase
+      const { data: business, error: businessError } = await supabase
         .from("business_profiles")
         .select("id,approval_status")
         .eq("owner_id", currentUser.id)
         .maybeSingle();
+
+      if (businessError) {
+        console.error("Erro ao carregar empresa:", businessError);
+      }
 
       if (mounted) {
         setBusinessStatus(
@@ -83,28 +87,77 @@ function DashboardPage() {
         );
       }
 
-      const { data: plansRows } = await supabase.from("plans").select("id,name,description,price_cents,billing_period,highlighted").eq("active",true).order("price_cents");
+      const { data: plansRows, error: plansError } = await supabase
+        .from("plans")
+        .select("id,name,description,price_cents,billing_period,highlighted")
+        .eq("active", true)
+        .order("price_cents");
+
+      if (plansError) {
+        console.error("Erro ao carregar planos:", plansError);
+      }
+
       if (mounted) setPlans((plansRows ?? []) as typeof plans);
+
       if (business?.id) {
-        const { data: sub } = await supabase.from("business_subscriptions").select("ends_at,plan:plans(name)").eq("business_id", business.id).eq("status","active").maybeSingle();
+        const { data: sub, error: subscriptionError } = await supabase
+          .from("business_subscriptions")
+          .select("ends_at,plan:plans(name)")
+          .eq("business_id", business.id)
+          .eq("status", "active")
+          .maybeSingle();
+
+        if (subscriptionError) {
+          console.error("Erro ao carregar assinatura:", subscriptionError);
+        }
+
         const planData = Array.isArray(sub?.plan) ? sub?.plan[0] : sub?.plan;
-        if (planData && mounted) setCurrentPlan({name: planData.name, ends_at: sub?.ends_at ?? null});
+        if (planData && mounted) {
+          setCurrentPlan({ name: planData.name, ends_at: sub?.ends_at ?? null });
+        }
 
         const firstDay = new Date();
         firstDay.setDate(1);
         firstDay.setHours(0, 0, 0, 0);
-        const { count: quoteCount } = await supabase.from("quotes")
+
+        const { count: quoteCount, error: quoteError } = await supabase
+          .from("quotes")
           .select("id", { count: "exact", head: true })
           .eq("business_id", business.id)
           .not("sent_at", "is", null)
           .gte("sent_at", firstDay.toISOString());
+
+        if (quoteError) {
+          console.error("Erro ao carregar quantidade de orçamentos:", quoteError);
+        }
+
         if (mounted) setQuotesSentThisMonth(quoteCount ?? 0);
       }
 
-      const { data: favoriteRows } = await supabase.from("favorites").select("business_id").eq("user_id", currentUser.id);
+      const { data: favoriteRows, error: favoritesError } = await supabase
+        .from("favorites")
+        .select("business_id")
+        .eq("user_id", currentUser.id);
+
+      if (favoritesError) {
+        console.error("Erro ao carregar favoritos:", favoritesError);
+      }
+
       const ids = (favoriteRows ?? []).map((row) => row.business_id);
+
       if (ids.length) {
-        const { data: saved } = await supabase.from("business_profiles").select("id,business_name,slug,city,state").in("id", ids).eq("active", true).eq("approval_status", "approved").order("business_name");
+        const { data: saved, error: savedBusinessesError } = await supabase
+          .from("business_profiles")
+          .select("id,business_name,slug,city,state")
+          .in("id", ids)
+          .eq("active", true)
+          .eq("approval_status", "approved")
+          .order("business_name");
+
+        if (savedBusinessesError) {
+          console.error("Erro ao carregar fornecedores salvos:", savedBusinessesError);
+        }
+
         if (mounted) setSavedBusinesses(saved ?? []);
       }
 
