@@ -5632,3 +5632,293 @@ a {
     padding-right: 12px !important;
   }
 }
+
+
+/* RESPONSIVIDADE FINAL — TODAS AS PÁGINAS */
+@media only screen and (max-width: 768px) {
+  html, body, #root { max-width: 100%; overflow-x: hidden !important; }
+  .auth-page, .profile-page, .personal-profile-page, .business-services-page,
+  .dashboard-page, .admin-page, .provider-page, .marketplace-page, .quotes-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .auth-page { min-height: 100svh !important; padding: 20px 12px !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+  .auth-card { width: min(100%, 440px) !important; max-width: 100% !important; margin: 0 !important; padding: 24px 18px !important; box-sizing: border-box !important; }
+  .auth-card h1, .auth-card h2, .auth-card p, .auth-card label { overflow-wrap: anywhere !important; }
+  .auth-card input, .auth-card button, .auth-card a { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
+
+  .profile-page .profile-content,
+  .profile-page .personal-profile-content,
+  .profile-page .business-services-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .profile-page .personal-profile-card,
+  .profile-page .business-services-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .profile-page .personal-profile-heading,
+  .profile-page .business-services-heading {
+    min-width: 0 !important;
+  }
+
+  .profile-page .personal-profile-heading h1,
+  .profile-page .business-services-heading h1,
+  .profile-page .personal-profile-heading h2,
+  .profile-page .business-services-heading h2 {
+    font-size: clamp(24px, 7vw, 34px) !important;
+    line-height: 1.12 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .profile-page .profile-header {
+    flex-wrap: wrap !important;
+  }
+
+  .profile-page .profile-back {
+    max-width: 42vw !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .profile-page .personal-profile-card-header,
+  .profile-page .business-services-head,
+  .profile-page .business-actions,
+  .profile-page .business-bottom-actions {
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+
+  .profile-page .personal-profile-primary,
+  .profile-page .business-primary,
+  .profile-page .business-secondary,
+  .profile-page .business-cancel,
+  .profile-page .business-public-button {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .profile-page .business-service-item {
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  .profile-page .business-service-main,
+  .profile-page .business-service-actions {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .profile-page .business-service-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+
+  .dashboard-page .dashboard-main,
+  .dashboard-page .dashboard-content {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .dashboard-page .dashboard-header {
+    flex-wrap: wrap !important;
+  }
+
+  .dashboard-page .dashboard-content h1,
+  .dashboard-page .dashboard-content h2,
+  .dashboard-page .dashboard-content h3 {
+    font-size: clamp(21px, 6vw, 32px) !important;
+    line-height: 1.15 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .dashboard-page .dashboard-grid,
+  .dashboard-page .dashboard-cards,
+  .dashboard-page .dashboard-actions-grid,
+  .dashboard-page .dashboard-saved-list,
+  .dashboard-page .dashboard-plan-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-page .dashboard-card,
+  .dashboard-page .dashboard-section,
+  .dashboard-page .dashboard-action-card,
+  .dashboard-page .dashboard-status {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .dashboard-page table,
+  .admin-page table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .dashboard-page input,
+  .dashboard-page select,
+  .dashboard-page textarea,
+  .dashboard-page button,
+  .dashboard-page a {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .provider-page .provider-profile-content,
+  .provider-page .provider-hero-content,
+  .provider-page .provider-profile-card {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-profile-card h1,
+  .provider-page .provider-profile-card h2,
+  .provider-page .provider-profile-card h3,
+  .provider-page .provider-hero h1,
+  .provider-page .provider-hero h2 {
+    font-size: clamp(21px, 6vw, 34px) !important;
+    line-height: 1.15 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .provider-page .provider-profile-actions,
+  .provider-page .provider-actions,
+  .provider-page .provider-report-actions,
+  .provider-page .provider-quote-form {
+    min-width: 0 !important;
+  }
+
+  .provider-page .provider-profile-actions > *,
+  .provider-page .provider-actions > *,
+  .provider-page .provider-report-actions > *,
+  .provider-page .provider-quote-form input,
+  .provider-page .provider-quote-form select,
+  .provider-page .provider-quote-form textarea {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .quotes-page h1,
+  .quotes-page h2,
+  .quotes-page h3 {
+    overflow-wrap: anywhere !important;
+    line-height: 1.15 !important;
+  }
+
+  .quotes-page .quote-item-row,
+  .quotes-page .quote-builder-grid,
+  .quotes-page .provider-quote-form {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .quotes-page input,
+  .quotes-page select,
+  .quotes-page textarea,
+  .quotes-page button {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-page .admin-content,
+  .admin-page .admin-shell,
+  .admin-page .admin-sidebar {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .admin-page .admin-content {
+    overflow-x: hidden !important;
+  }
+
+  .admin-page .admin-content h1,
+  .admin-page .admin-content h2,
+  .admin-page .admin-content h3,
+  .admin-page .admin-content p {
+    overflow-wrap: anywhere !important;
+  }
+
+  .admin-page .admin-menu button {
+    min-width: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .admin-page .admin-item-actions,
+  .admin-page .admin-actions,
+  .admin-page .admin-security-actions {
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* Evita que qualquer flex/grid filho impeça o encolhimento */
+  .home-page *,
+  .dashboard-page *,
+  .marketplace-page *,
+  .provider-page *,
+  .profile-page *,
+  .quotes-page *,
+  .admin-page *,
+  .auth-page * {
+    min-width: 0;
+  }
+
+  /* Inputs nunca criam rolagem horizontal */
+  input, select, textarea {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .profile-page .profile-content,
+  .profile-page .personal-profile-content,
+  .profile-page .business-services-content,
+  .dashboard-page .dashboard-main,
+  .dashboard-page .dashboard-content,
+  .admin-page .admin-main,
+  .admin-page .admin-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .profile-page .personal-profile-card,
+  .profile-page .business-services-card,
+  .quotes-page .quotes-section,
+  .quotes-page .quote-builder,
+  .admin-page .admin-section,
+  .admin-page .admin-card {
+    padding: 14px !important;
+  }
+
+  .profile-page .profile-back {
+    max-width: 38vw !important;
+    font-size: 11px !important;
+  }
+
+  .dashboard-page .dashboard-header,
+  .admin-page .admin-header,
+  .profile-page .profile-header {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .auth-card {
+    padding: 20px 15px !important;
+    border-radius: 14px !important;
+  }
+}
