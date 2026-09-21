@@ -138,10 +138,43 @@ function DashboardPage() {
 
   return (
     <main className="dashboard-page">
-      <header className="dashboard-header">
-        <div className="dashboard-logo mobile-centered-brand">LOSI <span>CONECTA</span></div>
-        <button className="dashboard-logout" onClick={logout}>Sair</button>
-      </header>
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
+        <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
+        <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
+          <button type="button" className="dashboard-nav-item active" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            <span className="dashboard-nav-mark">01</span><span><strong>Visão geral</strong><small>Resumo da conta</small></span>
+          </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/buscar" })}>
+            <span className="dashboard-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span>
+          </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/meu-perfil" })}>
+            <span className="dashboard-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span>
+          </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/meus-servicos" })}>
+            <span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span>
+          </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => navigate({ to: "/orcamentos" })}>
+            <span className="dashboard-nav-mark">05</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
+          </button>
+        </nav>
+        <div className="dashboard-sidebar-footer">
+          <div className="dashboard-sidebar-status"><span></span> Conta profissional</div>
+          <button className="dashboard-sidebar-logout" onClick={logout}>Sair da conta</button>
+        </div>
+      </aside>
+
+      <div className="dashboard-main">
+        <header className="dashboard-header">
+          <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>Seu espaço profissional</strong></div>
+          <div className="dashboard-header-right">
+            <div className="dashboard-header-user">
+              <span>{(profile.full_name || user.email || "P").slice(0, 1).toUpperCase()}</span>
+              <div><strong>{profile.full_name || "Profissional"}</strong><small>{user.email}</small></div>
+            </div>
+            <button className="dashboard-logout" onClick={logout}>Sair</button>
+          </div>
+        </header>
 
       <section className="dashboard-content">
         <div className="dashboard-badge">PROFISSIONAL</div>
@@ -229,6 +262,7 @@ function DashboardPage() {
           </section>
         )}
       </section>
+      </div>
     </main>
   );
 }
