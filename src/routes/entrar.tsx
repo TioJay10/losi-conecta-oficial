@@ -29,7 +29,9 @@ function AuthPage() {
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      const isRecoveryUrl = window.location.hash.includes("type=recovery");
+      const isRecoveryUrl =
+        window.location.hash.includes("type=recovery") ||
+        new URLSearchParams(window.location.search).has("code");
       if (data.session && (recoverySession || isRecoveryUrl)) {
         setRecoverySession(true);
         setMode("recovery");
@@ -37,9 +39,6 @@ function AuthPage() {
       }
       // A existência de uma sessão persistida não deve abrir o painel automaticamente.
       // O acesso ao painel acontece somente após um login iniciado pelo usuário.
-      if (data.session && (recoverySession || isRecoveryUrl)) {
-        // O fluxo de recuperação já foi tratado acima.
-      }
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -105,8 +104,9 @@ function AuthPage() {
         return;
       }
 
+      const recoveryRedirect = window.location.origin + "/entrar";
       const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: APP_URL + "/entrar",
+        redirectTo: recoveryRedirect,
       });
 
       if (recoveryError) setError(recoveryError.message);
