@@ -90,7 +90,7 @@ function QuotesPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
-  const [activeMetric, setActiveMetric] = useState<"sent" | "pending" | "total" | "received" | "supplier-pending" | "supplier-sent" | null>(null);
+  const [activeMetric, setActiveMetric] = useState<"pending" | "total" | "received" | "supplier-pending" | "supplier-sent" | null>(null);
   const [filterFrom, setFilterFrom] = useState("");
   const [filterTo, setFilterTo] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -484,15 +484,13 @@ function QuotesPage() {
   );
 
   const metricRequests =
-    activeMetric === "sent"
-      ? sentRequestsThisMonth
-      : activeMetric === "pending"
-        ? clientPendingRequests
-        : activeMetric === "received"
-          ? requests
-          : activeMetric === "supplier-pending"
-            ? supplierPendingRequests
-            : [];
+    activeMetric === "pending"
+      ? clientPendingRequests
+      : activeMetric === "received"
+        ? requests
+        : activeMetric === "supplier-pending"
+          ? supplierPendingRequests
+          : [];
 
   const metricQuotes =
     activeMetric === "total"
@@ -611,8 +609,8 @@ function QuotesPage() {
           <section className="quotes-metric-details">
             <div className="quotes-section-head">
               <div>
-                <div className="quotes-kicker">{activeMetric === "sent" || activeMetric === "supplier-sent" ? "ENVIADOS" : activeMetric === "pending" || activeMetric === "supplier-pending" ? "AGUARDANDO" : "RECEBIDOS"}</div>
-                <h2>{activeMetric === "sent" ? "Solicitações enviadas" : activeMetric === "pending" ? "Solicitações aguardando orçamento" : activeMetric === "received" ? "Solicitações recebidas" : activeMetric === "supplier-pending" ? "Solicitações recebidas aguardando resposta" : activeMetric === "supplier-sent" ? "Orçamentos enviados" : "Orçamentos recebidos"}</h2>
+                <div className="quotes-kicker">{activeMetric === "supplier-sent" ? "ENVIADOS" : activeMetric === "pending" || activeMetric === "supplier-pending" ? "AGUARDANDO" : "RECEBIDOS"}</div>
+                <h2>{activeMetric === "pending" ? "Solicitações aguardando orçamento" : activeMetric === "received" ? "Solicitações recebidas" : activeMetric === "supplier-pending" ? "Solicitações recebidas aguardando resposta" : activeMetric === "supplier-sent" ? "Orçamentos enviados" : "Orçamentos recebidos"}</h2>
               </div>
               <button type="button" className="quotes-secondary" onClick={closeMetric}>Fechar</button>
             </div>
@@ -629,7 +627,7 @@ function QuotesPage() {
               <button type="button" className="quotes-secondary" onClick={() => { setFilterFrom(""); setFilterTo(""); setFilterType("all"); }}>Limpar filtros</button>
             </div>
 
-            {(activeMetric === "sent" || activeMetric === "pending" || activeMetric === "received" || activeMetric === "supplier-pending") ? (
+            {(activeMetric === "pending" || activeMetric === "received" || activeMetric === "supplier-pending") ? (
               filteredMetricRequests.length === 0 ? <div className="quotes-empty">Nenhum registro encontrado com esses filtros.</div> : (
                 <div className="quote-request-list">
                   {filteredMetricRequests.map((request) => (
@@ -641,7 +639,7 @@ function QuotesPage() {
                         <p>{activeMetric === "received" || activeMetric === "supplier-pending" ? "Solicitação recebida em" : "Solicitação enviada em"} <strong>{dateTime(request.created_at)}</strong></p>
                         <p>Data do evento: {dateOnly(request.event_date)} · {request.event_location || "Local não informado"}</p>
                         {request.description && <p>{request.description}</p>}
-                        {isSupplier && activeMetric === "supplier-pending" && (
+                        {isSupplier && (activeMetric === "supplier-pending" || (activeMetric === "received" && request.status === "pending")) && (
                           <button className="quotes-primary" type="button" onClick={() => setSelectedRequest(request)}>Fazer orçamento</button>
                         )}
                       </div>
