@@ -6253,3 +6253,69 @@ a {
     letter-spacing: .10em !important;
   }
 }
+
+
+/* CORREÇÃO — TÍTULOS E TEXTOS DOS BLOCOS DO PERFIL PÚBLICO DO FORNECEDOR */
+.provider-page .provider-profile-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.provider-page .provider-profile-card h2,
+.provider-page .provider-profile-card h3,
+.provider-page .provider-profile-card p,
+.provider-page .provider-profile-card .catalog-kicker {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+}
+
+.provider-page .provider-profile-card h2 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.provider-page .provider-profile-card p {
+  white-space: normal !important;
+}
+
+.provider-page .provider-service-list,
+.provider-page .provider-service-list article,
+.provider-page .provider-service-list article > div {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.provider-page .provider-service-list article strong,
+.provider-page .provider-service-list article span,
+.provider-page .provider-service-list article p {
+  max-width: 100%;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+}
+
+@media only screen and (max-width: 768px) {
+  .provider-page .provider-profile-card {
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-profile-card h2 {
+    font-size: clamp(20px, 5.8vw, 28px) !important;
+    line-height: 1.18 !important;
+  }
+
+  .provider-page .provider-profile-card p {
+    line-height: 1.55 !important;
+  }
+
+  .provider-page .provider-service-list article {
+    overflow: hidden !important;
+  }
+}
