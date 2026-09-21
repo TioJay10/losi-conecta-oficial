@@ -61,7 +61,11 @@ function SearchPage() {
       ]);
       if (!mounted) return;
       if (businessResult.error || categoryResult.error) {
-        setError("Não foi possível carregar os fornecedores.");
+        console.error("Erro ao carregar catálogo de fornecedores:", businessResult.error ?? categoryResult.error);
+        setError(
+          "Não foi possível carregar os fornecedores: " +
+          (businessResult.error?.message ?? categoryResult.error?.message ?? "erro desconhecido")
+        );
       } else {
         setBusinesses((businessResult.data ?? []) as unknown as Business[]);
         setCategories(categoryResult.data ?? []);
@@ -333,6 +337,12 @@ function SearchPage() {
           {locationLoading && <div className="marketplace-message">Obtendo sua localização para filtrar por raio...</div>}
           {locationMessage && <div className="marketplace-message marketplace-error">{locationMessage}</div>}
           {error && <div className="marketplace-message marketplace-error">{error}</div>}
+          {radiusKm !== null && !locationLoading && userLocation && businesses.length > 0 &&
+            businesses.every((business) => business.latitude === null || business.longitude === null) && (
+              <div className="marketplace-message">
+                Ainda não há fornecedores aprovados com localização cadastrada para o filtro por raio.
+              </div>
+            )}
 
           {(search || city || categoryId || radiusKm !== null) && (
             <div className="marketplace-active-filters" aria-label="Filtros ativos">
