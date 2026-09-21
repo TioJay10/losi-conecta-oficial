@@ -203,12 +203,20 @@ function BusinessServicesPage() {
     });
 
     if (uploadError) {
+      console.error("Erro ao enviar mídia do fornecedor:", uploadError);
       setMessage("Não foi possível enviar a imagem: " + uploadError.message);
       setUploading(null);
       return;
     }
 
     const { data } = supabase.storage.from("provider-media").getPublicUrl(path);
+
+    if (!data?.publicUrl) {
+      console.error("Upload concluído, mas a URL pública não foi gerada.");
+      setMessage("A imagem foi enviada, mas não foi possível gerar o endereço público.");
+      setUploading(null);
+      return;
+    }
 
     if (kind === "logo") update("logo_url", data.publicUrl);
     if (kind === "cover") update("cover_url", data.publicUrl);
@@ -303,22 +311,32 @@ function BusinessServicesPage() {
       : await supabase.from("business_profiles").insert(payload).select("*").single();
 
     if (result.error) {
+      console.error("Erro ao salvar perfil da empresa:", result.error);
       setMessage("Não foi possível salvar as informações da empresa: " + result.error.message);
-    } else {
-      const savedBusiness = result.data as Business;
-      setBusiness(savedBusiness);
-      setCoordinates({
-        latitude: savedBusiness.latitude ?? null,
-        longitude: savedBusiness.longitude ?? null,
-      });
-      await loadServices(savedBusiness.id);
-      setMessage(
-        business?.approval_status === "rejected"
-          ? "Alterações salvas e enviadas para nova análise."
-          : "Informações da empresa salvas com sucesso."
-      );
+      setSaving(false);
+      return;
     }
 
+    if (!result.data) {
+      console.error("Perfil da empresa não foi retornado após o salvamento.");
+      setMessage("As informações foram enviadas, mas não foi possível confirmar o cadastro.");
+      setSaving(false);
+      return;
+    }
+
+    const savedBusiness = result.data as Business;
+    setBusiness(savedBusiness);
+    setCoordinates({
+      latitude: savedBusiness.latitude ?? null,
+      longitude: savedBusiness.longitude ?? null,
+    });
+
+    await loadServices(savedBusiness.id);
+    setMessage(
+      business?.approval_status === "rejected"
+        ? "Alterações salvas e enviadas para nova análise."
+        : "Informações da empresa salvas com sucesso."
+    );
     setSaving(false);
   }
 
