@@ -214,7 +214,7 @@ function SearchPage() {
     <main className="marketplace-page">
       <header className="marketplace-header">
         <div className="marketplace-header-inner">
-          <Link to="/" className="marketplace-logo" aria-label="LOSI CONECTA">LOSI <span>CONECTA</span></Link>
+          <AppLogo className="marketplace-logo" aria-label="LOSI CONECTA">LOSI <span>CONECTA</span></AppLogo>
           <button
             type="button"
             className={"marketplace-mobile-menu-button" + (mobileMenuOpen ? " is-open" : "")}
