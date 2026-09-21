@@ -6319,3 +6319,97 @@ a {
     overflow: hidden !important;
   }
 }
+
+
+/* CORREÇÃO FINAL — SERVIÇOS CADASTRADOS NO PERFIL DO FORNECEDOR */
+.profile-page.business-services-page .business-services-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.profile-page.business-services-page .business-services-head {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.profile-page.business-services-page .business-services-head > div {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+.profile-page.business-services-page .business-section-title,
+.profile-page.business-services-page .profile-page-text,
+.profile-page.business-services-page .business-service-category,
+.profile-page.business-services-page .business-service-title,
+.profile-page.business-services-page .business-service-description {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  white-space: normal !important;
+}
+
+.profile-page.business-services-page .business-service-list {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.profile-page.business-services-page .business-service-item {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.profile-page.business-services-page .business-service-main {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+}
+
+.profile-page.business-services-page .business-service-actions {
+  flex: 0 0 auto !important;
+  max-width: 100% !important;
+}
+
+@media only screen and (max-width: 768px) {
+  .profile-page.business-services-page .business-services-card {
+    padding: 14px !important;
+  }
+
+  .profile-page.business-services-page .business-services-head {
+    align-items: flex-start !important;
+  }
+
+  .profile-page.business-services-page .business-service-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .profile-page.business-services-page .business-service-main {
+    width: 100% !important;
+  }
+
+  .profile-page.business-services-page .business-service-actions {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+
+  .profile-page.business-services-page .business-service-actions > button {
+    flex: 1 1 120px !important;
+  }
+}
