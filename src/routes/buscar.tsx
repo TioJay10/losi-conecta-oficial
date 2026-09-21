@@ -32,6 +32,7 @@ function SearchPage() {
   const [authLoading, setAuthLoading] = useState(true);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [favoriteBusy, setFavoriteBusy] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -214,6 +215,15 @@ function SearchPage() {
       <header className="marketplace-header">
         <div className="marketplace-header-inner">
           <Link to="/" className="marketplace-logo" aria-label="LOSI CONECTA">LOSI <span>CONECTA</span></Link>
+          <button
+            type="button"
+            className={"marketplace-mobile-menu-button" + (mobileMenuOpen ? " is-open" : "")}
+            onClick={() => setMobileMenuOpen((value) => !value)}
+            aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span></span><span></span><span></span>
+          </button>
           <div className="marketplace-main-search">
             <input
               id="marketplace-search"
@@ -235,25 +245,25 @@ function SearchPage() {
         </div>
       </header>
 
-      <nav className="marketplace-category-bar" aria-label="Navegação principal">
+      <nav className={"marketplace-category-bar" + (mobileMenuOpen ? " mobile-open" : "")} aria-label="Navegação principal">
         <div className="marketplace-category-inner">
-          <Link to="/painel" className="marketplace-menu-link">
+          <Link to="/painel" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">01</span>
             <span><strong>Visão geral</strong><small>Resumo da conta</small></span>
           </Link>
-          <Link to="/buscar" className="marketplace-menu-link active">
+          <Link to="/buscar" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link active">
             <span className="marketplace-menu-mark">02</span>
             <span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span>
           </Link>
-          <Link to="/meu-perfil" className="marketplace-menu-link">
+          <Link to="/meu-perfil" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">03</span>
             <span><strong>Meu perfil</strong><small>Dados pessoais</small></span>
           </Link>
-          <Link to="/meus-servicos" className="marketplace-menu-link">
+          <Link to="/meus-servicos" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">04</span>
             <span><strong>Minha empresa</strong><small>Serviços e presença</small></span>
           </Link>
-          <Link to="/orcamentos" className="marketplace-menu-link">
+          <Link to="/orcamentos" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">05</span>
             <span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
           </Link>
