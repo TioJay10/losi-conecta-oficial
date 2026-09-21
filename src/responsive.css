@@ -4755,3 +4755,17 @@ a {
     left: 16px !important;
   }
 }
+
+
+/* ADMIN — cabeçalho permanece fixo */
+.admin-page .admin-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
+.admin-page .admin-shell {
+  padding-top: 64px !important;
+}
