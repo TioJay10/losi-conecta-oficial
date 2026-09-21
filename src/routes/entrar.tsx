@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FormEvent, useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { supabase } from "../lib/supabase";
 
 const APP_URL = "https://losi-conecta-oficial.vercel.app";
@@ -268,7 +269,7 @@ function AuthPage() {
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, CSSProperties> = {
   page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "#f5f6fa", padding: 24, fontFamily: "Arial, sans-serif", color: "#172033" },
   card: { width: "100%", maxWidth: 440, background: "#fff", border: "1px solid #e7e9f0", borderRadius: 20, padding: 36, boxSizing: "border-box", boxShadow: "0 18px 50px rgba(23,32,51,.08)" },
   brand: { fontSize: 21, fontWeight: 800, letterSpacing: ".06em", color: "#4f46c7" },
