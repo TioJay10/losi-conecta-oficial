@@ -280,7 +280,8 @@ function ProviderPage() {
       return;
     }
 
-    event.currentTarget.reset();
+    const formElement = event.currentTarget;
+    formElement.reset();
     setReviewMessage("Solicitação enviada. O fornecedor poderá preparar seu orçamento pelo LOSI CONECTA.");
   }
 
