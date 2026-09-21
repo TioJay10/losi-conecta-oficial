@@ -9,9 +9,9 @@ function HomePage() {
   return (
     <main className="home-page" style={styles.page}>
       <header className="home-header" style={styles.header}>
-        <Link to="/" className="mobile-centered-brand" style={styles.logo}>
+        <AppLogo className="mobile-centered-brand" style={styles.logo}>
           LOSI <span>CONECTA</span>
-        </Link>
+        </AppLogo>
 
         <nav className="home-nav" style={styles.nav}>
           <a href="#como-funciona" style={styles.navLink}>Como funciona</a>
