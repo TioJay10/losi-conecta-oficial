@@ -6680,3 +6680,314 @@ a {
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* RESPONSIVIDADE TOTAL — PERFIL PÚBLICO DO FORNECEDOR */
+.provider-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.provider-page .provider-hero,
+.provider-page .provider-profile-content,
+.provider-page .provider-profile-main,
+.provider-page .provider-profile-sidebar,
+.provider-page .provider-profile-card,
+.provider-page .provider-quote-form,
+.provider-page .provider-report-form,
+.provider-page .provider-reviews {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.provider-page img {
+  max-width: 100%;
+}
+
+.provider-page .provider-profile-content {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px) !important;
+  gap: 24px !important;
+  align-items: start !important;
+}
+
+.provider-page .provider-profile-main {
+  width: 100% !important;
+}
+
+.provider-page .provider-profile-sidebar {
+  width: 100% !important;
+}
+
+.provider-page .provider-profile-card {
+  overflow: hidden !important;
+}
+
+.provider-page .provider-portfolio-grid {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.provider-page .provider-portfolio-item {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  display: block !important;
+}
+
+.provider-page .provider-portfolio-item img {
+  display: block !important;
+  width: 100% !important;
+  height: 220px !important;
+  object-fit: cover !important;
+}
+
+.provider-page .provider-quote-form,
+.provider-page .provider-report-form {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.provider-page .provider-quote-form label,
+.provider-page .provider-report-form label {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.provider-page .provider-quote-form label:last-of-type,
+.provider-page .provider-report-form label:last-of-type {
+  grid-column: 1 / -1 !important;
+}
+
+.provider-page .provider-quote-form input,
+.provider-page .provider-quote-form select,
+.provider-page .provider-quote-form textarea,
+.provider-page .provider-report-form input,
+.provider-page .provider-report-form select,
+.provider-page .provider-report-form textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.provider-page .provider-quote-form > button,
+.provider-page .provider-report-form > button {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.provider-page .provider-reviews-list {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.provider-page .provider-review,
+.provider-page .provider-review-item {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+.provider-page .provider-reputation-head,
+.provider-page .provider-reputation-meta {
+  min-width: 0 !important;
+}
+
+.provider-page .provider-reputation-head strong,
+.provider-page .provider-reputation-head span,
+.provider-page .provider-reputation-meta span {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+@media only screen and (max-width: 1024px) {
+  .provider-page .provider-profile-content {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .provider-page .provider-profile-sidebar {
+    order: 2;
+  }
+
+  .provider-page .provider-portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .provider-page .catalog-header {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-hero {
+    width: 100% !important;
+  }
+
+  .provider-page .provider-hero-cover {
+    width: 100% !important;
+    height: clamp(150px, 32vw, 220px) !important;
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-hero-cover img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  .provider-page .provider-profile-content {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  .provider-page .provider-profile-card {
+    padding: 18px !important;
+    border-radius: 16px !important;
+  }
+
+  .provider-page .provider-profile-card h2 {
+    font-size: clamp(20px, 6vw, 28px) !important;
+    line-height: 1.15 !important;
+  }
+
+  .provider-page .provider-profile-card p,
+  .provider-page .provider-profile-card li,
+  .provider-page .provider-profile-card span {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .provider-page .provider-portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .provider-page .provider-portfolio-item img {
+    height: clamp(130px, 35vw, 190px) !important;
+  }
+
+  .provider-page .provider-quote-form,
+  .provider-page .provider-report-form {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .provider-page .provider-quote-form label:last-of-type,
+  .provider-page .provider-report-form label:last-of-type {
+    grid-column: auto !important;
+  }
+
+  .provider-page .provider-quote-form > button,
+  .provider-page .provider-report-form > button {
+    grid-column: auto !important;
+    min-height: 46px !important;
+  }
+
+  .provider-page .provider-reputation-head {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+  }
+
+  .provider-page .provider-reputation-meta {
+    overflow-wrap: anywhere !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .provider-page .catalog-header {
+    min-height: 70px !important;
+    height: 70px !important;
+    padding: 0 10px !important;
+  }
+
+  .provider-page .catalog-header .catalog-logo {
+    max-width: calc(100% - 108px) !important;
+    font-size: 15px !important;
+  }
+
+  .provider-page .catalog-header .catalog-login {
+    max-width: 102px !important;
+    font-size: 10px !important;
+    padding: 7px 8px !important;
+  }
+
+  .provider-page .provider-profile-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .provider-page .provider-profile-card {
+    padding: 15px !important;
+    border-radius: 14px !important;
+  }
+
+  .provider-page .provider-portfolio-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .provider-page .provider-portfolio-item img {
+    height: min(70vw, 260px) !important;
+  }
+
+  .provider-page .provider-profile-actions {
+    width: 100% !important;
+  }
+
+  .provider-page .provider-profile-actions > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .provider-page .provider-reputation-head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .provider-page .provider-reputation-meta {
+    grid-template-columns: 1fr !important;
+  }
+
+  .provider-page input,
+  .provider-page select,
+  .provider-page textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* IDENTIDADE — NENHUM LOGO "LOSI CONECTA" COM UNDERLINE */
+a.catalog-logo,
+a.marketplace-logo,
+a.mobile-centered-brand,
+a.profile-logo,
+.app-logo,
+[class*="catalog-logo"],
+[class*="marketplace-logo"] {
+  text-decoration: none !important;
+}
+
+a.catalog-logo:hover,
+a.marketplace-logo:hover,
+a.mobile-centered-brand:hover,
+a.profile-logo:hover,
+.app-logo:hover {
+  text-decoration: none !important;
+}
