@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { AppLogo } from "../components/AppLogo";
 
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
