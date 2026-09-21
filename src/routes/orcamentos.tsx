@@ -79,6 +79,7 @@ function QuotesPage() {
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [clientRequests, setClientRequests] = useState<RequestRow[]>([]);
   const [quotes, setQuotes] = useState<QuoteRow[]>([]);
+  const [clientQuotes, setClientQuotes] = useState<QuoteRow[]>([]);
   const [businessContacts, setBusinessContacts] = useState<Record<string, BusinessContact>>({});
   const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
   const [items, setItems] = useState<ItemDraft[]>([{ description: "", quantity: "1", unit_price: "" }]);
@@ -128,9 +129,23 @@ function QuotesPage() {
         if (requestsError) console.error("Erro ao carregar solicitações de orçamento:", requestsError);
         if (quotesError) console.error("Erro ao carregar orçamentos enviados:", quotesError);
 
+        const { data: requestedByUser } = await supabase
+          .from("quote_requests")
+          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+          .eq("requester_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        const { data: receivedByUser } = await supabase
+          .from("quotes")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+          .eq("client_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
         if (mounted) {
           setRequests((requestRows ?? []) as unknown as RequestRow[]);
           setQuotes((quoteRows ?? []) as unknown as QuoteRow[]);
+          setClientRequests((requestedByUser ?? []) as unknown as RequestRow[]);
+          setClientQuotes((receivedByUser ?? []) as unknown as QuoteRow[]);
           if (requestsError || quotesError) {
             setMessage("Não foi possível carregar todos os dados de orçamento. Tente atualizar a página.");
           }
@@ -165,7 +180,7 @@ function QuotesPage() {
 
         if (mounted) {
           setClientRequests((requested ?? []) as unknown as RequestRow[]);
-          setQuotes((received ?? []) as unknown as QuoteRow[]);
+          setClientQuotes((received ?? []) as unknown as QuoteRow[]);
 
           const businessIds = [...new Set((received ?? []).map((quote: any) => quote.business_id).filter(Boolean))];
           if (businessIds.length > 0) {
@@ -425,6 +440,52 @@ function QuotesPage() {
             </div>
 
             {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
+
+            <section className="quotes-section">
+              <div className="quotes-section-head"><div><div className="quotes-kicker">SOLICITADOS</div><h2>Orçamentos solicitados</h2></div></div>
+              {clientRequests.length === 0 ? <div className="quotes-empty">Você ainda não solicitou nenhum orçamento.</div> : (
+                <div className="quote-request-list">
+                  {clientRequests.map((request) => (
+                    <article key={request.id} className="quote-request-card">
+                      <div>
+                        <span className={"quote-status " + request.status}>{statusLabel(request.status)}</span>
+                        <h3>{request.event_title}</h3>
+                        <strong>{request.services?.name || "Serviço não informado"}</strong>
+                        <p>{request.event_date ? new Date(request.event_date + "T12:00:00").toLocaleDateString("pt-BR") + " · " : ""}{request.event_location || "Local não informado"}</p>
+                        {request.description && <p>{request.description}</p>}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="quotes-section">
+              <div className="quotes-section-head"><div><div className="quotes-kicker">RECEBIDOS</div><h2>Orçamentos enviados para você</h2></div></div>
+              {clientQuotes.length === 0 ? <div className="quotes-empty">Você ainda não recebeu nenhum orçamento.</div> : (
+                <div className="quote-history-list">
+                  {clientQuotes.map((quote) => (
+                    <article key={quote.id} className="quote-client-card">
+                      <div>
+                        <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
+                        <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
+                        <p>{quote.quote_requests?.event_location || "Local não informado"}{quote.validity_until ? " · válido até " + new Date(quote.validity_until + "T12:00:00").toLocaleDateString("pt-BR") : ""}</p>
+                        {quote.notes && <p>{quote.notes}</p>}
+                        <div className="quote-client-items">{(quote.quote_items ?? []).map((item) => <div key={item.id}><span>{item.description} × {item.quantity}</span><strong>{money(Number(item.total))}</strong></div>)}</div>
+                      </div>
+                      <div className="quote-client-total">
+                        <span>Total</span>
+                        <strong>{money(Number(quote.total))}</strong>
+                        <div className="quote-client-actions">
+                          <button className="quotes-whatsapp" type="button" onClick={() => shareQuoteOnWhatsApp(quote)}>Compartilhar no WhatsApp</button>
+                          {(quote.status === "sent" || quote.status === "viewed") && <><button className="quotes-primary" type="button" onClick={() => respondToQuote(quote, "accepted")}>Aceitar</button><button className="quotes-secondary" type="button" onClick={() => respondToQuote(quote, "rejected")}>Recusar</button></>}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
 
             {selectedRequest ? (
               <form className="quote-builder" onSubmit={sendQuote}>
