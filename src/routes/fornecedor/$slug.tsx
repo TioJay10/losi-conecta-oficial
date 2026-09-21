@@ -324,7 +324,7 @@ function ProviderPage() {
             {whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}
             <button type="button" className="provider-profile-report" onClick={() => { setReportOpen(true); setReportMessage(""); }}>Denunciar fornecedor</button>
           </div>
-        </div>        </div>
+        </div>
       </section>
 
       <section className="provider-profile-content">
