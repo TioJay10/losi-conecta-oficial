@@ -7456,3 +7456,83 @@ a.profile-logo:hover,
     line-height: 1.2 !important;
   }
 }
+
+
+/* MARGEM SUAVE GLOBAL — MOBILE
+   Mantém uma pequena área de respiro nas laterais sem alterar
+   cabeçalhos/capas que precisam ocupar toda a largura. */
+@media only screen and (max-width: 768px) {
+  .home-page > section,
+  .home-page > footer,
+  .marketplace-page .marketplace-main,
+  .dashboard-page .dashboard-main,
+  .profile-page .profile-main,
+  .services-page .services-main,
+  .quotes-page .quotes-content,
+  .admin-page .admin-main,
+  .login-page .login-content,
+  .register-page .register-content {
+    padding-left: max(10px, env(safe-area-inset-left)) !important;
+    padding-right: max(10px, env(safe-area-inset-right)) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Containers/cards que já possuem largura própria */
+  .home-page .home-hero,
+  .home-page .home-section,
+  .home-page .home-dark-section,
+  .home-page .home-cta-section,
+  .marketplace-page .marketplace-content,
+  .dashboard-page .dashboard-content,
+  .profile-page .profile-content,
+  .services-page .services-content,
+  .admin-page .admin-content {
+    width: calc(100% - 20px) !important;
+    max-width: none !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Formulários e blocos que podem escapar horizontalmente */
+  .quotes-page .quotes-section,
+  .quotes-page .quote-builder,
+  .quotes-page .quotes-metric-details,
+  .quotes-page .quotes-supplier-intro,
+  .admin-page .admin-section,
+  .admin-page .admin-card,
+  .dashboard-page .dashboard-card,
+  .profile-page .profile-card,
+  .services-page .business-services-card {
+    max-width: calc(100% - 4px) !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .home-page > section,
+  .home-page > footer,
+  .marketplace-page .marketplace-main,
+  .dashboard-page .dashboard-main,
+  .profile-page .profile-main,
+  .services-page .services-main,
+  .quotes-page .quotes-content,
+  .admin-page .admin-main,
+  .login-page .login-content,
+  .register-page .register-content {
+    padding-left: max(9px, env(safe-area-inset-left)) !important;
+    padding-right: max(9px, env(safe-area-inset-right)) !important;
+  }
+
+  .home-page .home-hero,
+  .home-page .home-section,
+  .home-page .home-dark-section,
+  .home-page .home-cta-section,
+  .marketplace-page .marketplace-content,
+  .dashboard-page .dashboard-content,
+  .profile-page .profile-content,
+  .services-page .services-content,
+  .admin-page .admin-content {
+    width: calc(100% - 18px) !important;
+  }
+}
