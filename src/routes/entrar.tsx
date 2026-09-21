@@ -35,21 +35,10 @@ function AuthPage() {
         setMode("recovery");
         return;
       }
-      if (data.session) {
-        supabase
-          .from("profiles")
-          .select("blocked")
-          .eq("id", data.session.user.id)
-          .maybeSingle()
-          .then(({ data: profile }) => {
-            if (!mounted) return;
-            if (profile?.blocked) {
-              supabase.auth.signOut();
-              setError("Esta conta está bloqueada. Entre em contato com a administração.");
-              return;
-            }
-            navigate({ to: "/painel" });
-          });
+      // A existência de uma sessão persistida não deve abrir o painel automaticamente.
+      // O acesso ao painel acontece somente após um login iniciado pelo usuário.
+      if (data.session && (recoverySession || isRecoveryUrl)) {
+        // O fluxo de recuperação já foi tratado acima.
       }
     });
 
