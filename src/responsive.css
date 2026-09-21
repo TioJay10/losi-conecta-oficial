@@ -2366,6 +2366,7 @@ a {
 }
 .business-services-content {
   width: min(1000px, calc(100% - 48px));
+  margin: 0 auto;
   padding: 48px 0 80px;
 }
 .profile-back {
@@ -2664,6 +2665,7 @@ a {
 .personal-profile-header { min-height: 72px; }
 .personal-profile-content {
   width: min(900px, calc(100% - 48px));
+  margin: 0 auto;
   padding: 48px 0 80px;
 }
 .personal-profile-heading { margin-bottom: 24px; }
