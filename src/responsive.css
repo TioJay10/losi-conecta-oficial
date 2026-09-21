@@ -4198,3 +4198,70 @@ a {
     padding-right: 16px !important;
   }
 }
+
+
+/* PAINEL — centralização vertical do contexto do cabeçalho */
+.dashboard-page .dashboard-header {
+  align-items: center !important;
+}
+
+.dashboard-page .dashboard-header-context {
+  align-self: center !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  margin: 0 !important;
+  line-height: 1.2;
+}
+
+/* FORNECEDORES SALVOS — transformar o link em um card de fornecedor */
+.dashboard-main .dashboard-saved-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 15px 17px;
+  border: 1px solid rgba(214,180,106,.25);
+  border-radius: 12px;
+  background: rgba(255,255,255,.78);
+  color: #172033;
+  text-decoration: none;
+  box-shadow: 0 5px 16px rgba(23,32,51,.05);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.dashboard-main .dashboard-saved-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(174,132,57,.52);
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(23,32,51,.09);
+}
+
+.dashboard-main .dashboard-saved-card strong {
+  position: relative;
+  z-index: 1;
+  color: #182235;
+  font-size: 14px;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.dashboard-main .dashboard-saved-card span {
+  color: #697386;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dashboard-main .dashboard-saved-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+@media only screen and (max-width: 768px) {
+  .dashboard-main .dashboard-saved-list {
+    grid-template-columns: 1fr;
+  }
+}
