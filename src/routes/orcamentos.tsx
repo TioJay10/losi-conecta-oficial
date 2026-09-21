@@ -275,7 +275,7 @@ function QuotesPage() {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, [loading, userId]);
+  }, [loading, userId, businessId]);
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0), 0),
@@ -378,7 +378,6 @@ function QuotesPage() {
     }
     setQuotes((refreshed.data ?? []) as unknown as QuoteRow[]);
     setRequests((current) => current.map((request) => request.id === selectedRequest.id ? { ...request, status: "quoted" } : request));
-    setSentThisMonth((value) => value + 1);
     resetForm();
     setMessageType("success");
     setMessage("ORÇAMENTO ENVIADO COM SUCESSO");
@@ -527,6 +526,16 @@ function QuotesPage() {
         <h1>Orçamentos e solicitações</h1>
         <p className="quotes-intro">Acompanhe o que você solicitou, os orçamentos que recebeu e, quando também for fornecedor, as solicitações e propostas da sua empresa.</p>
 
+        {isSupplier && (
+          <div className="quotes-supplier-intro">
+            <div>
+              <div className="quotes-kicker">ÁREA DO FORNECEDOR</div>
+              <h2>Receber solicitações e enviar orçamentos</h2>
+              <p>Esta área aparece porque sua conta também possui um perfil de fornecedor.</p>
+            </div>
+          </div>
+        )}
+
         <div className="quotes-metrics">
           {isSupplier ? <>
             <button type="button" className={"quotes-metric-card" + (activeMetric === "received" ? " active" : "")} onClick={() => setActiveMetric(activeMetric === "received" ? null : "received")}><span>Solicitações recebidas</span><strong>{requests.length}</strong><small>Pedidos enviados para sua empresa</small></button>
@@ -613,14 +622,6 @@ function QuotesPage() {
           <>
 
             <div className={"quotes-supplier-area " + (activeMetric || "none")}>
-              <div className="quotes-section-head">
-                <div>
-                  <div className="quotes-kicker">ÁREA DO FORNECEDOR</div>
-                  <h2>Receber solicitações e enviar orçamentos</h2>
-                  <p>Esta área aparece porque sua conta também possui um perfil de fornecedor.</p>
-                </div>
-              </div>
-
             {selectedRequest ? (
               <form className="quote-builder" onSubmit={sendQuote}>
                 <div className="quote-builder-head">
