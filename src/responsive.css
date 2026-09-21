@@ -2771,3 +2771,65 @@ a {
     padding-right: 10px !important;
   }
 }
+
+
+/* FINAL LINE / DIVIDER NORMALIZATION */
+.admin-page .admin-card,
+.admin-page .admin-stat-card,
+.admin-page .admin-list-item,
+.admin-page .admin-review-card,
+.admin-page .admin-commercial-card,
+.admin-page .admin-commercial-subscriptions,
+.admin-page .admin-subscriptions-section,
+.admin-page .admin-category-create,
+.admin-page .admin-security-section,
+.admin-page .admin-security-hero,
+.admin-page .admin-security-card,
+.admin-page .admin-security-metrics article,
+.admin-page .admin-pending-panel,
+.admin-page .admin-metric {
+  overflow: hidden;
+}
+
+.admin-page .admin-pending-item,
+.admin-page .admin-user-form,
+.admin-page .admin-form-section {
+  overflow: hidden;
+}
+
+.admin-page hr {
+  border: 0;
+  border-top: 1px solid #e5e8ee;
+  margin: 18px 0;
+}
+
+.marketplace-page .marketplace-card-footer,
+.provider-page .provider-review-form {
+  border-top-color: #e5e8ee;
+}
+
+@media (max-width: 768px) {
+  .admin-page .admin-pending-item {
+    align-items: stretch;
+  }
+
+  .admin-page .admin-pending-item > *,
+  .admin-page .admin-item-main > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-page .admin-section-head,
+  .admin-page .admin-category-toolbar,
+  .admin-page .admin-commercial-card-head {
+    flex-wrap: wrap;
+  }
+
+  .marketplace-page .marketplace-card-footer {
+    align-items: flex-start;
+  }
+
+  .provider-page .provider-service-list article > div {
+    align-items: flex-start;
+  }
+}
