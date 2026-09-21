@@ -4412,3 +4412,158 @@ a {
   background: #f3f4f7;
   color: #687386;
 }
+
+
+/* PERFIL PÚBLICO DO FORNECEDOR — identidade premium */
+.provider-page {
+  background:
+    radial-gradient(circle at 82% 7%, rgba(214,180,106,.08), transparent 24%),
+    radial-gradient(circle at 10% 38%, rgba(79,70,199,.045), transparent 25%),
+    #f3f4f7;
+  color: #172033;
+}
+.provider-page .catalog-header {
+  background: linear-gradient(145deg, rgba(18,31,50,.98), rgba(5,13,24,.99));
+  border-bottom: 1px solid rgba(214,180,106,.26);
+  box-shadow: 0 10px 28px rgba(4,10,19,.12);
+}
+.provider-page .catalog-logo { color: #f0d99a; }
+.provider-page .catalog-logo span { color: #fff; }
+.provider-page .catalog-login {
+  border: 1px solid rgba(214,180,106,.48);
+  border-radius: 10px;
+  background: rgba(255,255,255,.045);
+  color: #f0d99a;
+  transition: .2s ease;
+}
+.provider-page .catalog-login:hover {
+  background: rgba(214,180,106,.1);
+  border-color: #d6b46a;
+}
+.provider-page .provider-hero {
+  background: linear-gradient(145deg, #0b182a, #07111f);
+  border-bottom: 1px solid rgba(214,180,106,.22);
+  box-shadow: 0 18px 42px rgba(7,17,31,.12);
+}
+.provider-page .provider-hero .catalog-kicker {
+  color: #d6b46a;
+}
+.provider-page .provider-hero-title h1 { color: #fff; }
+.provider-page .provider-hero-title p,
+.provider-page .provider-reputation-meta { color: #aeb6c5; }
+.provider-page .provider-reputation {
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(214,180,106,.22);
+  border-radius: 14px;
+  box-shadow: inset 0 1px rgba(255,255,255,.06);
+}
+.provider-page .provider-reputation-head strong,
+.provider-page .provider-reputation-head span { color: #f0d99a; }
+.provider-page .provider-profile-content { color: #172033; }
+.provider-page .provider-profile-main,
+.provider-page .provider-profile-side { min-width: 0; }
+.provider-page .provider-profile-card,
+.provider-page .provider-report-card,
+.provider-page .provider-quote-request-card {
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(178,145,73,.22);
+  border-radius: 16px;
+  box-shadow: 0 16px 36px rgba(15,24,40,.08), inset 0 1px rgba(255,255,255,.9);
+  backdrop-filter: blur(8px);
+}
+.provider-page .provider-profile-card .catalog-kicker,
+.provider-page .provider-report-card .catalog-kicker,
+.provider-page .provider-quote-request-card .catalog-kicker {
+  color: #9a742f;
+}
+.provider-page .provider-profile-card h2,
+.provider-page .provider-profile-card h3,
+.provider-page .provider-report-card h2,
+.provider-page .provider-quote-request-card h2 { color: #182337; }
+.provider-page .provider-profile-card p,
+.provider-page .provider-report-card > p,
+.provider-page .provider-quote-request-card > p { color: #687386; }
+.provider-page .provider-services span,
+.provider-page .provider-service-tag {
+  background: #f5f1e8;
+  border-color: #e1d4b8;
+  color: #75613c;
+}
+.provider-page .provider-profile-actions button,
+.provider-page .provider-profile-actions a {
+  border-radius: 10px;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.provider-page .provider-profile-save {
+  border: 1px solid rgba(214,180,106,.55);
+  background: linear-gradient(145deg, #d6b46a, #a77b2f);
+  color: #101827;
+  box-shadow: 0 8px 18px rgba(128,91,29,.18), inset 0 1px rgba(255,255,255,.3);
+}
+.provider-page .provider-profile-save:hover:not(:disabled) {
+  background: linear-gradient(145deg, #e2c681, #b88d3c);
+  transform: translateY(-1px);
+}
+.provider-page .provider-profile-quote {
+  border: 1px solid rgba(214,180,106,.55);
+  background: linear-gradient(145deg, #12233a, #081423);
+  color: #f0d99a;
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 7px 16px rgba(7,17,31,.14);
+}
+.provider-page .provider-profile-quote:hover {
+  background: linear-gradient(145deg, #1a304d, #0b192b);
+  transform: translateY(-1px);
+}
+.provider-page .provider-profile-contact {
+  border: 1px solid rgba(214,180,106,.45);
+  background: rgba(214,180,106,.09);
+  color: #8b682d;
+}
+.provider-page .provider-profile-contact:hover {
+  background: rgba(214,180,106,.16);
+  color: #70521f;
+}
+.provider-page .provider-profile-report {
+  border: 1px solid #d9dee8;
+  background: #fff;
+  color: #687386;
+}
+.provider-page .provider-profile-report:hover {
+  border-color: #d5c49f;
+  color: #8b682d;
+  background: #fbf7ed;
+}
+.provider-page .provider-portfolio-grid > article,
+.provider-page .provider-side-card {
+  background: rgba(255,255,255,.88);
+  border-color: rgba(178,145,73,.22);
+  box-shadow: 0 14px 32px rgba(15,24,40,.07), inset 0 1px rgba(255,255,255,.9);
+}
+.provider-page .provider-rating strong,
+.provider-page .provider-reputation strong { color: #9a742f; }
+.provider-page .provider-report-form input,
+.provider-page .provider-report-form select,
+.provider-page .provider-report-form textarea,
+.provider-page .provider-quote-form input,
+.provider-page .provider-quote-form select,
+.provider-page .provider-quote-form textarea {
+  background: rgba(255,255,255,.94);
+  border-color: #d5c49f;
+  color: #172033;
+}
+.provider-page .provider-report-form input:focus,
+.provider-page .provider-report-form select:focus,
+.provider-page .provider-report-form textarea:focus,
+.provider-page .provider-quote-form input:focus,
+.provider-page .provider-quote-form select:focus,
+.provider-page .provider-quote-form textarea:focus {
+  border-color: #b18a43;
+  box-shadow: 0 0 0 3px rgba(214,180,106,.14);
+  outline: none;
+}
+.provider-page .provider-profile-message,
+.provider-page .provider-report-message {
+  background: linear-gradient(135deg, rgba(214,180,106,.08), rgba(255,255,255,.75));
+  border-color: rgba(214,180,106,.2);
+  color: #705622;
+}
