@@ -5,6 +5,7 @@ import {
   createRootRoute,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import "../responsive.css";
 
 export const Route = createRootRoute({
   head: () => ({
