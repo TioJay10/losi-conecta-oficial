@@ -7054,3 +7054,86 @@ a.profile-logo:hover,
     margin-top: -28px !important;
   }
 }
+
+
+/* AJUSTE DEFINITIVO — CAPA MAIS BAIXA E FOTO DE PERFIL SEMPRE ACIMA */
+@media only screen and (max-width: 768px) {
+  .provider-page .provider-hero {
+    position: relative !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+  }
+
+  .provider-page .provider-hero-cover {
+    position: relative !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    height: 135px !important;
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-hero-cover img {
+    position: relative !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .provider-page .provider-hero-content {
+    position: relative !important;
+    z-index: 20 !important;
+    isolation: isolate !important;
+    margin-top: 0 !important;
+  }
+
+  .provider-page .provider-hero-identity {
+    position: relative !important;
+    z-index: 30 !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    position: relative !important;
+    z-index: 40 !important;
+    isolation: isolate !important;
+    background: #fff !important;
+    overflow: hidden !important;
+  }
+
+  .provider-page .provider-hero-logo img {
+    position: relative !important;
+    z-index: 41 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .provider-page .provider-hero-cover {
+    height: 120px !important;
+  }
+
+  .provider-page .provider-hero-content {
+    padding-top: 18px !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    margin-top: -28px !important;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .provider-page .provider-hero-cover {
+    height: 110px !important;
+  }
+
+  .provider-page .provider-hero-content {
+    padding-top: 20px !important;
+  }
+
+  .provider-page .provider-hero-logo {
+    margin-top: -24px !important;
+  }
+}
