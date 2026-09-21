@@ -7233,3 +7233,27 @@ a.profile-logo:hover,
     margin-top: -42px !important;
   }
 }
+
+/* FEEDBACK DE ENVIO DE ORÇAMENTOS */
+.quotes-message.success,
+.provider-quote-message.success {
+  background: #eaf8ef !important;
+  color: #18864b !important;
+  border: 1px solid #bfe8cf !important;
+}
+
+.quotes-message.error,
+.provider-quote-message.error {
+  background: #fff0f0 !important;
+  color: #c62828 !important;
+  border: 1px solid #f1c2c2 !important;
+}
+
+.provider-quote-message {
+  display: block !important;
+  margin-top: 14px !important;
+  padding: 12px 14px !important;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+}
