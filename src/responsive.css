@@ -5060,3 +5060,61 @@ a {
     padding-top: 0;
   }
 }
+
+
+/* ADMIN — ajuste de posicionamento do conteúdo */
+.admin-page .admin-sidebar {
+  width: 238px;
+}
+
+.admin-page .admin-main {
+  margin-left: 238px;
+}
+
+.admin-page .admin-shell {
+  min-height: 100vh;
+  display: block;
+}
+
+.admin-page .admin-content {
+  width: min(1180px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 42px 0 64px;
+}
+
+.admin-page .admin-content > .admin-overview-content,
+.admin-page .admin-content > .admin-security-center,
+.admin-page .admin-content > .admin-table-section {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.admin-page .admin-overview-content,
+.admin-page .admin-security-center,
+.admin-page .admin-table-section {
+  max-width: 1180px;
+}
+
+@media (min-width: 901px) {
+  .admin-page .admin-content {
+    margin-left: calc(238px + (100% - 238px - min(1180px, 100% - 64px)) / 2);
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-page .admin-sidebar {
+    width: 100%;
+  }
+
+  .admin-page .admin-main {
+    margin-left: 0;
+  }
+
+  .admin-page .admin-content {
+    width: calc(100% - 32px);
+    margin: 0 auto;
+    padding: 28px 0 48px;
+  }
+}
