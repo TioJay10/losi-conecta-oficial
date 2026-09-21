@@ -1696,13 +1696,15 @@ a {
 
 .admin-page .admin-commercial-subscriptions {
   grid-column: 1 / -1;
-  padding: 22px;
+  padding: 30px !important;
+  margin: 12px 0 8px !important;
 }
 .admin-page .admin-commercial-activation {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 24px !important;
+  padding-top: 6px;
 }
 
 .admin-page .admin-review-card { padding: 20px; margin-bottom: 18px; }
