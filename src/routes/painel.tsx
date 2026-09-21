@@ -17,7 +17,9 @@ function DashboardPage() {
   const [quotesSentThisMonth, setQuotesSentThisMonth] = useState(0);
   const [supplierRequestsReceived, setSupplierRequestsReceived] = useState(0);
   const [supplierRequestsPending, setSupplierRequestsPending] = useState(0);
-  const [activeDashboardMetric, setActiveDashboardMetric] = useState<"received" | "pending" | "sent" | null>(null);
+  const [clientQuotesReceived, setClientQuotesReceived] = useState(0);
+  const [clientRequestsPending, setClientRequestsPending] = useState(0);
+  const [activeDashboardMetric, setActiveDashboardMetric] = useState<"received" | "pending" | "sent" | "client-received" | "client-pending" | null>(null);
   const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -129,14 +131,11 @@ function DashboardPage() {
           .select("id", { count: "exact", head: true })
           .eq("business_id", business.id);
 
-        const { count: pendingCount, error: pendingError } = await supabase
+        const { data: supplierRequestRows, error: supplierPendingError } = await supabase
           .from("quote_requests")
-          .select("id", { count: "exact", head: true })
+          .select("id")
           .eq("business_id", business.id)
           .eq("status", "pending");
-
-        if (receivedError) console.error("Erro ao carregar solicitações recebidas:", receivedError);
-        if (pendingError) console.error("Erro ao carregar solicitações pendentes:", pendingError);
 
         const { count: quoteCount, error: quoteError } = await supabase
           .from("quotes")
@@ -145,15 +144,56 @@ function DashboardPage() {
           .not("sent_at", "is", null)
           .gte("sent_at", firstDay.toISOString());
 
-        if (quoteError) {
-          console.error("Erro ao carregar quantidade de orçamentos:", quoteError);
-        }
+        if (receivedError) console.error("Erro ao carregar solicitações recebidas:", receivedError);
+        if (supplierPendingError) console.error("Erro ao carregar solicitações pendentes:", supplierPendingError);
+        if (quoteError) console.error("Erro ao carregar quantidade de orçamentos:", quoteError);
 
         if (mounted) {
           setSupplierRequestsReceived(receivedCount ?? 0);
-          setSupplierRequestsPending(pendingCount ?? 0);
+          setSupplierRequestsPending((supplierRequestRows ?? []).length);
           setQuotesSentThisMonth(quoteCount ?? 0);
         }
+      }
+
+      // Métricas do lado de quem procura: todo usuário pode solicitar
+      // orçamentos, mesmo sem possuir um perfil de fornecedor.
+      const { data: clientRequestRows, error: clientRequestsError } = await supabase
+        .from("quote_requests")
+        .select("id")
+        .eq("requester_id", currentUser.id);
+
+      const { count: receivedByClientCount, error: receivedByClientError } = await supabase
+        .from("quotes")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", currentUser.id);
+
+      if (clientRequestsError) {
+        console.error("Erro ao carregar solicitações feitas pelo usuário:", clientRequestsError);
+      }
+      if (receivedByClientError) {
+        console.error("Erro ao carregar orçamentos recebidos pelo usuário:", receivedByClientError);
+      }
+
+      const requestedIds = (clientRequestRows ?? []).map((row) => row.id);
+      let pendingClientCount = requestedIds.length;
+
+      if (requestedIds.length > 0) {
+        const { data: answeredRequests, error: answeredRequestsError } = await supabase
+          .from("quotes")
+          .select("request_id")
+          .in("request_id", requestedIds);
+
+        if (answeredRequestsError) {
+          console.error("Erro ao verificar solicitações já orçadas:", answeredRequestsError);
+        } else {
+          const answeredIds = new Set((answeredRequests ?? []).map((row) => row.request_id));
+          pendingClientCount = requestedIds.filter((id) => !answeredIds.has(id)).length;
+        }
+      }
+
+      if (mounted) {
+        setClientRequestsPending(pendingClientCount);
+        setClientQuotesReceived(receivedByClientCount ?? 0);
       }
 
       const { data: favoriteRows, error: favoritesError } = await supabase
@@ -306,39 +346,73 @@ function DashboardPage() {
           </section>
         )}
 
-        {hasBusinessProfile && (
-          <section className="dashboard-quotes-overview">
-            <div className="dashboard-section-heading">
-              <div>
-                <div className="dashboard-badge">ORÇAMENTOS</div>
-                <h2 className="dashboard-status-title">Resumo de movimentação</h2>
-                <p className="dashboard-text dashboard-status-text">Selecione um indicador para visualizar os detalhes. O conteúdo fica oculto até você abrir o card.</p>
-              </div>
-              <button type="button" onClick={() => navigate({ to: "/orcamentos" })} className="dashboard-secondary">Gerenciar orçamentos</button>
+        <section className="dashboard-quotes-overview">
+          <div className="dashboard-section-heading">
+            <div>
+              <div className="dashboard-badge">ORÇAMENTOS</div>
+              <h2 className="dashboard-status-title">Resumo de movimentação</h2>
+              <p className="dashboard-text dashboard-status-text">Acompanhe no painel as solicitações e orçamentos da sua conta.</p>
             </div>
-            <div className="dashboard-metric-grid">
-              <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "received" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "received" ? null : "received")}>
-                <span>Solicitações recebidas</span><strong>{supplierRequestsReceived}</strong><small>Pedidos enviados para sua empresa</small>
-              </button>
-              <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "pending" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "pending" ? null : "pending")}>
-                <span>Aguardando orçamento</span><strong>{supplierRequestsPending}</strong><small>Solicitações que ainda aguardam resposta</small>
-              </button>
-              <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "sent" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "sent" ? null : "sent")}>
-                <span>Orçamentos enviados</span><strong>{quotesSentThisMonth}</strong><small>Enviados pela sua empresa neste mês</small>
-              </button>
-            </div>
-            {activeDashboardMetric && (
-              <div className="dashboard-metric-details">
-                <div>
-                  <div className="dashboard-badge">DETALHES</div>
-                  <h3>{activeDashboardMetric === "received" ? "Solicitações recebidas" : activeDashboardMetric === "pending" ? "Solicitações aguardando orçamento" : "Orçamentos enviados neste mês"}</h3>
-                  <p>{activeDashboardMetric === "received" ? supplierRequestsReceived + " solicitações foram direcionadas para sua empresa." : activeDashboardMetric === "pending" ? supplierRequestsPending + " solicitações ainda estão aguardando que sua empresa envie um orçamento." : quotesSentThisMonth + " orçamentos foram enviados pela sua empresa neste mês."}</p>
-                </div>
-                <button type="button" className="dashboard-secondary" onClick={() => navigate({ to: "/orcamentos" })}>Ver página de orçamentos</button>
-              </div>
+            <button type="button" onClick={() => navigate({ to: "/orcamentos" })} className="dashboard-secondary">Gerenciar orçamentos</button>
+          </div>
+
+          <div className="dashboard-metric-grid">
+            <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "client-pending" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "client-pending" ? null : "client-pending")}>
+              <span>Aguardando orçamento</span><strong>{clientRequestsPending}</strong><small>Solicitações feitas por você que ainda não receberam resposta</small>
+            </button>
+
+            <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "client-received" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "client-received" ? null : "client-received")}>
+              <span>Orçamentos recebidos</span><strong>{clientQuotesReceived}</strong><small>Propostas recebidas de fornecedores</small>
+            </button>
+
+            {hasBusinessProfile && (
+              <>
+                <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "received" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "received" ? null : "received")}>
+                  <span>Solicitações recebidas</span><strong>{supplierRequestsReceived}</strong><small>Pedidos enviados para sua empresa</small>
+                </button>
+
+                <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "pending" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "pending" ? null : "pending")}>
+                  <span>Aguardando resposta</span><strong>{supplierRequestsPending}</strong><small>Solicitações que sua empresa ainda precisa responder</small>
+                </button>
+
+                <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "sent" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "sent" ? null : "sent")}>
+                  <span>Orçamentos enviados</span><strong>{quotesSentThisMonth}</strong><small>Enviados pela sua empresa neste mês</small>
+                </button>
+              </>
             )}
-          </section>
-        )}
+          </div>
+
+          {activeDashboardMetric && (
+            <div className="dashboard-metric-details">
+              <div>
+                <div className="dashboard-badge">DETALHES</div>
+                <h3>
+                  {activeDashboardMetric === "client-pending"
+                    ? "Solicitações aguardando orçamento"
+                    : activeDashboardMetric === "client-received"
+                      ? "Orçamentos recebidos"
+                      : activeDashboardMetric === "received"
+                        ? "Solicitações recebidas"
+                        : activeDashboardMetric === "pending"
+                          ? "Solicitações aguardando resposta"
+                          : "Orçamentos enviados neste mês"}
+                </h3>
+                <p>
+                  {activeDashboardMetric === "client-pending"
+                    ? clientRequestsPending + " solicitações feitas por você ainda não receberam um orçamento."
+                    : activeDashboardMetric === "client-received"
+                      ? clientQuotesReceived + " orçamentos foram recebidos de fornecedores."
+                      : activeDashboardMetric === "received"
+                        ? supplierRequestsReceived + " solicitações foram direcionadas para sua empresa."
+                        : activeDashboardMetric === "pending"
+                          ? supplierRequestsPending + " solicitações ainda estão aguardando que sua empresa envie um orçamento."
+                          : quotesSentThisMonth + " orçamentos foram enviados pela sua empresa neste mês."}
+                </p>
+              </div>
+              <button type="button" className="dashboard-secondary" onClick={() => navigate({ to: "/orcamentos" })}>Ver página de orçamentos</button>
+            </div>
+          )}
+        </section>
 
         <section className="dashboard-commercial dashboard-status">
           <div>
