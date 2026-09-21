@@ -5,15 +5,10 @@ import viteReact from "@vitejs/plugin-react";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const supabaseUrl =
-    env.VITE_SUPABASE_URL ?? "https://bpvaftobiosjesdbaany.supabase.co";
+  const supabaseUrl = env.VITE_SUPABASE_URL ?? "https://bpvaftobiosjesdbaany.supabase.co";
 
   return {
-    plugins: [
-      tanstackStart(),
-      nitro(),
-      viteReact(),
-    ],
+    plugins: [tanstackStart(), nitro(), viteReact()],
     server: {
       proxy: {
         "/__supabase": {
