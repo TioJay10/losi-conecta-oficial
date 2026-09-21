@@ -3916,3 +3916,155 @@ a {
     flex: 1 1 0 !important;
   }
 }
+
+/* PALETA LOSI — páginas internas do painel profissional */
+/* Somente identidade visual: nenhuma regra de layout, responsividade ou comportamento é alterada. */
+.dashboard-page,
+.profile-page,
+.quotes-page {
+  --losi-navy: #07111f;
+  --losi-navy-2: #0b182a;
+  --losi-gold: #d6b46a;
+  --losi-gold-soft: #f0d99a;
+  --losi-ink: #172033;
+  --losi-muted: #697386;
+  --losi-border: #e7e9f0;
+  --losi-surface: #ffffff;
+  --losi-background: #f4f5f8;
+}
+
+/* Fundo e textos principais */
+.profile-page,
+.quotes-page {
+  background: var(--losi-background) !important;
+  color: var(--losi-ink) !important;
+}
+.profile-page-state,
+.quotes-page-state {
+  background: var(--losi-background) !important;
+  color: var(--losi-muted) !important;
+}
+
+/* Cabeçalhos das páginas internas */
+.profile-page .profile-header,
+.quotes-page .quotes-header {
+  background: var(--losi-navy) !important;
+  border-bottom-color: rgba(214,180,106,.22) !important;
+  color: #fff !important;
+}
+.profile-page .profile-logo,
+.quotes-page .catalog-logo {
+  color: var(--losi-gold-soft) !important;
+}
+.profile-page .profile-back,
+.quotes-page .quotes-back {
+  color: var(--losi-gold-soft) !important;
+}
+
+/* Textos e destaques */
+.profile-page .profile-badge,
+.quotes-page .quotes-kicker,
+.profile-page .catalog-kicker,
+.quotes-page .quotes-kicker {
+  color: #9a7029 !important;
+}
+.profile-page h1,
+.profile-page h2,
+.profile-page h3,
+.quotes-page h1,
+.quotes-page h2,
+.quotes-page h3 {
+  color: var(--losi-ink) !important;
+}
+.profile-page .profile-page-text,
+.quotes-page .quotes-intro {
+  color: var(--losi-muted) !important;
+}
+
+/* Cards e superfícies */
+.profile-page .personal-profile-card,
+.profile-page .business-services-card,
+.quotes-page .quotes-section,
+.quotes-page .quote-builder,
+.quotes-page .quotes-metrics article {
+  background: var(--losi-surface) !important;
+  border-color: var(--losi-border) !important;
+  color: var(--losi-ink) !important;
+}
+
+/* Campos */
+.profile-page input,
+.profile-page select,
+.profile-page textarea,
+.quotes-page input,
+.quotes-page select,
+.quotes-page textarea,
+.quotes-page .quote-item-row input,
+.quotes-page .quote-side-fields input,
+.quotes-page .quote-side-fields textarea,
+.quotes-page .provider-quote-form input,
+.quotes-page .provider-quote-form select,
+.quotes-page .provider-quote-form textarea {
+  background: #fff !important;
+  color: var(--losi-ink) !important;
+  border-color: #d9dee8 !important;
+}
+
+/* Botões e ações principais */
+.profile-page .personal-profile-primary,
+.profile-page .business-primary,
+.quotes-page .quotes-primary,
+.quotes-page .provider-profile-quote {
+  background: var(--losi-navy) !important;
+  color: #fff !important;
+  border-color: var(--losi-navy) !important;
+}
+.profile-page .personal-profile-primary:hover,
+.profile-page .business-primary:hover,
+.quotes-page .quotes-primary:hover,
+.quotes-page .provider-profile-quote:hover {
+  background: var(--losi-navy-2) !important;
+  border-color: var(--losi-gold) !important;
+}
+.profile-page .business-secondary,
+.profile-page .business-cancel,
+.quotes-page .quotes-secondary {
+  background: #fff !important;
+  color: var(--losi-navy) !important;
+  border-color: #d9dee8 !important;
+}
+.profile-page .business-secondary:hover,
+.profile-page .business-cancel:hover,
+.quotes-page .quotes-secondary:hover {
+  border-color: var(--losi-gold) !important;
+  color: #8a6827 !important;
+}
+
+/* Métricas e estados */
+.quotes-page .quotes-metrics strong,
+.quotes-page .quote-total-box span:last-child strong,
+.quotes-page .quote-client-total > strong {
+  color: #9a7029 !important;
+}
+.quotes-page .quote-status,
+.quotes-page .quotes-message {
+  background: rgba(214,180,106,.14) !important;
+  color: #7d5d22 !important;
+}
+.quotes-page .quote-total-box {
+  background: #faf8f2 !important;
+}
+.quotes-page .quotes-empty {
+  color: var(--losi-muted) !important;
+  border-color: #d9dee8 !important;
+}
+
+/* Links e elementos de apoio */
+.profile-page a,
+.quotes-page a {
+  color: #8a6827;
+}
+.profile-page a:hover,
+.quotes-page a:hover {
+  color: var(--losi-navy);
+}
