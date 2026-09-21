@@ -1,16 +1,18 @@
 import { useNavigate } from "@tanstack/react-router";
+import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 
 type AppLogoProps = {
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
+  style?: CSSProperties;
   "aria-label"?: string;
 };
 
 export function AppLogo({ className, children, "aria-label": ariaLabel = "LOSI CONECTA" }: AppLogoProps) {
   const navigate = useNavigate();
 
-  async function handleClick(event: React.MouseEvent<HTMLAnchorElement>) {
+  async function handleClick(event: MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
 
     const { data } = await supabase.auth.getSession();
