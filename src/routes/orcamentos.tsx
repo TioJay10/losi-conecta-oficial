@@ -86,6 +86,7 @@ function QuotesPage() {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [sentThisMonth, setSentThisMonth] = useState(0);
 
   useEffect(() => {
@@ -146,7 +147,7 @@ function QuotesPage() {
         if (sentCountError) console.error("Erro ao contar orçamentos enviados no mês:", sentCountError);
         if (mounted) setSentThisMonth(count ?? 0);
       } else {
-        const { data: received } = await supabase
+        const { data: received, error: receivedError } = await supabase
           .from("quotes")
           .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
           .eq("client_id", currentUser.id)
@@ -203,6 +204,7 @@ function QuotesPage() {
     event.preventDefault();
     if (!selectedRequest || !businessId || !userId || saving) return;
     setMessage("");
+    setMessageType("");
     setSaving(true);
 
     const validItems = items
@@ -214,7 +216,8 @@ function QuotesPage() {
       .filter((item) => item.description && item.quantity > 0);
 
     if (!validItems.length) {
-      setMessage("Adicione pelo menos um item ao orçamento.");
+      setMessageType("error");
+      setMessage("NÃO FOI POSSÍVEL ENVIAR O ORÇAMENTO");
       setSaving(false);
       return;
     }
@@ -234,7 +237,8 @@ function QuotesPage() {
 
     if (quoteError || !quote) {
       console.error("Erro ao criar orçamento:", quoteError);
-      setMessage(quoteError?.message || "Não foi possível criar o orçamento.");
+      setMessageType("error");
+      setMessage("NÃO FOI POSSÍVEL ENVIAR O ORÇAMENTO");
       setSaving(false);
       return;
     }
@@ -252,7 +256,8 @@ function QuotesPage() {
     if (itemsError) {
       console.error("Erro ao salvar itens do orçamento:", itemsError);
       await supabase.from("quotes").delete().eq("id", quote.id);
-      setMessage(itemsError.message || "Não foi possível salvar os itens do orçamento.");
+      setMessageType("error");
+      setMessage("NÃO FOI POSSÍVEL ENVIAR O ORÇAMENTO");
       setSaving(false);
       return;
     }
@@ -279,7 +284,8 @@ function QuotesPage() {
     setRequests((current) => current.map((request) => request.id === selectedRequest.id ? { ...request, status: "quoted" } : request));
     setSentThisMonth((value) => value + 1);
     resetForm();
-    setMessage("Orçamento enviado com sucesso para o cliente.");
+    setMessageType("success");
+    setMessage("ORÇAMENTO ENVIADO COM SUCESSO");
     setSaving(false);
   }
 
@@ -381,7 +387,7 @@ function QuotesPage() {
               <article><span>Total de orçamentos</span><strong>{quotes.length}</strong></article>
             </div>
 
-            {message && <div className="quotes-message">{message}</div>}
+            {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
 
             {selectedRequest ? (
               <form className="quote-builder" onSubmit={sendQuote}>
