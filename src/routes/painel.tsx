@@ -15,6 +15,9 @@ function DashboardPage() {
   const [plans, setPlans] = useState<Array<{id:string;name:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean}>>([]);
   const [currentPlan, setCurrentPlan] = useState<{name:string;ends_at:string|null}|null>(null);
   const [quotesSentThisMonth, setQuotesSentThisMonth] = useState(0);
+  const [supplierRequestsReceived, setSupplierRequestsReceived] = useState(0);
+  const [supplierRequestsPending, setSupplierRequestsPending] = useState(0);
+  const [activeDashboardMetric, setActiveDashboardMetric] = useState<"received" | "pending" | "sent" | null>(null);
   const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -121,6 +124,20 @@ function DashboardPage() {
         firstDay.setDate(1);
         firstDay.setHours(0, 0, 0, 0);
 
+        const { count: receivedCount, error: receivedError } = await supabase
+          .from("quote_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("business_id", business.id);
+
+        const { count: pendingCount, error: pendingError } = await supabase
+          .from("quote_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("business_id", business.id)
+          .eq("status", "pending");
+
+        if (receivedError) console.error("Erro ao carregar solicitações recebidas:", receivedError);
+        if (pendingError) console.error("Erro ao carregar solicitações pendentes:", pendingError);
+
         const { count: quoteCount, error: quoteError } = await supabase
           .from("quotes")
           .select("id", { count: "exact", head: true })
@@ -132,7 +149,11 @@ function DashboardPage() {
           console.error("Erro ao carregar quantidade de orçamentos:", quoteError);
         }
 
-        if (mounted) setQuotesSentThisMonth(quoteCount ?? 0);
+        if (mounted) {
+          setSupplierRequestsReceived(receivedCount ?? 0);
+          setSupplierRequestsPending(pendingCount ?? 0);
+          setQuotesSentThisMonth(quoteCount ?? 0);
+        }
       }
 
       const { data: favoriteRows, error: favoritesError } = await supabase
@@ -286,13 +307,36 @@ function DashboardPage() {
         )}
 
         {hasBusinessProfile && (
-          <section className="dashboard-status">
-            <div>
-              <div className="dashboard-badge">ORÇAMENTOS</div>
-              <h2 className="dashboard-status-title">{quotesSentThisMonth}</h2>
-              <p className="dashboard-text dashboard-status-text">orçamentos enviados neste mês pela sua empresa.</p>
+          <section className="dashboard-quotes-overview">
+            <div className="dashboard-section-heading">
+              <div>
+                <div className="dashboard-badge">ORÇAMENTOS</div>
+                <h2 className="dashboard-status-title">Resumo de movimentação</h2>
+                <p className="dashboard-text dashboard-status-text">Selecione um indicador para visualizar os detalhes. O conteúdo fica oculto até você abrir o card.</p>
+              </div>
+              <button type="button" onClick={() => navigate({ to: "/orcamentos" })} className="dashboard-secondary">Gerenciar orçamentos</button>
             </div>
-            <button type="button" onClick={() => navigate({ to: "/orcamentos" })} className="dashboard-secondary">Gerenciar orçamentos</button>
+            <div className="dashboard-metric-grid">
+              <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "received" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "received" ? null : "received")}>
+                <span>Solicitações recebidas</span><strong>{supplierRequestsReceived}</strong><small>Pedidos enviados para sua empresa</small>
+              </button>
+              <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "pending" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "pending" ? null : "pending")}>
+                <span>Aguardando orçamento</span><strong>{supplierRequestsPending}</strong><small>Solicitações que ainda aguardam resposta</small>
+              </button>
+              <button type="button" className={"dashboard-metric-card" + (activeDashboardMetric === "sent" ? " active" : "")} onClick={() => setActiveDashboardMetric(activeDashboardMetric === "sent" ? null : "sent")}>
+                <span>Orçamentos enviados</span><strong>{quotesSentThisMonth}</strong><small>Enviados pela sua empresa neste mês</small>
+              </button>
+            </div>
+            {activeDashboardMetric && (
+              <div className="dashboard-metric-details">
+                <div>
+                  <div className="dashboard-badge">DETALHES</div>
+                  <h3>{activeDashboardMetric === "received" ? "Solicitações recebidas" : activeDashboardMetric === "pending" ? "Solicitações aguardando orçamento" : "Orçamentos enviados neste mês"}</h3>
+                  <p>{activeDashboardMetric === "received" ? supplierRequestsReceived + " solicitações foram direcionadas para sua empresa." : activeDashboardMetric === "pending" ? supplierRequestsPending + " solicitações ainda estão aguardando que sua empresa envie um orçamento." : quotesSentThisMonth + " orçamentos foram enviados pela sua empresa neste mês."}</p>
+                </div>
+                <button type="button" className="dashboard-secondary" onClick={() => navigate({ to: "/orcamentos" })}>Ver página de orçamentos</button>
+              </div>
+            )}
           </section>
         )}
 
