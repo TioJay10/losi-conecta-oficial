@@ -231,14 +231,28 @@ function SearchPage() {
         </div>
       </header>
 
-      <nav className="marketplace-category-bar" aria-label="Categorias">
+      <nav className="marketplace-category-bar" aria-label="Navegação principal">
         <div className="marketplace-category-inner">
-          <button type="button" className={!categoryId ? "active" : ""} onClick={() => setCategoryId("")}>Todos</button>
-          {categories.slice(0, 8).map((category) => (
-            <button type="button" key={category.id} className={categoryId === category.id ? "active" : ""} onClick={() => setCategoryId(category.id)}>
-              {category.name}
-            </button>
-          ))}
+          <Link to="/painel" className="marketplace-menu-link">
+            <span className="marketplace-menu-mark">01</span>
+            <span><strong>Visão geral</strong><small>Resumo da conta</small></span>
+          </Link>
+          <Link to="/buscar" className="marketplace-menu-link active">
+            <span className="marketplace-menu-mark">02</span>
+            <span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span>
+          </Link>
+          <Link to="/meu-perfil" className="marketplace-menu-link">
+            <span className="marketplace-menu-mark">03</span>
+            <span><strong>Meu perfil</strong><small>Dados pessoais</small></span>
+          </Link>
+          <Link to="/meus-servicos" className="marketplace-menu-link">
+            <span className="marketplace-menu-mark">04</span>
+            <span><strong>Minha empresa</strong><small>Serviços e presença</small></span>
+          </Link>
+          <Link to="/orcamentos" className="marketplace-menu-link">
+            <span className="marketplace-menu-mark">05</span>
+            <span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
+          </Link>
         </div>
       </nav>
 
