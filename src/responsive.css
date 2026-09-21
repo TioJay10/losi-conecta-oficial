@@ -3313,6 +3313,57 @@ a {
   color: #a33b3b;
 }
 
+/* AUTH / CADASTRO — identidade do painel do fornecedor */
+.auth-page {
+  background: linear-gradient(145deg, #07111f, #0b182a) !important;
+}
+.auth-card {
+  border-color: rgba(214,180,106,.55) !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,.28) !important;
+}
+.auth-card button[type="submit"] {
+  border: 1px solid #d6b46a !important;
+  background: linear-gradient(145deg, #0b182a, #07111f) !important;
+  color: #f0d99a !important;
+}
+.auth-card a,
+.auth-card button:not([type="submit"]) {
+  color: #8a6d2f !important;
+}
+
+.admin-page .admin-user-form {
+  border-color: rgba(214,180,106,.48) !important;
+  background: linear-gradient(145deg, #ffffff, #f9fafb) !important;
+  box-shadow: 0 12px 30px rgba(7,17,31,.08) !important;
+}
+.admin-page .admin-user-form .admin-form-kicker {
+  color: #8a6d2f !important;
+}
+.admin-page .admin-user-form .admin-form-heading h2 {
+  color: #07111f !important;
+}
+.admin-page .admin-user-form .admin-form-field > span {
+  color: #465166 !important;
+}
+.admin-page .admin-user-form input,
+.admin-page .admin-user-form select {
+  border-color: rgba(7,17,31,.16) !important;
+}
+.admin-page .admin-user-form input:focus,
+.admin-page .admin-user-form select:focus {
+  border-color: #d6b46a !important;
+  box-shadow: 0 0 0 3px rgba(214,180,106,.16) !important;
+}
+.admin-page .admin-user-form .admin-primary-button {
+  border-color: #d6b46a !important;
+  background: linear-gradient(145deg, #0b182a, #07111f) !important;
+  color: #f0d99a !important;
+}
+.admin-page .admin-user-form .admin-secondary-button {
+  border-color: rgba(214,180,106,.45) !important;
+  color: #07111f !important;
+}
+
 /* ADMIN — sistema visual definitivo alinhado ao painel do fornecedor */
 .admin-page {
   --dash-navy: #07111f;
