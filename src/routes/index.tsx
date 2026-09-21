@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
+import { AppLogo } from "../components/AppLogo";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
