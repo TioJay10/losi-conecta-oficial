@@ -363,7 +363,7 @@ function QuotesPage() {
   return (
     <main className="quotes-page">
       <header className="quotes-header">
-        <Link to="/" className="catalog-logo">LOSI <span>CONECTA</span></Link>
+        <AppLogo className="catalog-logo">LOSI <span>CONECTA</span></AppLogo>
         <Link to="/painel" className="quotes-back">Voltar ao painel</Link>
       </header>
 
