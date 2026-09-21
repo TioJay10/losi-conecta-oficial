@@ -181,6 +181,34 @@ function QuotesPage() {
     return () => { mounted = false; };
   }, [navigate]);
 
+  useEffect(() => {
+    if (loading || businessId || !userId) return;
+
+    let active = true;
+
+    async function refreshReceivedQuotes() {
+      const { data: received, error: receivedError } = await supabase
+        .from("quotes")
+        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at)")
+        .eq("client_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (!active) return;
+      if (receivedError) {
+        console.error("Erro ao atualizar orçamentos recebidos:", receivedError);
+        return;
+      }
+
+      setQuotes((received ?? []) as unknown as QuoteRow[]);
+    }
+
+    const intervalId = window.setInterval(refreshReceivedQuotes, 5000);
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, [loading, businessId, userId]);
+
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0), 0),
     [items],
