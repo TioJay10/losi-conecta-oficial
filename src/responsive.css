@@ -7257,3 +7257,151 @@ a.profile-logo:hover,
   font-weight: 800 !important;
   line-height: 1.4 !important;
 }
+
+
+/* ORÇAMENTOS — MÉTRICAS INTERATIVAS E FILTROS */
+.quotes-metrics {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.quotes-metric-card {
+  appearance: none !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  border: 1px solid #e4e8ef !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  padding: 18px !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .05) !important;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+}
+
+.quotes-metric-card:hover,
+.quotes-metric-card.active {
+  transform: translateY(-2px) !important;
+  border-color: #9aa7b8 !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .09) !important;
+}
+
+.quotes-metric-card span,
+.quotes-metric-card small {
+  display: block !important;
+}
+
+.quotes-metric-card span {
+  color: #687386 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+}
+
+.quotes-metric-card strong {
+  display: block !important;
+  margin: 8px 0 5px !important;
+  color: #1f2937 !important;
+  font-size: 32px !important;
+  line-height: 1 !important;
+}
+
+.quotes-metric-card small {
+  color: #8a94a6 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.quotes-metric-details {
+  margin-top: 18px !important;
+  padding: 20px !important;
+  border: 1px solid #e6eaf0 !important;
+  border-radius: 18px !important;
+  background: #f9fafc !important;
+}
+
+.quotes-filters {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto !important;
+  gap: 10px !important;
+  align-items: end !important;
+  margin: 16px 0 !important;
+  padding: 14px !important;
+  border: 1px solid #e8ebf0 !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+}
+
+.quotes-filters label {
+  display: grid !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  color: #596579 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+}
+
+.quotes-filters input,
+.quotes-filters select {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  box-sizing: border-box !important;
+  border: 1px solid #dfe4eb !important;
+  border-radius: 9px !important;
+  background: #fff !important;
+  padding: 0 11px !important;
+  color: #263142 !important;
+  font-size: 14px !important;
+}
+
+.quotes-metric-details .quote-request-card,
+.quotes-metric-details .quote-client-card {
+  background: #fff !important;
+}
+
+@media only screen and (max-width: 760px) {
+  .quotes-metrics {
+    grid-template-columns: 1fr !important;
+  }
+
+  .quotes-filters {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .quotes-filters label:nth-child(3),
+  .quotes-filters button {
+    grid-column: 1 / -1 !important;
+  }
+
+  .quotes-metric-details {
+    padding: 14px !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .quotes-metric-card {
+    padding: 15px !important;
+  }
+
+  .quotes-metric-card strong {
+    font-size: 28px !important;
+  }
+
+  .quotes-filters {
+    grid-template-columns: 1fr !important;
+  }
+
+  .quotes-filters label,
+  .quotes-filters button {
+    grid-column: auto !important;
+  }
+
+  .quotes-metric-details .quotes-section-head {
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+}
