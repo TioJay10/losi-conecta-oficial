@@ -6072,3 +6072,102 @@ a {
     height: 42px !important;
   }
 }
+
+
+/* PAINEL DO FORNECEDOR — MENU HAMBÚRGUER NO MOBILE */
+.dashboard-mobile-menu-button {
+  display: none;
+}
+
+@media only screen and (max-width: 768px) {
+  .dashboard-page .dashboard-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: min(82vw, 310px) !important;
+    height: 100dvh !important;
+    z-index: 1000 !important;
+    transform: translateX(-105%) !important;
+    transition: transform .22s ease !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-page .dashboard-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .dashboard-page .dashboard-mobile-menu-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999 !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: rgba(15, 20, 35, .45) !important;
+    cursor: pointer !important;
+  }
+
+  .dashboard-page .dashboard-main {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .dashboard-page .dashboard-header {
+    position: relative !important;
+    min-height: 68px !important;
+    padding-left: 58px !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-page .dashboard-mobile-menu-button {
+    display: inline-flex !important;
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 8px !important;
+    border: 1px solid #d9deea !important;
+    border-radius: 9px !important;
+    background: #fff !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-page .dashboard-mobile-menu-button span {
+    display: block !important;
+    width: 18px !important;
+    height: 2px !important;
+    border-radius: 2px !important;
+    background: #24304a !important;
+  }
+
+  .dashboard-page .dashboard-header-right {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .dashboard-page .dashboard-header-user {
+    min-width: 0 !important;
+  }
+
+  .dashboard-page .dashboard-header-user > div {
+    min-width: 0 !important;
+    max-width: calc(100vw - 150px) !important;
+  }
+
+  .dashboard-page .dashboard-header-user small,
+  .dashboard-page .dashboard-header-user strong {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
