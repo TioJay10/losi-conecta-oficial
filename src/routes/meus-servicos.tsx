@@ -330,7 +330,7 @@ function BusinessServicesPage() {
       return;
     }
 
-    const { error } = await supabase
+    const { data: updatedService, error } = await supabase
       .from("services")
       .update({
         category_id: categoryId,
@@ -338,16 +338,25 @@ function BusinessServicesPage() {
         description: serviceDescription.trim().slice(0, 150) || null,
       })
       .eq("id", editingServiceId)
-      .eq("business_id", business.id);
+      .eq("business_id", business.id)
+      .select("id")
+      .maybeSingle();
 
     if (error) {
+      console.error("Erro ao atualizar serviço:", error);
       setMessage("Não foi possível atualizar o serviço: " + error.message);
+      return;
+    }
+
+    if (!updatedService) {
+      console.error("Atualização do serviço não afetou nenhum registro.");
+      setMessage("O serviço não foi encontrado ou não pertence à sua empresa.");
       return;
     }
 
     cancelEditService();
     await loadServices(business.id);
-    setMessage("Serviço atualizado.");
+    setMessage("Serviço atualizado com sucesso.");
   }
 
   async function addService(event: FormEvent) {
@@ -358,22 +367,32 @@ function BusinessServicesPage() {
       return;
     }
 
-    const { error } = await supabase.from("services").insert({
-      business_id: business.id,
-      category_id: categoryId,
-      name: serviceName.trim(),
-      description: serviceDescription.trim().slice(0, 150) || null,
-    });
+    const { data: createdService, error } = await supabase
+      .from("services")
+      .insert({
+        business_id: business.id,
+        category_id: categoryId,
+        name: serviceName.trim(),
+        description: serviceDescription.trim().slice(0, 150) || null,
+      })
+      .select("id")
+      .single();
 
     if (error) {
+      console.error("Erro ao cadastrar serviço:", error);
       setMessage("Não foi possível cadastrar o serviço: " + error.message);
+      return;
+    }
+
+    if (!createdService) {
+      setMessage("O serviço não pôde ser confirmado após o cadastro.");
       return;
     }
 
     setServiceName("");
     setServiceDescription("");
     await loadServices(business.id);
-    setMessage("Serviço cadastrado.");
+    setMessage("Serviço cadastrado com sucesso.");
   }
 
   function startEditService(service: Service) {
@@ -396,20 +415,29 @@ function BusinessServicesPage() {
     const confirmed = window.confirm(`Excluir o serviço "${service.name}"?`);
     if (!confirmed) return;
 
-    const { error } = await supabase
+    const { data: deletedService, error } = await supabase
       .from("services")
       .delete()
       .eq("id", service.id)
-      .eq("business_id", business.id);
+      .eq("business_id", business.id)
+      .select("id")
+      .maybeSingle();
 
     if (error) {
+      console.error("Erro ao excluir serviço:", error);
       setMessage("Não foi possível excluir o serviço: " + error.message);
+      return;
+    }
+
+    if (!deletedService) {
+      console.error("Exclusão do serviço não afetou nenhum registro.");
+      setMessage("O serviço não foi encontrado ou não pertence à sua empresa.");
       return;
     }
 
     if (editingServiceId === service.id) cancelEditService();
     await loadServices(business.id);
-    setMessage("Serviço excluído.");
+    setMessage("Serviço excluído com sucesso.");
   }
 
   if (loading) return <main className="business-services-loading">Carregando seus serviços...</main>;
