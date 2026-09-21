@@ -35,6 +35,8 @@ function ProviderPage() {
   const [reportDetails, setReportDetails] = useState("");
   const [reportMessage, setReportMessage] = useState("");
   const [reporting, setReporting] = useState(false);
+  const [quoteMessage, setQuoteMessage] = useState("");
+  const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "">("");
   const [reputation, setReputation] = useState({ score: 0, level: 1, reviews: 0, negativeReviews: 0, completedServices: 0, reports: 0, blocked: false });
 
   useEffect(() => {
@@ -269,20 +271,23 @@ function ProviderPage() {
     };
 
     if (!payload.client_name || !payload.event_title) {
-      setReviewMessage("Informe seu nome e o tipo de evento para solicitar o orçamento.");
+      setQuoteMessageType("error");
+      setQuoteMessage("NÃO FOI POSSÍVEL SOLICITAR O ORÇAMENTO");
       return;
     }
 
     const { error: requestError } = await supabase.from("quote_requests").insert(payload);
     if (requestError) {
       console.error("Erro ao solicitar orçamento:", requestError);
-      setReviewMessage(requestError.message || "Não foi possível enviar a solicitação.");
+      setQuoteMessageType("error");
+      setQuoteMessage("NÃO FOI POSSÍVEL SOLICITAR O ORÇAMENTO");
       return;
     }
 
     const formElement = event.currentTarget;
     formElement.reset();
-    setReviewMessage("Solicitação enviada. O fornecedor poderá preparar seu orçamento pelo LOSI CONECTA.");
+    setQuoteMessageType("success");
+    setQuoteMessage("ORÇAMENTO ENVIADO COM SUCESSO");
   }
 
   return (
@@ -372,7 +377,7 @@ function ProviderPage() {
                 <label>Detalhes<textarea name="description" rows={4} placeholder="Quantidade de pessoas, horário, necessidades e outras informações..." /></label>
                 <button type="submit">Enviar solicitação de orçamento</button>
               </form>
-              {reviewMessage && <small>{reviewMessage}</small>}
+              {quoteMessage && <small className={"provider-quote-message " + quoteMessageType} role="status">{quoteMessage}</small>}
             </div>
           )}
 
