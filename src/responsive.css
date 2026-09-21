@@ -5118,3 +5118,136 @@ a {
     padding: 28px 0 48px;
   }
 }
+
+/* ADMIN — correção final de área útil e contraste */
+.admin-page .admin-shell {
+  min-height: 100vh;
+  display: block;
+  padding-left: 238px;
+  box-sizing: border-box;
+}
+
+.admin-page .admin-sidebar {
+  width: 238px;
+  box-sizing: border-box;
+}
+
+.admin-page .admin-content {
+  width: min(1180px, calc(100% - 48px));
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 42px 0 64px;
+  box-sizing: border-box;
+}
+
+.admin-page .admin-content,
+.admin-page .admin-content p,
+.admin-page .admin-content span,
+.admin-page .admin-content small,
+.admin-page .admin-content label,
+.admin-page .admin-content .admin-text,
+.admin-page .admin-content .admin-filter-count,
+.admin-page .admin-content .admin-id {
+  color: #c9d5e2;
+}
+
+.admin-page .admin-content h1,
+.admin-page .admin-content h2,
+.admin-page .admin-content h3,
+.admin-page .admin-content strong,
+.admin-page .admin-content b {
+  color: #f4f8fc;
+}
+
+.admin-page .admin-content .admin-badge,
+.admin-page .admin-content .admin-stat-card strong,
+.admin-page .admin-content .admin-metric strong {
+  color: #63e6ff;
+}
+
+.admin-page .admin-content .admin-list-item span,
+.admin-page .admin-content .admin-overview-card span,
+.admin-page .admin-content .admin-operation-card span,
+.admin-page .admin-content .admin-section-head p,
+.admin-page .admin-content .admin-form-heading p {
+  color: #b7c5d4;
+}
+
+.admin-page .admin-content input,
+.admin-page .admin-content select,
+.admin-page .admin-content textarea {
+  color: #eef7ff;
+  background: #0b121c;
+  border-color: rgba(135, 190, 215, .28);
+}
+
+.admin-page .admin-content input::placeholder,
+.admin-page .admin-content textarea::placeholder {
+  color: #718397;
+}
+
+.admin-page .admin-content option {
+  color: #eef7ff;
+  background: #0b121c;
+}
+
+.admin-page .admin-content .admin-card,
+.admin-page .admin-content .admin-review-card,
+.admin-page .admin-content .admin-commercial-card,
+.admin-page .admin-content .admin-commercial-subscriptions,
+.admin-page .admin-content .admin-subscriptions-section,
+.admin-page .admin-content .admin-list-item,
+.admin-page .admin-content .admin-overview-card,
+.admin-page .admin-content .admin-operation-card,
+.admin-page .admin-content .admin-pending-panel,
+.admin-page .admin-content .admin-metric,
+.admin-page .admin-content .admin-security-section,
+.admin-page .admin-content .admin-security-card {
+  background: linear-gradient(145deg, #111a26, #0b121c);
+  border-color: rgba(130, 177, 201, .24);
+  box-shadow: 0 16px 34px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.04);
+}
+
+.admin-page .admin-content .admin-action-button,
+.admin-page .admin-content .admin-primary-button {
+  color: #07141c;
+  background: linear-gradient(135deg, #63e6ff, #42bdd8);
+  border-color: #63e6ff;
+  font-weight: 800;
+}
+
+.admin-page .admin-content .admin-action-button:hover:not(:disabled),
+.admin-page .admin-content .admin-primary-button:hover:not(:disabled) {
+  color: #041016;
+  background: linear-gradient(135deg, #82ecff, #5bd0e8);
+  box-shadow: 0 0 20px rgba(99,230,255,.18);
+}
+
+.admin-page .admin-content .admin-secondary-button,
+.admin-page .admin-content .admin-back-button {
+  color: #d9e6f2;
+  background: #101a27;
+  border-color: rgba(130,177,201,.28);
+}
+
+.admin-page .admin-content .admin-secondary-button:hover,
+.admin-page .admin-content .admin-back-button:hover {
+  color: #63e6ff;
+  border-color: rgba(99,230,255,.55);
+}
+
+@media (max-width: 900px) {
+  .admin-page .admin-shell {
+    padding-left: 0;
+  }
+
+  .admin-page .admin-sidebar {
+    width: 100%;
+  }
+
+  .admin-page .admin-content {
+    width: calc(100% - 32px);
+    margin: 0 auto;
+    padding: 28px 0 48px;
+  }
+}
