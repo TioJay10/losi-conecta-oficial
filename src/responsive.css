@@ -4733,3 +4733,25 @@ a {
     justify-self: end !important;
   }
 }
+
+
+/* BUSCAR — marca à esquerda, busca central e conta à direita */
+.marketplace-page .marketplace-header {
+  position: relative !important;
+}
+
+.marketplace-page .marketplace-header .marketplace-logo {
+  position: absolute !important;
+  left: 24px !important;
+  right: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+  z-index: 20 !important;
+}
+
+@media (max-width: 768px) {
+  .marketplace-page .marketplace-header .marketplace-logo {
+    left: 16px !important;
+  }
+}
