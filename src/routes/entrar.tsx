@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import type { CSSProperties } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -8,6 +9,8 @@ export const Route = createFileRoute("/entrar")({
 });
 
 type Mode = "login" | "signup" | "recovery";
+
+const APP_URL = import.meta.env.VITE_APP_URL || "https://losi-conecta-oficial.vercel.app";
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -59,7 +62,7 @@ function AuthPage() {
       mounted = false;
       listener.subscription.unsubscribe();
     };
-  }, [navigate, recoverySession]);
+  }, [navigate]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
