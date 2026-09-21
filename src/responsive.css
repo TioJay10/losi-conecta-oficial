@@ -2190,6 +2190,7 @@ a {
 
 .dashboard-main .dashboard-content {
   width: min(1120px, calc(100% - 64px));
+  margin: 0 auto;
   padding: 48px 0 70px;
 }
 
