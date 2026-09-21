@@ -2393,6 +2393,9 @@ a {
   font-weight: 800;
 }
 .admin-user-status-blocked {
+  background: #fff0f0;
+  color: #a33b3b;
+}
 
 /* ADMIN — sistema visual definitivo alinhado ao painel do fornecedor */
 .admin-page {
