@@ -3229,3 +3229,95 @@ a {
   margin-left: auto;
   margin-right: auto;
 }
+
+
+/* MEU PERFIL / MEUS SERVIÇOS — cabeçalho e enquadramento desktop */
+.personal-profile-page .profile-header,
+.business-services-page .profile-header {
+  position: relative;
+  min-height: 72px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: #fff;
+  border-bottom: 1px solid #e7e9f0;
+  overflow: visible;
+}
+.personal-profile-page .profile-back,
+.business-services-page .profile-back {
+  border: 0;
+  background: transparent;
+  color: #4f46c7;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 10px 0;
+  white-space: nowrap;
+}
+.personal-profile-page .profile-logo,
+.business-services-page .profile-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #4f46c7;
+  font-weight: 800;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  z-index: 2;
+}
+.personal-profile-page .profile-logo span,
+.business-services-page .profile-logo span {
+  color: #7c3aed;
+}
+.personal-profile-content,
+.business-services-content {
+  margin-left: auto;
+  margin-right: auto;
+}
+.business-services-content {
+  width: min(1000px, calc(100% - 48px));
+}
+@media (max-width: 700px) {
+  .personal-profile-page .profile-header,
+  .business-services-page .profile-header {
+    min-height: 64px;
+    padding: 0 16px;
+  }
+  .personal-profile-page .profile-back,
+  .business-services-page .profile-back {
+    max-width: 150px;
+    font-size: 12px;
+  }
+  .personal-profile-page .profile-logo,
+  .business-services-page .profile-logo {
+    font-size: 15px;
+  }
+  .business-services-content {
+    width: min(100% - 28px, 1000px);
+  }
+}
+@media (max-width: 480px) {
+  .personal-profile-page .profile-header,
+  .business-services-page .profile-header {
+    padding: 0 10px;
+  }
+  .personal-profile-page .profile-back,
+  .business-services-page .profile-back {
+    max-width: 125px;
+    white-space: normal;
+    line-height: 1.2;
+    text-align: left;
+  }
+  .personal-profile-page .profile-logo,
+  .business-services-page .profile-logo {
+    font-size: 14px;
+  }
+  .business-services-content {
+    width: calc(100% - 20px);
+  }
+}
