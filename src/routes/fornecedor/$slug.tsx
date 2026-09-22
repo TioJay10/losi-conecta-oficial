@@ -294,9 +294,44 @@ function ProviderPage() {
       return;
     }
 
+    const serviceName = business.services.find((service) => service.id === payload.service_id)?.name || "Não informado";
+    const whatsappNumber = (business.whatsapp || business.phone || "").replace(/\D/g, "");
+    const normalizedWhatsapp = whatsappNumber
+      ? (whatsappNumber.startsWith("55") ? whatsappNumber : "55" + whatsappNumber)
+      : "";
+
+    const whatsappMessage = [
+      "Olá! Recebi sua solicitação de orçamento pelo LOSI CONECTA.",
+      "",
+      "INFORMAÇÕES DE QUEM SOLICITOU",
+      "Nome: " + payload.client_name,
+      payload.client_phone ? "WhatsApp/Telefone: " + payload.client_phone : "",
+      payload.client_email ? "E-mail: " + payload.client_email : "",
+      "",
+      "DADOS DA SOLICITAÇÃO",
+      "Serviço: " + serviceName,
+      "Tipo de evento: " + payload.event_title,
+      "Data do evento: " + (payload.event_date ? new Date(payload.event_date + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"),
+      payload.event_location ? "Local: " + payload.event_location : "",
+      payload.description ? "Detalhes: " + payload.description : "",
+      "",
+      "Esta solicitação foi registrada no LOSI CONECTA.",
+    ].filter(Boolean).join("\n");
+
     formElement.reset();
-    setQuoteMessageType("success");
-    setQuoteMessage("ORÇAMENTO ENVIADO COM SUCESSO");
+
+    if (normalizedWhatsapp) {
+      window.open(
+        "https://wa.me/" + normalizedWhatsapp + "?text=" + encodeURIComponent(whatsappMessage),
+        "_blank",
+        "noopener,noreferrer",
+      );
+      setQuoteMessageType("success");
+      setQuoteMessage("SOLICITAÇÃO REGISTRADA. O WHATSAPP FOI ABERTO COM OS DADOS PARA ENVIO.");
+    } else {
+      setQuoteMessageType("error");
+      setQuoteMessage("SOLICITAÇÃO REGISTRADA, MAS ESTE FORNECEDOR NÃO POSSUI WHATSAPP CADASTRADO.");
+    }
   }
 
   return (
