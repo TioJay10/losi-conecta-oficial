@@ -312,7 +312,12 @@ function QuotesPage() {
     return [
       "Olá, " + recipientName + "! Segue o orçamento solicitado para seu evento.",
       "",
-      "Fornecedor: " + senderName,
+      "INFORMAÇÕES DE QUEM SOLICITOU",
+      "Nome: " + (request?.client_name || recipientName),
+      request?.client_phone ? "WhatsApp/Telefone: " + request.client_phone : "",
+      request?.client_email ? "E-mail: " + request.client_email : "",
+      "",
+      "FORNECEDOR: " + senderName,
       "Evento: " + (request?.event_title || "Não informado"),
       "Data: " + formatQuoteDate(request?.event_date ?? null),
       request?.event_location ? "Local: " + request.event_location : "",
@@ -340,13 +345,18 @@ function QuotesPage() {
   }
 
   function shareQuoteOnWhatsApp(quote: QuoteRow) {
+    const request = quote.quote_requests;
     const business = businessContacts[quote.business_id];
     const message = buildQuoteWhatsAppMessage(
       quote,
-      "cliente",
+      request?.client_name || "cliente",
       business?.business_name || "Fornecedor",
     );
-    window.open("https://wa.me/?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
+    const number = normalizeWhatsAppNumber(request?.client_phone);
+    const url = number
+      ? "https://wa.me/" + number + "?text=" + encodeURIComponent(message)
+      : "https://wa.me/?text=" + encodeURIComponent(message);
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   async function respondToQuote(quote: QuoteRow, status: "accepted" | "rejected") {
@@ -535,6 +545,9 @@ function QuotesPage() {
                         <span className={"quote-status " + request.status}>{statusLabel(request.status)}</span>
                         <h3>{request.event_title}</h3>
                         <strong>{serviceName(request)}</strong>
+                        <p><strong>Solicitado por:</strong> {request.client_name}</p>
+                        {request.client_phone && <p>WhatsApp/Telefone: {request.client_phone}</p>}
+                        {request.client_email && <p>E-mail: {request.client_email}</p>}
                         <p>{activeMetric === "received" || activeMetric === "supplier-pending" ? "Solicitação recebida em" : "Solicitação enviada em"} <strong>{dateTime(request.created_at)}</strong></p>
                         <p>Data do evento: {dateOnly(request.event_date)} · {request.event_location || "Local não informado"}</p>
                         {request.description && <p>{request.description}</p>}
@@ -561,6 +574,9 @@ function QuotesPage() {
                         <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
                         <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
                         <strong>{serviceName(quote.quote_requests)}</strong>
+                        <p><strong>Solicitado por:</strong> {quote.quote_requests?.client_name || "Não informado"}</p>
+                        {quote.quote_requests?.client_phone && <p>WhatsApp/Telefone: {quote.quote_requests.client_phone}</p>}
+                        {quote.quote_requests?.client_email && <p>E-mail: {quote.quote_requests.client_email}</p>}
                         <p>Solicitação enviada em <strong>{dateTime(quote.quote_requests?.created_at ?? null)}</strong></p>
                         <p>Orçamento recebido em <strong>{dateTime(quote.sent_at || quote.created_at)}</strong></p>
                         <p>Data do evento: {dateOnly(quote.quote_requests?.event_date ?? null)} · {quote.quote_requests?.event_location || "Local não informado"}</p>
