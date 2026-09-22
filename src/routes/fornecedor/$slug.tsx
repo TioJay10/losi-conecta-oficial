@@ -295,6 +295,15 @@ function ProviderPage() {
     }
 
     const serviceName = business.services.find((service) => service.id === payload.service_id)?.name || "Não informado";
+    const { data: requesterBusiness } = await supabase
+      .from("business_profiles")
+      .select("slug,business_name")
+      .eq("owner_id", currentUser.id)
+      .eq("active", true)
+      .maybeSingle();
+    const requesterProfileUrl = requesterBusiness?.slug
+      ? window.location.origin + "/fornecedor/" + requesterBusiness.slug
+      : "";
     const whatsappNumber = (business.whatsapp || business.phone || "").replace(/\D/g, "");
     const normalizedWhatsapp = whatsappNumber
       ? (whatsappNumber.startsWith("55") ? whatsappNumber : "55" + whatsappNumber)
@@ -314,6 +323,8 @@ function ProviderPage() {
       "Data do evento: " + (payload.event_date ? new Date(payload.event_date + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"),
       payload.event_location ? "Local: " + payload.event_location : "",
       payload.description ? "Detalhes: " + payload.description : "",
+      requesterProfileUrl ? "" : "",
+      requesterProfileUrl ? "🔗 PERFIL PÚBLICO DE QUEM SOLICITOU: " + requesterProfileUrl : "",
       "",
       "Esta solicitação foi registrada no LOSI CONECTA.",
     ].filter(Boolean).join("\n");
