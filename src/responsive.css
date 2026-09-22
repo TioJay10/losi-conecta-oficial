@@ -7666,3 +7666,24 @@ a.profile-logo:hover,
     overflow-wrap: anywhere !important;
   }
 }
+
+
+/* PERFIL OFICIAL LOSI — destaque fixo na busca */
+.marketplace-official{
+  flex:none;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  background:linear-gradient(135deg,#07111f,#0b182a);
+  color:#f0d99a;
+  border:1px solid #d6b46a;
+  border-radius:999px;
+  padding:4px 7px;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  box-shadow:0 3px 8px rgba(7,17,31,.12);
+}
+.marketplace-rating-official strong{color:#b98b24 !important}
+.marketplace-rating-official span{font-weight:700;color:#596273}
