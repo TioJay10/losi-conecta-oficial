@@ -5478,25 +5478,19 @@ a {
   .marketplace-page .marketplace-logo {
     font-size: 14px !important;
     max-width: 145px !important;
-
-/* PAINEL — botão Sair alinhado à esquerda */
-.dashboard-page .dashboard-header-right {
-  order: 0 !important;
-  margin-left: 0 !important;
-  margin-right: auto !important;
-  justify-content: flex-start !important;
+  }
 }
-.dashboard-page .dashboard-header-context {
-  order: 1 !important;
 
 /* PAINEL — cabeçalho: área exclusiva à esquerda e Sair à direita */
 .dashboard-page .dashboard-header {
   justify-content: flex-start !important;
 }
+
 .dashboard-page .dashboard-header-context {
   order: 0 !important;
   margin-right: auto !important;
 }
+
 .dashboard-page .dashboard-header-right {
   order: 1 !important;
   margin-left: auto !important;
