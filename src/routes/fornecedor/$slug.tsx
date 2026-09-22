@@ -189,7 +189,7 @@ function ProviderPage() {
   const digits = rawPhone.replace(/\D/g, "");
   const whatsapp = digits ? "https://wa.me/" + (digits.startsWith("55") ? digits : "55" + digits) + "?text=" + encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA.") : null;
   const canRequestQuote = Boolean(userId && userId !== business.owner_id);
-  const reputationLabel = reputation.level === 1 ? "Atenção" : reputation.level === 2 ? "Inicial" : reputation.level === 3 ? "Boa" : reputation.level === 4 ? "Muito boa" : "Excelente";
+  const reputationLabel = reputation.label;
   const reputationClass = `level-${reputation.level}`;
   const satisfactionText = reputation.satisfaction === null ? "Sem reputação" : reputation.satisfaction + "% de satisfação";
 
