@@ -1,22 +1,29 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = (
-  import.meta.env.VITE_SUPABASE_URL ??
-  "https://bpvaftobiosjesdbaany.supabase.co"
-).trim();
+const DEFAULT_SUPABASE_URL = "https://bpvaftobiosjesdbaany.supabase.co";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EsH6rhQ7pJ0SP6dM9_tILA_KO7MShd1";
 
-const supabasePublishableKey = (
+const configuredUrl = (import.meta.env.VITE_SUPABASE_URL ?? "").trim();
+const configuredKey = (
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
   import.meta.env.VITE_SUPABASE_ANON_KEY ??
   ""
 ).trim();
 
+const supabaseUrl =
+  configuredUrl === DEFAULT_SUPABASE_URL ? configuredUrl : DEFAULT_SUPABASE_URL;
+
+const supabasePublishableKey =
+  configuredKey.startsWith("sb_publishable_") || configuredKey.startsWith("eyJ")
+    ? configuredKey
+    : DEFAULT_SUPABASE_PUBLISHABLE_KEY;
+
 if (!supabasePublishableKey) {
-  throw new Error("Supabase não configurado: defina VITE_SUPABASE_PUBLISHABLE_KEY no ambiente de build.");
+  throw new Error("Supabase não configurado.");
 }
 
 if (supabasePublishableKey.startsWith("sb_secret_")) {
-  throw new Error("Configuração inválida: VITE_SUPABASE_PUBLISHABLE_KEY não pode receber uma chave secreta.");
+  throw new Error("Configuração inválida: uma chave secreta não pode ser usada no navegador.");
 }
 
 const localSupabaseFetch: typeof fetch = (input, init) => {
