@@ -319,7 +319,7 @@ function SearchPage() {
               <option value="100">Até 100 km</option>
             </select>
           </div>
-          <div className="marketplace-filter-group">
+          <div className="marketplace-filter-group marketplace-sidebar-category-filter">
             <div className="marketplace-filter-label">Categorias</div>
             <button type="button" className={!categoryId ? "selected" : ""} onClick={() => setCategoryId("")}>Todas as categorias</button>
             {categories.map((category) => (
