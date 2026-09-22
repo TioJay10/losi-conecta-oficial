@@ -390,7 +390,7 @@ function ProviderPage() {
     <main className="provider-page">
       <header className="catalog-header">
         <AppLogo className="catalog-logo">LOSI <span>CONECTA</span></AppLogo>
-        <Link to="/buscar" className="catalog-login">Buscar fornecedores</Link>
+        <Link to="/buscar" className="catalog-login provider-search-button">Buscar fornecedores</Link>
       </header>
 
       <section className="provider-hero">
