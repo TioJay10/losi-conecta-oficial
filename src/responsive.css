@@ -8441,36 +8441,3 @@ button,input,textarea,select{max-width:100%;font:inherit}
   background-color: transparent !important;
   box-shadow: none !important;
 }
-
-
-/* AJUSTE PONTUAL — botão Buscar fornecedores no perfil público */
-.provider-page .catalog-header .catalog-login {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  line-height: 1.2 !important;
-}
-
-@media only screen and (max-width: 480px) {
-  .provider-page .catalog-header .catalog-login {
-    width: auto !important;
-    max-width: 118px !important;
-    padding: 7px 9px !important;
-    font-size: 10px !important;
-  }
-}
-
-@media only screen and (max-width: 360px) {
-  .provider-page .catalog-header .catalog-login {
-    max-width: 108px !important;
-    padding-left: 7px !important;
-    padding-right: 7px !important;
-    font-size: 9px !important;
-  }
-}
