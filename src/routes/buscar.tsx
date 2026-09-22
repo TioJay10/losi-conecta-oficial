@@ -4,7 +4,7 @@ import type { MouseEvent } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
 import { AuthModal } from "../components/AuthModal";
-import { calculateReputation, type ReputationSummary } from "../lib/reputation";
+import { calculateReputation } from "../lib/reputation";
 
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
