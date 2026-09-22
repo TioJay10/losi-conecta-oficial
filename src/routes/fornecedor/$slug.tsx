@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { AppLogo } from "../../components/AppLogo";
 import { AuthModal } from "../../components/AuthModal";
+import { calculateReputation, type ReputationSummary } from "../../lib/reputation";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
 const OFFICIAL_BUSINESS_ID = "333ccf56-324f-4e4f-99e3-1ebc9ade0140";
@@ -42,7 +43,11 @@ function ProviderPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "whatsapp" | null>(null);
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
-  const [reputation, setReputation] = useState({ score: 0, level: 1, reviews: 0, negativeReviews: 0, completedServices: 0, reports: 0, blocked: false });
+  const [reputation, setReputation] = useState<ReputationSummary & { completedServices: number; reports: number; blocked: boolean }>({
+    planSlug: "gratis", planName: "Grátis", planPriority: 0, baseStars: 0, stars: 0,
+    positiveReviews: 0, totalReviews: 0, satisfaction: null, level: 0, label: "Sem reputação", rankingScore: 0,
+    completedServices: 0, reports: 0, blocked: false,
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -80,23 +85,23 @@ function ProviderPage() {
 
             const { data: ownerData } = await supabase.from("profiles").select("blocked").eq("id", loaded.owner_id).maybeSingle();
             const activeReviews = (reviewData ?? []) as unknown as Review[];
-            const negativeReviews = activeReviews.filter(review => review.rating <= 2).length;
             const reports = loaded.reputation_report_count ?? 0;
             const completedServices = loaded.reputation_service_count ?? 0;
             const blocked = Boolean((ownerData as { blocked?: boolean } | null)?.blocked);
-            const monthsOnPlatform = Math.max(0, (Date.now() - new Date(loaded.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
-            let score = 20;
-            score += Math.min(25, Math.floor(monthsOnPlatform / 3) * 5);
-            score += Math.min(25, completedServices * 5);
-            score += activeReviews.length ? Math.round((activeReviews.reduce((sum, review) => sum + review.rating, 0) / activeReviews.length) * 5) : 0;
-            score -= negativeReviews * 8;
-            score -= reports * 12;
-            if (blocked) score -= 40;
-            score = Math.max(0, Math.min(100, score));
-            const level = score < 20 ? 1 : score < 40 ? 2 : score < 60 ? 3 : score < 80 ? 4 : 5;
-            if (mounted) setReputation(loaded.id === OFFICIAL_BUSINESS_ID
-              ? { score: 100, level: 5, reviews: activeReviews.length, negativeReviews: 0, completedServices, reports: 0, blocked: false }
-              : { score, level, reviews: activeReviews.length, negativeReviews, completedServices, reports, blocked });
+            const { data: planData } = await supabase
+              .from("supplier_plan_visibility")
+              .select("business_id,plan_slug,plan_name,plan_priority,ends_at")
+              .eq("business_id", loaded.id)
+              .maybeSingle();
+            const calculated = loaded.id === OFFICIAL_BUSINESS_ID
+              ? calculateReputation("destaque", activeReviews.map((review) => review.rating))
+              : calculateReputation(planData?.plan_slug ?? "gratis", activeReviews.map((review) => review.rating));
+            if (mounted) setReputation({
+              ...calculated,
+              completedServices,
+              reports,
+              blocked,
+            });
 
             if (sessionData.session) {
               const { data: favoriteData } = await supabase.from("favorites").select("business_id").eq("user_id", sessionData.session.user.id).eq("business_id", loaded.id).maybeSingle();
@@ -186,6 +191,7 @@ function ProviderPage() {
   const canRequestQuote = Boolean(userId && userId !== business.owner_id);
   const reputationLabel = reputation.level === 1 ? "Atenção" : reputation.level === 2 ? "Inicial" : reputation.level === 3 ? "Boa" : reputation.level === 4 ? "Muito boa" : "Excelente";
   const reputationClass = `level-${reputation.level}`;
+  const satisfactionText = reputation.satisfaction === null ? "Sem reputação" : reputation.satisfaction + "% de satisfação";
 
 
   async function saveFavoriteForUser(currentUserId: string) {
@@ -398,6 +404,7 @@ function ProviderPage() {
             </div>
             <div className="provider-hero-title">
               <div className="catalog-kicker">PERFIL PROFISSIONAL</div>
+              {!isOfficial && <span className={"provider-plan-badge " + reputation.planSlug}>{reputation.planName}</span>}
               <h1>{business.business_name}</h1>
               {isOfficial ? <span className="provider-verified provider-official-badge">✓ PERFIL OFICIAL LOSI</span> : business.verified && <span className="provider-verified">Fornecedor verificado</span>}
               {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
@@ -407,10 +414,11 @@ function ProviderPage() {
           <div className="provider-hero-reputation">
             <div className="provider-reputation">
               <div className="provider-reputation-head"><strong>{isOfficial ? "Perfil oficial da LOSI" : "Reputação do fornecedor"}</strong><span>{isOfficial ? "Satisfação máxima" : reputationLabel}</span></div>
-              <div className="provider-reputation-bar" aria-label={`Reputação: ${reputationLabel}`}>
+              <div className="provider-reputation-bar" aria-label={`Reputação: ${satisfactionText}`}>
                 {[1,2,3,4,5].map(level => <span key={level} className={`${reputationClass} ${level <= reputation.level ? "filled" : ""}`} />)}
               </div>
-              <div className="provider-reputation-meta"><span>{reputation.reviews} {reputation.reviews === 1 ? "avaliação" : "avaliações"}</span><span>{reputation.completedServices} {reputation.completedServices === 1 ? "serviço registrado" : "serviços registrados"}</span></div>
+              <div className="provider-reputation-meta"><span>{satisfactionText}</span><span>{"★".repeat(reputation.stars)}{"☆".repeat(Math.max(0, 6 - reputation.stars))} · {reputation.stars}/6 estrelas</span></div>
+              <div className="provider-reputation-meta"><span>{reputation.totalReviews} {reputation.totalReviews === 1 ? "avaliação" : "avaliações"}</span><span>{reputation.completedServices} {reputation.completedServices === 1 ? "serviço registrado" : "serviços registrados"}</span></div>
             </div>
           </div>
 
