@@ -15,6 +15,8 @@ type Business = {
 
 export const Route = createFileRoute("/buscar")({ component: SearchPage });
 
+const OFFICIAL_BUSINESS_ID = "333ccf56-324f-4e4f-99e3-1ebc9ade0140";
+
 function SearchPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -119,6 +121,8 @@ function SearchPage() {
     const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
     const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
     return businesses.filter((business) => {
+      const isOfficial = business.id === OFFICIAL_BUSINESS_ID;
+      if (isOfficial) return true;
       const searchable = [
         business.business_name, business.description ?? "", business.city ?? "", business.state ?? "",
         ...business.services.map((service) => service.name),
@@ -179,6 +183,7 @@ function SearchPage() {
       return copy.sort((a, b) => Number(favoriteIds.includes(b.business.id)) - Number(favoriteIds.includes(a.business.id))).map((item) => item.business);
     }
     return copy.sort((a, b) =>
+      Number(b.business.id === OFFICIAL_BUSINESS_ID) - Number(a.business.id === OFFICIAL_BUSINESS_ID) ||
       b.searchScore - a.searchScore ||
       Number(b.business.verified) - Number(a.business.verified) ||
       rating(b.business) - rating(a.business) ||
@@ -375,7 +380,8 @@ function SearchPage() {
             {sortedResults.map((business) => {
               const whatsapp = whatsappUrl(business);
               const serviceNames = business.services.map((service) => service.name).filter(Boolean).slice(0, 3);
-              const avg = business.reviews.length ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length : 0;
+              const isOfficial = business.id === OFFICIAL_BUSINESS_ID;
+              const avg = isOfficial ? 5 : business.reviews.length ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length : 0;
               return (
                 <article className="marketplace-card" key={business.id}>
                   <div className="marketplace-card-media">
@@ -387,10 +393,10 @@ function SearchPage() {
                   <div className="marketplace-card-body">
                     <div className="marketplace-card-heading">
                       <h3>{business.business_name}</h3>
-                      {business.verified && <span className="marketplace-verified">Verificado</span>}
+                      {isOfficial ? <span className="marketplace-official">✓ OFICIAL LOSI</span> : business.verified && <span className="marketplace-verified">Verificado</span>}
                     </div>
                     {(business.city || business.state) && <div className="marketplace-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
-                    {business.reviews.length > 0 && <div className="marketplace-rating"><strong>★ {avg.toFixed(1)}</strong><span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span></div>}
+                    {isOfficial ? <div className="marketplace-rating marketplace-rating-official"><strong>★ 5.0</strong><span>Avaliação máxima · Satisfação máxima</span></div> : business.reviews.length > 0 && <div className="marketplace-rating"><strong>★ {avg.toFixed(1)}</strong><span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span></div>}
                     <p>{business.description || "Profissional ou empresa para eventos cadastrada no LOSI CONECTA."}</p>
                     {serviceNames.length > 0 && <div className="marketplace-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
                     <div className="marketplace-card-footer">
