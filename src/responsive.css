@@ -8312,3 +8312,67 @@ button,input,textarea,select{max-width:100%;font:inherit}
 .provider-plan-badge {
   margin: 6px 0 8px;
 }
+
+
+/* AJUSTE PONTUAL — ações do cabeçalho da BUSCA não podem ser comprimidas no mobile */
+@media only screen and (max-width: 768px) {
+  .marketplace-page .marketplace-header-actions {
+    width: auto !important;
+    max-width: none !important;
+    min-width: max-content !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+
+  .marketplace-page .marketplace-header-actions .marketplace-account {
+    width: auto !important;
+    max-width: none !important;
+    min-width: max-content !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .marketplace-page .marketplace-header-inner {
+    grid-template-columns: 46px minmax(0, 1fr) max-content !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .marketplace-page .marketplace-header-inner {
+    grid-template-columns: 42px minmax(0, 1fr) max-content !important;
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions {
+    gap: 5px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions .marketplace-account {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+    font-size: 10px !important;
+  }
+
+  .marketplace-page .marketplace-logo {
+    font-size: 16px !important;
+  }
+}
+
+@media only screen and (max-width: 360px) {
+  .marketplace-page .marketplace-logo {
+    font-size: 15px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions {
+    gap: 4px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions .marketplace-account {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    font-size: 9px !important;
+  }
+}
