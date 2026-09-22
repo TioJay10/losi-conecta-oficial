@@ -8162,3 +8162,91 @@ button,input,textarea,select{max-width:100%;font:inherit}
     font-size: 17px !important;
   }
 }
+
+
+/* BUSCAR — correção definitiva do cabeçalho mobile
+   O logo fica centrado na viewport, enquanto menu e ações ficam presos às laterais. */
+@media only screen and (max-width: 768px) {
+  .marketplace-page .marketplace-header-inner {
+    display: block !important;
+    position: relative !important;
+    min-height: 118px !important;
+    padding: 0 12px 10px !important;
+  }
+
+  .marketplace-page .marketplace-logo {
+    position: absolute !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    width: max-content !important;
+    max-width: calc(100vw - 120px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    line-height: 64px !important;
+    z-index: 5 !important;
+  }
+
+  .marketplace-page .marketplace-mobile-menu-button {
+    position: absolute !important;
+    left: 12px !important;
+    top: 11px !important;
+    z-index: 10 !important;
+    margin: 0 !important;
+  }
+
+  .marketplace-page .marketplace-header-actions {
+    position: absolute !important;
+    right: 12px !important;
+    top: 11px !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 7px !important;
+    width: auto !important;
+    max-width: 88px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .marketplace-page .marketplace-header-actions .marketplace-account {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    max-width: 88px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .marketplace-page .marketplace-main-search {
+    position: absolute !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: 74px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .marketplace-page .marketplace-logo {
+    max-width: calc(100vw - 104px) !important;
+    font-size: 17px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions {
+    max-width: 70px !important;
+  }
+
+  .marketplace-page .marketplace-header-actions .marketplace-account {
+    max-width: 70px !important;
+    font-size: 11px !important;
+  }
+}
