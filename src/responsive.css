@@ -7751,3 +7751,113 @@ a.profile-logo:hover,
 
 .business-image-dimension-hint{margin-top:6px;line-height:1.45}
 .business-image-dimension-hint strong{font-weight:800;color:#172033}
+
+/* PAINEL — cabeçalho integrado ao menu lateral
+   Sem espaço superior, mais alto e com a mesma linguagem visual do menu. */
+.dashboard-page .dashboard-main {
+  min-width: 0;
+}
+
+.dashboard-page .dashboard-header {
+  min-height: 96px !important;
+  height: 96px !important;
+  margin: 0 !important;
+  padding: 0 30px !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(145deg, rgba(18,31,50,.98), rgba(5,13,24,.99)) !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(214,180,106,.26) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 10px 28px rgba(4,10,19,.14) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 22px !important;
+}
+
+.dashboard-page .dashboard-header-context {
+  flex: 0 0 auto;
+}
+
+.dashboard-page .dashboard-header-context span {
+  color: #d6b46a !important;
+}
+
+.dashboard-page .dashboard-header-context strong {
+  color: #fff !important;
+}
+
+.dashboard-page .dashboard-header-right {
+  margin-left: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+}
+
+.dashboard-page .dashboard-header-user {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 11px !important;
+}
+
+.dashboard-page .dashboard-header-user > span {
+  flex: 0 0 auto;
+}
+
+.dashboard-page .dashboard-header-user strong {
+  color: #fff !important;
+}
+
+.dashboard-page .dashboard-header-user small {
+  color: rgba(255,255,255,.64) !important;
+}
+
+.dashboard-page .dashboard-logout {
+  margin: 0 !important;
+  border: 1px solid rgba(214,180,106,.55) !important;
+  background: transparent !important;
+  color: #f0d99a !important;
+  border-radius: 9px !important;
+  padding: 10px 16px !important;
+  font-weight: 800 !important;
+}
+
+.dashboard-page .dashboard-logout:hover {
+  background: rgba(214,180,106,.12) !important;
+}
+
+@media only screen and (max-width: 768px) {
+  .dashboard-page .dashboard-header {
+    min-height: 78px !important;
+    height: 78px !important;
+    padding: 0 14px !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-page .dashboard-header-context {
+    min-width: 0;
+  }
+
+  .dashboard-page .dashboard-header-context strong {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dashboard-page .dashboard-header-right {
+    margin-left: auto !important;
+    gap: 8px !important;
+  }
+
+  .dashboard-page .dashboard-header-user > div {
+    display: none !important;
+  }
+
+  .dashboard-page .dashboard-logout {
+    padding: 8px 11px !important;
+  }
+}
+
