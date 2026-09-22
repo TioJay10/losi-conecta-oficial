@@ -213,6 +213,58 @@ function SearchPage() {
     setFavoriteBusy(null);
   }
 
+  async function saveFavoriteForUser(businessId: string, currentUserId: string) {
+    setFavoriteBusy(businessId);
+    const isFavorite = favoriteIds.includes(businessId);
+    const result = isFavorite
+      ? await supabase.from("favorites").delete().eq("user_id", currentUserId).eq("business_id", businessId)
+      : await supabase.from("favorites").insert({ user_id: currentUserId, business_id: businessId });
+    if (!result.error) {
+      setFavoriteIds((current) => isFavorite ? current.filter((id) => id !== businessId) : [...current, businessId]);
+    }
+    setFavoriteBusy(null);
+  }
+
+  async function toggleFavorite(businessId: string) {
+    if (!userId) {
+      setPendingAuthAction({ type: "favorite", businessId });
+      setAuthModalOpen(true);
+      return;
+    }
+    await saveFavoriteForUser(businessId, userId);
+  }
+
+  function handleProtectedMenu(path: string, event: MouseEvent<HTMLAnchorElement>) {
+    if (!userId) {
+      event.preventDefault();
+      setPendingAuthAction({ type: "menu", path });
+      setAuthModalOpen(true);
+      return;
+    }
+    setMobileMenuOpen(false);
+  }
+
+  function openWhatsApp(url: string, event: MouseEvent<HTMLAnchorElement>) {
+    if (!userId) {
+      event.preventDefault();
+      setPendingAuthAction({ type: "whatsapp", url });
+      setAuthModalOpen(true);
+    }
+  }
+
+  async function handleAuthenticatedFromModal() {
+    const { data } = await supabase.auth.getSession();
+    const currentUserId = data.session?.user.id ?? null;
+    setUserId(currentUserId);
+    setAuthModalOpen(false);
+    const action = pendingAuthAction;
+    setPendingAuthAction(null);
+    if (!currentUserId || !action) return;
+    if (action.type === "favorite") await saveFavoriteForUser(action.businessId, currentUserId);
+    else if (action.type === "menu") window.location.href = action.path;
+    else window.location.href = action.url;
+  }
+
   function whatsappUrl(business: Business) {
     const raw = business.whatsapp || business.phone || "";
     const digits = raw.replace(/\D/g, "");
