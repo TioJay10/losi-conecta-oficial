@@ -520,6 +520,7 @@ function BusinessServicesPage() {
 
             <div>
               <Field label="URL da logo" value={form.logo_url} onChange={(v) => update("logo_url", v)} />
+              <p className="business-hint business-image-dimension-hint">Recomendado: <strong>600 × 600 px</strong> (quadrada). No perfil aparece em <strong>110 × 110 px</strong>.</p>
               <label className="business-upload-button">
                 {uploading === "logo" ? "Enviando..." : "Enviar logo"}
                 <input
@@ -538,6 +539,7 @@ function BusinessServicesPage() {
 
             <div>
               <Field label="URL da capa" value={form.cover_url} onChange={(v) => update("cover_url", v)} />
+              <p className="business-hint business-image-dimension-hint">Recomendado: <strong>1600 × 600 px</strong> (horizontal). A capa é exibida em área ampla e pode ser recortada.</p>
               <label className="business-upload-button">
                 {uploading === "cover" ? "Enviando..." : "Enviar capa"}
                 <input
@@ -563,17 +565,18 @@ function BusinessServicesPage() {
             rows={4}
             placeholder="Cole uma URL de imagem por linha. Ex.: https://site.com/foto.jpg"
           />
-          <p className="business-hint">Até 12 imagens. Você pode enviar arquivos diretamente ou colar links públicos.</p>
+          <p className="business-hint business-image-dimension-hint">Até 12 imagens. Recomendado: <strong>1200 × 900 px</strong> ou maior. Você pode enviar arquivos diretamente ou colar links públicos.</p>
           <label className="business-upload-button">
             {uploading === "portfolio" ? "Enviando imagem..." : "Adicionar imagem ao portfólio"}
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
+              multiple
               hidden
               disabled={uploading !== null}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadImage(file, "portfolio");
+              onChange={async (e) => {
+                const files = Array.from(e.target.files ?? []);
+                for (const file of files.slice(0, 12)) await uploadImage(file, "portfolio");
                 e.currentTarget.value = "";
               }}
             />
