@@ -8103,15 +8103,22 @@ button,input,textarea,select{max-width:100%;font:inherit}
 /* BUSCAR — LOSI CONECTA centralizado no cabeçalho mobile */
 @media only screen and (max-width: 768px) {
   .marketplace-page .marketplace-header-inner {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    grid-template-rows: 64px auto !important;
+    align-items: center !important;
+    min-height: 64px !important;
+    padding: 0 12px !important;
     position: relative !important;
   }
 
   .marketplace-page .marketplace-logo {
-    position: absolute !important;
-    left: 50% !important;
-    top: 0 !important;
-    transform: translateX(-50%) !important;
-    z-index: 20 !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    position: static !important;
+    transform: none !important;
+    justify-self: center !important;
+    align-self: center !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -8121,6 +8128,32 @@ button,input,textarea,select{max-width:100%;font:inherit}
     font-size: 19px !important;
     line-height: 1 !important;
     margin: 0 !important;
+    z-index: 5 !important;
+  }
+
+  .marketplace-page .marketplace-mobile-menu-button {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    z-index: 10 !important;
+  }
+
+  .marketplace-page .marketplace-header-actions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+  }
+
+  .marketplace-page .marketplace-main-search {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 10px !important;
   }
 }
 
