@@ -7698,3 +7698,7 @@ a.profile-logo:hover,
   border:1px solid #d6b46a !important;
   box-shadow:0 4px 10px rgba(7,17,31,.12);
 }
+
+
+.business-image-dimension-hint{margin-top:6px;line-height:1.45}
+.business-image-dimension-hint strong{font-weight:800;color:#172033}
