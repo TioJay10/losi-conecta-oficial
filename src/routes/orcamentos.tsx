@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
 
@@ -46,7 +45,6 @@ type BusinessContact = {
   phone: string | null;
 };
 
-type ItemDraft = { description: string; quantity: string; unit_price: string };
 
 export const Route = createFileRoute("/orcamentos")({
   component: QuotesPage,
@@ -76,18 +74,11 @@ function QuotesPage() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
-  const [businessName, setBusinessName] = useState("");
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [clientRequests, setClientRequests] = useState<RequestRow[]>([]);
   const [quotes, setQuotes] = useState<QuoteRow[]>([]);
   const [clientQuotes, setClientQuotes] = useState<QuoteRow[]>([]);
   const [businessContacts, setBusinessContacts] = useState<Record<string, BusinessContact>>({});
-  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
-  const [items, setItems] = useState<ItemDraft[]>([{ description: "", quantity: "1", unit_price: "" }]);
-  const [discount, setDiscount] = useState("0");
-  const [validityUntil, setValidityUntil] = useState("");
-  const [notes, setNotes] = useState("");
-  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [activeMetric, setActiveMetric] = useState<"pending" | "total" | "received" | "supplier-pending" | "supplier-sent" | null>(null);
@@ -117,7 +108,6 @@ function QuotesPage() {
 
       if (business?.id) {
         setBusinessId(business.id);
-        setBusinessName(business.business_name);
 
         const [{ data: requestRows, error: requestsError }, { data: quoteRows, error: quotesError }] = await Promise.all([
           supabase.from("quote_requests")
@@ -281,117 +271,6 @@ function QuotesPage() {
   const discountValue = Math.max(0, Number(discount) || 0);
   const total = Math.max(0, subtotal - discountValue);
 
-  function updateItem(index: number, field: keyof ItemDraft, value: string) {
-    setItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
-  }
-
-  function resetForm() {
-    setSelectedRequest(null);
-    setItems([{ description: "", quantity: "1", unit_price: "" }]);
-    setDiscount("0");
-    setValidityUntil("");
-    setNotes("");
-  }
-
-  async function sendQuote(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!selectedRequest || !businessId || !userId || saving) return;
-    setMessage("");
-    setMessageType("");
-    setSaving(true);
-
-    const validItems = items
-      .map((item) => ({
-        description: item.description.trim(),
-        quantity: Number(item.quantity) || 0,
-        unit_price: Number(item.unit_price) || 0,
-      }))
-      .filter((item) => item.description && item.quantity > 0);
-
-    if (!validItems.length) {
-      setMessageType("error");
-      setMessage("NÃO FOI POSSÍVEL ENVIAR O ORÇAMENTO");
-      setSaving(false);
-      return;
-    }
-
-    const { data: quote, error: quoteError } = await supabase.from("quotes").insert({
-      request_id: selectedRequest.id,
-      business_id: businessId,
-      client_id: selectedRequest.requester_id,
-      subtotal,
-      discount: discountValue,
-      total,
-      validity_until: validityUntil || null,
-      notes: notes.trim() || null,
-      status: "sent",
-      sent_at: new Date().toISOString(),
-    }).select("id").single();
-
-    if (quoteError || !quote) {
-      console.error("Erro ao criar orçamento:", quoteError);
-      setMessageType("error");
-      setMessage("NÃO FOI POSSÍVEL ENVIAR O ORÇAMENTO");
-      setSaving(false);
-      return;
-    }
-
-    const { error: itemsError } = await supabase.from("quote_items").insert(
-      validItems.map((item) => ({
-        quote_id: quote.id,
-        description: item.description,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        total: item.quantity * item.unit_price,
-      })),
-    );
-
-    if (itemsError) {
-      console.error("Erro ao salvar itens do orçamento:", itemsError);
-      await supabase.from("quotes").delete().eq("id", quote.id);
-      setMessageType("error");
-      setMessage("NÃO FOI POSSÍVEL ENVIAR O ORÇAMENTO");
-      setSaving(false);
-      return;
-    }
-
-    const { error: requestStatusError } = await supabase
-      .from("quote_requests")
-      .update({ status: "quoted" })
-      .eq("id", selectedRequest.id)
-      .eq("business_id", businessId);
-
-    if (requestStatusError) {
-      console.error("Erro ao atualizar status da solicitação:", requestStatusError);
-    }
-    const refreshed = await supabase
-      .from("quotes")
-      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
-      .eq("business_id", businessId)
-      .order("created_at", { ascending: false });
-
-    if (refreshed.error) {
-      console.error("Erro ao atualizar histórico de orçamentos:", refreshed.error);
-    }
-    setQuotes((refreshed.data ?? []) as unknown as QuoteRow[]);
-    setRequests((current) => current.map((request) => request.id === selectedRequest.id ? { ...request, status: "quoted" } : request));
-
-    const { data: refreshedClientQuotes } = await supabase
-      .from("quotes")
-      .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
-      .eq("client_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (refreshedClientQuotes) {
-      setClientQuotes((refreshedClientQuotes ?? []) as unknown as QuoteRow[]);
-    }
-
-    resetForm();
-    setMessageType("success");
-    setMessage("ORÇAMENTO ENVIADO COM SUCESSO");
-    setSaving(false);
-  }
-
   function normalizeWhatsAppNumber(value: string | null | undefined) {
     const digits = (value ?? "").replace(/\D/g, "");
     if (!digits) return "";
@@ -402,6 +281,26 @@ function QuotesPage() {
 
   function formatQuoteDate(value: string | null) {
     return value ? new Date(value + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada";
+  }
+
+  function buildRequestWhatsAppMessage(request: RequestRow) {
+    return [
+      "Olá! Recebi sua solicitação de orçamento pelo LOSI CONECTA e vou preparar o orçamento para você.",
+      "",
+      "INFORMAÇÕES DE QUEM SOLICITOU",
+      "Nome: " + request.client_name,
+      request.client_phone ? "WhatsApp/Telefone: " + request.client_phone : "",
+      request.client_email ? "E-mail: " + request.client_email : "",
+      "",
+      "DADOS DO EVENTO",
+      "Evento: " + (request.event_title || "Não informado"),
+      "Serviço: " + serviceName(request),
+      "Data: " + formatQuoteDate(request.event_date),
+      request.event_location ? "Local: " + request.event_location : "",
+      request.description ? "Detalhes: " + request.description : "",
+      "",
+      "Vou enviar o orçamento por aqui pelo WhatsApp.",
+    ].filter(Boolean).join("\n");
   }
 
   function buildQuoteWhatsAppMessage(quote: QuoteRow, recipientName: string, senderName: string) {
@@ -640,7 +539,13 @@ function QuotesPage() {
                         <p>Data do evento: {dateOnly(request.event_date)} · {request.event_location || "Local não informado"}</p>
                         {request.description && <p>{request.description}</p>}
                         {isSupplier && (activeMetric === "supplier-pending" || (activeMetric === "received" && request.status === "pending")) && (
-                          <button className="quotes-primary" type="button" onClick={() => setSelectedRequest(request)}>Fazer orçamento</button>
+                          <button
+                            className="quotes-whatsapp"
+                            type="button"
+                            onClick={() => openWhatsApp(request.client_phone, buildRequestWhatsAppMessage(request))}
+                          >
+                            Enviar orçamento pelo WhatsApp
+                          </button>
                         )}
                       </div>
                     </article>
@@ -679,43 +584,7 @@ function QuotesPage() {
 
         {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
 
-        {isSupplier && selectedRequest && (
-          <form className="quote-builder" onSubmit={sendQuote}>
-            <div className="quote-builder-head">
-              <div>
-                <div className="quotes-kicker">NOVO ORÇAMENTO</div>
-                <h2>{selectedRequest.event_title}</h2>
-                <p>Cliente: <strong>{selectedRequest.client_name}</strong>{selectedRequest.client_phone ? " · " + selectedRequest.client_phone : ""}</p>
-              </div>
-              <button type="button" className="quotes-secondary" onClick={resetForm}>Cancelar</button>
-            </div>
-            <div className="quote-builder-grid">
-              <div>
-                <label>Itens do orçamento</label>
-                {items.map((item, index) => (
-                  <div className="quote-item-row" key={index}>
-                    <input value={item.description} onChange={(e) => updateItem(index, "description", e.target.value)} placeholder="Descrição do serviço/item" />
-                    <input value={item.quantity} onChange={(e) => updateItem(index, "quantity", e.target.value)} type="number" min="0.01" step="0.01" placeholder="Qtd." />
-                    <input value={item.unit_price} onChange={(e) => updateItem(index, "unit_price", e.target.value)} type="number" min="0" step="0.01" placeholder="Valor unitário" />
-                    {items.length > 1 && <button type="button" className="quote-remove-item" onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}>×</button>}
-                  </div>
-                ))}
-                <button type="button" className="quotes-secondary" onClick={() => setItems((current) => [...current, { description: "", quantity: "1", unit_price: "" }])}>+ Adicionar item</button>
-              </div>
-              <div className="quote-side-fields">
-                <label>Desconto<input type="number" min="0" step="0.01" value={discount} onChange={(e) => setDiscount(e.target.value)} /></label>
-                <label>Validade<input type="date" value={validityUntil} onChange={(e) => setValidityUntil(e.target.value)} /></label>
-                <label>Observações<textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Condições, prazo, formas de pagamento..." /></label>
-              </div>
-            </div>
-            <div className="quote-total-box">
-              <span>Subtotal <strong>{money(subtotal)}</strong></span>
-              <span>Desconto <strong>{money(discountValue)}</strong></span>
-              <span>Total <strong>{money(total)}</strong></span>
-            </div>
-            <button className="quotes-primary" type="submit" disabled={saving}>{saving ? "Enviando..." : "Enviar orçamento ao cliente"}</button>
-          </form>
-        )}
+
 
       </section>
     </main>
