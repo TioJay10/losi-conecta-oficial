@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
+import { AuthModal } from "../components/AuthModal";
 
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
@@ -36,6 +37,10 @@ function SearchPage() {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [favoriteBusy, setFavoriteBusy] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingAuthAction, setPendingAuthAction] = useState<
+    { type: "favorite"; businessId: string } | { type: "whatsapp"; url: string } | { type: "menu"; path: string } | null
+  >(null);
 
   useEffect(() => {
     let mounted = true;
@@ -253,7 +258,7 @@ function SearchPage() {
 
       <nav className={"marketplace-category-bar" + (mobileMenuOpen ? " mobile-open" : "")} aria-label="Navegação principal">
         <div className="marketplace-category-inner">
-          <Link to="/painel" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
+          <Link to="/painel" onClick={(event) => handleProtectedMenu("/painel", event)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">01</span>
             <span><strong>Visão geral</strong><small>Resumo da conta</small></span>
           </Link>
@@ -261,15 +266,15 @@ function SearchPage() {
             <span className="marketplace-menu-mark">02</span>
             <span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span>
           </Link>
-          <Link to="/meu-perfil" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
+          <Link to="/meu-perfil" onClick={(event) => handleProtectedMenu("/meu-perfil", event)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">03</span>
             <span><strong>Meu perfil</strong><small>Dados pessoais</small></span>
           </Link>
-          <Link to="/meus-servicos" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
+          <Link to="/meus-servicos" onClick={(event) => handleProtectedMenu("/meus-servicos", event)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">04</span>
             <span><strong>Minha empresa</strong><small>Serviços e presença</small></span>
           </Link>
-          <Link to="/orcamentos" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
+          <Link to="/orcamentos" onClick={(event) => handleProtectedMenu("/orcamentos", event)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">05</span>
             <span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
           </Link>
@@ -401,7 +406,7 @@ function SearchPage() {
                     {serviceNames.length > 0 && <div className="marketplace-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
                     <div className="marketplace-card-footer">
                       <Link to={"/fornecedor/" + business.slug} className="marketplace-profile-link">Ver fornecedor</Link>
-                      {whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="marketplace-contact">WhatsApp</a> : <span className="marketplace-no-contact">Contato não informado</span>}
+                      {whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="marketplace-contact" onClick={(event) => openWhatsApp(whatsapp, event)}>WhatsApp</a> : <span className="marketplace-no-contact">Contato não informado</span>}
                     </div>
                   </div>
                 </article>
