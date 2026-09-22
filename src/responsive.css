@@ -9026,3 +9026,221 @@ button,input,textarea,select{max-width:100%;font:inherit}
     min-height: 100px;
   }
 }
+
+
+/* ADMIN PREMIUM — camada 3: Central de Segurança */
+.admin-page .admin-security-center {
+  gap: 14px;
+}
+.admin-page .admin-security-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 20px 22px;
+}
+.admin-page .admin-security-hero h2 {
+  margin: 5px 0 4px;
+  color: #20283b;
+  font-size: 22px;
+  line-height: 1.15;
+}
+.admin-page .admin-security-hero p {
+  max-width: 700px;
+  margin: 0;
+  color: #71798b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.admin-page .admin-security-status {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid #ddd9f5;
+  border-radius: 999px;
+  background: #f5f3ff;
+  color: #5544c7;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  white-space: nowrap;
+}
+.admin-page .admin-security-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.admin-page .admin-security-metrics article {
+  min-width: 0;
+  padding: 15px 16px;
+  border: 1px solid #e1e4ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(25,32,55,.04);
+}
+.admin-page .admin-security-metrics span {
+  display: block;
+  color: #71798b;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.admin-page .admin-security-metrics strong {
+  display: block;
+  margin-top: 7px;
+  color: #20283b;
+  font-size: 25px;
+  line-height: 1;
+}
+.admin-page .admin-security-toolbar {
+  padding: 10px;
+  border: 1px solid #e1e4ec;
+  border-radius: 12px;
+  background: #fff;
+}
+.admin-page .admin-security-toolbar input {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid #d9dee8;
+  border-radius: 9px;
+  color: #30394d;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+}
+.admin-page .admin-security-section {
+  padding: 17px;
+}
+.admin-page .admin-security-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+.admin-page .admin-security-section-head h3 {
+  margin: 5px 0 0;
+  color: #20283b;
+  font-size: 17px;
+  line-height: 1.2;
+}
+.admin-page .admin-security-section-head > span {
+  color: #858d9d;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.admin-page .admin-security-list {
+  display: grid;
+  gap: 8px;
+}
+.admin-page .admin-security-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 14px;
+  border: 1px solid #e7e9f0;
+  border-radius: 10px;
+  background: #fff;
+}
+.admin-page .admin-security-card:hover {
+  border-color: #d8d4f1;
+}
+.admin-page .admin-security-card-main {
+  min-width: 0;
+}
+.admin-page .admin-security-card-main > strong {
+  display: block;
+  color: #20283b;
+  font-size: 13px;
+  line-height: 1.3;
+}
+.admin-page .admin-security-card-main > span {
+  display: block;
+  margin-top: 3px;
+  color: #71798b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.admin-page .admin-security-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.admin-page .admin-security-reasons > span {
+  display: inline-flex;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: #f5f3ff;
+  color: #5544c7;
+  font-size: 10px;
+  font-weight: 700;
+}
+.admin-page .admin-security-card-main p {
+  margin: 8px 0 0;
+  color: #626b7d;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.admin-page .admin-security-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.admin-page .admin-security-actions button {
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+.admin-page .admin-security-danger {
+  border: 1px solid #ead4d4;
+  background: #fff8f8;
+  color: #a33b3b;
+  font-weight: 800;
+  cursor: pointer;
+}
+.admin-page .admin-security-danger:hover {
+  border-color: #d9b7b7;
+  background: #fff2f2;
+}
+
+@media only screen and (max-width: 800px) {
+  .admin-page .admin-security-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-page .admin-security-hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 17px;
+  }
+  .admin-page .admin-security-status {
+    white-space: normal;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .admin-page .admin-security-metrics {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .admin-page .admin-security-section {
+    padding: 14px;
+  }
+  .admin-page .admin-security-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .admin-page .admin-security-card {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+  .admin-page .admin-security-actions {
+    justify-content: stretch;
+  }
+  .admin-page .admin-security-actions button {
+    flex: 1 1 140px;
+  }
+}
