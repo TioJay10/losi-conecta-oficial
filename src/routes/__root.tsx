@@ -11,6 +11,16 @@ import "../responsive.css";
 import "../montserrat.css";
 
 
+.auth-required-page{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:linear-gradient(145deg,#0b1626 0%,#142238 100%);color:#fff;font-family:"Montserrat",Arial,sans-serif}
+.auth-required-card{width:min(100%,560px);box-sizing:border-box;padding:46px 38px;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:linear-gradient(145deg,rgba(18,31,50,.98),rgba(8,17,30,.98));box-shadow:0 24px 70px rgba(0,0,0,.35);text-align:center}
+.auth-required-card::before{content:"";display:block;width:54px;height:4px;margin:0 auto 24px;border-radius:99px;background:#d6b15b}
+.auth-required-card .auth-required-kicker{color:#d6b15b;font-size:11px;font-weight:800;letter-spacing:.16em}
+.auth-required-card h1{margin:14px 0 12px;font-size:clamp(25px,5vw,34px);line-height:1.15;color:#fff}
+.auth-required-card p{margin:0 auto 28px;max-width:460px;color:#c4cedb;line-height:1.7;font-size:14px}
+.auth-required-button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:10px;background:#d6b15b;color:#101a29;font-size:13px;font-weight:800;text-decoration:none;box-shadow:0 8px 20px rgba(214,177,91,.18);transition:transform .18s ease,filter .18s ease}
+.auth-required-button:hover{filter:brightness(1.06);transform:translateY(-1px)}
+@media(max-width:600px){.auth-required-page{padding:16px}.auth-required-card{padding:36px 22px;border-radius:16px}.auth-required-card h1{font-size:25px}.auth-required-card p{font-size:13px}.auth-required-button{width:100%;box-sizing:border-box}}
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
