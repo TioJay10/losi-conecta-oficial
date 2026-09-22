@@ -1,0 +1,6 @@
+/* AJUSTE PONTUAL — contraste dos subtítulos dos cabeçalhos dos painéis */
+.dashboard-page .dashboard-header-context span,
+.dashboard-page .dashboard-header-context strong,
+.admin-page .admin-mobile-subtitle {
+  color: #fff !important;
+}
