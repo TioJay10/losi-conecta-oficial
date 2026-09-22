@@ -8376,3 +8376,57 @@ button,input,textarea,select{max-width:100%;font:inherit}
     font-size: 9px !important;
   }
 }
+
+
+/* AJUSTE PONTUAL — botões de ação do painel profissional */
+.dashboard-main .dashboard-grid > button,
+.dashboard-main .dashboard-primary,
+.dashboard-main .dashboard-secondary {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: 1px solid #d9dee8;
+  background: #fff;
+  color: #172033;
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.25;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(23,32,51,.06);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.dashboard-main .dashboard-grid > button:hover,
+.dashboard-main .dashboard-primary:hover,
+.dashboard-main .dashboard-secondary:hover {
+  transform: translateY(-1px);
+  border-color: #c9ced9;
+  box-shadow: 0 8px 18px rgba(23,32,51,.10);
+}
+
+.dashboard-main .dashboard-primary {
+  border-color: #172033;
+  background: #172033;
+  color: #fff;
+}
+
+.dashboard-main .dashboard-secondary {
+  border-color: #c9ced9;
+  background: #fff;
+  color: #172033;
+  white-space: nowrap;
+}
+
+@media only screen and (max-width: 600px) {
+  .dashboard-main .dashboard-secondary {
+    white-space: normal;
+    width: 100%;
+  }
+}
