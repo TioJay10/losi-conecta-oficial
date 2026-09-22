@@ -121,23 +121,6 @@ function ProviderPage() {
     );
   }
 
-  async function toggleFavorite() {
-    if (!userId) {
-      window.location.href = "/entrar";
-      return;
-    }
-    setFavoriteBusy(true);
-    const result = isFavorite
-      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", business.id)
-      : await supabase.from("favorites").insert({ user_id: userId, business_id: business.id });
-    if (result.error) {
-      console.error("Erro ao alterar fornecedor salvo:", result.error);
-    } else {
-      setIsFavorite(!isFavorite);
-    }
-    setFavoriteBusy(false);
-  }
-
   async function submitReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (reviewing) return;
@@ -302,24 +285,6 @@ function ProviderPage() {
     } finally {
       setReporting(false);
     }
-  }
-
-  function openQuoteRequest() {
-    if (!userId) {
-      setAuthModalOpen(true);
-      return;
-    }
-    const target = document.getElementById("provider-quote-request");
-    target?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function handleAuthenticatedFromModal() {
-    setAuthModalOpen(false);
-    window.setTimeout(async () => {
-      const { data } = await supabase.auth.getSession();
-      setUserId(data.session?.user.id ?? null);
-      document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
   }
 
   async function submitQuoteRequest(event: FormEvent<HTMLFormElement>) {
