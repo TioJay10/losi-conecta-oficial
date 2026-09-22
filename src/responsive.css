@@ -3313,6 +3313,39 @@ a {
   color: #a33b3b;
 }
 
+/* AUTH — responsividade da identidade visual do painel */
+@media only screen and (max-width: 600px) {
+  .auth-page {
+    padding: 14px !important;
+    align-items: center !important;
+  }
+
+  .auth-card {
+    max-width: 100% !important;
+    border-radius: 16px !important;
+  }
+
+  .auth-brand-panel,
+  .auth-form-panel {
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  .auth-brand-panel {
+    padding-top: 24px !important;
+    padding-bottom: 23px !important;
+  }
+
+  .auth-form-panel {
+    padding-top: 24px !important;
+    padding-bottom: 25px !important;
+  }
+
+  .auth-brand-panel h1 {
+    font-size: 25px !important;
+  }
+}
+
 /* AUTH / CADASTRO — identidade do painel do fornecedor */
 .auth-page {
   background: linear-gradient(145deg, #07111f, #0b182a) !important;
