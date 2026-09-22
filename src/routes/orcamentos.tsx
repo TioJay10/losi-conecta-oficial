@@ -311,9 +311,12 @@ function QuotesPage() {
   function buildRequestWhatsAppMessage(request: RequestRow) {
     const profileUrl = publicProfileUrl(request.requester_id);
     return [
-      "Olá! Recebi sua solicitação de orçamento pelo LOSI CONECTA e vou preparar o orçamento para você.",
+      "SOLICITAÇÃO DE ORÇAMENTO — LOSI CONECTA",
       "",
-      "INFORMAÇÕES DE QUEM SOLICITOU",
+      "DESTINATÁRIO: " + (businessContacts[request.business_id]?.business_name || "Sua empresa"),
+      "SOLICITANTE: " + request.client_name,
+      "",
+      "CONTATO DO SOLICITANTE",
       "Nome: " + request.client_name,
       request.client_phone ? "WhatsApp/Telefone: " + request.client_phone : "",
       request.client_email ? "E-mail: " + request.client_email : "",
@@ -339,14 +342,18 @@ function QuotesPage() {
       .join("\n");
 
     return [
-      "Olá, " + recipientName + "! Segue o orçamento solicitado para seu evento.",
+      "ORÇAMENTO — LOSI CONECTA",
       "",
-      "INFORMAÇÕES DE QUEM SOLICITOU",
+      "DESTINATÁRIO: " + recipientName,
+      "FORNECEDOR: " + senderName,
+      "SOLICITANTE: " + (request?.client_name || "Cliente"),
+      "",
+      "CONTATO DO SOLICITANTE",
       "Nome: " + (request?.client_name || recipientName),
       request?.client_phone ? "WhatsApp/Telefone: " + request.client_phone : "",
       request?.client_email ? "E-mail: " + request.client_email : "",
       "",
-      "FORNECEDOR: " + senderName,
+      "DADOS DO EVENTO",
       "Evento: " + (request?.event_title || "Não informado"),
       "Data: " + formatQuoteDate(request?.event_date ?? null),
       request?.event_location ? "Local: " + request.event_location : "",
@@ -506,9 +513,9 @@ function QuotesPage() {
             className={"quotes-metric-card" + (activeMetric === "pending" ? " active" : "")}
             onClick={() => setActiveMetric(activeMetric === "pending" ? null : "pending")}
           >
-            <span>Aguardando orçamento</span>
+            <span>Solicitações aguardando</span>
             <strong>{clientPendingRequests.length}</strong>
-            <small>Solicitações feitas por você sem retorno</small>
+            <small>Pedidos feitos por você que ainda não receberam proposta</small>
           </button>
 
           <button
@@ -516,9 +523,9 @@ function QuotesPage() {
             className={"quotes-metric-card" + (activeMetric === "total" ? " active" : "")}
             onClick={() => setActiveMetric(activeMetric === "total" ? null : "total")}
           >
-            <span>Orçamentos recebidos</span>
+            <span>Propostas recebidas</span>
             <strong>{clientQuotes.length}</strong>
-            <small>Propostas enviadas pelos fornecedores</small>
+            <small>Orçamentos enviados pelos fornecedores para você</small>
           </button>
 
           {isSupplier && (
@@ -528,9 +535,9 @@ function QuotesPage() {
                 className={"quotes-metric-card" + (activeMetric === "received" ? " active" : "")}
                 onClick={() => setActiveMetric(activeMetric === "received" ? null : "received")}
               >
-                <span>Solicitações recebidas</span>
+                <span>Pedidos recebidos</span>
                 <strong>{requests.length}</strong>
-                <small>Pedidos enviados para sua empresa</small>
+                <small>Solicitações de clientes para sua empresa</small>
               </button>
 
               <button
@@ -538,9 +545,9 @@ function QuotesPage() {
                 className={"quotes-metric-card" + (activeMetric === "supplier-sent" ? " active" : "")}
                 onClick={() => setActiveMetric(activeMetric === "supplier-sent" ? null : "supplier-sent")}
               >
-                <span>Orçamentos enviados</span>
+                <span>Propostas enviadas</span>
                 <strong>{quotes.length}</strong>
-                <small>Propostas enviadas por você</small>
+                <small>Orçamentos preparados e enviados por sua empresa</small>
               </button>
             </>
           )}
