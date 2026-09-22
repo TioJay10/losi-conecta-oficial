@@ -8763,3 +8763,266 @@ button,input,textarea,select{max-width:100%;font:inherit}
     margin-bottom: 13px;
   }
 }
+
+
+/* ADMIN PREMIUM — camada 2: contexto, listas, ferramentas e comercial */
+.admin-page .admin-overview-card,
+.admin-page .admin-operation-card {
+  min-height: 118px;
+  padding: 18px 19px;
+  border: 1px solid #e1e4ec;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(25,32,55,.045);
+  text-align: left;
+}
+.admin-page .admin-overview-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+.admin-page .admin-overview-card:hover {
+  border-color: #cfc9f3;
+  box-shadow: 0 8px 22px rgba(25,32,55,.08);
+  transform: translateY(-1px);
+}
+.admin-page .admin-overview-card strong,
+.admin-page .admin-operation-card strong {
+  color: #20283b;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.admin-page .admin-overview-card strong em {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #f0edff;
+  color: #5544c7;
+  font-size: 11px;
+  font-style: normal;
+}
+.admin-page .admin-overview-card span,
+.admin-page .admin-operation-card span {
+  color: #71798b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.admin-page .admin-operation-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+.admin-page .admin-users-toolbar,
+.admin-page .admin-category-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border: 1px solid #e1e4ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(25,32,55,.035);
+}
+.admin-page .admin-users-toolbar > div,
+.admin-page .admin-category-toolbar > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-page .admin-users-toolbar strong,
+.admin-page .admin-category-toolbar strong {
+  color: #20283b;
+  font-size: 14px;
+}
+.admin-page .admin-users-toolbar span,
+.admin-page .admin-category-toolbar span {
+  color: #71798b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.admin-page .admin-filters {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #e1e4ec;
+  border-radius: 12px;
+  background: #fff;
+}
+.admin-page .admin-filters input,
+.admin-page .admin-filters select,
+.admin-page .admin-commercial-activation select {
+  min-height: 40px;
+  border: 1px solid #d9dee8;
+  border-radius: 9px;
+  background: #fff;
+  color: #30394d;
+  outline: none;
+}
+.admin-page .admin-filters input {
+  flex: 1;
+}
+.admin-page .admin-filter-count {
+  flex: 0 0 auto;
+  color: #687386;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.admin-page .admin-list-item {
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.admin-page .admin-list-item:hover {
+  border-color: #d6d9e4 !important;
+  box-shadow: 0 6px 18px rgba(25,32,55,.06);
+}
+.admin-page .admin-review-card {
+  margin-bottom: 14px;
+  padding: 18px;
+}
+.admin-page .admin-commercial-grid {
+  display: grid;
+  gap: 16px;
+}
+.admin-page .admin-commercial-card {
+  padding: 18px;
+}
+.admin-page .admin-commercial-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.admin-page .admin-commercial-card-head > span {
+  color: #5544c7;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+.admin-page .admin-plan-summary {
+  padding-top: 2px;
+}
+.admin-page .admin-plan-summary h2 {
+  margin: 0 0 6px;
+  color: #20283b;
+  font-size: 21px;
+}
+.admin-page .admin-plan-summary > strong {
+  display: block;
+  color: #5544c7;
+  font-size: 25px;
+  line-height: 1.15;
+}
+.admin-page .admin-plan-summary p {
+  margin: 9px 0 12px;
+  color: #71798b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.admin-page .admin-plan-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.admin-page .admin-plan-meta span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #f2f3f7;
+  color: #596274;
+  font-size: 10px;
+  font-weight: 800;
+}
+.admin-page .admin-commercial-subscriptions {
+  padding: 18px;
+}
+.admin-page .admin-commercial-subscriptions > h2,
+.admin-page .admin-subscriptions-section > h2 {
+  margin: 7px 0 5px;
+  color: #20283b;
+  font-size: 19px;
+}
+.admin-page .admin-commercial-subscriptions > .admin-text {
+  margin: 0 0 14px;
+  font-size: 12px;
+}
+.admin-page .admin-commercial-activation {
+  display: grid;
+  gap: 8px;
+}
+.admin-page .admin-commercial-activation .admin-list-item {
+  padding: 12px 14px;
+}
+.admin-page .admin-subscriptions-section {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e8eaf0;
+}
+.admin-page .admin-form-heading {
+  margin-bottom: 2px;
+}
+.admin-page .admin-form-heading h2 {
+  margin: 5px 0;
+  color: #20283b;
+  font-size: 19px;
+}
+.admin-page .admin-form-heading p {
+  margin: 0;
+  color: #71798b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.admin-page .admin-category-create {
+  margin-bottom: 14px;
+  padding: 17px;
+}
+.admin-page .admin-empty {
+  padding: 28px 18px;
+  border: 1px dashed #d8dce6;
+  border-radius: 12px;
+  background: #fff;
+  color: #7a8292;
+  text-align: center;
+  font-size: 12px;
+}
+
+@media only screen and (max-width: 700px) {
+  .admin-page .admin-users-toolbar,
+  .admin-page .admin-category-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 11px;
+  }
+  .admin-page .admin-users-toolbar .admin-primary-button,
+  .admin-page .admin-category-toolbar .admin-primary-button {
+    width: 100%;
+  }
+  .admin-page .admin-filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-page .admin-filters input,
+  .admin-page .admin-filters select,
+  .admin-page .admin-filter-count {
+    width: 100%;
+  }
+  .admin-page .admin-filter-count {
+    text-align: left;
+  }
+  .admin-page .admin-overview-card,
+  .admin-page .admin-operation-card {
+    min-height: 100px;
+  }
+}
