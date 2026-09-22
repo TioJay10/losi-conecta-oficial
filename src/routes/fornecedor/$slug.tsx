@@ -40,6 +40,7 @@ function ProviderPage() {
   const [reporting, setReporting] = useState(false);
   const [quoteMessage, setQuoteMessage] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "whatsapp" | null>(null);
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
   const [reputation, setReputation] = useState({ score: 0, level: 1, reviews: 0, negativeReviews: 0, completedServices: 0, reports: 0, blocked: false });
 
@@ -393,7 +394,7 @@ function ProviderPage() {
           <div className="provider-profile-actions">
             <button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>
             {userId !== business.owner_id && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}
-            {whatsapp && <a className="provider-profile-contact" href={whatsapp} target="_blank" rel="noreferrer">Conversar pelo WhatsApp</a>}
+            {whatsapp && <button type="button" className="provider-profile-contact" onClick={openWhatsApp}>Conversar pelo WhatsApp</button>}
             <button type="button" className="provider-profile-report" onClick={() => { setReportOpen(true); setReportMessage(""); }}>Denunciar fornecedor</button>
           </div>
         </div>
@@ -538,7 +539,7 @@ function ProviderPage() {
           </div>
         </aside>
       </section>
-      {authModalOpen && <AuthModal onClose={() => setAuthModalOpen(false)} onAuthenticated={handleAuthenticatedFromModal} />}
+      {authModalOpen && <AuthModal onClose={() => { setAuthModalOpen(false); setPendingAuthAction(null); }} onAuthenticated={handleAuthenticatedFromModal} />}
     </main>
   );
 }
