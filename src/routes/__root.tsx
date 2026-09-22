@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import "../responsive.css";
 import "../montserrat.css";
+import "../panel-header-contrast.css";
 
 
 
