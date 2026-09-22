@@ -45,6 +45,12 @@ type BusinessContact = {
   phone: string | null;
 };
 
+type PublicProfile = {
+  owner_id: string;
+  slug: string;
+  business_name: string;
+};
+
 
 export const Route = createFileRoute("/orcamentos")({
   component: QuotesPage,
@@ -79,6 +85,7 @@ function QuotesPage() {
   const [quotes, setQuotes] = useState<QuoteRow[]>([]);
   const [clientQuotes, setClientQuotes] = useState<QuoteRow[]>([]);
   const [businessContacts, setBusinessContacts] = useState<Record<string, BusinessContact>>({});
+  const [requesterProfiles, setRequesterProfiles] = useState<Record<string, PublicProfile>>({});
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [activeMetric, setActiveMetric] = useState<"pending" | "total" | "received" | "supplier-pending" | "supplier-sent" | null>(null);
@@ -134,6 +141,26 @@ function QuotesPage() {
           .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
+
+        const allRequests = [
+          ...((requestRows ?? []) as unknown as RequestRow[]),
+          ...((requestedByUser ?? []) as unknown as RequestRow[]),
+          ...((quoteRows ?? []).map((quote: any) => quote.quote_requests).filter(Boolean) as RequestRow[]),
+          ...((receivedByUser ?? []).map((quote: any) => quote.quote_requests).filter(Boolean) as RequestRow[]),
+        ];
+        const requesterIds = [...new Set(allRequests.map((request) => request.requester_id).filter(Boolean))];
+        if (requesterIds.length > 0) {
+          const { data: requesterBusinesses } = await supabase
+            .from("business_profiles")
+            .select("owner_id,slug,business_name")
+            .in("owner_id", requesterIds)
+            .eq("active", true);
+          const profileMap = (requesterBusinesses ?? []).reduce<Record<string, PublicProfile>>((map, profile) => {
+            map[profile.owner_id] = profile as PublicProfile;
+            return map;
+          }, {});
+          if (mounted) setRequesterProfiles(profileMap);
+        }
 
         if (mounted) {
           setRequests((requestRows ?? []) as unknown as RequestRow[]);
@@ -276,7 +303,13 @@ function QuotesPage() {
     return value ? new Date(value + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada";
   }
 
+  function publicProfileUrl(requesterId: string | null | undefined) {
+    const profile = requesterId ? requesterProfiles[requesterId] : null;
+    return profile ? window.location.origin + "/fornecedor/" + profile.slug : "";
+  }
+
   function buildRequestWhatsAppMessage(request: RequestRow) {
+    const profileUrl = publicProfileUrl(request.requester_id);
     return [
       "Olá! Recebi sua solicitação de orçamento pelo LOSI CONECTA e vou preparar o orçamento para você.",
       "",
@@ -291,6 +324,8 @@ function QuotesPage() {
       "Data: " + formatQuoteDate(request.event_date),
       request.event_location ? "Local: " + request.event_location : "",
       request.description ? "Detalhes: " + request.description : "",
+      profileUrl ? "" : "",
+      profileUrl ? "🔗 PERFIL PÚBLICO DE QUEM SOLICITOU: " + profileUrl : "",
       "",
       "Vou enviar o orçamento por aqui pelo WhatsApp.",
     ].filter(Boolean).join("\n");
@@ -298,6 +333,7 @@ function QuotesPage() {
 
   function buildQuoteWhatsAppMessage(quote: QuoteRow, recipientName: string, senderName: string) {
     const request = quote.quote_requests;
+    const profileUrl = publicProfileUrl(request?.requester_id);
     const itemLines = (quote.quote_items ?? [])
       .map((item) => "• " + item.quantity + "x " + item.description + " — " + money(Number(item.total)))
       .join("\n");
@@ -314,6 +350,8 @@ function QuotesPage() {
       "Evento: " + (request?.event_title || "Não informado"),
       "Data: " + formatQuoteDate(request?.event_date ?? null),
       request?.event_location ? "Local: " + request.event_location : "",
+      profileUrl ? "" : "",
+      profileUrl ? "🔗 PERFIL PÚBLICO DE QUEM SOLICITOU: " + profileUrl : "",
       "",
       "Itens:",
       itemLines || "• Itens conforme orçamento no LOSI CONECTA",
