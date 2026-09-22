@@ -5,6 +5,8 @@ import { supabase } from "../../lib/supabase";
 import { AppLogo } from "../../components/AppLogo";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
+const OFFICIAL_BUSINESS_ID = "333ccf56-324f-4e4f-99e3-1ebc9ade0140";
+
 type Review = { id: string; rating: number; comment: string | null; created_at: string; reviewer: { full_name: string | null } | null };
 type Business = {
   id: string; business_name: string; slug: string; description: string | null;
@@ -89,7 +91,9 @@ function ProviderPage() {
             if (blocked) score -= 40;
             score = Math.max(0, Math.min(100, score));
             const level = score < 20 ? 1 : score < 40 ? 2 : score < 60 ? 3 : score < 80 ? 4 : 5;
-            if (mounted) setReputation({ score, level, reviews: activeReviews.length, negativeReviews, completedServices, reports, blocked });
+            if (mounted) setReputation(loaded.id === OFFICIAL_BUSINESS_ID
+              ? { score: 100, level: 5, reviews: activeReviews.length, negativeReviews: 0, completedServices, reports: 0, blocked: false }
+              : { score, level, reviews: activeReviews.length, negativeReviews, completedServices, reports, blocked });
 
             if (sessionData.session) {
               const { data: favoriteData } = await supabase.from("favorites").select("business_id").eq("user_id", sessionData.session.user.id).eq("business_id", loaded.id).maybeSingle();
@@ -188,7 +192,8 @@ function ProviderPage() {
     }
   }
 
-  const averageRating = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
+  const isOfficial = business.id === OFFICIAL_BUSINESS_ID;
+  const averageRating = isOfficial ? 5 : reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
   const rawPhone = business.whatsapp || business.phone || "";
   const digits = rawPhone.replace(/\D/g, "");
   const whatsapp = digits ? "https://wa.me/" + (digits.startsWith("55") ? digits : "55" + digits) + "?text=" + encodeURIComponent("Olá! Encontrei a " + business.business_name + " no LOSI CONECTA.") : null;
@@ -313,14 +318,14 @@ function ProviderPage() {
             <div className="provider-hero-title">
               <div className="catalog-kicker">PERFIL PROFISSIONAL</div>
               <h1>{business.business_name}</h1>
-              {business.verified && <span className="provider-verified">Fornecedor verificado</span>}
+              {isOfficial ? <span className="provider-verified provider-official-badge">✓ PERFIL OFICIAL LOSI</span> : business.verified && <span className="provider-verified">Fornecedor verificado</span>}
               {(business.city || business.state) && <div className="provider-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
             </div>
           </div>
 
           <div className="provider-hero-reputation">
             <div className="provider-reputation">
-              <div className="provider-reputation-head"><strong>Reputação do fornecedor</strong><span>{reputationLabel}</span></div>
+              <div className="provider-reputation-head"><strong>{isOfficial ? "Perfil oficial da LOSI" : "Reputação do fornecedor"}</strong><span>{isOfficial ? "Satisfação máxima" : reputationLabel}</span></div>
               <div className="provider-reputation-bar" aria-label={`Reputação: ${reputationLabel}`}>
                 {[1,2,3,4,5].map(level => <span key={level} className={`${reputationClass} ${level <= reputation.level ? "filled" : ""}`} />)}
               </div>
@@ -418,7 +423,7 @@ function ProviderPage() {
             <div className="catalog-kicker">AVALIAÇÕES</div>
             <div className="provider-rating-summary">
               <strong>{averageRating ? averageRating.toFixed(1) : "—"}</strong>
-              <span>{"★".repeat(Math.round(averageRating)) || "Sem avaliações"} · {reviews.length} {reviews.length === 1 ? "avaliação" : "avaliações"}</span>
+              <span>{"★".repeat(Math.round(averageRating)) || "Sem avaliações"} · {isOfficial ? "Avaliação máxima" : `${reviews.length} ${reviews.length === 1 ? "avaliação" : "avaliações"}`}</span>
             </div>
             {reviews.length === 0 ? <p>Este fornecedor ainda não recebeu avaliações.</p> : (
               <div className="provider-review-list">
