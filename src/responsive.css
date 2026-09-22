@@ -8430,3 +8430,14 @@ button,input,textarea,select{max-width:100%;font:inherit}
     width: 100%;
   }
 }
+
+
+/* AJUSTE PONTUAL — títulos dos cards do painel sem fundo */
+.dashboard-page .dashboard-grid > button > strong,
+.dashboard-page .dashboard-metric-card strong,
+.dashboard-page .dashboard-plan-card > strong,
+.dashboard-page .dashboard-saved-card > strong {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
