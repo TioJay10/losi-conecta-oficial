@@ -8180,7 +8180,7 @@ button,input,textarea,select{max-width:100%;font:inherit}
     top: 0 !important;
     transform: translateX(-50%) !important;
     width: max-content !important;
-    max-width: calc(100vw - 120px) !important;
+    max-width: none !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
@@ -8237,7 +8237,7 @@ button,input,textarea,select{max-width:100%;font:inherit}
 
 @media only screen and (max-width: 480px) {
   .marketplace-page .marketplace-logo {
-    max-width: calc(100vw - 104px) !important;
+    max-width: none !important;
     font-size: 17px !important;
   }
 
