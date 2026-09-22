@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import "../responsive.css";
+import "../montserrat.css";
 
 export const Route = createRootRoute({
   head: () => ({
