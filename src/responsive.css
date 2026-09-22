@@ -9388,9 +9388,3 @@ button,input,textarea,select{max-width:100%;font:inherit}
     font-size: 10px;
   }
 }
-
-
-/* AJUSTE PONTUAL — botões "Editar plano" mais arredondados */
-.admin-page .admin-commercial-card button {
-  border-radius: 999px !important;
-}
