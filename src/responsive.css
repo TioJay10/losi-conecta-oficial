@@ -7668,6 +7668,14 @@ a.profile-logo:hover,
 }
 
 
+/* BUSCAR — no mobile e tablet, a categoria da barra lateral fica oculta.
+   O seletor de categoria do painel superior continua visível. */
+@media only screen and (max-width: 1024px) {
+  .marketplace-page .marketplace-sidebar .marketplace-sidebar-category-filter {
+    display: none !important;
+  }
+}
+
 /* PERFIL OFICIAL LOSI — destaque fixo na busca */
 .marketplace-official{
   flex:none;
