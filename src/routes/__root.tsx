@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { supabase } from "../lib/supabase";
 import "../responsive.css";
 import "../montserrat.css";
 
@@ -52,21 +51,26 @@ function RootComponent() {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
+    import("../lib/supabase").then(({ supabase }) => supabase.auth.getSession()).then(({ data }) => {
       if (!mounted) return;
       setIsAuthenticated(Boolean(data.session));
       setAuthChecked(true);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    let unsubscribe = () => {};
+    import("../lib/supabase").then(({ supabase }) => {
       if (!mounted) return;
-      setIsAuthenticated(Boolean(session));
-      setAuthChecked(true);
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!mounted) return;
+        setIsAuthenticated(Boolean(session));
+        setAuthChecked(true);
+      });
+      unsubscribe = () => listener.subscription.unsubscribe();
     });
 
     return () => {
       mounted = false;
-      listener.subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
