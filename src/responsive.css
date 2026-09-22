@@ -7668,6 +7668,47 @@ a.profile-logo:hover,
 }
 
 
+/* BUSCAR — centralização segura do LOSI CONECTA somente em celulares.
+   O logo ocupa uma faixa própria no cabeçalho e não pode sobrepor as ações laterais. */
+@media only screen and (max-width: 599px) {
+  .catalog-page .catalog-header {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 64px !important;
+    padding-left: 92px !important;
+    padding-right: 92px !important;
+  }
+
+  .catalog-page .catalog-header .catalog-logo {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: max-content !important;
+    max-width: calc(100% - 184px) !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    z-index: 20 !important;
+    pointer-events: none !important;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .catalog-page .catalog-header {
+    padding-left: 82px !important;
+    padding-right: 82px !important;
+  }
+
+  .catalog-page .catalog-header .catalog-logo {
+    max-width: calc(100% - 164px) !important;
+    font-size: 14px !important;
+  }
+}
+
 /* BUSCAR — no mobile e tablet, a categoria da barra lateral fica oculta.
    O seletor de categoria do painel superior continua visível. */
 @media only screen and (max-width: 1024px) {
