@@ -264,13 +264,6 @@ function QuotesPage() {
     };
   }, [loading, userId, businessId]);
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unit_price) || 0), 0),
-    [items],
-  );
-  const discountValue = Math.max(0, Number(discount) || 0);
-  const total = Math.max(0, subtotal - discountValue);
-
   function normalizeWhatsAppNumber(value: string | null | undefined) {
     const digits = (value ?? "").replace(/\D/g, "");
     if (!digits) return "";
