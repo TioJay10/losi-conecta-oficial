@@ -8257,3 +8257,58 @@ button,input,textarea,select{max-width:100%;font:inherit}
     font-size: 11px !important;
   }
 }
+
+
+/* Planos e reputação — ranking do catálogo */
+.marketplace-plan-badge,
+.provider-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 9px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.marketplace-plan-badge.profissional,
+.provider-plan-badge.profissional {
+  background: #f4e7bf;
+  color: #765a18;
+}
+.marketplace-plan-badge.destaque,
+.provider-plan-badge.destaque {
+  background: #dfeee3;
+  color: #24633b;
+}
+.marketplace-reputation-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 8px 0 4px;
+  font-size: 10px;
+  color: #687386;
+  font-weight: 700;
+}
+.marketplace-reputation-summary > span:last-child {
+  margin-left: auto;
+  letter-spacing: .02em;
+}
+.marketplace-reputation-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #aeb5bf;
+}
+.marketplace-reputation-dot.green { background: #3c9a5f; }
+.marketplace-reputation-dot.yellow { background: #d3a633; }
+.marketplace-reputation-dot.red { background: #c95757; }
+.marketplace-reputation-dot.none { background: #aeb5bf; }
+
+.provider-plan-badge {
+  margin: 6px 0 8px;
+}
