@@ -7861,3 +7861,124 @@ a.profile-logo:hover,
   }
 }
 
+/* PAINEL — grupo do usuário/sair sempre centralizado no lado esquerdo.
+   No mobile, o grupo fica depois do botão hamburger e nunca ocupa a área dele. */
+.dashboard-page .dashboard-header {
+  justify-content: flex-start !important;
+}
+
+.dashboard-page .dashboard-header-right {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+}
+
+@media only screen and (max-width: 768px) {
+  .dashboard-page .dashboard-header {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-height: 78px !important;
+    height: 78px !important;
+    padding: 0 12px !important;
+    gap: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboard-page .dashboard-mobile-menu-button {
+    position: relative !important;
+    z-index: 50 !important;
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-page .dashboard-header-context {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    max-width: 125px !important;
+    overflow: hidden !important;
+  }
+
+  .dashboard-page .dashboard-header-context span,
+  .dashboard-page .dashboard-header-context strong {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .dashboard-page .dashboard-header-right {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    gap: 7px !important;
+    justify-content: flex-start !important;
+  }
+
+  .dashboard-page .dashboard-header-user {
+    min-width: 0 !important;
+    gap: 7px !important;
+  }
+
+  .dashboard-page .dashboard-header-user strong,
+  .dashboard-page .dashboard-header-user small {
+    max-width: 120px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .dashboard-page .dashboard-logout {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 8px 10px !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .dashboard-page .dashboard-header {
+    gap: 7px !important;
+    padding: 0 9px !important;
+  }
+
+  .dashboard-page .dashboard-mobile-menu-button {
+    flex-basis: 40px !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+  }
+
+  .dashboard-page .dashboard-header-context {
+    max-width: 98px !important;
+  }
+
+  .dashboard-page .dashboard-header-right {
+    gap: 5px !important;
+  }
+
+  .dashboard-page .dashboard-header-user {
+    gap: 5px !important;
+  }
+
+  .dashboard-page .dashboard-header-user strong {
+    max-width: 72px !important;
+  }
+
+  .dashboard-page .dashboard-header-user small {
+    display: none !important;
+  }
+
+  .dashboard-page .dashboard-logout {
+    padding: 7px 9px !important;
+    font-size: 11px !important;
+  }
+}
+
