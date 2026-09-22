@@ -205,6 +205,64 @@ function ProviderPage() {
   const reputationClass = `level-${reputation.level}`;
 
 
+  async function saveFavoriteForUser(currentUserId: string) {
+    setFavoriteBusy(true);
+    const result = isFavorite
+      ? await supabase.from("favorites").delete().eq("user_id", currentUserId).eq("business_id", business.id)
+      : await supabase.from("favorites").insert({ user_id: currentUserId, business_id: business.id });
+    if (result.error) {
+      console.error("Erro ao alterar fornecedor salvo:", result.error);
+    } else {
+      setIsFavorite(!isFavorite);
+    }
+    setFavoriteBusy(false);
+  }
+
+  async function toggleFavorite() {
+    if (!userId) {
+      setPendingAuthAction("favorite");
+      setAuthModalOpen(true);
+      return;
+    }
+    await saveFavoriteForUser(userId);
+  }
+
+  function openQuoteRequest() {
+    if (!userId) {
+      setPendingAuthAction("quote");
+      setAuthModalOpen(true);
+      return;
+    }
+    document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function openWhatsApp() {
+    if (!whatsapp) return;
+    if (!userId) {
+      setPendingAuthAction("whatsapp");
+      setAuthModalOpen(true);
+      return;
+    }
+    window.location.href = whatsapp;
+  }
+
+  async function handleAuthenticatedFromModal() {
+    const { data } = await supabase.auth.getSession();
+    const currentUserId = data.session?.user.id ?? null;
+    setUserId(currentUserId);
+    setAuthModalOpen(false);
+    const action = pendingAuthAction;
+    setPendingAuthAction(null);
+    if (!currentUserId || !action) return;
+    if (action === "favorite") {
+      await saveFavoriteForUser(currentUserId);
+    } else if (action === "quote") {
+      window.setTimeout(() => document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    } else if (whatsapp) {
+      window.location.href = whatsapp;
+    }
+  }
+
   async function submitSupplierReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (reporting) return;
