@@ -190,15 +190,18 @@ function AuthPage() {
   return (
     <main className="auth-page" style={styles.page}>
       <section className="auth-card" style={styles.card}>
-        <div style={styles.brand}>LOSI <span>CONECTA</span></div>
-        <div style={styles.eyebrow}>PROFISSIONAIS DE EVENTOS</div>
-        <h1 style={styles.title}>{title}</h1>
-        <p style={styles.subtitle}>
-          {mode === "login" && "Acesse sua conta para encontrar e conectar-se a fornecedores."}
-          {mode === "signup" && "Crie seu acesso para fazer parte da rede de profissionais."}
-          {mode === "recovery" && (recoverySession ? "Escolha uma nova senha para sua conta." : "Informe seu e-mail para receber as instruções de acesso.")}
-        </p>
+        <div className="auth-brand-panel" style={styles.brandPanel}>
+          <div style={styles.brand}>LOSI <span>CONECTA</span></div>
+          <div style={styles.eyebrow}>PROFISSIONAIS DE EVENTOS</div>
+          <h1 style={styles.title}>{title}</h1>
+          <p style={styles.subtitle}>
+            {mode === "login" && "Acesse sua conta para encontrar e conectar-se a fornecedores."}
+            {mode === "signup" && "Crie seu acesso para fazer parte da rede de profissionais."}
+            {mode === "recovery" && (recoverySession ? "Escolha uma nova senha para sua conta." : "Informe seu e-mail para receber as instruções de acesso.")}
+          </p>
+        </div>
 
+        <div className="auth-form-panel" style={styles.formPanel}>
         <form onSubmit={submit} style={styles.form}>
           {mode === "signup" && (
             <label style={styles.label}>
@@ -254,22 +257,25 @@ function AuthPage() {
         </div>
 
         <button style={styles.home} onClick={() => navigate({ to: "/" })}>← Voltar para o início</button>
+        </div>
       </section>
     </main>
   );
 }
 
 const styles: Record<string, CSSProperties> = {
-  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "linear-gradient(145deg, #07111f, #0b182a)", padding: 24, fontFamily: "Arial, sans-serif", color: "#172033" },
-  card: { width: "100%", maxWidth: 440, background: "#fff", border: "1px solid rgba(214,180,106,.55)", borderRadius: 20, padding: 36, boxSizing: "border-box", boxShadow: "0 24px 60px rgba(0,0,0,.28)" },
-  brand: { fontSize: 21, fontWeight: 800, letterSpacing: ".06em", color: "#07111f" },
-  title: { fontSize: 30, lineHeight: 1.15, margin: "14px 0 8px", color: "#07111f" },
-  eyebrow: { marginTop: 24, fontSize: 11, fontWeight: 800, letterSpacing: ".14em", color: "#7a8191" },
-  subtitle: { color: "#687386", lineHeight: 1.5, margin: "0 0 24px" },
+  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "radial-gradient(circle at 72% 4%, rgba(214,180,106,.12), transparent 27%), radial-gradient(circle at 25% 60%, rgba(79,70,199,.07), transparent 30%), #f4f5f8", padding: 24, fontFamily: "Arial, sans-serif", color: "#172033", boxSizing: "border-box" },
+  card: { width: "100%", maxWidth: 470, background: "#fff", border: "1px solid rgba(214,180,106,.48)", borderRadius: 20, overflow: "hidden", boxSizing: "border-box", boxShadow: "0 24px 60px rgba(7,17,31,.16)" },
+  brandPanel: { padding: "30px 34px 28px", background: "linear-gradient(145deg, rgba(18,31,50,.99), rgba(5,13,24,.99))", borderBottom: "1px solid rgba(214,180,106,.30)", boxSizing: "border-box" },
+  formPanel: { padding: "30px 34px 32px", background: "#fff", boxSizing: "border-box" },
+  brand: { fontSize: 21, fontWeight: 800, letterSpacing: ".08em", color: "#fff" },
+  title: { fontSize: 30, lineHeight: 1.15, margin: "14px 0 8px", color: "#fff" },
+  eyebrow: { marginTop: 24, fontSize: 11, fontWeight: 800, letterSpacing: ".16em", color: "#f0d99a" },
+  subtitle: { color: "#c4cbd7", lineHeight: 1.5, margin: "0" },
   form: { display: "grid", gap: 16 },
   label: { display: "grid", gap: 7, fontSize: 13, fontWeight: 700 },
-  input: { width: "100%", boxSizing: "border-box", border: "1px solid #dfe2ea", borderRadius: 10, padding: "12px 13px", fontSize: 15, outline: "none" },
-  button: { border: 1px solid "#d6b46a", borderRadius: 10, padding: "13px 16px", background: "linear-gradient(145deg, #0b182a, #07111f)", color: "#f0d99a", fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 8px 18px rgba(7,17,31,.16)" },
+  input: { width: "100%", boxSizing: "border-box", border: "1px solid #d9dee8", borderRadius: 9, padding: "12px 13px", fontSize: 15, outline: "none", background: "#fff", color: "#172033" },
+  button: { border: "1px solid #d6b46a", borderRadius: 9, padding: "13px 16px", background: "linear-gradient(145deg, #0b182a, #07111f)", color: "#f0d99a", fontSize: 15, fontWeight: 800, cursor: "pointer", boxShadow: "0 8px 18px rgba(7,17,31,.16)" },
   link: { display: "block", margin: "18px auto 0", border: 0, background: "transparent", color: "#8a6d2f", fontWeight: 700, cursor: "pointer" },
   inlineLink: { border: 0, background: "transparent", padding: 0, color: "#8a6d2f", fontWeight: 700, cursor: "pointer" },
   footer: { marginTop: 22, textAlign: "center", color: "#687386", fontSize: 14 },
