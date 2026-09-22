@@ -4,6 +4,7 @@ import type { MouseEvent } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
 import { AuthModal } from "../components/AuthModal";
+import { calculateReputation, type ReputationSummary } from "../lib/reputation";
 
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
@@ -12,7 +13,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; logo_url: string | null; cover_url: string | null;
-  verified: boolean; latitude: number | null; longitude: number | null; services: Service[]; reviews: ReviewSummary[];
+  verified: boolean; latitude: number | null; longitude: number | null; services: Service[]; reviews: ReviewSummary[]; plan?: { plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null } | null;
 };
 
 export const Route = createFileRoute("/buscar")({ component: SearchPage });
@@ -60,7 +61,7 @@ function SearchPage() {
         }
       }
       if (mounted) setAuthLoading(false);
-      const [businessResult, categoryResult] = await Promise.all([
+      const [businessResult, categoryResult, planResult] = await Promise.all([
         supabase
           .from("business_profiles")
           .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,latitude,longitude,services(id,name,category_id,categories(name)),reviews(rating)")
@@ -68,16 +69,23 @@ function SearchPage() {
           .eq("approval_status", "approved")
           .order("business_name"),
         supabase.from("categories").select("id,name,slug").eq("active", true).order("name"),
+        supabase.from("supplier_plan_visibility").select("business_id,plan_slug,plan_name,plan_priority,ends_at"),
       ]);
       if (!mounted) return;
-      if (businessResult.error || categoryResult.error) {
-        console.error("Erro ao carregar catálogo de fornecedores:", businessResult.error ?? categoryResult.error);
+      if (businessResult.error || categoryResult.error || planResult.error) {
+        console.error("Erro ao carregar catálogo de fornecedores:", businessResult.error ?? categoryResult.error ?? planResult.error);
         setError(
           "Não foi possível carregar os fornecedores: " +
-          (businessResult.error?.message ?? categoryResult.error?.message ?? "erro desconhecido")
+          (businessResult.error?.message ?? categoryResult.error?.message ?? planResult.error?.message ?? "erro desconhecido")
         );
       } else {
-        setBusinesses((businessResult.data ?? []) as unknown as Business[]);
+        const planRows = (planResult.data ?? []) as Array<{ business_id: string; plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null }>;
+        const planByBusiness = new Map(planRows.map((row) => [row.business_id, row]));
+        const loadedBusinesses = ((businessResult.data ?? []) as unknown as Business[]).map((business) => ({
+          ...business,
+          plan: planByBusiness.get(business.id) ?? { business_id: business.id, plan_slug: "gratis", plan_name: "Grátis", plan_priority: 0, ends_at: null },
+        }));
+        setBusinesses(loadedBusinesses);
         setCategories(categoryResult.data ?? []);
       }
       setLoading(false);
@@ -170,7 +178,11 @@ function SearchPage() {
       return total;
     }
 
-    return results.map((business) => ({ business, searchScore: score(business) }));
+    return results.map((business) => ({
+      business,
+      searchScore: score(business),
+      reputation: calculateReputation(business.plan?.plan_slug, business.reviews.map((review) => review.rating)),
+    }));
   }, [results, search]);
 
   const sortedResults = useMemo(() => {
@@ -180,17 +192,18 @@ function SearchPage() {
         ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length
         : 0;
     if (sortBy === "rating") {
-      return copy.sort((a, b) => rating(b.business) - rating(a.business) || a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
+      return copy.sort((a, b) => b.reputation.rankingScore - a.reputation.rankingScore || rating(b.business) - rating(a.business) || a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
     }
     if (sortBy === "az") {
       return copy.sort((a, b) => a.business.business_name.localeCompare(b.business.business_name, "pt-BR")).map((item) => item.business);
     }
     if (sortBy === "saved") {
-      return copy.sort((a, b) => Number(favoriteIds.includes(b.business.id)) - Number(favoriteIds.includes(a.business.id))).map((item) => item.business);
+      return copy.sort((a, b) => Number(favoriteIds.includes(b.business.id)) - Number(favoriteIds.includes(a.business.id)) || b.reputation.rankingScore - a.reputation.rankingScore).map((item) => item.business);
     }
     return copy.sort((a, b) =>
       Number(b.business.id === OFFICIAL_BUSINESS_ID) - Number(a.business.id === OFFICIAL_BUSINESS_ID) ||
-      b.searchScore - a.searchScore ||
+      (b.searchScore * 100 + b.reputation.rankingScore) - (a.searchScore * 100 + a.reputation.rankingScore) ||
+      b.reputation.rankingScore - a.reputation.rankingScore ||
       Number(b.business.verified) - Number(a.business.verified) ||
       rating(b.business) - rating(a.business) ||
       a.business.business_name.localeCompare(b.business.business_name, "pt-BR")
@@ -424,6 +437,10 @@ function SearchPage() {
               const serviceNames = business.services.map((service) => service.name).filter(Boolean).slice(0, 3);
               const isOfficial = business.id === OFFICIAL_BUSINESS_ID;
               const avg = isOfficial ? 5 : business.reviews.length ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length : 0;
+              const reputation = isOfficial
+                ? { planSlug: "destaque", planName: "Destaque", planPriority: 45, baseStars: 4, stars: 6, positiveReviews: business.reviews.length, totalReviews: business.reviews.length, satisfaction: 100, level: 3, label: "Boa satisfação", rankingScore: 100 }
+                : calculateReputation(business.plan?.plan_slug, business.reviews.map((review) => review.rating));
+              const reputationClass = reputation.level === 3 ? "green" : reputation.level === 2 ? "yellow" : reputation.level === 1 ? "red" : "none";
               return (
                 <article className="marketplace-card" key={business.id}>
                   <div className="marketplace-card-media">
@@ -436,9 +453,15 @@ function SearchPage() {
                     <div className="marketplace-card-heading">
                       <h3>{business.business_name}</h3>
                       {isOfficial ? <span className="marketplace-official">✓ OFICIAL LOSI</span> : business.verified && <span className="marketplace-verified">Verificado</span>}
+                      {!isOfficial && reputation.planSlug !== "gratis" && <span className={"marketplace-plan-badge " + reputation.planSlug}>{reputation.planName}</span>}
                     </div>
                     {(business.city || business.state) && <div className="marketplace-location">{business.city}{business.city && business.state ? " — " : ""}{business.state}</div>}
                     {isOfficial ? <div className="marketplace-rating marketplace-rating-official"><strong>★ 5.0</strong><span>Avaliação máxima · Satisfação máxima</span></div> : business.reviews.length > 0 && <div className="marketplace-rating"><strong>★ {avg.toFixed(1)}</strong><span>{business.reviews.length} {business.reviews.length === 1 ? "avaliação" : "avaliações"}</span></div>}
+                    <div className="marketplace-reputation-summary" aria-label={reputation.label}>
+                      <span className={"marketplace-reputation-dot " + reputationClass}></span>
+                      <span>{reputation.satisfaction === null ? "Sem reputação" : reputation.satisfaction + "% de satisfação"}</span>
+                      <span>{"★".repeat(reputation.stars)}{reputation.stars < 6 ? "☆".repeat(6 - reputation.stars) : ""}</span>
+                    </div>
                     <p>{business.description || "Profissional ou empresa para eventos cadastrada no LOSI CONECTA."}</p>
                     {serviceNames.length > 0 && <div className="marketplace-services">{serviceNames.map((service) => <span key={service}>{service}</span>)}</div>}
                     <div className="marketplace-card-footer">
