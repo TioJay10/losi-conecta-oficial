@@ -8098,3 +8098,34 @@ button,input,textarea,select{max-width:100%;font:inherit}
     line-height: 1.4 !important;
   }
 }
+
+
+/* BUSCAR — LOSI CONECTA centralizado no cabeçalho mobile */
+@media only screen and (max-width: 768px) {
+  .marketplace-page .marketplace-header-inner {
+    position: relative !important;
+  }
+
+  .marketplace-page .marketplace-logo {
+    position: absolute !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    z-index: 20 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: max-content !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .marketplace-page .marketplace-logo {
+    font-size: 17px !important;
+  }
+}
