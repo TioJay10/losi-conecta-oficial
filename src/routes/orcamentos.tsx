@@ -79,6 +79,8 @@ function QuotesPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState("");
+  const [selectedQuote, setSelectedQuote] = useState<QuoteRow | null>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [clientRequests, setClientRequests] = useState<RequestRow[]>([]);
@@ -112,6 +114,7 @@ function QuotesPage() {
 
       if (!mounted) return;
       setUserId(currentUser.id);
+      setUserEmail(currentUser.email || "");
 
       if (business?.id) {
         setBusinessId(business.id);
@@ -414,6 +417,14 @@ function QuotesPage() {
 
   if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
 
+  const selectedSupplier = selectedQuote ? businessContacts[selectedQuote.business_id] : null;
+  const selectedRequester = selectedQuote?.quote_requests;
+  const selectedRequesterProfile = selectedRequester ? requesterProfiles[selectedRequester.requester_id] : null;
+  const selectedItemLines = selectedQuote?.quote_items ?? [];
+
+  const closeQuoteModal = () => setSelectedQuote(null);
+
+
   const isSupplier = Boolean(businessId);
 
   // Uma solicitação só deixa de estar "Aguardando orçamento" quando existe
@@ -621,6 +632,7 @@ function QuotesPage() {
                         {quote.notes && <p>{quote.notes}</p>}
                       </div>
                       <div className="quote-client-total">
+                        <button className="quotes-secondary quote-view-button" type="button" onClick={() => setSelectedQuote(quote)}>Ver proposta</button>
                         <span>Total</span>
                         <strong>{money(Number(quote.total))}</strong>
                         <div className="quote-client-actions">
@@ -636,6 +648,62 @@ function QuotesPage() {
           </section>
         )}
 
+
+        {selectedQuote && (
+          <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeQuoteModal(); }}>
+            <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="quote-modal-title">
+              <div className="quote-modal-head">
+                <div>
+                  <div className="quotes-kicker">DETALHAMENTO DA PROPOSTA</div>
+                  <h2 id="quote-modal-title">{selectedRequester?.event_title || "Proposta"}</h2>
+                </div>
+                <button type="button" className="quotes-secondary quote-modal-close" onClick={closeQuoteModal}>Fechar</button>
+              </div>
+
+              <div className="quote-modal-parties">
+                <div className="quote-modal-party">
+                  <span>{isSupplier ? "SOLICITANTE" : "FORNECEDOR"}</span>
+                  <strong>{isSupplier ? (selectedRequester?.client_name || "Não informado") : (selectedSupplier?.business_name || "Fornecedor")}</strong>
+                  <p>E-mail: {isSupplier ? (selectedRequester?.client_email || "Não informado") : "E-mail não disponibilizado no perfil"}</p>
+                  <p>Contato: {isSupplier ? (selectedRequester?.client_phone || "Não informado") : (selectedSupplier?.whatsapp || selectedSupplier?.phone || "Não informado")}</p>
+                  {!isSupplier && selectedSupplier?.id && (
+                    <Link className="quote-modal-profile-link" to={"/fornecedor/" + (requesterProfiles[selectedRequester?.requester_id || ""]?.slug || "")}>Perfil público do fornecedor</Link>
+                  )}
+                  {isSupplier && selectedRequesterProfile?.slug && (
+                    <Link className="quote-modal-profile-link" to={"/fornecedor/" + selectedRequesterProfile.slug}>Perfil público do solicitante</Link>
+                  )}
+                </div>
+              </div>
+
+              <div className="quote-modal-event">
+                <h3>Dados do evento</h3>
+                <p><strong>Serviço:</strong> {serviceName(selectedRequester)}</p>
+                <p><strong>Data:</strong> {dateOnly(selectedRequester?.event_date ?? null)}</p>
+                <p><strong>Local:</strong> {selectedRequester?.event_location || "Não informado"}</p>
+                {selectedRequester?.description && <p><strong>Detalhes:</strong> {selectedRequester.description}</p>}
+              </div>
+
+              <div className="quote-modal-items">
+                <h3>Itens da proposta</h3>
+                {selectedItemLines.length ? selectedItemLines.map((item) => (
+                  <div key={item.id} className="quote-modal-item">
+                    <div><strong>{item.description}</strong><span>{item.quantity} x {money(Number(item.unit_price))}</span></div>
+                    <strong>{money(Number(item.total))}</strong>
+                  </div>
+                )) : <p>Nenhum item detalhado.</p>}
+              </div>
+
+              <div className="quote-modal-total">
+                <div><span>Subtotal</span><strong>{money(Number(selectedQuote.subtotal))}</strong></div>
+                <div><span>Desconto</span><strong>{money(Number(selectedQuote.discount))}</strong></div>
+                <div className="grand"><span>TOTAL</span><strong>{money(Number(selectedQuote.total))}</strong></div>
+              </div>
+
+              {selectedQuote.validity_until && <p className="quote-modal-note"><strong>Validade:</strong> {dateOnly(selectedQuote.validity_until)}</p>}
+              {selectedQuote.notes && <p className="quote-modal-note"><strong>Observações:</strong> {selectedQuote.notes}</p>}
+            </section>
+          </div>
+        )}
         {message && <div className={"quotes-message " + messageType} role="status">{message}</div>}
 
 
