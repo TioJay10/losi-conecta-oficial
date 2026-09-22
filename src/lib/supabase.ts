@@ -1,23 +1,26 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl =
+const supabaseUrl = (
   import.meta.env.VITE_SUPABASE_URL ??
-  "https://bpvaftobiosjesdbaany.supabase.co";
+  "https://bpvaftobiosjesdbaany.supabase.co"
+).trim();
 
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabasePublishableKey = (
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  import.meta.env.VITE_SUPABASE_ANON_KEY ??
+  ""
+).trim();
 
 if (!supabasePublishableKey) {
-  throw new Error("VITE_SUPABASE_PUBLISHABLE_KEY não configurada.");
+  throw new Error("Supabase não configurado: defina VITE_SUPABASE_PUBLISHABLE_KEY no ambiente de build.");
 }
 
-// No desenvolvimento local, o navegador pode usar 127.0.0.1, localhost
-// ou uma URL encaminhada pelo ambiente de desenvolvimento. O proxy do Vite
-// mantém as chamadas ao Supabase same-origin e evita falhas de CORS locais.
-// Em produção, as chamadas continuam indo diretamente ao Supabase.
+if (supabasePublishableKey.startsWith("sb_secret_")) {
+  throw new Error("Configuração inválida: VITE_SUPABASE_PUBLISHABLE_KEY não pode receber uma chave secreta.");
+}
+
 const localSupabaseFetch: typeof fetch = (input, init) => {
-  if (!import.meta.env.DEV || typeof window === "undefined") {
-    return fetch(input, init);
-  }
+  if (!import.meta.env.DEV || typeof window === "undefined") return fetch(input, init);
 
   const requestUrl =
     typeof input === "string"
@@ -26,22 +29,17 @@ const localSupabaseFetch: typeof fetch = (input, init) => {
         ? input.toString()
         : input.url;
 
-  if (!requestUrl.startsWith(supabaseUrl)) {
-    return fetch(input, init);
-  }
+  if (!requestUrl.startsWith(supabaseUrl)) return fetch(input, init);
 
   const remoteUrl = new URL(requestUrl);
   const proxiedUrl =
-    window.location.origin + "/__supabase" +
-    remoteUrl.pathname + remoteUrl.search;
+    window.location.origin + "/__supabase" + remoteUrl.pathname + remoteUrl.search;
 
   return fetch(proxiedUrl, init);
 };
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
-  global: {
-    fetch: localSupabaseFetch,
-  },
+  global: { fetch: localSupabaseFetch },
   auth: {
     persistSession: true,
     autoRefreshToken: true,
