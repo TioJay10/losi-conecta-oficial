@@ -7687,3 +7687,14 @@ a.profile-logo:hover,
 }
 .marketplace-rating-official strong{color:#b98b24 !important}
 .marketplace-rating-official span{font-weight:700;color:#596273}
+
+
+.provider-official-badge{
+  display:inline-flex !important;
+  align-items:center;
+  gap:5px;
+  background:linear-gradient(135deg,#07111f,#0b182a) !important;
+  color:#f0d99a !important;
+  border:1px solid #d6b46a !important;
+  box-shadow:0 4px 10px rgba(7,17,31,.12);
+}
