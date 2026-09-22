@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { AppLogo } from "../../components/AppLogo";
+import { AuthModal } from "../../components/AuthModal";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
 const OFFICIAL_BUSINESS_ID = "333ccf56-324f-4e4f-99e3-1ebc9ade0140";
@@ -38,6 +39,7 @@ function ProviderPage() {
   const [reportMessage, setReportMessage] = useState("");
   const [reporting, setReporting] = useState(false);
   const [quoteMessage, setQuoteMessage] = useState("");
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
   const [reputation, setReputation] = useState({ score: 0, level: 1, reviews: 0, negativeReviews: 0, completedServices: 0, reports: 0, blocked: false });
 
@@ -245,11 +247,20 @@ function ProviderPage() {
 
   function openQuoteRequest() {
     if (!userId) {
-      window.location.href = "/entrar";
+      setAuthModalOpen(true);
       return;
     }
     const target = document.getElementById("provider-quote-request");
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function handleAuthenticatedFromModal() {
+    setAuthModalOpen(false);
+    window.setTimeout(async () => {
+      const { data } = await supabase.auth.getSession();
+      setUserId(data.session?.user.id ?? null);
+      document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   }
 
   async function submitQuoteRequest(event: FormEvent<HTMLFormElement>) {
@@ -527,6 +538,7 @@ function ProviderPage() {
           </div>
         </aside>
       </section>
+      {authModalOpen && <AuthModal onClose={() => setAuthModalOpen(false)} onAuthenticated={handleAuthenticatedFromModal} />}
     </main>
   );
 }
