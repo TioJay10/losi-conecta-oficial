@@ -7026,11 +7026,18 @@ a {
   }
 
   .provider-page .provider-portfolio-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .provider-page .provider-portfolio-item {
+    aspect-ratio: 4 / 3 !important;
   }
 
   .provider-page .provider-portfolio-item img {
-    height: min(70vw, 260px) !important;
+    height: 100% !important;
+    aspect-ratio: 4 / 3 !important;
+    object-fit: cover !important;
   }
 
   .provider-page .provider-profile-actions {
