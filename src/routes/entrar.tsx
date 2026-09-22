@@ -264,7 +264,7 @@ function AuthPage() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "radial-gradient(circle at 72% 4%, rgba(214,180,106,.12), transparent 27%), radial-gradient(circle at 25% 60%, rgba(79,70,199,.07), transparent 30%), #f4f5f8", padding: 24, fontFamily: "Arial, sans-serif", color: "#172033", boxSizing: "border-box" },
+  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "radial-gradient(circle at 72% 4%, rgba(214,180,106,.12), transparent 27%), radial-gradient(circle at 25% 60%, rgba(79,70,199,.07), transparent 30%), #f4f5f8", padding: 24, fontFamily: "\"Montserrat\", Arial, sans-serif", color: "#172033", boxSizing: "border-box" },
   card: { width: "100%", maxWidth: 470, background: "#fff", border: "1px solid rgba(214,180,106,.48)", borderRadius: 20, overflow: "hidden", boxSizing: "border-box", boxShadow: "0 24px 60px rgba(7,17,31,.16)" },
   brandPanel: { padding: "30px 34px 28px", background: "linear-gradient(145deg, rgba(18,31,50,.99), rgba(5,13,24,.99))", borderBottom: "1px solid rgba(214,180,106,.30)", boxSizing: "border-box" },
   formPanel: { padding: "30px 34px 32px", background: "#fff", boxSizing: "border-box" },
