@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
 /* BUSCAR FORNECEDOR — cada botão do cabeçalho ocupa seu próprio lado no mobile */
 @media only screen and (max-width: 599px) {
   .catalog-page .catalog-header .catalog-header-actions {
@@ -83,7 +85,7 @@
   min-height: 100vh;
   background: #f7f9fd;
   color: #172033;
-  font-family: Arial, sans-serif;
+  font-family: "Montserrat", Arial, sans-serif;
 }
 .quotes-header {
   height: 72px;
@@ -352,7 +354,7 @@
   display: grid;
   place-items: center;
   color: #687386;
-  font-family: Arial, sans-serif;
+  font-family: "Montserrat", Arial, sans-serif;
 }
 .provider-profile-actions {
   flex-wrap: wrap;
@@ -1283,7 +1285,7 @@ a {
   min-height: 100vh;
   background: #f5f6fb !important;
   color: #172033 !important;
-  font-family: Arial, sans-serif;
+  font-family: "Montserrat", Arial, sans-serif;
   overflow-x: hidden;
 }
 
@@ -1835,7 +1837,7 @@ a {
 
 
 /* LOSI CONECTA — busca em layout marketplace */
-.marketplace-page{min-height:100vh;background:#f4f5f8;color:#172033;font-family:Arial,Helvetica,sans-serif}
+.marketplace-page{min-height:100vh;background:#f4f5f8;color:#172033;font-family: "Montserrat", Arial, Helvetica, sans-serif}
 .marketplace-header{background:#fff;border-bottom:1px solid #e2e5eb;position:sticky;top:0;z-index:40}
 .marketplace-header-inner{max-width:1280px;margin:0 auto;min-height:72px;padding:0 24px;display:grid;grid-template-columns:190px minmax(320px,1fr) auto;align-items:center;gap:24px}
 .marketplace-logo{font-weight:900;letter-spacing:-.045em;font-size:23px;color:#2436a6;text-decoration:none;white-space:nowrap}
@@ -2409,14 +2411,14 @@ a {
   min-height: 100vh;
   background: #f7f8fc;
   color: #172033;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 .business-services-loading {
   min-height: 100vh;
   display: grid;
   place-items: center;
   color: #687386;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 .business-services-header {
   min-height: 72px;
@@ -2710,14 +2712,14 @@ a {
   min-height: 100vh;
   background: #f7f8fc;
   color: #172033;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 .personal-profile-loading {
   min-height: 100vh;
   display: grid;
   place-items: center;
   color: #687386;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 .personal-profile-header { min-height: 72px; }
 .personal-profile-content {
