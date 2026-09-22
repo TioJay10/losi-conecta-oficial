@@ -8164,89 +8164,96 @@ button,input,textarea,select{max-width:100%;font:inherit}
 }
 
 
-/* BUSCAR — correção definitiva do cabeçalho mobile
-   O logo fica centrado na viewport, enquanto menu e ações ficam presos às laterais. */
+/* BUSCAR — cabeçalho mobile: três áreas independentes, sem sobreposição */
 @media only screen and (max-width: 768px) {
   .marketplace-page .marketplace-header-inner {
-    display: block !important;
-    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 52px minmax(0, 1fr) 76px !important;
+    grid-template-rows: 64px auto !important;
+    align-items: center !important;
     min-height: 118px !important;
     padding: 0 12px 10px !important;
-  }
-
-  .marketplace-page .marketplace-logo {
-    position: absolute !important;
-    left: 50% !important;
-    top: 0 !important;
-    transform: translateX(-50%) !important;
-    width: max-content !important;
-    max-width: none !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    margin: 0 !important;
-    font-size: 18px !important;
-    line-height: 64px !important;
-    z-index: 5 !important;
+    position: relative !important;
   }
 
   .marketplace-page .marketplace-mobile-menu-button {
-    position: absolute !important;
-    left: 12px !important;
-    top: 11px !important;
-    z-index: 10 !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
     margin: 0 !important;
+    z-index: 10 !important;
+  }
+
+  .marketplace-page .marketplace-logo {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: center !important;
+    align-self: center !important;
+    position: static !important;
+    transform: none !important;
+    display: inline-flex !important;
+    width: max-content !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: clip !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    z-index: 5 !important;
   }
 
   .marketplace-page .marketplace-header-actions {
-    position: absolute !important;
-    right: 12px !important;
-    top: 11px !important;
-    z-index: 10 !important;
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    width: 76px !important;
+    min-width: 0 !important;
+    max-width: 76px !important;
+    overflow: hidden !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
     gap: 7px !important;
-    width: auto !important;
-    max-width: 88px !important;
-    min-width: 0 !important;
-    overflow: hidden !important;
+    margin: 0 !important;
+    z-index: 10 !important;
   }
 
   .marketplace-page .marketplace-header-actions .marketplace-account {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    max-width: 76px !important;
     min-width: 0 !important;
-    max-width: 88px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
 
   .marketplace-page .marketplace-main-search {
-    position: absolute !important;
-    left: 12px !important;
-    right: 12px !important;
-    top: 74px !important;
-    width: auto !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
     min-width: 0 !important;
     margin: 0 !important;
   }
 }
 
 @media only screen and (max-width: 480px) {
+  .marketplace-page .marketplace-header-inner {
+    grid-template-columns: 46px minmax(0, 1fr) 64px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
   .marketplace-page .marketplace-logo {
-    max-width: none !important;
     font-size: 17px !important;
   }
 
-  .marketplace-page .marketplace-header-actions {
-    max-width: 70px !important;
+  .marketplace-page .marketplace-header-actions,
+  .marketplace-page .marketplace-header-actions .marketplace-account {
+    width: 64px !important;
+    max-width: 64px !important;
   }
 
-  .marketplace-page .marketplace-header-actions .marketplace-account {
-    max-width: 70px !important;
+  .marketplace-page .marketplace-account {
     font-size: 11px !important;
   }
 }
