@@ -41,6 +41,7 @@ type QuoteRow = {
 type BusinessContact = {
   id: string;
   business_name: string;
+  slug: string | null;
   whatsapp: string | null;
   phone: string | null;
 };
@@ -206,7 +207,7 @@ function QuotesPage() {
           if (businessIds.length > 0) {
             const { data: businesses } = await supabase
               .from("business_profiles")
-              .select("id,business_name,whatsapp,phone")
+              .select("id,business_name,slug,whatsapp,phone")
               .in("id", businessIds);
 
             const contacts = (businesses ?? []).reduce<Record<string, BusinessContact>>((map, business) => {
@@ -420,6 +421,7 @@ function QuotesPage() {
   const selectedSupplier = selectedQuote ? businessContacts[selectedQuote.business_id] : null;
   const selectedRequester = selectedQuote?.quote_requests;
   const selectedRequesterProfile = selectedRequester ? requesterProfiles[selectedRequester.requester_id] : null;
+  const selectedSupplierSlug = selectedSupplier?.slug || "";
   const selectedItemLines = selectedQuote?.quote_items ?? [];
 
   const closeQuoteModal = () => setSelectedQuote(null);
@@ -667,7 +669,7 @@ function QuotesPage() {
                   <p>E-mail: {isSupplier ? (selectedRequester?.client_email || "Não informado") : "E-mail não disponibilizado no perfil"}</p>
                   <p>Contato: {isSupplier ? (selectedRequester?.client_phone || "Não informado") : (selectedSupplier?.whatsapp || selectedSupplier?.phone || "Não informado")}</p>
                   {!isSupplier && selectedSupplier?.id && (
-                    <Link className="quote-modal-profile-link" to={"/fornecedor/" + (requesterProfiles[selectedRequester?.requester_id || ""]?.slug || "")}>Perfil público do fornecedor</Link>
+                    <Link className="quote-modal-profile-link" to={"/fornecedor/" + selectedSupplierSlug}>Perfil público do fornecedor</Link>
                   )}
                   {isSupplier && selectedRequesterProfile?.slug && (
                     <Link className="quote-modal-profile-link" to={"/fornecedor/" + selectedRequesterProfile.slug}>Perfil público do solicitante</Link>
