@@ -7918,3 +7918,8 @@ a.profile-logo:hover,
     overflow-wrap: anywhere !important;
   }
 }
+
+/* PAINEL — cabeçalho com a mesma cor do menu lateral */
+.dashboard-page .dashboard-header {
+  background: linear-gradient(145deg, rgba(18,31,50,.98), rgba(5,13,24,.99)) !important;
+}
