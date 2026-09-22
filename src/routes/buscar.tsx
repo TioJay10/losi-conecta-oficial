@@ -197,22 +197,6 @@ function SearchPage() {
     ).map((item) => item.business);
   }, [scoredResults, sortBy, favoriteIds]);
 
-  async function toggleFavorite(businessId: string) {
-    if (!userId) {
-      window.location.href = "/entrar";
-      return;
-    }
-    setFavoriteBusy(businessId);
-    const isFavorite = favoriteIds.includes(businessId);
-    const result = isFavorite
-      ? await supabase.from("favorites").delete().eq("user_id", userId).eq("business_id", businessId)
-      : await supabase.from("favorites").insert({ user_id: userId, business_id: businessId });
-    if (!result.error) {
-      setFavoriteIds((current) => isFavorite ? current.filter((id) => id !== businessId) : [...current, businessId]);
-    }
-    setFavoriteBusy(null);
-  }
-
   async function saveFavoriteForUser(businessId: string, currentUserId: string) {
     setFavoriteBusy(businessId);
     const isFavorite = favoriteIds.includes(businessId);
