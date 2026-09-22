@@ -75,7 +75,7 @@ function RootComponent() {
     };
   }, []);
 
-  const publicRoute = location.pathname === "/" || location.pathname === "/entrar";
+  const publicRoute = location.pathname === "/" || location.pathname === "/entrar" || location.pathname === "/buscar" || location.pathname.startsWith("/fornecedor/");
 
   if (!authChecked && !publicRoute) {
     return (
