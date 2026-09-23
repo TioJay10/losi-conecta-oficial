@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { NotificationBell } from "../components/NotificationBell";
-import { NotificationBell } from "../components/NotificationBell";
 
 export const Route = createFileRoute("/painel")({
   component: DashboardPage,
