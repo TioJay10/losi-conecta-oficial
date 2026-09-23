@@ -9628,3 +9628,101 @@ button,input,textarea,select{max-width:100%;font:inherit}
     gap: 10px !important;
   }
 }
+
+
+/* BUSCA — organização premium e alinhamento */
+.marketplace-page {
+  background: #f7f9fd !important;
+}
+.marketplace-page .marketplace-content {
+  width: min(1180px, calc(100% - 48px)) !important;
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+.marketplace-page .marketplace-main {
+  padding-top: 24px !important;
+  padding-bottom: 44px !important;
+}
+.marketplace-page .marketplace-toolbar,
+.marketplace-page .marketplace-filters,
+.marketplace-page .marketplace-results-header {
+  box-sizing: border-box !important;
+}
+.marketplace-page .marketplace-results-header {
+  margin: 0 0 14px !important;
+}
+.marketplace-page .marketplace-results-header h1,
+.marketplace-page .marketplace-results-header h2 {
+  margin-top: 0 !important;
+}
+.marketplace-page .marketplace-grid {
+  gap: 14px !important;
+}
+.marketplace-page .marketplace-card {
+  border: 1px solid #e1e4ec !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 18px rgba(25,32,55,.045) !important;
+  overflow: hidden !important;
+}
+.marketplace-page .marketplace-card-body {
+  padding: 14px !important;
+}
+.marketplace-page .marketplace-card-heading {
+  gap: 9px !important;
+}
+.marketplace-page .marketplace-card-heading h3 {
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+.marketplace-page .marketplace-card-body > p {
+  margin: 8px 0 !important;
+  line-height: 1.45 !important;
+}
+.marketplace-page .marketplace-card-footer {
+  margin-top: 10px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #edf0f4 !important;
+}
+.marketplace-page .marketplace-sidebar {
+  border-radius: 13px !important;
+  border: 1px solid #e1e4ec !important;
+  background: #fff !important;
+  box-shadow: 0 5px 18px rgba(25,32,55,.045) !important;
+}
+.marketplace-page .marketplace-sidebar-section {
+  padding: 14px !important;
+}
+.marketplace-page .marketplace-empty,
+.marketplace-page .marketplace-loading,
+.marketplace-page .marketplace-error {
+  border: 1px solid #e1e4ec !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: 0 5px 18px rgba(25,32,55,.04) !important;
+}
+@media only screen and (max-width: 900px) {
+  .marketplace-page .marketplace-content {
+    width: calc(100% - 32px) !important;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .marketplace-page .marketplace-content {
+    width: calc(100% - 20px) !important;
+  }
+  .marketplace-page .marketplace-main {
+    padding-top: 18px !important;
+    padding-bottom: 30px !important;
+  }
+  .marketplace-page .marketplace-grid {
+    gap: 9px !important;
+  }
+  .marketplace-page .marketplace-card-body {
+    padding: 11px !important;
+  }
+  .marketplace-page .marketplace-card-footer {
+    margin-top: 8px !important;
+    padding-top: 8px !important;
+  }
+}
