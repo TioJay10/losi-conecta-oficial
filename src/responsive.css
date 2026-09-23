@@ -11460,3 +11460,77 @@ button.availability-day {
     z-index: 3000 !important;
   }
 }
+
+
+/* PERFIL DO FORNECEDOR — coração de curtidas */
+.provider-profile-like {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid currentColor;
+  border-radius: 11px;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.provider-profile-like:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(23,32,51,.10); }
+.provider-profile-like:disabled { opacity: .6; cursor: wait; transform: none; }
+.provider-profile-like.green { color: #16803a; background: #f1fbf4; }
+.provider-profile-like.yellow { color: #b58a16; background: #fffaf0; }
+.provider-profile-like.red { color: #c43737; background: #fff3f3; }
+.provider-profile-like.gold { color: #a87918; background: linear-gradient(145deg,#fffaf0,#f7edc9); box-shadow: 0 8px 24px rgba(180,137,35,.16); }
+.provider-profile-heart { font-size: 20px; line-height: 1; }
+.provider-profile-like.liked .provider-profile-heart { text-shadow: 0 2px 8px currentColor; }
+.provider-profile-like-count { min-width: 18px; text-align: center; font-size: 12px; }
+.provider-profile-like-label { white-space: nowrap; }
+@media only screen and (max-width: 600px) {
+  .provider-profile-actions { display: grid !important; grid-template-columns: 1fr; gap: 9px !important; }
+  .provider-profile-actions > * { width: 100% !important; min-width: 0; box-sizing: border-box; }
+  .provider-profile-like { min-height: 44px; }
+}
+
+/* PAINEL — conquista do Coração Dourado */
+.dashboard-golden-heart-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(7,17,31,.68);
+  box-sizing: border-box;
+}
+.dashboard-golden-heart-modal {
+  width: min(520px,100%);
+  overflow: hidden;
+  border: 1px solid #e8d39a;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 30px 90px rgba(7,17,31,.28);
+}
+.dashboard-golden-heart-top {
+  padding: 30px 26px 24px;
+  text-align: center;
+  background: linear-gradient(145deg,#fffaf0,#f6edcf);
+}
+.dashboard-golden-heart-icon { font-size: 56px; line-height: 1; color: #c79a32; text-shadow: 0 5px 16px rgba(199,154,50,.28); }
+.dashboard-golden-heart-top h2 { margin: 12px 0 7px; color: #172033; font-size: 24px; }
+.dashboard-golden-heart-top p { margin: 0; color: #687386; font-size: 13px; line-height: 1.6; }
+.dashboard-golden-heart-body { padding: 24px 26px 26px; }
+.dashboard-golden-heart-body p { margin: 0 0 18px; color: #4b5565; line-height: 1.6; text-align: center; }
+.dashboard-golden-heart-action { width: 100%; }
+.dashboard-golden-heart-message { margin-top: 12px !important; font-size: 12px; color: #16803a !important; }
+@media only screen and (max-width: 600px) {
+  .dashboard-golden-heart-backdrop { align-items: flex-end; padding: 10px; }
+  .dashboard-golden-heart-modal { border-radius: 18px; }
+  .dashboard-golden-heart-top { padding: 26px 18px 20px; }
+  .dashboard-golden-heart-top h2 { font-size: 21px; }
+  .dashboard-golden-heart-body { padding: 20px 18px 22px; }
+}
