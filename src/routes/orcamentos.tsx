@@ -111,6 +111,12 @@ function QuotesPage() {
   const [filterFrom, setFilterFrom] = useState("");
   const [filterTo, setFilterTo] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [proposalRequestId, setProposalRequestId] = useState("");
+  const [proposalItems, setProposalItems] = useState([{ description: "", quantity: "1", unitPrice: "" }]);
+  const [proposalDiscount, setProposalDiscount] = useState("0");
+  const [proposalValidity, setProposalValidity] = useState("");
+  const [proposalNotes, setProposalNotes] = useState("");
+  const [savingProposal, setSavingProposal] = useState(false);
   const detailsRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -507,6 +513,157 @@ function QuotesPage() {
     return () => window.clearTimeout(timer);
   }, [activeMetric]);
 
+  function proposalSubtotal() {
+    return proposalItems.reduce((sum, item) => {
+      const quantity = Number(item.quantity) || 0;
+      const unitPrice = Number(item.unitPrice.replace(",", ".")) || 0;
+      return sum + quantity * unitPrice;
+    }, 0);
+  }
+
+  function proposalTotal() {
+    return Math.max(0, proposalSubtotal() - (Number(proposalDiscount.replace(",", ".")) || 0));
+  }
+
+  function addProposalItem() {
+    setProposalItems((items) => [...items, { description: "", quantity: "1", unitPrice: "" }]);
+  }
+
+  function removeProposalItem(index: number) {
+    setProposalItems((items) => items.length === 1 ? items : items.filter((_, itemIndex) => itemIndex !== index));
+  }
+
+  function updateProposalItem(index: number, field: "description" | "quantity" | "unitPrice", value: string) {
+    setProposalItems((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item));
+  }
+
+  function resetProposalForm() {
+    setProposalRequestId("");
+    setProposalItems([{ description: "", quantity: "1", unitPrice: "" }]);
+    setProposalDiscount("0");
+    setProposalValidity("");
+    setProposalNotes("");
+  }
+
+  async function createAndSendProposal() {
+    if (!businessId || !userId) return;
+    const request = supplierPendingRequests.find((item) => item.id === proposalRequestId);
+    if (!request) {
+      setMessageType("error");
+      setMessage("Selecione uma solicitação para montar a proposta.");
+      return;
+    }
+
+    const validItems = proposalItems
+      .map((item) => ({
+        description: item.description.trim(),
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unitPrice.replace(",", ".")),
+      }))
+      .filter((item) => item.description && item.quantity > 0 && Number.isFinite(item.unit_price) && item.unit_price >= 0);
+
+    if (!validItems.length) {
+      setMessageType("error");
+      setMessage("Adicione pelo menos um item válido à proposta.");
+      return;
+    }
+
+    const subtotal = validItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
+    const discount = Math.max(0, Number(proposalDiscount.replace(",", ".")) || 0);
+    const total = Math.max(0, subtotal - discount);
+
+    setSavingProposal(true);
+    setMessage("");
+    try {
+      const { data: quote, error: quoteError } = await supabase
+        .from("quotes")
+        .insert({
+          request_id: request.id,
+          business_id: businessId,
+          client_id: request.requester_id,
+          subtotal,
+          discount,
+          total,
+          validity_until: proposalValidity || null,
+          notes: proposalNotes.trim() || null,
+          status: "sent",
+          sent_at: new Date().toISOString(),
+        })
+        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at")
+        .single();
+
+      if (quoteError || !quote) throw quoteError || new Error("Não foi possível criar a proposta.");
+
+      const { error: itemsError } = await supabase.from("quote_items").insert(
+        validItems.map((item) => ({
+          quote_id: quote.id,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total: item.quantity * item.unit_price,
+        })),
+      );
+
+      if (itemsError) {
+        await supabase.from("quotes").delete().eq("id", quote.id).eq("business_id", businessId);
+        throw itemsError;
+      }
+
+      await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", request.id).eq("business_id", businessId);
+
+      const supplier = businessContacts[businessId];
+      const profileUrl = supplier?.slug
+        ? window.location.origin + "/fornecedor/" + supplier.slug + "?proposta=" + quote.id
+        : "";
+      const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
+      const whatsappMessage = [
+        "Olá, " + request.client_name + "!",
+        "",
+        "Preparei sua proposta pelo LOSI CONECTA.",
+        "",
+        "Fornecedor: " + supplierName,
+        "Empresa: " + (supplier?.business_name || "Não informada"),
+        "Telefone: " + (supplier?.phone || supplier?.whatsapp || "Não informado"),
+        "E-mail: " + userEmail,
+        "",
+        "Valor total: " + money(total),
+        proposalValidity ? "Validade: " + formatQuoteDate(proposalValidity) : "",
+        "",
+        profileUrl ? "Acesse sua proposta pelo link abaixo:" : "",
+        profileUrl,
+      ].filter(Boolean).join("\n");
+
+      const number = normalizeWhatsAppNumber(request.client_phone);
+      const whatsappUrl = number
+        ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage)
+        : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+
+      const createdQuote = {
+        ...(quote as QuoteRow),
+        quote_items: validItems.map((item, index) => ({
+          id: "local-" + index,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total: item.quantity * item.unit_price,
+        })),
+        quote_requests: request,
+      } as QuoteRow;
+      setQuotes((current) => [createdQuote, ...current]);
+      setRequests((current) => current.map((item) => item.id === request.id ? { ...item, status: "quoted" } : item));
+      resetProposalForm();
+      setMessageType("success");
+      setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
+    } catch (error: any) {
+      console.error("Erro ao criar proposta:", error);
+      setMessageType("error");
+      setMessage(error?.message || "Não foi possível criar a proposta.");
+    } finally {
+      setSavingProposal(false);
+    }
+  }
+
   async function deleteQuote(quote: QuoteRow) {
     const confirmed = window.confirm("Excluir este orçamento? Esta ação não pode ser desfeita.");
     if (!confirmed) return;
@@ -570,6 +727,49 @@ function QuotesPage() {
 
   return (
     <main className="quotes-page">
+      <style>{`
+        .proposal-builder{margin:28px 0 34px;padding:24px;border:1px solid rgba(31,41,55,.12);border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(31,41,55,.07)}
+        .proposal-builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:22px}
+        .proposal-builder-head h2{margin:4px 0 6px;font-size:24px;line-height:1.2}
+        .proposal-builder-head p{margin:0;color:#667085;font-size:14px;line-height:1.55}
+        .proposal-form-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(180px,.6fr);gap:16px;margin-bottom:18px}
+        .proposal-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+        .proposal-field label{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475467}
+        .proposal-field input,.proposal-field select,.proposal-field textarea{width:100%;box-sizing:border-box;border:1px solid #d0d5dd;border-radius:11px;background:#fff;color:#101828;padding:12px 13px;font:inherit;outline:none}
+        .proposal-field input:focus,.proposal-field select:focus,.proposal-field textarea:focus{border-color:#667085;box-shadow:0 0 0 3px rgba(102,112,133,.12)}
+        .proposal-field textarea{min-height:94px;resize:vertical}
+        .proposal-items{border:1px solid #eaecf0;border-radius:15px;overflow:hidden;margin:18px 0}
+        .proposal-items-title{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 16px;background:#f8f9fb;border-bottom:1px solid #eaecf0}
+        .proposal-items-title strong{font-size:14px;color:#101828}
+        .proposal-add{border:0;background:transparent;color:#344054;font-weight:700;cursor:pointer;padding:8px 4px}
+        .proposal-item{display:grid;grid-template-columns:minmax(0,1fr) 92px 145px 42px;gap:10px;padding:14px 16px;border-bottom:1px solid #eaecf0}
+        .proposal-item:last-child{border-bottom:0}
+        .proposal-remove{border:1px solid #d0d5dd;background:#fff;border-radius:10px;cursor:pointer;font-size:18px;color:#667085}
+        .proposal-summary{display:flex;justify-content:flex-end;margin:18px 0}
+        .proposal-summary-box{width:min(100%,360px);border:1px solid #eaecf0;border-radius:15px;padding:16px;background:#fafafa}
+        .proposal-summary-line{display:flex;justify-content:space-between;gap:20px;margin:7px 0;color:#475467;font-size:14px}
+        .proposal-summary-line.total{margin-top:12px;padding-top:12px;border-top:1px solid #d0d5dd;color:#101828;font-size:17px;font-weight:800}
+        .proposal-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:18px}
+        .proposal-primary{border:0;border-radius:11px;padding:12px 18px;background:#1f2937;color:#fff;font-weight:800;cursor:pointer;min-height:44px}
+        .proposal-primary:disabled{opacity:.55;cursor:not-allowed}
+        .proposal-hint{margin:12px 0 0;color:#667085;font-size:12px;line-height:1.5}
+        .proposal-client{padding:12px 14px;border-radius:12px;background:#f8f9fb;border:1px solid #eaecf0;margin-bottom:18px}
+        .proposal-client strong{display:block;color:#101828}
+        .proposal-client span{display:block;color:#667085;font-size:13px;margin-top:2px}
+        @media(max-width:700px){
+          .proposal-builder{padding:18px;margin-top:20px;border-radius:16px}
+          .proposal-builder-head{display:block}
+          .proposal-builder-head h2{font-size:21px}
+          .proposal-form-grid{grid-template-columns:1fr}
+          .proposal-item{grid-template-columns:minmax(0,1fr) 76px;gap:9px}
+          .proposal-item .proposal-price{grid-column:1}
+          .proposal-remove{grid-column:2;grid-row:1;align-self:end}
+          .proposal-actions{display:grid;grid-template-columns:1fr}
+          .proposal-primary{width:100%}
+          .proposal-summary{justify-content:stretch}
+          .proposal-summary-box{width:100%;box-sizing:border-box}
+        }
+      `}</style>
       <header className="quotes-header">
         <AppLogo className="catalog-logo">LOSI <span>CONECTA</span></AppLogo>
               <Link to="/painel" className="quotes-back">Voltar ao painel</Link>
@@ -579,6 +779,104 @@ function QuotesPage() {
         <div className="quotes-kicker">ORÇAMENTOS</div>
         <h1>Orçamentos e solicitações</h1>
         <p className="quotes-intro">Acompanhe o que você solicitou, os orçamentos que recebeu e, quando também for fornecedor, as solicitações e propostas da sua empresa.</p>
+
+        {isSupplier && (
+          <section className="proposal-builder" aria-labelledby="proposal-builder-title">
+            <div className="proposal-builder-head">
+              <div>
+                <div className="quotes-kicker">NOVA PROPOSTA</div>
+                <h2 id="proposal-builder-title">Preparar orçamento para o cliente</h2>
+                <p>Monte uma proposta detalhada com os dados do fornecedor e envie o acesso diretamente pelo WhatsApp.</p>
+              </div>
+            </div>
+
+            {supplierPendingRequests.length === 0 ? (
+              <div className="quotes-empty">Não há solicitações aguardando orçamento no momento.</div>
+            ) : (
+              <>
+                <div className="proposal-field" style={{ marginBottom: 18 }}>
+                  <label htmlFor="proposal-request">Cliente e solicitação</label>
+                  <select id="proposal-request" value={proposalRequestId} onChange={(event) => setProposalRequestId(event.target.value)}>
+                    <option value="">Selecione a solicitação</option>
+                    {supplierPendingRequests.map((request) => (
+                      <option key={request.id} value={request.id}>
+                        {request.client_name} — {request.event_title} — {serviceName(request)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {proposalRequestId && (() => {
+                  const request = supplierPendingRequests.find((item) => item.id === proposalRequestId);
+                  if (!request) return null;
+                  return (
+                    <div className="proposal-client">
+                      <strong>{request.client_name}</strong>
+                      <span>{request.client_phone || "WhatsApp não informado"} · {request.client_email || "E-mail não informado"}</span>
+                    </div>
+                  );
+                })()}
+
+                <div className="proposal-items">
+                  <div className="proposal-items-title">
+                    <strong>Itens da proposta</strong>
+                    <button type="button" className="proposal-add" onClick={addProposalItem}>+ Adicionar item</button>
+                  </div>
+                  {proposalItems.map((item, index) => (
+                    <div className="proposal-item" key={index}>
+                      <div className="proposal-field">
+                        <label>Descrição</label>
+                        <input value={item.description} onChange={(event) => updateProposalItem(index, "description", event.target.value)} placeholder="Ex.: Recreação e monitoria" />
+                      </div>
+                      <div className="proposal-field">
+                        <label>Qtd.</label>
+                        <input type="number" min="1" step="1" value={item.quantity} onChange={(event) => updateProposalItem(index, "quantity", event.target.value)} />
+                      </div>
+                      <div className="proposal-field proposal-price">
+                        <label>Valor unitário</label>
+                        <input inputMode="decimal" value={item.unitPrice} onChange={(event) => updateProposalItem(index, "unitPrice", event.target.value)} placeholder="0,00" />
+                      </div>
+                      <button type="button" className="proposal-remove" onClick={() => removeProposalItem(index)} aria-label="Remover item">×</button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="proposal-form-grid">
+                  <div className="proposal-field">
+                    <label htmlFor="proposal-notes">Observações da proposta</label>
+                    <textarea id="proposal-notes" value={proposalNotes} onChange={(event) => setProposalNotes(event.target.value)} placeholder="Inclua condições, prazo, detalhes do serviço ou informações importantes." />
+                  </div>
+                  <div>
+                    <div className="proposal-field">
+                      <label htmlFor="proposal-discount">Desconto</label>
+                      <input id="proposal-discount" inputMode="decimal" value={proposalDiscount} onChange={(event) => setProposalDiscount(event.target.value)} placeholder="0,00" />
+                    </div>
+                    <div className="proposal-field" style={{ marginTop: 12 }}>
+                      <label htmlFor="proposal-validity">Validade</label>
+                      <input id="proposal-validity" type="date" value={proposalValidity} onChange={(event) => setProposalValidity(event.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="proposal-summary">
+                  <div className="proposal-summary-box">
+                    <div className="proposal-summary-line"><span>Subtotal</span><strong>{money(proposalSubtotal())}</strong></div>
+                    <div className="proposal-summary-line"><span>Desconto</span><strong>{money(Number(proposalDiscount.replace(",", ".")) || 0)}</strong></div>
+                    <div className="proposal-summary-line total"><span>Total da proposta</span><strong>{money(proposalTotal())}</strong></div>
+                  </div>
+                </div>
+
+                <div className="proposal-actions">
+                  <button type="button" className="quotes-secondary" onClick={resetProposalForm}>Limpar</button>
+                  <button type="button" className="proposal-primary" disabled={savingProposal || !proposalRequestId} onClick={createAndSendProposal}>
+                    {savingProposal ? "Preparando proposta..." : "Criar proposta e enviar pelo WhatsApp"}
+                  </button>
+                </div>
+                <p className="proposal-hint">O WhatsApp será aberto com a mensagem pronta e o link da proposta.</p>
+              </>
+            )}
+          </section>
+        )}
 
         {isSupplier && (
           <div className="quotes-supplier-intro">
