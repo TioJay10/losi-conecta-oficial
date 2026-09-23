@@ -135,41 +135,6 @@ function SearchPage() {
     if (radiusKm !== null && !userLocation && !locationLoading) requestLocation();
   }, [radiusKm, userLocation, locationLoading]);
 
-  // Parallax leve e isolado: somente nesta página e somente em telas mobile.
-  useEffect(() => {
-    if (typeof window === "undefined" || window.innerWidth > 768) return;
-
-    const searchPanel = document.querySelector<HTMLElement>(".marketplace-search-panel");
-    const content = document.querySelector<HTMLElement>(".marketplace-content");
-    if (!searchPanel || !content) return;
-
-    let frame = 0;
-
-    const updateParallax = () => {
-      frame = 0;
-      const y = Math.min(window.scrollY, 520);
-      const progress = y / 520;
-      searchPanel.style.transform = `translate3d(0, ${-12 * progress}px, 0) scale(${1 - 0.018 * progress})`;
-      searchPanel.style.opacity = String(1 - 0.12 * progress);
-      content.style.transform = `translate3d(0, ${10 * (1 - progress)}px, 0)`;
-    };
-
-    const onScroll = () => {
-      if (!frame) frame = window.requestAnimationFrame(updateParallax);
-    };
-
-    updateParallax();
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) window.cancelAnimationFrame(frame);
-      searchPanel.style.transform = "";
-      searchPanel.style.opacity = "";
-      content.style.transform = "";
-    };
-  }, []);
-
   const results = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
     const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
