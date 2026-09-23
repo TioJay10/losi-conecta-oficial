@@ -3174,138 +3174,213 @@ a {
 }
 
 .dashboard-plan-specs {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 9px 12px;
-  margin-top: -4px;
-  border: 1px solid #d6b46a;
-  border-radius: 9px;
-  background: #fff;
-  color: #8a6d2f;
+  width: 100%;
+  min-height: 42px;
+  margin-top: -2px;
+  padding: 10px 16px;
+  border: 1px solid rgba(214,180,106,.72);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fffdf8 0%, #f8f2e4 100%);
+  color: #6f5520;
   font-size: 12px;
   font-weight: 800;
+  letter-spacing: .03em;
   cursor: pointer;
+  box-shadow: 0 5px 14px rgba(25,32,55,.07);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+.dashboard-plan-specs::before {
+  content: "✦";
+  margin-right: 7px;
+  color: #b18a38;
+  font-size: 12px;
 }
 .dashboard-plan-specs:hover {
-  background: #fbf7ed;
+  transform: translateY(-1px);
+  border-color: #b99343;
+  background: linear-gradient(135deg, #fff 0%, #f4ead4 100%);
+  box-shadow: 0 8px 18px rgba(25,32,55,.11);
 }
+.dashboard-plan-specs:active {
+  transform: translateY(0);
+}
+
 .dashboard-plan-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  background: rgba(5,13,24,.72);
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  background: rgba(5,13,24,.72) !important;
   backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 .dashboard-plan-modal {
-  position: relative;
-  width: min(100%, 560px);
-  max-height: calc(100vh - 40px);
-  overflow: auto;
-  box-sizing: border-box;
-  background: #fff;
-  border: 1px solid rgba(214,180,106,.48);
-  border-radius: 20px;
-  box-shadow: 0 24px 70px rgba(0,0,0,.35);
+  position: relative !important;
+  width: min(100%, 470px) !important;
+  max-height: calc(100vh - 40px) !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(214,180,106,.48) !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.35) !important;
+  font-family: "Montserrat", Arial, sans-serif !important;
 }
 .dashboard-plan-modal-brand {
-  padding: 30px 34px 28px;
-  background: linear-gradient(145deg, rgba(18,31,50,.99), rgba(5,13,24,.99));
-  border-bottom: 1px solid rgba(214,180,106,.3);
+  padding: 28px 30px 25px !important;
+  background: linear-gradient(145deg, rgba(18,31,50,.99), rgba(5,13,24,.99)) !important;
+  border-bottom: 1px solid rgba(214,180,106,.3) !important;
 }
 .dashboard-plan-modal-logo {
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  color: #fff;
+  color: #fff !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
 }
-.dashboard-plan-modal-logo span { color: #d6b46a; }
+.dashboard-plan-modal-logo span {
+  color: #d6b46a !important;
+}
 .dashboard-plan-modal-eyebrow {
-  margin-top: 22px;
-  color: #f0d99a;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .16em;
+  margin-top: 20px !important;
+  color: #f0d99a !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .15em !important;
 }
 .dashboard-plan-modal-brand h2 {
-  margin: 12px 0 8px;
-  color: #fff;
-  font-size: 30px;
-  line-height: 1.15;
+  margin: 10px 0 7px !important;
+  color: #fff !important;
+  font-size: 27px !important;
+  line-height: 1.15 !important;
 }
 .dashboard-plan-modal-brand p {
-  margin: 0;
-  color: #c4cbd7;
-  line-height: 1.5;
+  margin: 0 !important;
+  color: #c4cbd7 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
 }
-.dashboard-plan-modal-content { padding: 28px 34px 32px; }
+.dashboard-plan-modal-content {
+  padding: 24px 30px 28px !important;
+}
 .dashboard-plan-modal-price {
-  margin-bottom: 20px;
-  color: #4f46c7;
-  font-size: 23px;
-  font-weight: 800;
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  margin-bottom: 17px !important;
+  padding: 7px 11px !important;
+  border: 1px solid rgba(214,180,106,.45) !important;
+  border-radius: 8px !important;
+  background: #fffaf0 !important;
+  color: #80652c !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
 }
 .dashboard-plan-modal-benefits {
-  display: grid;
-  gap: 12px;
+  display: grid !important;
+  gap: 9px !important;
 }
 .dashboard-plan-modal-benefits > div {
-  display: grid;
-  gap: 4px;
-  padding: 14px 15px;
-  border: 1px solid #e7e9f0;
-  border-radius: 11px;
-  background: #fbfcfe;
+  display: grid !important;
+  grid-template-columns: 8px minmax(0,1fr) !important;
+  column-gap: 11px !important;
+  padding: 12px 13px !important;
+  border: 1px solid #e7e9f0 !important;
+  border-radius: 11px !important;
+  background: #fbfcfe !important;
+}
+.dashboard-plan-modal-benefits > div::before {
+  content: "" !important;
+  width: 7px !important;
+  height: 7px !important;
+  margin-top: 5px !important;
+  border-radius: 50% !important;
+  background: #d6b46a !important;
+  box-shadow: 0 0 0 3px rgba(214,180,106,.13) !important;
+}
+.dashboard-plan-modal-benefits > div strong,
+.dashboard-plan-modal-benefits > div span {
+  grid-column: 2 !important;
 }
 .dashboard-plan-modal-benefits strong {
-  color: #172033;
-  font-size: 14px;
+  color: #172033 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
 }
 .dashboard-plan-modal-benefits span {
-  color: #687386;
-  font-size: 13px;
-  line-height: 1.5;
+  margin-top: 3px !important;
+  color: #687386 !important;
+  font-size: 12px !important;
+  line-height: 1.48 !important;
 }
 .dashboard-plan-modal-action {
-  width: 100%;
-  margin-top: 20px;
-  border: 1px solid #d6b46a;
-  border-radius: 9px;
-  padding: 13px 16px;
-  background: linear-gradient(145deg,#0b182a,#07111f);
-  color: #f0d99a;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
+  width: 100% !important;
+  min-height: 44px !important;
+  margin-top: 18px !important;
+  border: 1px solid rgba(214,180,106,.72) !important;
+  border-radius: 10px !important;
+  padding: 11px 16px !important;
+  background: linear-gradient(145deg,#0b182a,#07111f) !important;
+  color: #f0d99a !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
 }
 .dashboard-plan-modal-close {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  z-index: 2;
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 50%;
-  background: rgba(0,0,0,.2);
-  color: #fff;
-  font-size: 25px;
-  line-height: 1;
-  cursor: pointer;
+  position: absolute !important;
+  top: 12px !important;
+  right: 13px !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 50% !important;
+  background: rgba(0,0,0,.18) !important;
+  color: #fff !important;
+  font-size: 23px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
 }
-@media(max-width:520px) {
-  .dashboard-plan-modal-backdrop { padding: 10px; align-items: end; }
-  .dashboard-plan-modal { max-height: calc(100vh - 20px); border-radius: 16px; }
-  .dashboard-plan-modal-brand { padding: 26px 22px 24px; }
-  .dashboard-plan-modal-brand h2 { font-size: 24px; }
-  .dashboard-plan-modal-content { padding: 24px 22px 26px; }
-  .dashboard-plan-modal-close { top: 10px; right: 10px; }
+.dashboard-plan-modal-close:hover {
+  background: rgba(214,180,106,.18) !important;
+  border-color: rgba(240,217,154,.65) !important;
+}
+@media only screen and (max-width: 520px) {
+  .dashboard-plan-modal-backdrop {
+    padding: 14px !important;
+    align-items: center !important;
+  }
+  .dashboard-plan-modal {
+    width: min(100%, 470px) !important;
+    max-height: calc(100vh - 28px) !important;
+    border-radius: 18px !important;
+  }
+  .dashboard-plan-modal-brand {
+    padding: 24px 22px 21px !important;
+  }
+  .dashboard-plan-modal-brand h2 {
+    font-size: 23px !important;
+  }
+  .dashboard-plan-modal-content {
+    padding: 21px 22px 23px !important;
+  }
+  .dashboard-plan-modal-close {
+    top: 10px !important;
+    right: 10px !important;
+  }
 }
 
 /* ONBOARDING */
