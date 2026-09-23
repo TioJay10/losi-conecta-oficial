@@ -277,7 +277,7 @@ function ProviderPage() {
     await saveFavoriteForUser(userId);
   }
 
-  async function toggleLikeForUser(currentUserId: string) {
+  async function toggleLikeForUser() {
     if (likeBusy) return;
     setLikeBusy(true);
     const { data, error } = await supabase.rpc("toggle_business_like", { p_business_id: business.id });
@@ -297,7 +297,7 @@ function ProviderPage() {
       setAuthModalOpen(true);
       return;
     }
-    await toggleLikeForUser(userId);
+    await toggleLikeForUser();
   }
 
   function openQuoteRequest() {
@@ -330,7 +330,7 @@ function ProviderPage() {
     if (action === "favorite") {
       await saveFavoriteForUser(currentUserId);
     } else if (action === "like") {
-      await toggleLikeForUser(currentUserId);
+      await toggleLikeForUser();
     } else if (action === "quote") {
       window.setTimeout(() => document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } else if (whatsapp) {
