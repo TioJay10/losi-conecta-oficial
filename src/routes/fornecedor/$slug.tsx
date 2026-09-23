@@ -48,6 +48,9 @@ function ProviderPage() {
   const [publicQuote, setPublicQuote] = useState<any | null>(null);
   const [publicQuoteLoading, setPublicQuoteLoading] = useState(false);
   const [publicQuoteError, setPublicQuoteError] = useState("");
+  const [publicQuoteResponding, setPublicQuoteResponding] = useState(false);
+  const [publicQuoteResponse, setPublicQuoteResponse] = useState<"accepted" | "rejected" | null>(null);
+  const [publicQuoteResponseMessage, setPublicQuoteResponseMessage] = useState("");
   const [availabilityMonth, setAvailabilityMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -628,6 +631,25 @@ function ProviderPage() {
                 <div className="public-quote-total"><span>Total da proposta</span><strong>{Number(publicQuote.quote?.total || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong></div>
                 {publicQuote.quote?.validity_until && <p className="public-quote-note"><strong>Validade:</strong> {new Date(publicQuote.quote.validity_until + "T12:00:00").toLocaleDateString("pt-BR")}</p>}
                 {publicQuote.quote?.notes && <p className="public-quote-note"><strong>Observações:</strong> {publicQuote.quote.notes}</p>}
+                {publicQuoteResponseMessage && <div className={"public-quote-response-message " + (publicQuoteResponse === "accepted" ? "accepted" : "rejected")}>{publicQuoteResponseMessage}</div>}
+                {publicQuote.quote?.status !== "accepted" && publicQuote.quote?.status !== "rejected" && !publicQuoteResponse && (
+                  <div className="public-quote-actions">
+                    <button type="button" className="public-quote-reject" disabled={publicQuoteResponding} onClick={async () => {
+                      setPublicQuoteResponding(true); setPublicQuoteResponseMessage("");
+                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_status: "rejected" });
+                      if (error) { setPublicQuoteResponseMessage(error.message || "Não foi possível recusar a proposta."); }
+                      else { setPublicQuoteResponse("rejected"); setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta recusada."); setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "rejected" } } : current); }
+                      setPublicQuoteResponding(false);
+                    }}>Recusar proposta</button>
+                    <button type="button" className="public-quote-accept" disabled={publicQuoteResponding} onClick={async () => {
+                      setPublicQuoteResponding(true); setPublicQuoteResponseMessage("");
+                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_status: "accepted" });
+                      if (error) { setPublicQuoteResponseMessage(error.message || "Não foi possível aceitar a proposta."); }
+                      else { setPublicQuoteResponse("accepted"); setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta aceita com sucesso."); setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "accepted" } } : current); }
+                      setPublicQuoteResponding(false);
+                    }}>{publicQuoteResponding ? "Registrando..." : "Aceitar proposta"}</button>
+                  </div>
+                )}
               </>
             )}
             {!publicQuoteLoading && publicQuoteError && <div><h2>Proposta indisponível</h2><p>{publicQuoteError}</p></div>}
@@ -725,7 +747,7 @@ function ProviderPage() {
         .public-quote-items>div{display:flex;justify-content:space-between;gap:14px;padding:13px 15px;border-bottom:1px solid #edf0f4}.public-quote-items>div:last-child{border-bottom:0}
         .public-quote-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0;font-size:14px}.public-quote-total strong{font-size:22px;color:#8a6d2f}
         .public-quote-note{padding:12px 14px;border-radius:12px;background:#f8f9fb;color:#687386}
-        @media(max-width:700px){.public-quote-grid{grid-template-columns:1fr}.public-quote-modal{padding:20px}}
+        .public-quote-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:20px}.public-quote-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-weight:700;cursor:pointer;transition:.2s}.public-quote-actions button:disabled{opacity:.65;cursor:wait}.public-quote-reject{border:1px solid #d9dee8;background:#fff;color:#7c3030}.public-quote-accept{border:1px solid #d6b46a;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;box-shadow:0 8px 18px rgba(7,17,31,.12)}.public-quote-response-message{margin-top:16px;padding:14px;border-radius:12px;font-weight:700;text-align:center}.public-quote-response-message.accepted{background:#eefaf3;color:#237345}.public-quote-response-message.rejected{background:#fff1f1;color:#a32f2f}        @media(max-width:700px){.public-quote-grid{grid-template-columns:1fr}.public-quote-modal{padding:20px}}
       `}</style>
       {authModalOpen && <AuthModal onClose={() => { setAuthModalOpen(false); setPendingAuthAction(null); }} onAuthenticated={handleAuthenticatedFromModal} />}
     </main>
