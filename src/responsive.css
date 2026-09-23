@@ -11485,7 +11485,54 @@ button.availability-day {
 .provider-profile-like.green { color: #16803a; background: #f1fbf4; }
 .provider-profile-like.yellow { color: #f2c94c; background: #fffdf0; }
 .provider-profile-like.red { color: #c43737; background: #fff3f3; }
-.provider-profile-like.gold { color: #a87918; background: linear-gradient(145deg,#fffaf0,#f7edc9); box-shadow: 0 8px 24px rgba(180,137,35,.16); }
+.provider-profile-like.gold {
+  position: relative;
+  overflow: hidden;
+  color: #9a6d12;
+  border-color: rgba(255,255,255,.72);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.18) 34%, rgba(255,255,255,.42) 52%, rgba(255,255,255,.08)),
+    linear-gradient(145deg,#fff8d8,#f4d56b 48%,#dcae35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(255,255,255,.28),
+    0 0 10px rgba(255,220,91,.42),
+    0 8px 26px rgba(180,137,35,.24);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.provider-profile-like.gold::after {
+  content: "";
+  position: absolute;
+  top: -35%;
+  left: -55%;
+  width: 38%;
+  height: 170%;
+  pointer-events: none;
+  transform: rotate(22deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
+  filter: blur(2px);
+  animation: provider-gold-glass-shine 3.2s ease-in-out infinite;
+}
+.provider-profile-like.gold .provider-profile-heart {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 5px rgba(255,239,150,.95)) drop-shadow(0 2px 4px rgba(150,105,10,.3));
+  animation: provider-gold-heart-glow 1.8s ease-in-out infinite;
+}
+.provider-profile-like.gold > span:not(.provider-profile-heart) {
+  position: relative;
+  z-index: 1;
+}
+@keyframes provider-gold-glass-shine {
+  0%, 55% { left: -55%; opacity: 0; }
+  65% { opacity: 1; }
+  88%, 100% { left: 125%; opacity: 0; }
+}
+@keyframes provider-gold-heart-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(255,239,150,.72)) drop-shadow(0 2px 4px rgba(150,105,10,.25)); }
+  50% { filter: drop-shadow(0 0 10px rgba(255,239,150,1)) drop-shadow(0 2px 5px rgba(150,105,10,.3)); }
+}
 .provider-profile-heart { font-size: 20px; line-height: 1; }
 .provider-profile-like.liked .provider-profile-heart { text-shadow: 0 2px 8px currentColor; }
 .provider-profile-like-count { min-width: 18px; text-align: center; font-size: 12px; }
