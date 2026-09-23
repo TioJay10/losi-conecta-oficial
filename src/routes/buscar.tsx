@@ -445,6 +445,7 @@ function SearchPage() {
                 <article className="marketplace-card" key={business.id}>
                   <div className="marketplace-card-media">
                     {business.cover_url ? <img src={business.cover_url} alt="" /> : <div className="marketplace-card-media-fallback" />}
+                    {business.logo_url && <div className="marketplace-card-profile-photo"><img src={business.logo_url} alt={business.business_name} /></div>}
                     <button type="button" className={"marketplace-favorite " + (favoriteIds.includes(business.id) ? "saved" : "")} onClick={() => toggleFavorite(business.id)} disabled={favoriteBusy === business.id} aria-label={favoriteIds.includes(business.id) ? "Remover dos salvos" : "Salvar fornecedor"}>
                       {favoriteIds.includes(business.id) ? "♥" : "♡"}
                     </button>
