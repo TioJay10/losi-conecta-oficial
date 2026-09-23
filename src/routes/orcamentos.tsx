@@ -622,6 +622,7 @@ function QuotesPage() {
                     <article key={request.id} className="quote-request-card">
                       <div>
                         <span className={"quote-status " + request.status}>{statusLabel(request.status)}</span>
+                        <span className="quote-context-label">{activeMetric === "received" || activeMetric === "supplier-pending" ? "SOLICITAÇÃO RECEBIDA DO CLIENTE" : "SOLICITAÇÃO FEITA POR VOCÊ"}</span>
                         <h3>{request.event_title}</h3>
                         <strong>{serviceName(request)}</strong>
                         <p><strong>Solicitado por:</strong> {request.client_name}</p>
@@ -643,7 +644,7 @@ function QuotesPage() {
                               type="button"
                               onClick={() => openWhatsApp(request.client_phone, buildRequestWhatsAppMessage(request))}
                             >
-                              Enviar orçamento pelo WhatsApp
+                              Responder solicitação pelo WhatsApp
                             </button>
                           )}
                         </div>
@@ -659,6 +660,7 @@ function QuotesPage() {
                     <article key={quote.id} className="quote-client-card">
                       <div>
                         <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
+                        <span className="quote-context-label">{activeMetric === "supplier-sent" ? "PROPOSTA ENVIADA POR VOCÊ" : "PROPOSTA RECEBIDA DO FORNECEDOR"}</span>
                         <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
                         <strong>{serviceName(quote.quote_requests)}</strong>
                         <p><strong>Solicitado por:</strong> {quote.quote_requests?.client_name || "Não informado"}</p>
