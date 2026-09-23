@@ -3173,6 +3173,141 @@ a {
   font-weight: 800;
 }
 
+.dashboard-plan-specs {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 12px;
+  margin-top: -4px;
+  border: 1px solid #d6b46a;
+  border-radius: 9px;
+  background: #fff;
+  color: #8a6d2f;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.dashboard-plan-specs:hover {
+  background: #fbf7ed;
+}
+.dashboard-plan-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: rgba(5,13,24,.72);
+  backdrop-filter: blur(5px);
+}
+.dashboard-plan-modal {
+  position: relative;
+  width: min(100%, 560px);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid rgba(214,180,106,.48);
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.35);
+}
+.dashboard-plan-modal-brand {
+  padding: 30px 34px 28px;
+  background: linear-gradient(145deg, rgba(18,31,50,.99), rgba(5,13,24,.99));
+  border-bottom: 1px solid rgba(214,180,106,.3);
+}
+.dashboard-plan-modal-logo {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  color: #fff;
+}
+.dashboard-plan-modal-logo span { color: #d6b46a; }
+.dashboard-plan-modal-eyebrow {
+  margin-top: 22px;
+  color: #f0d99a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.dashboard-plan-modal-brand h2 {
+  margin: 12px 0 8px;
+  color: #fff;
+  font-size: 30px;
+  line-height: 1.15;
+}
+.dashboard-plan-modal-brand p {
+  margin: 0;
+  color: #c4cbd7;
+  line-height: 1.5;
+}
+.dashboard-plan-modal-content { padding: 28px 34px 32px; }
+.dashboard-plan-modal-price {
+  margin-bottom: 20px;
+  color: #4f46c7;
+  font-size: 23px;
+  font-weight: 800;
+}
+.dashboard-plan-modal-benefits {
+  display: grid;
+  gap: 12px;
+}
+.dashboard-plan-modal-benefits > div {
+  display: grid;
+  gap: 4px;
+  padding: 14px 15px;
+  border: 1px solid #e7e9f0;
+  border-radius: 11px;
+  background: #fbfcfe;
+}
+.dashboard-plan-modal-benefits strong {
+  color: #172033;
+  font-size: 14px;
+}
+.dashboard-plan-modal-benefits span {
+  color: #687386;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.dashboard-plan-modal-action {
+  width: 100%;
+  margin-top: 20px;
+  border: 1px solid #d6b46a;
+  border-radius: 9px;
+  padding: 13px 16px;
+  background: linear-gradient(145deg,#0b182a,#07111f);
+  color: #f0d99a;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.dashboard-plan-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 50%;
+  background: rgba(0,0,0,.2);
+  color: #fff;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+@media(max-width:520px) {
+  .dashboard-plan-modal-backdrop { padding: 10px; align-items: end; }
+  .dashboard-plan-modal { max-height: calc(100vh - 20px); border-radius: 16px; }
+  .dashboard-plan-modal-brand { padding: 26px 22px 24px; }
+  .dashboard-plan-modal-brand h2 { font-size: 24px; }
+  .dashboard-plan-modal-content { padding: 24px 22px 26px; }
+  .dashboard-plan-modal-close { top: 10px; right: 10px; }
+}
+
 /* ONBOARDING */
 .onboarding-steps {
   display: grid;
