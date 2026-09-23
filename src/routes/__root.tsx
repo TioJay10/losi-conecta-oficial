@@ -32,7 +32,7 @@ export const Route = createRootRoute({
 function RootShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const existing = document.querySelector('script[data-losi-vlibras="true"]');
-    if (existing || window.VLibrasWidget) return;
+    if (existing) return;
 
     const script = document.createElement("script");
     script.src = "https://vlibras.gov.br/app/vlibras-plugin.js";
