@@ -10553,3 +10553,18 @@ button,input,textarea,select{max-width:100%;font:inherit}
     margin-bottom: 8px !important;
   }
 }
+
+
+/* BUSCA — cards de fornecedores mais largos no mobile */
+@media only screen and (max-width: 600px) {
+  .marketplace-page .marketplace-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .marketplace-page .marketplace-card {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+}
