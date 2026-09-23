@@ -14,6 +14,8 @@ function PersonalProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [cepValidated, setCepValidated] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -41,7 +43,7 @@ function PersonalProfilePage() {
       const currentUser = data.user;
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("full_name,phone,city,state,cep,address")
+        .select("full_name,phone,city,state,cep,address,avatar_url")
         .eq("id", currentUser.id)
         .maybeSingle();
 
@@ -53,6 +55,7 @@ function PersonalProfilePage() {
         setMessage("Não foi possível carregar seus dados: " + profileError.message);
       }
 
+      setAvatarUrl(profile?.avatar_url ?? null);
       setForm({
         full_name: profile?.full_name ?? currentUser.user_metadata?.full_name ?? "",
         phone: profile?.phone ?? "",
@@ -97,6 +100,58 @@ function PersonalProfilePage() {
       city: data.city ?? current.city,
       state: data.state ?? current.state,
     }));
+  }
+
+  async function uploadProfilePhoto(file: File) {
+    if (!supabase || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      setMessage("Selecione uma imagem válida.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage("A foto deve ter no máximo 5 MB.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setMessage("");
+
+    try {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = user.id + "/" + Date.now() + "." + extension;
+
+      const { data: uploaded, error: uploadError } = await supabase.storage
+        .from("profile-avatars")
+        .upload(path, file, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from("profile-avatars")
+        .getPublicUrl(uploaded.path);
+
+      const nextAvatarUrl = publicUrlData.publicUrl;
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: nextAvatarUrl })
+        .eq("id", user.id);
+
+      if (profileError) throw profileError;
+
+      setAvatarUrl(nextAvatarUrl);
+      setMessage("Foto de perfil atualizada com sucesso.");
+    } catch (error) {
+      console.error("Erro ao atualizar foto de perfil:", error);
+      setMessage(error instanceof Error ? "Não foi possível atualizar a foto: " + error.message : "Não foi possível atualizar a foto.");
+    } finally {
+      setUploadingAvatar(false);
+    }
   }
 
   async function saveProfile(event: FormEvent) {
