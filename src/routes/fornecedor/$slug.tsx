@@ -34,6 +34,9 @@ function ProviderPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteBusy, setFavoriteBusy] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likedByCurrentUser, setLikedByCurrentUser] = useState(false);
+  const [likeBusy, setLikeBusy] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("tentativa_de_golpe");
   const [reportDetails, setReportDetails] = useState("");
@@ -41,7 +44,7 @@ function ProviderPage() {
   const [reporting, setReporting] = useState(false);
   const [quoteMessage, setQuoteMessage] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "whatsapp" | null>(null);
+  const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "like" | "whatsapp" | null>(null);
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
   const [availabilityDates, setAvailabilityDates] = useState<string[]>([]);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
@@ -146,6 +149,15 @@ function ProviderPage() {
               blocked,
             });
 
+            const { data: likeSummary, error: likeSummaryError } = await supabase.rpc("get_business_like_summary", { p_business_id: loaded.id });
+            if (likeSummaryError) {
+              console.error("Erro ao carregar curtidas do fornecedor:", likeSummaryError);
+            } else if (mounted) {
+              const summary = Array.isArray(likeSummary) ? likeSummary[0] : likeSummary;
+              setLikeCount(Number(summary?.like_count ?? 0));
+              setLikedByCurrentUser(Boolean(summary?.liked_by_current_user));
+            }
+
             if (sessionData.session) {
               const { data: favoriteData } = await supabase.from("favorites").select("business_id").eq("user_id", sessionData.session.user.id).eq("business_id", loaded.id).maybeSingle();
               if (mounted) setIsFavorite(Boolean(favoriteData));
@@ -239,6 +251,7 @@ function ProviderPage() {
   const canRequestQuote = Boolean(userId && userId !== business.owner_id);
   const reputationLabel = reputation.label;
   const reputationClass = `level-${reputation.level}`;
+  const heartClass = likeCount >= 250 ? "gold" : likeCount >= 61 ? "red" : likeCount >= 31 ? "yellow" : "green";
   const satisfactionText = reputation.satisfaction === null ? "Sem reputação" : reputation.satisfaction + "% de satisfação";
 
 
@@ -262,6 +275,29 @@ function ProviderPage() {
       return;
     }
     await saveFavoriteForUser(userId);
+  }
+
+  async function toggleLikeForUser(currentUserId: string) {
+    if (likeBusy) return;
+    setLikeBusy(true);
+    const { data, error } = await supabase.rpc("toggle_business_like", { p_business_id: business.id });
+    if (error) {
+      console.error("Erro ao alterar curtida do fornecedor:", error);
+    } else {
+      const result = Array.isArray(data) ? data[0] : data;
+      setLikedByCurrentUser(Boolean(result?.liked));
+      setLikeCount(Number(result?.like_count ?? likeCount));
+    }
+    setLikeBusy(false);
+  }
+
+  async function toggleLike() {
+    if (!userId) {
+      setPendingAuthAction("like");
+      setAuthModalOpen(true);
+      return;
+    }
+    await toggleLikeForUser(userId);
   }
 
   function openQuoteRequest() {
@@ -293,6 +329,8 @@ function ProviderPage() {
     if (!currentUserId || !action) return;
     if (action === "favorite") {
       await saveFavoriteForUser(currentUserId);
+    } else if (action === "like") {
+      await toggleLikeForUser(currentUserId);
     } else if (action === "quote") {
       window.setTimeout(() => document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } else if (whatsapp) {
@@ -475,6 +513,11 @@ function ProviderPage() {
           </div>
 
           <div className="provider-profile-actions">
+            <button type="button" className={"provider-profile-like " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser}>
+              <span className="provider-profile-heart" aria-hidden="true">♥</span>
+              <span className="provider-profile-like-count">{likeCount}</span>
+              <span className="provider-profile-like-label">{likedByCurrentUser ? "Curtido" : "Curtir perfil"}</span>
+            </button>
             <button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>
             {userId !== business.owner_id && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}
             {whatsapp && <button type="button" className="provider-profile-contact" onClick={openWhatsApp}>Conversar pelo WhatsApp</button>}
