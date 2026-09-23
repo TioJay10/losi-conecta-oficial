@@ -238,14 +238,23 @@ function BusinessServicesPage() {
 
 async function geocodeAddress(address: string) {
   const query = encodeURIComponent(address);
-  const response = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" + query, {
-    headers: { Accept: "application/json" },
-  });
-  if (!response.ok) throw new Error("Não foi possível localizar este endereço.");
+  const response = await fetch(
+    "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" + query,
+    { headers: { Accept: "application/json" } },
+  );
+  if (!response.ok) throw new Error("Serviço de localização indisponível.");
   const results = await response.json();
   const first = results?.[0];
-  if (!first || !first.lat || !first.lon) throw new Error("Não foi possível encontrar coordenadas para este CEP.");
+  if (!first?.lat || !first?.lon) throw new Error("Coordenadas não encontradas.");
   return { latitude: Number(first.lat), longitude: Number(first.lon) };
+}
+
+async function lookupViaCep(cep: string) {
+  const response = await fetch("https://viacep.com.br/ws/" + cep + "/json/");
+  if (!response.ok) throw new Error("CEP não encontrado.");
+  const data = await response.json();
+  if (data.erro) throw new Error("CEP não encontrado.");
+  return data;
 }
 
   async function lookupCep(value: string): Promise<{ latitude: number; longitude: number } | null> {
@@ -255,25 +264,43 @@ async function geocodeAddress(address: string) {
     setCepLoading(true);
     setMessage("");
     try {
-      const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + cep);
-      if (!response.ok) throw new Error("CEP não encontrado.");
-      const data = await response.json();
-      if (data.erro) throw new Error("CEP não encontrado.");
-      const street = data.street ?? data.address ?? "";
-      const neighborhood = data.neighborhood ?? "";
-      const city = data.city ?? "";
-      const state = data.state ?? "";
+      let data: any;
+      try {
+        const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + cep);
+        if (!response.ok) throw new Error("BrasilAPI indisponível");
+        data = await response.json();
+        if (data.erro) throw new Error("CEP não encontrado.");
+      } catch {
+        data = await lookupViaCep(cep);
+      }
+
+      const street = data.street ?? data.logradouro ?? data.address ?? "";
+      const neighborhood = data.neighborhood ?? data.bairro ?? "";
+      const city = data.city ?? data.localidade ?? "";
+      const state = data.state ?? data.uf ?? "";
       update("address", street);
       update("bairro", neighborhood);
       update("city", city);
       update("state", state);
-      const address = [street, neighborhood, city, state, "Brasil"].filter(Boolean).join(", ");
-      const coordinates =
-        typeof data.latitude === "number" && typeof data.longitude === "number"
-          ? { latitude: data.latitude, longitude: data.longitude }
-          : await geocodeAddress(address);
-      setCoordinates(coordinates);
-      setMessage("CEP localizado. Cidade, bairro, estado e coordenadas foram preenchidos automaticamente.");
+
+      let coordinates: { latitude: number; longitude: number } | null = null;
+      if (typeof data.latitude === "number" && typeof data.longitude === "number") {
+        coordinates = { latitude: data.latitude, longitude: data.longitude };
+      } else {
+        try {
+          const address = [street, neighborhood, city, state, "Brasil"].filter(Boolean).join(", ");
+          coordinates = await geocodeAddress(address);
+        } catch {
+          // CEP válido é suficiente para salvar o cadastro; coordenadas podem ser obtidas depois.
+        }
+      }
+
+      setCoordinates(coordinates ?? { latitude: null, longitude: null });
+      setMessage(
+        coordinates
+          ? "CEP localizado. Dados e localização foram preenchidos automaticamente."
+          : "CEP localizado. Os dados foram preenchidos; a localização por distância poderá ser configurada depois.",
+      );
       return coordinates;
     } catch (error) {
       setCoordinates({ latitude: null, longitude: null });
@@ -302,12 +329,8 @@ async function geocodeAddress(address: string) {
 
     let saveCoordinates = coordinates;
     if (saveCoordinates.latitude === null || saveCoordinates.longitude === null) {
-      const resolved = await lookupCep(form.cep);
-      if (!resolved) {
-        setMessage("Não foi possível localizar o CEP. Consulte o CEP e tente salvar novamente.");
-        return;
-      }
-      saveCoordinates = resolved;
+      await lookupCep(form.cep);
+      saveCoordinates = coordinates;
     }
 
     if (!form.bairro.trim() || !form.city.trim() || !form.state.trim()) {
