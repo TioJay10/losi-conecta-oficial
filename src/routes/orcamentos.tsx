@@ -636,7 +636,7 @@ function QuotesPage() {
       if (request) await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", request.id).eq("business_id", businessId);
 
       const supplier = businessContacts[businessId];
-      const profileUrl = supplier?.slug ? window.location.origin + "/fornecedor/" + supplier.slug + "?proposta=" + quote.id : "";
+      const profileUrl = supplier?.slug ? window.location.origin + "/fornecedor/" + supplier.slug + "?proposta=" + quote.id + "&token=" + quote.public_response_token : "";
       const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
       const whatsappMessage = [
         "Olá, " + finalRecipientName + "!", "", "Preparei sua proposta pelo LOSI CONECTA.", "",
