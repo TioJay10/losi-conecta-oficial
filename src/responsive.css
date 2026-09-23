@@ -10921,3 +10921,17 @@ button,input,textarea,select{max-width:100%;font:inherit}
   letter-spacing: .07em;
   line-height: 1.2;
 }
+
+
+/* ORÇAMENTOS — ação de exclusão */
+.quote-delete-button {
+  border-color: #e5b8b8;
+  color: #a12f2f;
+  background: #fff7f7;
+}
+
+.quote-delete-button:hover {
+  border-color: #c96a6a;
+  color: #8f2222;
+  background: #fff0f0;
+}
