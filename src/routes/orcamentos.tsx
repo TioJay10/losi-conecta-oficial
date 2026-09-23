@@ -499,7 +499,10 @@ function QuotesPage() {
   useEffect(() => {
     if (!activeMetric) return;
     const timer = window.setTimeout(() => {
-      detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const element = detailsRef.current;
+      if (!element) return;
+      const top = element.getBoundingClientRect().top + window.scrollY - 18;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     }, 60);
     return () => window.clearTimeout(timer);
   }, [activeMetric]);
@@ -508,11 +511,22 @@ function QuotesPage() {
     const confirmed = window.confirm("Excluir este orçamento? Esta ação não pode ser desfeita.");
     if (!confirmed) return;
 
-    const { error } = await supabase.from("quotes").delete().eq("id", quote.id);
+    let query = supabase.from("quotes").delete().eq("id", quote.id);
+    query = isSupplier
+      ? query.eq("business_id", businessId)
+      : query.eq("client_id", userId);
+
+    const { data: deletedRows, error } = await query.select("id");
     if (error) {
       console.error("Erro ao excluir orçamento:", error);
       setMessageType("error");
       setMessage(error.message || "Não foi possível excluir o orçamento.");
+      return;
+    }
+
+    if (!deletedRows?.length) {
+      setMessageType("error");
+      setMessage("Não foi possível excluir este orçamento. Ele pode não pertencer à sua conta ou já ter sido excluído.");
       return;
     }
 
@@ -829,6 +843,11 @@ function QuotesPage() {
 
               {selectedQuote.validity_until && <p className="quote-modal-note"><strong>Validade:</strong> {dateOnly(selectedQuote.validity_until)}</p>}
               {selectedQuote.notes && <p className="quote-modal-note"><strong>Observações:</strong> {selectedQuote.notes}</p>}
+              <div className="quote-modal-actions">
+                <button type="button" className="quotes-secondary quote-delete-button" onClick={() => deleteQuote(selectedQuote)}>
+                  Excluir orçamento
+                </button>
+              </div>
             </section>
           </div>
         )}
