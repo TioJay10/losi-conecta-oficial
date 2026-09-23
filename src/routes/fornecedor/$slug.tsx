@@ -63,10 +63,12 @@ function ProviderPage() {
 
   useEffect(() => {
     let mounted = true;
-    const proposalId = new URLSearchParams(window.location.search).get("proposta");
-    if (!proposalId) return;
+    const proposalParams = new URLSearchParams(window.location.search);
+    const proposalId = proposalParams.get("proposta");
+    const proposalToken = proposalParams.get("token");
+    if (!proposalId || !proposalToken) { if (proposalId) setPublicQuoteError("Link da proposta inválido ou incompleto."); return; }
     setPublicQuoteLoading(true);
-    supabase.rpc("get_public_quote", { p_quote_id: proposalId }).then(({ data, error }) => {
+    supabase.rpc("get_public_quote", { p_quote_id: proposalId, p_token: proposalToken }).then(({ data, error }) => {
       if (!mounted) return;
       if (error || !data) {
         console.error("Erro ao carregar proposta pública:", error);
@@ -636,14 +638,14 @@ function ProviderPage() {
                   <div className="public-quote-actions">
                     <button type="button" className="public-quote-reject" disabled={publicQuoteResponding} onClick={async () => {
                       setPublicQuoteResponding(true); setPublicQuoteResponseMessage("");
-                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_status: "rejected" });
+                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_token: proposalToken, p_status: "rejected" });
                       if (error) { setPublicQuoteResponseMessage(error.message || "Não foi possível recusar a proposta."); }
                       else { setPublicQuoteResponse("rejected"); setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta recusada."); setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "rejected" } } : current); }
                       setPublicQuoteResponding(false);
                     }}>Recusar proposta</button>
                     <button type="button" className="public-quote-accept" disabled={publicQuoteResponding} onClick={async () => {
                       setPublicQuoteResponding(true); setPublicQuoteResponseMessage("");
-                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_status: "accepted" });
+                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_token: proposalToken, p_status: "accepted" });
                       if (error) { setPublicQuoteResponseMessage(error.message || "Não foi possível aceitar a proposta."); }
                       else { setPublicQuoteResponse("accepted"); setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta aceita com sucesso."); setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "accepted" } } : current); }
                       setPublicQuoteResponding(false);
