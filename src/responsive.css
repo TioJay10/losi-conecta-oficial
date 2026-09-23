@@ -11483,7 +11483,7 @@ button.availability-day {
 .provider-profile-like:disabled { opacity: .6; cursor: wait; transform: none; }
 .provider-profile-like.neutral { color: #8a93a3; background: #f7f8fa; }
 .provider-profile-like.green { color: #16803a; background: #f1fbf4; }
-.provider-profile-like.yellow { color: #b58a16; background: #fffaf0; }
+.provider-profile-like.yellow { color: #f2c94c; background: #fffdf0; }
 .provider-profile-like.red { color: #c43737; background: #fff3f3; }
 .provider-profile-like.gold { color: #a87918; background: linear-gradient(145deg,#fffaf0,#f7edc9); box-shadow: 0 8px 24px rgba(180,137,35,.16); }
 .provider-profile-heart { font-size: 20px; line-height: 1; }
