@@ -435,18 +435,18 @@ function DashboardPage() {
           })}</div>
         </section>
         {specificationsPlan && (
-          <div className="dashboard-plan-modal-backdrop" role="presentation" onMouseDown={(event) => {
+          <div className="auth-modal-backdrop dashboard-plan-modal-backdrop" role="presentation" onMouseDown={(event) => {
             if (event.target === event.currentTarget) setSpecificationsPlan(null);
           }}>
-            <section className="dashboard-plan-modal" role="dialog" aria-modal="true" aria-labelledby="plan-specifications-title">
-              <button type="button" className="dashboard-plan-modal-close" onClick={() => setSpecificationsPlan(null)} aria-label="Fechar especificações">×</button>
-              <div className="dashboard-plan-modal-brand">
-                <div className="dashboard-plan-modal-logo">LOSI <span>CONECTA</span></div>
-                <div className="dashboard-plan-modal-eyebrow">PLANO PARA FORNECEDORES</div>
+            <section className="auth-modal-card dashboard-plan-modal" role="dialog" aria-modal="true" aria-labelledby="plan-specifications-title">
+              <button type="button" className="auth-modal-close dashboard-plan-modal-close" onClick={() => setSpecificationsPlan(null)} aria-label="Fechar especificações">×</button>
+              <div className="auth-modal-brand-panel dashboard-plan-modal-brand">
+                <div className="auth-modal-brand dashboard-plan-modal-logo">LOSI <span>CONECTA</span></div>
+                <div className="auth-modal-eyebrow dashboard-plan-modal-eyebrow">PLANO PARA FORNECEDORES</div>
                 <h2 id="plan-specifications-title">{specificationsPlan.name}</h2>
                 <p>{specificationsPlan.description || "Recursos para aumentar a presença da sua empresa no LOSI CONECTA."}</p>
               </div>
-              <div className="dashboard-plan-modal-content">
+              <div className="auth-modal-form-panel dashboard-plan-modal-content">
                 <div className="dashboard-plan-modal-price">{specificationsPlan.price}</div>
                 <div className="dashboard-plan-modal-benefits">
                   {specificationsPlan.name.toLocaleLowerCase("pt-BR") === "profissional" ? (
