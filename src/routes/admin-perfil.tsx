@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { supabase } from "../lib/supabase";
 
 export const Route = createFileRoute("/admin-perfil")({ component: AdminProfilePage });
@@ -57,7 +58,7 @@ function AdminProfilePage() {
     return () => { mounted = false; };
   }, [navigate]);
 
-  async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!userId || saving) return;
     setSaving(true);
