@@ -434,6 +434,8 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
             <label htmlFor="marketplace-location-cep">Local de referência</label>
             <input
               id="marketplace-location-cep"
+              name="event-location-cep"
+              autoComplete="off"
               value={locationCep}
               onChange={(event) => setLocationCep(event.target.value)}
               onBlur={(event) => lookupLocationCep(event.target.value)}
