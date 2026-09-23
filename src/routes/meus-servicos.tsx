@@ -236,6 +236,18 @@ function BusinessServicesPage() {
     setUploading(null);
   }
 
+async function geocodeAddress(address: string) {
+  const query = encodeURIComponent(address);
+  const response = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" + query, {
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) throw new Error("Não foi possível localizar este endereço.");
+  const results = await response.json();
+  const first = results?.[0];
+  if (!first || !first.lat || !first.lon) throw new Error("Não foi possível encontrar coordenadas para este CEP.");
+  return { latitude: Number(first.lat), longitude: Number(first.lon) };
+}
+
   async function lookupCep(value: string) {
     const cep = value.replace(/\D/g, "");
     update("cep", value);
@@ -247,14 +259,20 @@ function BusinessServicesPage() {
       if (!response.ok) throw new Error("CEP não encontrado.");
       const data = await response.json();
       if (data.erro) throw new Error("CEP não encontrado.");
-      update("address", data.street ?? data.address ?? "");
-      update("bairro", data.neighborhood ?? "");
-      update("city", data.city ?? "");
-      update("state", data.state ?? "");
-      setCoordinates({
-        latitude: typeof data.latitude === "number" ? data.latitude : null,
-        longitude: typeof data.longitude === "number" ? data.longitude : null,
-      });
+      const street = data.street ?? data.address ?? "";
+      const neighborhood = data.neighborhood ?? "";
+      const city = data.city ?? "";
+      const state = data.state ?? "";
+      update("address", street);
+      update("bairro", neighborhood);
+      update("city", city);
+      update("state", state);
+      const address = [street, neighborhood, city, state, "Brasil"].filter(Boolean).join(", ");
+      const coordinates =
+        typeof data.latitude === "number" && typeof data.longitude === "number"
+          ? { latitude: data.latitude, longitude: data.longitude }
+          : await geocodeAddress(address);
+      setCoordinates(coordinates);
       setMessage("CEP localizado. Cidade, bairro, estado e coordenadas foram preenchidos automaticamente.");
     } catch (error) {
       setCoordinates({ latitude: null, longitude: null });
