@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
+import { NotificationBell } from "../components/NotificationBell";
 
 type RequestRow = {
   id: string;
@@ -502,6 +503,7 @@ function QuotesPage() {
     <main className="quotes-page">
       <header className="quotes-header">
         <AppLogo className="catalog-logo">LOSI <span>CONECTA</span></AppLogo>
+        {userId && <NotificationBell />}
         <Link to="/painel" className="quotes-back">Voltar ao painel</Link>
       </header>
 
