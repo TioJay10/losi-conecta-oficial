@@ -182,6 +182,17 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
 
   function handleSearch() {
     setSubmittedSearch(search.trim());
+
+    // No mobile, após buscar, leva o usuário diretamente para os resultados.
+    // No desktop, a posição da página permanece como está.
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+      window.requestAnimationFrame(() => {
+        document.querySelector(".marketplace-results")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
   }
 
   const results = useMemo(() => {
