@@ -112,7 +112,12 @@ function ProviderPage() {
       }
       setLoading(false);
     }
-    load();
+    load().catch((loadError) => {
+      console.error("Erro inesperado ao carregar perfil público:", loadError);
+      if (mounted) setError("Não foi possível carregar este fornecedor.");
+    }).finally(() => {
+      if (mounted) setLoading(false);
+    });
     return () => { mounted = false; };
   }, [slug]);
 
