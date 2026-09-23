@@ -10350,3 +10350,27 @@ button,input,textarea,select{max-width:100%;font:inherit}
     gap: 9px !important;
   }
 }
+
+
+/* PERFIL PÚBLICO — campos de evento/data dentro do limite do card */
+.provider-page .provider-quote-form > label {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.provider-page .provider-quote-form input[name="event_title"],
+.provider-page .provider-quote-form input[name="event_date"] {
+  display: block !important;
+  width: 100% !important;
+  inline-size: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin-inline: 0 !important;
+}
+
+.provider-page .provider-quote-form input[type="date"] {
+  padding-right: 10px !important;
+  overflow: hidden !important;
+}
