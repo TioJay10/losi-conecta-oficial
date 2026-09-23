@@ -444,8 +444,6 @@ function QuotesPage() {
     setClientQuotes((current) => current.map((item) => item.id === quote.id ? { ...item, status } : item));
   }
 
-  if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
-
   const selectedSupplier = selectedQuote ? businessContacts[selectedQuote.business_id] : null;
   const selectedRequester = selectedQuote?.quote_requests;
   const selectedRequesterProfile = selectedRequester ? requesterProfiles[selectedRequester.requester_id] : null;
@@ -553,6 +551,8 @@ function QuotesPage() {
   );
 
   const closeMetric = () => setActiveMetric(null);
+
+  if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
 
   return (
     <main className="quotes-page">
