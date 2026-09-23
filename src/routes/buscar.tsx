@@ -5,7 +5,6 @@ import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
 import { AuthModal } from "../components/AuthModal";
 import { calculateReputation } from "../lib/reputation";
-import { NotificationBell } from "../components/NotificationBell";
 
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
@@ -303,9 +302,6 @@ async function geocodeAddress(address: string) {
       <header className="marketplace-header">
         <div className="marketplace-header-inner">
           <AppLogo className="marketplace-logo" aria-label="LOSI CONECTA">LOSI <span>CONECTA</span></AppLogo>
-          <div className="marketplace-mobile-header-tools">
-            {userId && <NotificationBell />}
-          </div>
           <button
             type="button"
             className={"marketplace-mobile-menu-button" + (mobileMenuOpen ? " is-open" : "")}
