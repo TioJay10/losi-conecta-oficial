@@ -366,6 +366,16 @@ async function geocodeAddress(address: string) {
         </div>
       </nav>
 
+      {authModalOpen && (
+        <AuthModal
+          onClose={() => {
+            setAuthModalOpen(false);
+            setPendingAuthAction(null);
+          }}
+          onAuthenticated={handleAuthenticatedFromModal}
+        />
+      )}
+
       <section className="marketplace-search-panel">
         <div className="marketplace-breadcrumb">LOSI CONECTA <span>›</span> Encontrar fornecedor</div>
         <h1>Encontre fornecedores para o seu evento</h1>
