@@ -74,6 +74,13 @@ function BusinessServicesPage() {
   const [serviceName, setServiceName] = useState("");
   const [serviceDescription, setServiceDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [showAvailability, setShowAvailability] = useState(false);
+  const [availabilityDates, setAvailabilityDates] = useState<Array<{ id: string; availability_date: string; status: "available" | "unavailable" }>>([]);
+  const [availabilityMonth, setAvailabilityMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const [availabilitySaving, setAvailabilitySaving] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -137,6 +144,8 @@ function BusinessServicesPage() {
           cover_url: loaded.cover_url ?? "",
           portfolio_urls: (loaded.portfolio_urls ?? []).join("\n"),
         });
+        setShowAvailability(Boolean((loaded as Business & { show_availability?: boolean }).show_availability));
+        await loadAvailability(loaded.id, mounted);
         await loadServices(loaded.id, mounted);
       }
 
@@ -148,6 +157,54 @@ function BusinessServicesPage() {
       mounted = false;
     };
   }, [navigate]);
+
+  async function loadAvailability(businessId: string, mounted = true) {
+    if (!supabase) return;
+    const { data, error } = await supabase.from("provider_availability").select("id,availability_date,status").eq("business_id", businessId).order("availability_date");
+    if (!mounted) return;
+    if (error) {
+      console.error("Erro ao carregar agenda:", error);
+      setMessage("Não foi possível carregar a agenda: " + error.message);
+      return;
+    }
+    setAvailabilityDates((data ?? []) as typeof availabilityDates);
+  }
+
+  async function toggleAvailabilityDate(date: string) {
+    if (!supabase || !business || availabilitySaving) return;
+    setAvailabilitySaving(true);
+    const current = availabilityDates.find((item) => item.availability_date === date);
+    const result = current
+      ? await supabase.from("provider_availability").delete().eq("id", current.id).eq("business_id", business.id)
+      : await supabase.from("provider_availability").insert({ business_id: business.id, availability_date: date, status: "unavailable" }).select("id,availability_date,status").single();
+    if (result.error) {
+      console.error("Erro ao alterar disponibilidade:", result.error);
+      setMessage("Não foi possível atualizar a agenda: " + result.error.message);
+      setAvailabilitySaving(false);
+      return;
+    }
+    await loadAvailability(business.id);
+    setMessageType("success");
+    setMessage(current ? "Data liberada novamente na agenda." : "Data marcada como indisponível.");
+    setAvailabilitySaving(false);
+  }
+
+  async function saveAvailabilityVisibility(value: boolean) {
+    if (!supabase || !business || availabilitySaving) return;
+    setAvailabilitySaving(true);
+    const { error } = await supabase.from("business_profiles").update({ show_availability: value }).eq("id", business.id);
+    if (error) {
+      console.error("Erro ao atualizar visibilidade da agenda:", error);
+      setMessageType("error");
+      setMessage("Não foi possível atualizar a visibilidade da agenda: " + error.message);
+      setAvailabilitySaving(false);
+      return;
+    }
+    setShowAvailability(value);
+    setMessageType("success");
+    setMessage(value ? "Agenda pública ativada." : "Agenda pública desativada.");
+    setAvailabilitySaving(false);
+  }
 
   async function loadServices(businessId: string, mounted = true) {
     if (!supabase) return;
@@ -687,6 +744,50 @@ async function lookupViaCep(cep: string) {
             </div>
           )}
         </form>
+
+        {business && (
+          <section className="business-services-card provider-availability-manager">
+            <div className="business-services-head">
+              <div>
+                <div className="profile-badge">AGENDA</div>
+                <h2 className="business-section-title no-top">Minha disponibilidade</h2>
+                <p className="profile-page-text">Escolha as datas em que você estará indisponível. Quando a agenda pública estiver ativa, os clientes verão apenas as datas livres.</p>
+              </div>
+            </div>
+            <div className="provider-availability-visibility">
+              <div>
+                <strong>Exibir disponibilidade no meu perfil público</strong>
+                <span>{showAvailability ? "Ativado — clientes podem consultar sua agenda." : "Desativado — sua agenda fica somente para você."}</span>
+              </div>
+              <button type="button" className={showAvailability ? "availability-toggle active" : "availability-toggle"} onClick={() => saveAvailabilityVisibility(!showAvailability)} disabled={availabilitySaving}>
+                {showAvailability ? "Ativado" : "Desativado"}
+              </button>
+            </div>
+            <div className="availability-calendar-head">
+              <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() - 1, 1))}>←</button>
+              <strong>{availabilityMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</strong>
+              <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() + 1, 1))}>→</button>
+            </div>
+            <div className="availability-weekdays">{["DOM","SEG","TER","QUA","QUI","SEX","SÁB"].map((day) => <span key={day}>{day}</span>)}</div>
+            <div className="availability-calendar-grid">
+              {(() => {
+                const year = availabilityMonth.getFullYear();
+                const month = availabilityMonth.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const cells = [];
+                for (let i = 0; i < firstDay; i++) cells.push(<span key={"empty-" + i} className="availability-day empty" />);
+                for (let day = 1; day <= daysInMonth; day++) {
+                  const date = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+                  const unavailable = availabilityDates.some((item) => item.availability_date === date);
+                  cells.push(<button key={date} type="button" className={"availability-day " + (unavailable ? "unavailable" : "available")} onClick={() => toggleAvailabilityDate(date)} disabled={availabilitySaving} title={unavailable ? "Clique para liberar esta data" : "Clique para marcar como indisponível"}><strong>{day}</strong><small>{unavailable ? "Ocupado" : "Livre"}</small></button>);
+                }
+                return cells;
+              })()}
+            </div>
+            <div className="availability-legend"><span><i className="available-dot" /> Livre</span><span><i className="unavailable-dot" /> Indisponível</span></div>
+          </section>
+        )}
 
         <form onSubmit={editingServiceId ? saveService : addService} className="business-services-card">
           <div className="business-services-head">
