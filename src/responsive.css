@@ -11481,6 +11481,7 @@ button.availability-day {
 }
 .provider-profile-like:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(23,32,51,.10); }
 .provider-profile-like:disabled { opacity: .6; cursor: wait; transform: none; }
+.provider-profile-like.neutral { color: #8a93a3; background: #f7f8fa; }
 .provider-profile-like.green { color: #16803a; background: #f1fbf4; }
 .provider-profile-like.yellow { color: #b58a16; background: #fffaf0; }
 .provider-profile-like.red { color: #c43737; background: #fff3f3; }
