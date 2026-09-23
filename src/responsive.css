@@ -8097,7 +8097,16 @@ a.profile-logo:hover,
   }
 
   .dashboard-page .dashboard-header-right {
-    display: none !important;
+    display: flex !important;
+    width: auto !important;
+    min-width: 42px !important;
+    margin-left: auto !important;
+    justify-content: flex-end !important;
+    gap: 0 !important;
+  }
+
+  .dashboard-page .dashboard-notifications {
+    display: flex !important;
   }
 
   /* O menu lateral é o único lugar do Sair no mobile. */
