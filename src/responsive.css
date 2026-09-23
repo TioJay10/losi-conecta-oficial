@@ -11099,3 +11099,117 @@ button.availability-day {
     flex-wrap: wrap;
   }
 }
+
+
+/* AGENDA PÚBLICA — popup no padrão visual dos modais */
+.provider-availability-open {
+  width: 100%;
+  margin-top: 16px;
+  min-height: 42px;
+  border: 1px solid #4f46c7;
+  border-radius: 10px;
+  background: #4f46c7;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+}
+.provider-availability-open:hover {
+  background: #4338a8;
+}
+.provider-availability-open:active {
+  transform: translateY(1px);
+}
+.availability-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(17, 24, 39, .58);
+  box-sizing: border-box;
+}
+.availability-modal-card {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: min(760px, calc(100vh - 40px));
+  overflow: auto;
+  padding: 26px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(17, 24, 39, .22);
+  box-sizing: border-box;
+}
+.availability-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e1e5ec;
+  border-radius: 9px;
+  background: #fff;
+  color: #687386;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.availability-modal-close:hover {
+  color: #172033;
+  border-color: #cfd5df;
+}
+.availability-modal-header {
+  padding-right: 44px;
+}
+.availability-modal-header h2 {
+  margin: 5px 0 6px;
+  color: #172033;
+  font-size: 22px;
+  line-height: 1.2;
+}
+.availability-modal-header p {
+  margin: 0;
+  color: #687386;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.availability-modal-card .availability-calendar-head {
+  margin-top: 22px;
+}
+.availability-modal-card .availability-day.available {
+  border-color: #a7e0b4;
+  background: #effbf2;
+  color: #16803a;
+}
+.availability-modal-card .availability-day.unavailable {
+  border-color: #e4e8f0;
+  background: #f3f4f7;
+  color: #687386;
+}
+.availability-modal-card .available-dot {
+  background: #20a04b;
+}
+.availability-modal-card .unavailable-dot {
+  background: #9aa3b2;
+}
+@media only screen and (max-width: 600px) {
+  .availability-modal-backdrop {
+    align-items: flex-end;
+    padding: 10px;
+  }
+  .availability-modal-card {
+    max-height: calc(100vh - 20px);
+    padding: 22px 16px 18px;
+    border-radius: 16px;
+  }
+  .availability-modal-header h2 {
+    font-size: 19px;
+  }
+  .availability-modal-card .availability-day {
+    min-height: 48px;
+  }
+}
