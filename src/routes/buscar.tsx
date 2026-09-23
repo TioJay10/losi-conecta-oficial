@@ -402,7 +402,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
         />
       )}
 
-      <section className="marketplace-search-panel">
+      <section className="marketplace-search-panel" autoComplete="off">
         <div className="marketplace-breadcrumb">LOSI CONECTA <span>›</span> Encontrar fornecedor</div>
         <h1>Encontre fornecedores para o seu evento</h1>
         <p>Compare profissionais e empresas por serviço, categoria e localização.</p>
@@ -413,7 +413,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
           </div>
           <div className="marketplace-filter-field">
             <label htmlFor="marketplace-city">Localização</label>
-            <input id="marketplace-city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Cidade ou região" />
+            <input id="marketplace-city" name="search-location-city" autoComplete="new-password" autoCorrect="off" spellCheck={false} value={city} onChange={(event) => setCity(event.target.value)} placeholder="Cidade ou região" />
           </div>
           <div className="marketplace-filter-field">
             <label htmlFor="marketplace-category">Categoria</label>
@@ -433,8 +433,10 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
             <label htmlFor="marketplace-location-cep">Local de referência</label>
             <input
               id="marketplace-location-cep"
-              name="event-location-cep"
-              autoComplete="off"
+              name="search-location-cep"
+              autoComplete="new-password"
+              autoCorrect="off"
+              spellCheck={false}
               value={locationCep}
               onChange={(event) => setLocationCep(event.target.value)}
               onBlur={(event) => lookupLocationCep(event.target.value)}
