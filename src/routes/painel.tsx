@@ -25,6 +25,8 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [specificationsPlan, setSpecificationsPlan] = useState<{ name: string; description: string | null; price: string } | null>(null);
+  const [notifications, setNotifications] = useState<Array<{ id: string; type: string; title: string; message: string; link: string | null; read_at: string | null; created_at: string }>>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -288,6 +290,54 @@ function DashboardPage() {
           </button>
           <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>Seu espaço profissional</strong></div>
           <div className="dashboard-header-right">
+            <div className="dashboard-notifications">
+              <button
+                type="button"
+                className="dashboard-notification-bell"
+                aria-label={notifications.filter((notification) => !notification.read_at).length ? "Abrir notificações não lidas" : "Abrir notificações"}
+                aria-expanded={notificationsOpen}
+                onClick={() => setNotificationsOpen((value) => !value)}
+              >
+                <span className="dashboard-notification-icon" aria-hidden="true">♧</span>
+                {notifications.filter((notification) => !notification.read_at).length > 0 && (
+                  <span className="dashboard-notification-count">
+                    {Math.min(99, notifications.filter((notification) => !notification.read_at).length)}
+                  </span>
+                )}
+              </button>
+              {notificationsOpen && (
+                <div className="dashboard-notification-popover" role="dialog" aria-label="Notificações">
+                  <div className="dashboard-notification-head">
+                    <div>
+                      <strong>Notificações</strong>
+                      <span>{notifications.filter((notification) => !notification.read_at).length} não lidas</span>
+                    </div>
+                    <button type="button" onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificações">×</button>
+                  </div>
+                  <div className="dashboard-notification-list">
+                    {notifications.length === 0 ? (
+                      <div className="dashboard-notification-empty">Você ainda não tem notificações.</div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <button
+                          key={notification.id}
+                          type="button"
+                          className={"dashboard-notification-item" + (notification.read_at ? "" : " unread")}
+                          onClick={() => void openNotification(notification)}
+                        >
+                          <span className="dashboard-notification-dot" aria-hidden="true"></span>
+                          <span>
+                            <strong>{notification.title}</strong>
+                            <small>{notification.message}</small>
+                            <em>{new Date(notification.created_at).toLocaleString("pt-BR")}</em>
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="dashboard-header-user">
               <span>{(profile.full_name || user.email || "P").slice(0, 1).toUpperCase()}</span>
               <div><strong>{profile.full_name || "Profissional"}</strong><small>{user.email}</small></div>
