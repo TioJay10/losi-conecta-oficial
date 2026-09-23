@@ -112,6 +112,9 @@ function QuotesPage() {
   const [proposalDiscount, setProposalDiscount] = useState("0");
   const [proposalValidity, setProposalValidity] = useState("");
   const [proposalNotes, setProposalNotes] = useState("");
+  const [proposalProfileLink, setProposalProfileLink] = useState("");
+  const [resolvedProposalRecipient, setResolvedProposalRecipient] = useState<BusinessContact | null>(null);
+  const [resolvingProposalRecipient, setResolvingProposalRecipient] = useState(false);
   const [savingProposal, setSavingProposal] = useState(false);
 
   useEffect(() => {
@@ -511,6 +514,48 @@ function QuotesPage() {
     setProposalDiscount("0");
     setProposalValidity("");
     setProposalNotes("");
+    setProposalProfileLink("");
+    setResolvedProposalRecipient(null);
+  }
+
+  function extractPublicProfileSlug(value: string) {
+    const normalized = value.trim();
+    if (!normalized) return "";
+    const match = normalized.match(/\/fornecedor\/([^/?#]+)/i);
+    return match?.[1]?.replace(/\/$/, "") || "";
+  }
+
+  async function resolveProposalRecipient(value: string, request: RequestRow) {
+    setProposalProfileLink(value);
+    setResolvedProposalRecipient(null);
+    const slug = extractPublicProfileSlug(value);
+    if (!slug) return;
+
+    setResolvingProposalRecipient(true);
+    try {
+      const { data, error } = await supabase
+        .from("business_profiles")
+        .select("id,owner_id,business_name,slug,whatsapp,phone,address,bairro,city,state,cep")
+        .eq("slug", slug)
+        .eq("active", true)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("Perfil público não encontrado. Confira o link informado.");
+      if (data.owner_id !== request.requester_id) {
+        throw new Error("Este perfil público não pertence ao solicitante desta solicitação. Confira o link antes de enviar.");
+      }
+      if (!data.whatsapp && !data.phone) {
+        throw new Error("O perfil público foi encontrado, mas não possui WhatsApp ou telefone cadastrado.");
+      }
+      setResolvedProposalRecipient(data as BusinessContact);
+    } catch (error: any) {
+      console.error("Erro ao identificar destinatário pelo perfil público:", error);
+      setMessageType("error");
+      setMessage(error?.message || "Não foi possível identificar o destinatário pelo perfil público.");
+    } finally {
+      setResolvingProposalRecipient(false);
+    }
   }
 
   async function createAndSendProposal() {
@@ -519,6 +564,28 @@ function QuotesPage() {
     if (!request) {
       setMessageType("error");
       setMessage("Selecione uma solicitação para montar a proposta.");
+      return;
+    }
+
+    const profileLink = proposalProfileLink.trim();
+    if (profileLink) {
+      const slug = extractPublicProfileSlug(profileLink);
+      if (!slug || !resolvedProposalRecipient) {
+        setMessageType("error");
+        setMessage("Identifique o destinatário pelo link do perfil público antes de enviar a proposta.");
+        return;
+      }
+      if (resolvedProposalRecipient.owner_id !== request.requester_id) {
+        setMessageType("error");
+        setMessage("O perfil público informado não corresponde ao solicitante desta solicitação.");
+        return;
+      }
+    }
+
+    const recipientPhone = resolvedProposalRecipient?.whatsapp || resolvedProposalRecipient?.phone || request.client_phone;
+    if (!recipientPhone) {
+      setMessageType("error");
+      setMessage("Não encontramos um WhatsApp para este destinatário. Informe o link do perfil público que possui o WhatsApp cadastrado.");
       return;
     }
 
@@ -593,6 +660,8 @@ function QuotesPage() {
         "Empresa: " + (supplier?.business_name || "Não informada"),
         "Telefone: " + (supplier?.phone || supplier?.whatsapp || "Não informado"),
         "E-mail: " + userEmail,
+        resolvedProposalRecipient ? "Perfil público do destinatário: " + (window.location.origin + "/fornecedor/" + resolvedProposalRecipient.slug) : "",
+        resolvedProposalRecipient ? "WhatsApp do destinatário: " + recipientPhone : "",
         "",
         "Valor total: " + money(total),
         proposalValidity ? "Validade: " + formatQuoteDate(proposalValidity) : "",
@@ -601,7 +670,7 @@ function QuotesPage() {
         profileUrl,
       ].filter(Boolean).join("\n");
 
-      const number = normalizeWhatsAppNumber(request.client_phone);
+      const number = normalizeWhatsAppNumber(recipientPhone);
       const whatsappUrl = number
         ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage)
         : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
@@ -718,14 +787,26 @@ function QuotesPage() {
         .proposal-primary{border:0;border-radius:11px;padding:12px 18px;background:#1f2937;color:#fff;font-weight:800;cursor:pointer;min-height:44px}
         .proposal-primary:disabled{opacity:.55;cursor:not-allowed}
         .proposal-hint{margin:12px 0 0;color:#667085;font-size:12px;line-height:1.5}
-        .proposal-client{padding:12px 14px;border-radius:12px;background:#f8f9fb;border:1px solid #eaecf0;margin-bottom:18px}
-        .proposal-client strong{display:block;color:#101828}
-        .proposal-client span{display:block;color:#667085;font-size:13px;margin-top:2px}
+        .proposal-recipient{padding:16px;border-radius:15px;background:#f8f9fb;border:1px solid #d9dee8;margin-bottom:18px}
+        .proposal-recipient-head strong{display:block;color:#172033;font-size:13px;letter-spacing:.04em}
+        .proposal-recipient-head span{display:block;color:#687386;font-size:12px;line-height:1.5;margin-top:4px}
+        .proposal-recipient-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px;margin-top:14px}
+        .proposal-recipient-grid label{display:block;margin-bottom:6px;color:#475467;font-size:11px;font-weight:800;text-transform:uppercase}
+        .proposal-recipient-grid input{width:100%;box-sizing:border-box;border:1px solid #d0d5dd;border-radius:11px;background:#fff;color:#101828;padding:12px 13px;font:inherit;outline:none}
+        .proposal-recipient-grid input:focus{border-color:#d6b46a;box-shadow:0 0 0 3px rgba(214,180,106,.15)}
+        .proposal-recipient-grid small{display:block;color:#687386;font-size:11px;line-height:1.45;margin-top:6px}
+        .proposal-recipient-status{padding:12px 14px;border:1px solid #d9dee8;border-radius:12px;background:#fff}
+        .proposal-recipient-status>span{display:block;color:#8a6d2f;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+        .proposal-recipient-status strong{display:block;color:#172033;margin-top:3px}
+        .proposal-recipient-status p{margin:6px 0 0;color:#475467;font-size:13px}
+        .proposal-recipient-status a{display:inline-block;margin-top:8px;color:#8a6d2f;font-size:12px;font-weight:800;text-decoration:none}
+
         @media(max-width:700px){
           .proposal-builder{padding:18px;margin-top:20px;border-radius:16px}
           .proposal-builder-head{display:block}
           .proposal-builder-head h2{font-size:21px}
           .proposal-form-grid{grid-template-columns:1fr}
+          .proposal-recipient-grid{grid-template-columns:1fr}
           .proposal-item{grid-template-columns:minmax(0,1fr) 76px;gap:9px}
           .proposal-item .proposal-price{grid-column:1}
           .proposal-remove{grid-column:2;grid-row:1;align-self:end}
@@ -785,9 +866,44 @@ function QuotesPage() {
                   const request = supplierPendingRequests.find((item) => item.id === proposalRequestId);
                   if (!request) return null;
                   return (
-                    <div className="proposal-client">
-                      <strong>{request.client_name}</strong>
-                      <span>{request.client_phone || "WhatsApp não informado"} · {request.client_email || "E-mail não informado"}</span>
+                    <div className="proposal-recipient">
+                      <div className="proposal-recipient-head">
+                        <strong>DESTINATÁRIO DA PROPOSTA</strong>
+                        <span>Use o link do perfil público quando o solicitante também for fornecedor.</span>
+                      </div>
+                      <div className="proposal-recipient-grid">
+                        <div>
+                          <label htmlFor="proposal-profile-link">Link do perfil público do solicitante</label>
+                          <input
+                            id="proposal-profile-link"
+                            value={proposalProfileLink}
+                            onChange={(event) => {
+                              setProposalProfileLink(event.target.value);
+                              setResolvedProposalRecipient(null);
+                            }}
+                            onBlur={(event) => resolveProposalRecipient(event.target.value, request)}
+                            placeholder="Cole aqui o link /fornecedor/..."
+                          />
+                          <small>O sistema usa esse perfil para encontrar automaticamente o WhatsApp cadastrado.</small>
+                        </div>
+                        <div className="proposal-recipient-status">
+                          <span>Solicitante</span>
+                          <strong>{resolvedProposalRecipient?.business_name || request.client_name}</strong>
+                          <p>
+                            WhatsApp:{" "}
+                            {resolvingProposalRecipient
+                              ? "Identificando..."
+                              : resolvedProposalRecipient
+                                ? (resolvedProposalRecipient.whatsapp || resolvedProposalRecipient.phone)
+                                : (proposalProfileLink ? "Aguardando identificação" : (request.client_phone || "Não informado"))}
+                          </p>
+                          {resolvedProposalRecipient?.slug && (
+                            <a href={window.location.origin + "/fornecedor/" + resolvedProposalRecipient.slug} target="_blank" rel="noreferrer">
+                              Abrir perfil público
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   );
                 })()}
