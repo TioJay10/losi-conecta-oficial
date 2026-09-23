@@ -248,10 +248,10 @@ async function geocodeAddress(address: string) {
   return { latitude: Number(first.lat), longitude: Number(first.lon) };
 }
 
-  async function lookupCep(value: string) {
+  async function lookupCep(value: string): Promise<{ latitude: number; longitude: number } | null> {
     const cep = value.replace(/\D/g, "");
     update("cep", value);
-    if (cep.length !== 8) return;
+    if (cep.length !== 8) return null;
     setCepLoading(true);
     setMessage("");
     try {
@@ -274,9 +274,11 @@ async function geocodeAddress(address: string) {
           : await geocodeAddress(address);
       setCoordinates(coordinates);
       setMessage("CEP localizado. Cidade, bairro, estado e coordenadas foram preenchidos automaticamente.");
+      return coordinates;
     } catch (error) {
       setCoordinates({ latitude: null, longitude: null });
       setMessage(error instanceof Error ? error.message : "Não foi possível consultar o CEP.");
+      return null;
     } finally {
       setCepLoading(false);
     }
@@ -293,12 +295,23 @@ async function geocodeAddress(address: string) {
     }
 
     const normalizedCep = form.cep.replace(/\D/g, "");
-    if (normalizedCep.length !== 8 || !form.bairro.trim() || !form.city.trim() || !form.state.trim()) {
-      setMessage("Para publicar a empresa, informe CEP, bairro, cidade e estado.");
+    if (normalizedCep.length !== 8) {
+      setMessage("Informe um CEP válido com 8 dígitos.");
       return;
     }
-    if (coordinates.latitude === null || coordinates.longitude === null) {
-      setMessage("Consulte o CEP novamente para gerar a localização usada no filtro por distância.");
+
+    let saveCoordinates = coordinates;
+    if (saveCoordinates.latitude === null || saveCoordinates.longitude === null) {
+      const resolved = await lookupCep(form.cep);
+      if (!resolved) {
+        setMessage("Não foi possível localizar o CEP. Consulte o CEP e tente salvar novamente.");
+        return;
+      }
+      saveCoordinates = resolved;
+    }
+
+    if (!form.bairro.trim() || !form.city.trim() || !form.state.trim()) {
+      setMessage("Informe CEP, bairro, cidade e estado.");
       return;
     }
 
@@ -340,8 +353,8 @@ async function geocodeAddress(address: string) {
         .map((url) => url.trim())
         .filter((url) => /^https?:\/\//i.test(url))
         .slice(0, 12),
-      latitude: coordinates.latitude,
-      longitude: coordinates.longitude,
+      latitude: saveCoordinates.latitude,
+      longitude: saveCoordinates.longitude,
     };
 
     const result = business
