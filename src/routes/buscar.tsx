@@ -326,7 +326,16 @@ async function geocodeAddress(address: string) {
             {userId ? (
               <button type="button" className="marketplace-account" disabled={authLoading} onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}>Sair</button>
             ) : (
-              <Link to="/entrar" className="marketplace-account">Entrar</Link>
+              <button
+                type="button"
+                className="marketplace-account"
+                onClick={() => {
+                  setPendingAuthAction(null);
+                  setAuthModalOpen(true);
+                }}
+              >
+                Entrar
+              </button>
             )}
           </div>
         </div>
