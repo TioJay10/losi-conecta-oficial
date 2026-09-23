@@ -251,7 +251,7 @@ function ProviderPage() {
   const canRequestQuote = Boolean(userId && userId !== business.owner_id);
   const reputationLabel = reputation.label;
   const reputationClass = `level-${reputation.level}`;
-  const heartClass = likeCount >= 250 ? "gold" : likeCount >= 61 ? "red" : likeCount >= 31 ? "yellow" : "green";
+  const heartClass = likeCount >= 250 ? "gold" : likeCount >= 61 ? "red" : likeCount >= 31 ? "yellow" : likeCount >= 1 ? "green" : "neutral";
   const satisfactionText = reputation.satisfaction === null ? "Sem reputação" : reputation.satisfaction + "% de satisfação";
 
 
