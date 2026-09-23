@@ -10568,3 +10568,33 @@ button,input,textarea,select{max-width:100%;font:inherit}
     min-width: 0 !important;
   }
 }
+
+
+/* BUSCA — localização por CEP para filtro de distância */
+.marketplace-page .marketplace-sidebar .marketplace-filter-group input#marketplace-location-cep {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(25, 32, 55, 0.16);
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+}
+
+.marketplace-page .marketplace-location-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #737b8f;
+}
+
+@media only screen and (max-width: 600px) {
+  .marketplace-page .marketplace-sidebar .marketplace-filter-group input#marketplace-location-cep {
+    height: 44px;
+  }
+}
