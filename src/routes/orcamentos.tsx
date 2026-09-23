@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
 
@@ -107,17 +107,12 @@ function QuotesPage() {
   const [personalIdentity, setPersonalIdentity] = useState<PersonalIdentity | null>(null);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
-  const [activeMetric, setActiveMetric] = useState<"pending" | "total" | "received" | "supplier-pending" | "supplier-sent" | null>(null);
-  const [filterFrom, setFilterFrom] = useState("");
-  const [filterTo, setFilterTo] = useState("");
-  const [filterType, setFilterType] = useState("all");
   const [proposalRequestId, setProposalRequestId] = useState("");
   const [proposalItems, setProposalItems] = useState([{ description: "", quantity: "1", unitPrice: "" }]);
   const [proposalDiscount, setProposalDiscount] = useState("0");
   const [proposalValidity, setProposalValidity] = useState("");
   const [proposalNotes, setProposalNotes] = useState("");
   const [savingProposal, setSavingProposal] = useState(false);
-  const detailsRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -698,36 +693,33 @@ function QuotesPage() {
     return request?.services?.name || "Serviço não informado";
   }
 
-  const availableTypes = [...new Set([
-    ...clientRequests.map((request) => serviceName(request)),
-    ...clientQuotes.map((quote) => serviceName(quote.quote_requests)),
-    ...requests.map((request) => serviceName(request)),
-    ...quotes.map((quote) => serviceName(quote.quote_requests)),
-  ].filter((type) => type !== "Serviço não informado"))].sort();
+  const sentQuotesCount = quotes.filter((quote) =>
+    Boolean(quote.sent_at) ||
+    ["sent", "viewed", "accepted", "rejected"].includes(quote.status)
+  ).length;
+  const acceptedQuotesCount = quotes.filter((quote) => quote.status === "accepted").length;
+  const rejectedQuotesCount = quotes.filter((quote) => quote.status === "rejected").length;
 
-  const matchesFilters = (createdAt: string, type: string) => {
-    const date = new Date(createdAt);
-    if (filterFrom && date < new Date(filterFrom + "T00:00:00")) return false;
-    if (filterTo && date > new Date(filterTo + "T23:59:59")) return false;
-    if (filterType !== "all" && type !== filterType) return false;
-    return true;
-  };
-
-  const filteredMetricRequests = metricRequests.filter((request) =>
-    matchesFilters(request.created_at, serviceName(request))
-  );
-
-  const filteredMetricQuotes = metricQuotes.filter((quote) =>
-    matchesFilters(quote.sent_at || quote.created_at, serviceName(quote.quote_requests))
-  );
-
-  const closeMetric = () => setActiveMetric(null);
 
   if (loading) return <main className="quotes-page-state">Carregando orçamentos...</main>;
 
   return (
     <main className="quotes-page">
       <style>{`
+        .quotes-dashboard{margin:28px 0 34px;padding:24px;border:1px solid rgba(11,24,42,.10);border-radius:20px;background:#f4f5f8;box-shadow:0 12px 30px rgba(7,17,31,.07)}
+        .quotes-dashboard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px}
+        .quotes-dashboard-head h2{margin:5px 0 7px;color:#172033;font-size:24px;line-height:1.2}
+        .quotes-dashboard-head p{margin:0;color:#687386;font-size:14px;line-height:1.55}
+        .quotes-dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+        .quotes-dashboard-card{min-width:0;padding:20px;border:1px solid rgba(11,24,42,.10);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.06)}
+        .quotes-dashboard-card.accepted{border-color:rgba(35,115,69,.16)}
+        .quotes-dashboard-card.rejected{border-color:rgba(163,47,47,.16)}
+        .quotes-dashboard-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;border-radius:10px;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;font-size:18px;font-weight:900}
+        .quotes-dashboard-card.accepted .quotes-dashboard-icon{background:#eefaf3;color:#237345}
+        .quotes-dashboard-card.rejected .quotes-dashboard-icon{background:#fff1f1;color:#a32f2f}
+        .quotes-dashboard-label{margin-bottom:5px;color:#687386;font-size:11px;font-weight:800;letter-spacing:.12em}
+        .quotes-dashboard-card strong{display:block;color:#172033;font-size:34px;line-height:1.05;font-weight:850}
+        .quotes-dashboard-card span{display:block;margin-top:8px;color:#687386;font-size:13px;line-height:1.45}
         .proposal-builder{margin:28px 0 34px;padding:24px;border:1px solid rgba(31,41,55,.12);border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(31,41,55,.07)}
         .proposal-builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:22px}
         .proposal-builder-head h2{margin:4px 0 6px;font-size:24px;line-height:1.2}
@@ -768,6 +760,16 @@ function QuotesPage() {
           .proposal-primary{width:100%}
           .proposal-summary{justify-content:stretch}
           .proposal-summary-box{width:100%;box-sizing:border-box}
+        }
+        @media (max-width:700px){
+          .quotes-dashboard{margin:20px 0 26px;padding:18px;border-radius:16px}
+          .quotes-dashboard-head{margin-bottom:16px}
+          .quotes-dashboard-head h2{font-size:21px}
+          .quotes-dashboard-head p{font-size:13px}
+          .quotes-dashboard-grid{grid-template-columns:1fr;gap:10px}
+          .quotes-dashboard-card{padding:16px}
+          .quotes-dashboard-icon{margin-bottom:12px}
+          .quotes-dashboard-card strong{font-size:30px}
         }
       `}</style>
       <header className="quotes-header">
@@ -888,147 +890,38 @@ function QuotesPage() {
           </div>
         )}
 
-        <div className="quotes-metrics">
-          <button
-            type="button"
-            className={"quotes-metric-card" + (activeMetric === "pending" ? " active" : "")}
-            onClick={() => setActiveMetric(activeMetric === "pending" ? null : "pending")}
-          >
-            <span>Solicitações aguardando</span>
-            <strong>{clientPendingRequests.length}</strong>
-            <small>Pedidos feitos por você que ainda não receberam proposta</small>
-          </button>
-
-          <button
-            type="button"
-            className={"quotes-metric-card" + (activeMetric === "total" ? " active" : "")}
-            onClick={() => setActiveMetric(activeMetric === "total" ? null : "total")}
-          >
-            <span>Propostas recebidas</span>
-            <strong>{clientQuotes.length}</strong>
-            <small>Orçamentos enviados pelos fornecedores para você</small>
-          </button>
-
-          {isSupplier && (
-            <>
-              <button
-                type="button"
-                className={"quotes-metric-card" + (activeMetric === "received" ? " active" : "")}
-                onClick={() => setActiveMetric(activeMetric === "received" ? null : "received")}
-              >
-                <span>Pedidos recebidos</span>
-                <strong>{requests.length}</strong>
-                <small>Solicitações de clientes para sua empresa</small>
-              </button>
-
-              <button
-                type="button"
-                className={"quotes-metric-card" + (activeMetric === "supplier-sent" ? " active" : "")}
-                onClick={() => setActiveMetric(activeMetric === "supplier-sent" ? null : "supplier-sent")}
-              >
-                <span>Propostas enviadas</span>
-                <strong>{quotes.length}</strong>
-                <small>Orçamentos preparados e enviados por sua empresa</small>
-              </button>
-            </>
-          )}
-        </div>
-        {activeMetric && (
-          <section ref={detailsRef} className="quotes-metric-details">
-            <div className="quotes-section-head">
-              <div>
-                <div className="quotes-kicker">{activeMetric === "supplier-sent" ? "ENVIADOS" : activeMetric === "pending" || activeMetric === "supplier-pending" ? "AGUARDANDO" : "RECEBIDOS"}</div>
-                <h2>{activeMetric === "pending" ? "Solicitações aguardando orçamento" : activeMetric === "received" ? "Solicitações recebidas" : activeMetric === "supplier-pending" ? "Solicitações recebidas aguardando resposta" : activeMetric === "supplier-sent" ? "Orçamentos enviados" : "Orçamentos recebidos"}</h2>
-              </div>
-              <button type="button" className="quotes-secondary" onClick={closeMetric}>Fechar</button>
+        <section className="quotes-dashboard" aria-label="Resumo dos orçamentos">
+          <div className="quotes-dashboard-head">
+            <div>
+              <div className="quotes-kicker">PAINEL DE ORÇAMENTOS</div>
+              <h2>Acompanhe suas propostas</h2>
+              <p>Veja rapidamente quantos orçamentos foram enviados e qual foi a resposta dos clientes.</p>
             </div>
+          </div>
 
-            <div className="quotes-filters">
-              <label>De<input type="date" value={filterFrom} onChange={(event) => setFilterFrom(event.target.value)} /></label>
-              <label>Até<input type="date" value={filterTo} onChange={(event) => setFilterTo(event.target.value)} /></label>
-              <label>Tipo
-                <select value={filterType} onChange={(event) => setFilterType(event.target.value)}>
-                  <option value="all">Todos os tipos</option>
-                  {availableTypes.map((type) => <option key={type} value={type}>{type}</option>)}
-                </select>
-              </label>
-              <button type="button" className="quotes-secondary" onClick={() => { setFilterFrom(""); setFilterTo(""); setFilterType("all"); }}>Limpar filtros</button>
-            </div>
+          <div className="quotes-dashboard-grid">
+            <article className="quotes-dashboard-card">
+              <div className="quotes-dashboard-icon">↗</div>
+              <div className="quotes-dashboard-label">ORÇAMENTOS ENVIADOS</div>
+              <strong>{sentQuotesCount}</strong>
+              <span>Total de propostas enviadas aos clientes</span>
+            </article>
 
-            {(activeMetric === "pending" || activeMetric === "received" || activeMetric === "supplier-pending") ? (
-              filteredMetricRequests.length === 0 ? <div className="quotes-empty">Nenhum registro encontrado com esses filtros.</div> : (
-                <div className="quote-request-list">
-                  {filteredMetricRequests.map((request) => (
-                    <article key={request.id} className="quote-request-card">
-                      <div>
-                        <span className={"quote-status " + request.status}>{statusLabel(request.status)}</span>
-                        <span className="quote-context-label">{activeMetric === "received" || activeMetric === "supplier-pending" ? "SOLICITAÇÃO RECEBIDA DO CLIENTE" : "SOLICITAÇÃO FEITA POR VOCÊ"}</span>
-                        <h3>{request.event_title}</h3>
-                        <strong>{serviceName(request)}</strong>
-                        <p><strong>Solicitado por:</strong> {request.client_name}</p>
-                        {request.client_phone && <p>WhatsApp/Telefone: {request.client_phone}</p>}
-                        {request.client_email && <p>E-mail: {request.client_email}</p>}
-                        <p>{activeMetric === "received" || activeMetric === "supplier-pending" ? "Solicitação recebida em" : "Solicitação enviada em"} <strong>{dateTime(request.created_at)}</strong></p>
-                        <p>Data do evento: {dateOnly(request.event_date)} · {request.event_location || "Local não informado"}</p>
-                        <div className="quote-request-actions">
-                          <button
-                            type="button"
-                            className="quotes-secondary quote-detail-button"
-                            onClick={() => setSelectedRequest(request)}
-                          >
-                            Ver detalhes
-                          </button>
-                          {isSupplier && (activeMetric === "supplier-pending" || (activeMetric === "received" && request.status === "pending")) && (
-                            <button
-                              className="quotes-whatsapp"
-                              type="button"
-                              onClick={() => openWhatsApp(request.client_phone, buildRequestWhatsAppMessage(request))}
-                            >
-                              Responder solicitação pelo WhatsApp
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )
-            ) : (
-              filteredMetricQuotes.length === 0 ? <div className="quotes-empty">Nenhum orçamento encontrado com esses filtros.</div> : (
-                <div className="quote-history-list">
-                  {filteredMetricQuotes.map((quote) => (
-                    <article key={quote.id} className="quote-client-card">
-                      <div>
-                        <span className={"quote-status " + quote.status}>{statusLabel(quote.status)}</span>
-                        <span className="quote-context-label">{activeMetric === "supplier-sent" ? "PROPOSTA ENVIADA POR VOCÊ" : "PROPOSTA RECEBIDA DO FORNECEDOR"}</span>
-                        <h3>{quote.quote_requests?.event_title || "Orçamento"}</h3>
-                        <strong>{serviceName(quote.quote_requests)}</strong>
-                        <p><strong>Solicitado por:</strong> {quote.quote_requests?.client_name || "Não informado"}</p>
-                        {quote.quote_requests?.client_phone && <p>WhatsApp/Telefone: {quote.quote_requests.client_phone}</p>}
-                        {quote.quote_requests?.client_email && <p>E-mail: {quote.quote_requests.client_email}</p>}
-                        <p>Solicitação enviada em <strong>{dateTime(quote.quote_requests?.created_at ?? null)}</strong></p>
-                        <p>Orçamento recebido em <strong>{dateTime(quote.sent_at || quote.created_at)}</strong></p>
-                        <p>Data do evento: {dateOnly(quote.quote_requests?.event_date ?? null)} · {quote.quote_requests?.event_location || "Local não informado"}</p>
-                        {quote.notes && <p>{quote.notes}</p>}
-                      </div>
-                      <div className="quote-client-total">
-                        <button className="quotes-secondary quote-view-button" type="button" onClick={() => setSelectedQuote(quote)}>Ver proposta</button>
-                        <span>Total</span>
-                        <strong>{money(Number(quote.total))}</strong>
-                        <div className="quote-client-actions">
-                          <button className="quotes-whatsapp" type="button" onClick={() => shareQuoteOnWhatsApp(quote)}>Compartilhar no WhatsApp</button>
-                          {(quote.status === "sent" || quote.status === "viewed") && <><button className="quotes-primary" type="button" onClick={() => respondToQuote(quote, "accepted")}>Aceitar</button><button className="quotes-secondary" type="button" onClick={() => respondToQuote(quote, "rejected")}>Recusar</button></>}
-                          <button className="quotes-secondary quote-delete-button" type="button" onClick={() => deleteQuote(quote)}>Excluir orçamento</button>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )
-            )}
-          </section>
-        )}
+            <article className="quotes-dashboard-card accepted">
+              <div className="quotes-dashboard-icon">✓</div>
+              <div className="quotes-dashboard-label">ORÇAMENTOS ACEITOS</div>
+              <strong>{acceptedQuotesCount}</strong>
+              <span>Propostas que foram aceitas pelo cliente</span>
+            </article>
 
+            <article className="quotes-dashboard-card rejected">
+              <div className="quotes-dashboard-icon">×</div>
+              <div className="quotes-dashboard-label">ORÇAMENTOS REJEITADOS</div>
+              <strong>{rejectedQuotesCount}</strong>
+              <span>Propostas que foram recusadas pelo cliente</span>
+            </article>
+          </div>
+        </section>
 
         {selectedRequest && (
           <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeRequestModal(); }}>
