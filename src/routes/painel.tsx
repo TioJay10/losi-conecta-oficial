@@ -24,6 +24,7 @@ function DashboardPage() {
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [specificationsPlan, setSpecificationsPlan] = useState<{ name: string; description: string | null; price: string } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -420,8 +421,56 @@ function DashboardPage() {
             <h2 className="dashboard-status-title">{currentPlan ? currentPlan.name : "Plano gratuito"}</h2>
             <p className="dashboard-text dashboard-status-text">{currentPlan?.ends_at ? "Seu plano está ativo até " + new Date(currentPlan.ends_at).toLocaleDateString("pt-BR") + "." : "Comece gratuitamente e conheça opções para aumentar a visibilidade do seu negócio."}</p>
           </div>
-          <div className="dashboard-plan-grid">{plans.filter(p => p.billing_period !== "free").map(plan => <div className="dashboard-plan-card" key={plan.id}><strong>{plan.name}</strong><span>{plan.price_cents === 0 ? "Grátis" : "R$ " + (plan.price_cents/100).toFixed(2).replace(".",",") + "/mês"}</span><small>{plan.description || "Mais recursos para seu perfil."}</small><a className="dashboard-plan-contract" href={`https://wa.me/5511988187354?text=${encodeURIComponent("Olá! Tenho interesse em contratar o plano " + plan.name + " do LOSI CONECTA.")}`} target="_blank" rel="noreferrer">Quero contratar</a></div>)}</div>
+          <div className="dashboard-plan-grid">{plans.filter(p => p.billing_period !== "free").map(plan => {
+            const price = plan.price_cents === 0 ? "Grátis" : "R$ " + (plan.price_cents / 100).toFixed(2).replace(".", ",") + "/mês";
+            return (
+              <div className="dashboard-plan-card" key={plan.id}>
+                <strong>{plan.name}</strong>
+                <span>{price}</span>
+                <small>{plan.description || "Mais recursos para seu perfil."}</small>
+                <a className="dashboard-plan-contract" href={`https://wa.me/5511988187354?text=${encodeURIComponent("Olá! Tenho interesse em contratar o plano " + plan.name + " do LOSI CONECTA.")}`} target="_blank" rel="noreferrer">Quero contratar</a>
+                <button type="button" className="dashboard-plan-specs" onClick={() => setSpecificationsPlan({ name: plan.name, description: plan.description, price })}>Especificações</button>
+              </div>
+            );
+          })}</div>
         </section>
+        {specificationsPlan && (
+          <div className="dashboard-plan-modal-backdrop" role="presentation" onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSpecificationsPlan(null);
+          }}>
+            <section className="dashboard-plan-modal" role="dialog" aria-modal="true" aria-labelledby="plan-specifications-title">
+              <button type="button" className="dashboard-plan-modal-close" onClick={() => setSpecificationsPlan(null)} aria-label="Fechar especificações">×</button>
+              <div className="dashboard-plan-modal-brand">
+                <div className="dashboard-plan-modal-logo">LOSI <span>CONECTA</span></div>
+                <div className="dashboard-plan-modal-eyebrow">PLANO PARA FORNECEDORES</div>
+                <h2 id="plan-specifications-title">{specificationsPlan.name}</h2>
+                <p>{specificationsPlan.description || "Recursos para aumentar a presença da sua empresa no LOSI CONECTA."}</p>
+              </div>
+              <div className="dashboard-plan-modal-content">
+                <div className="dashboard-plan-modal-price">{specificationsPlan.price}</div>
+                <div className="dashboard-plan-modal-benefits">
+                  {specificationsPlan.name.toLocaleLowerCase("pt-BR") === "profissional" ? (
+                    <>
+                      <div><strong>Mais visibilidade</strong><span>Seu fornecedor ganha prioridade em relação ao plano gratuito nas pesquisas do catálogo.</span></div>
+                      <div><strong>Reputação profissional</strong><span>O plano inicia com uma base de 2 estrelas e nível de satisfação de 70% quando ainda não há avaliações reais.</span></div>
+                      <div><strong>Presença completa</strong><span>Utilize seu perfil comercial para apresentar empresa, serviços, localização e canais de contato aos clientes.</span></div>
+                      <div><strong>Avaliações reais</strong><span>As avaliações recebidas passam a compor sua reputação e influenciam sua posição nos resultados.</span></div>
+                    </>
+                  ) : (
+                    <>
+                      <div><strong>Maior exposição</strong><span>Seu fornecedor recebe prioridade superior nas pesquisas, favorecendo seu posicionamento no catálogo.</span></div>
+                      <div><strong>Reputação de destaque</strong><span>O plano inicia com uma base de 4 estrelas e nível de satisfação de 90% quando ainda não há avaliações reais.</span></div>
+                      <div><strong>Mais destaque no catálogo</strong><span>O posicionamento promocional é considerado junto à reputação e às avaliações para ordenar os resultados.</span></div>
+                      <div><strong>Avaliações reais</strong><span>Conforme sua empresa recebe avaliações, a reputação real passa a substituir a base inicial do plano.</span></div>
+                    </>
+                  )}
+                </div>
+                <button type="button" className="dashboard-plan-modal-action" onClick={() => setSpecificationsPlan(null)}>Entendi</button>
+              </div>
+            </section>
+          </div>
+        )}
+
         {savedBusinesses.length > 0 && (
           <section className="dashboard-saved">
             <div className="dashboard-badge">SALVOS</div>
