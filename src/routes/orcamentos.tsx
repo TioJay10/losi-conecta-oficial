@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
 
@@ -111,6 +111,7 @@ function QuotesPage() {
   const [filterFrom, setFilterFrom] = useState("");
   const [filterTo, setFilterTo] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const detailsRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -497,6 +498,33 @@ function QuotesPage() {
       : "Não informada";
   }
 
+  useEffect(() => {
+    if (!activeMetric) return;
+    const timer = window.setTimeout(() => {
+      detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+    return () => window.clearTimeout(timer);
+  }, [activeMetric]);
+
+  async function deleteQuote(quote: QuoteRow) {
+    const confirmed = window.confirm("Excluir este orçamento? Esta ação não pode ser desfeita.");
+    if (!confirmed) return;
+
+    const { error } = await supabase.from("quotes").delete().eq("id", quote.id);
+    if (error) {
+      console.error("Erro ao excluir orçamento:", error);
+      setMessageType("error");
+      setMessage(error.message || "Não foi possível excluir o orçamento.");
+      return;
+    }
+
+    setQuotes((current) => current.filter((item) => item.id !== quote.id));
+    setClientQuotes((current) => current.filter((item) => item.id !== quote.id));
+    if (selectedQuote?.id === quote.id) setSelectedQuote(null);
+    setMessageType("success");
+    setMessage("Orçamento excluído com sucesso.");
+  }
+
   function serviceName(request: RequestRow | null | undefined) {
     return request?.services?.name || "Serviço não informado";
   }
@@ -594,7 +622,7 @@ function QuotesPage() {
           )}
         </div>
         {activeMetric && (
-          <section className="quotes-metric-details">
+          <section ref={detailsRef} className="quotes-metric-details">
             <div className="quotes-section-head">
               <div>
                 <div className="quotes-kicker">{activeMetric === "supplier-sent" ? "ENVIADOS" : activeMetric === "pending" || activeMetric === "supplier-pending" ? "AGUARDANDO" : "RECEBIDOS"}</div>
@@ -678,6 +706,7 @@ function QuotesPage() {
                         <div className="quote-client-actions">
                           <button className="quotes-whatsapp" type="button" onClick={() => shareQuoteOnWhatsApp(quote)}>Compartilhar no WhatsApp</button>
                           {(quote.status === "sent" || quote.status === "viewed") && <><button className="quotes-primary" type="button" onClick={() => respondToQuote(quote, "accepted")}>Aceitar</button><button className="quotes-secondary" type="button" onClick={() => respondToQuote(quote, "rejected")}>Recusar</button></>}
+                          <button className="quotes-secondary quote-delete-button" type="button" onClick={() => deleteQuote(quote)}>Excluir orçamento</button>
                         </div>
                       </div>
                     </article>
