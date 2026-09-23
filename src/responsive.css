@@ -10374,3 +10374,26 @@ button,input,textarea,select{max-width:100%;font:inherit}
   padding-right: 10px !important;
   overflow: hidden !important;
 }
+
+
+/* PERFIL PÚBLICO — restaura a borda completa dos campos de evento/data */
+.provider-page .provider-quote-form input[name="event_title"],
+.provider-page .provider-quote-form input[name="event_date"] {
+  border: 1px solid rgba(25, 32, 55, 0.16) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.provider-page .provider-quote-form input[name="event_date"] {
+  padding: 10px 12px !important;
+  min-height: 44px !important;
+}
+
+.provider-page .provider-quote-form input[name="event_title"]:focus,
+.provider-page .provider-quote-form input[name="event_date"]:focus {
+  outline: none !important;
+  border-color: rgba(102, 67, 170, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(102, 67, 170, 0.10) !important;
+}
