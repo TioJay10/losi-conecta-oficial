@@ -169,7 +169,8 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
           ? { latitude: directLatitude, longitude: directLongitude }
           : await geocodeAddress(address, cep, data.city, data.state);
       setUserLocation(coordinates);
-      setCity(data.city ?? data.city_ibge ?? "");
+      // O CEP serve apenas como ponto de referência para o raio.
+      // A cidade é um filtro independente e só deve ser preenchida pelo usuário.
       setLocationMessage("Local de referência definido pelo CEP. A distância será calculada a partir dele.");
     } catch (error) {
       setUserLocation(null);
