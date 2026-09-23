@@ -61,7 +61,7 @@ function SearchPage() {
         if (mounted) {
           setFavoriteIds((favoriteData ?? []).map((item) => item.business_id));
           setUserBusinessSlug(ownBusiness?.slug ?? null);
-          if (personalProfile?.city) setCity(personalProfile.city);
+          // A busca deve iniciar sem filtros de localização. O usuário escolhe a cidade manualmente.
         }
       }
       if (mounted) setAuthLoading(false);
