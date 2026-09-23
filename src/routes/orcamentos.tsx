@@ -96,6 +96,7 @@ function QuotesPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState("");
   const [selectedQuote, setSelectedQuote] = useState<QuoteRow | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [clientRequests, setClientRequests] = useState<RequestRow[]>([]);
@@ -451,6 +452,7 @@ function QuotesPage() {
   const selectedItemLines = selectedQuote?.quote_items ?? [];
 
   const closeQuoteModal = () => setSelectedQuote(null);
+  const closeRequestModal = () => setSelectedRequest(null);
 
 
   const isSupplier = Boolean(businessId);
@@ -627,16 +629,24 @@ function QuotesPage() {
                         {request.client_email && <p>E-mail: {request.client_email}</p>}
                         <p>{activeMetric === "received" || activeMetric === "supplier-pending" ? "Solicitação recebida em" : "Solicitação enviada em"} <strong>{dateTime(request.created_at)}</strong></p>
                         <p>Data do evento: {dateOnly(request.event_date)} · {request.event_location || "Local não informado"}</p>
-                        {request.description && <p>{request.description}</p>}
-                        {isSupplier && (activeMetric === "supplier-pending" || (activeMetric === "received" && request.status === "pending")) && (
+                        <div className="quote-request-actions">
                           <button
-                            className="quotes-whatsapp"
                             type="button"
-                            onClick={() => openWhatsApp(request.client_phone, buildRequestWhatsAppMessage(request))}
+                            className="quotes-secondary quote-detail-button"
+                            onClick={() => setSelectedRequest(request)}
                           >
-                            Enviar orçamento pelo WhatsApp
+                            Ver detalhes
                           </button>
-                        )}
+                          {isSupplier && (activeMetric === "supplier-pending" || (activeMetric === "received" && request.status === "pending")) && (
+                            <button
+                              className="quotes-whatsapp"
+                              type="button"
+                              onClick={() => openWhatsApp(request.client_phone, buildRequestWhatsAppMessage(request))}
+                            >
+                              Enviar orçamento pelo WhatsApp
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </article>
                   ))}
@@ -676,6 +686,64 @@ function QuotesPage() {
           </section>
         )}
 
+
+        {selectedRequest && (
+          <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeRequestModal(); }}>
+            <section className="quote-modal" role="dialog" aria-modal="true" aria-labelledby="request-modal-title">
+              <div className="quote-modal-head">
+                <div>
+                  <div className="quotes-kicker">DETALHAMENTO DA SOLICITAÇÃO</div>
+                  <h2 id="request-modal-title">{selectedRequest.event_title}</h2>
+                </div>
+                <button type="button" className="quotes-secondary quote-modal-close" onClick={closeRequestModal} aria-label="Fechar">Fechar</button>
+              </div>
+
+              <div className="quote-modal-parties">
+                <div className="quote-modal-party">
+                  <span>CLIENTE / SOLICITANTE</span>
+                  <strong>{selectedRequest.client_name || "Não informado"}</strong>
+                  <p>E-mail: {selectedRequest.client_email || "Não informado"}</p>
+                  <p>WhatsApp/Telefone: {selectedRequest.client_phone || "Não informado"}</p>
+                </div>
+              </div>
+
+              <div className="quote-modal-event">
+                <h3>Dados do evento</h3>
+                <p><strong>Serviço solicitado:</strong> {serviceName(selectedRequest)}</p>
+                <p><strong>Data do evento:</strong> {dateOnly(selectedRequest.event_date)}</p>
+                <p><strong>Local:</strong> {selectedRequest.event_location || "Não informado"}</p>
+                <p><strong>Solicitação recebida em:</strong> {dateTime(selectedRequest.created_at)}</p>
+                <p><strong>Status:</strong> {statusLabel(selectedRequest.status)}</p>
+              </div>
+
+              <div className="quote-modal-items">
+                <h3>Detalhes do pedido</h3>
+                <div className="quote-modal-request-description">
+                  {selectedRequest.description
+                    ? <p>{selectedRequest.description}</p>
+                    : <p>Nenhuma descrição adicional foi informada pelo solicitante.</p>}
+                </div>
+              </div>
+
+              <div className="quote-modal-total quote-modal-request-next">
+                <span>Próxima etapa</span>
+                <strong>{isSupplier ? "Preparar e enviar o orçamento ao cliente." : "Aguardar o fornecedor preparar o orçamento."}</strong>
+              </div>
+
+              {isSupplier && (
+                <div className="quote-modal-actions">
+                  <button
+                    type="button"
+                    className="quotes-whatsapp"
+                    onClick={() => openWhatsApp(selectedRequest.client_phone, buildRequestWhatsAppMessage(selectedRequest))}
+                  >
+                    Responder pelo WhatsApp
+                  </button>
+                </div>
+              )}
+            </section>
+          </div>
+        )}
 
         {selectedQuote && (
           <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeQuoteModal(); }}>
