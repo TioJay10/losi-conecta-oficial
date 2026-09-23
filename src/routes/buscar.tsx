@@ -91,7 +91,17 @@ function SearchPage() {
         const planByBusiness = new Map(planRows.map((row) => [row.business_id, row]));
         const loadedBusinesses = ((businessResult.data ?? []) as unknown as Business[]).map((business) => ({
           ...business,
-          plan: planByBusiness.get(business.id) ?? { business_id: business.id, plan_slug: "gratis", plan_name: "Grátis", plan_priority: 0, ends_at: null },
+          services: Array.isArray(business.services) ? business.services : [],
+          reviews: Array.isArray(business.reviews) ? business.reviews : [],
+          reputation_service_count: Number.isFinite(Number(business.reputation_service_count))
+            ? Number(business.reputation_service_count)
+            : 0,
+          plan: planByBusiness.get(business.id) ?? {
+            plan_slug: "gratis",
+            plan_name: "Grátis",
+            plan_priority: 0,
+            ends_at: null,
+          },
         }));
         setBusinesses(loadedBusinesses);
         setCategories(categoryResult.data ?? []);
