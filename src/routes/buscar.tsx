@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { MouseEvent } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
+import { AuthModal } from "../components/AuthModal";
 import { calculateReputation } from "../lib/reputation";
 
 type Category = { id: string; name: string; slug: string };
@@ -39,6 +40,10 @@ function SearchPage() {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [favoriteBusy, setFavoriteBusy] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingAuthAction, setPendingAuthAction] = useState<
+    { type: "favorite"; businessId: string } | { type: "whatsapp"; url: string } | { type: "menu"; path: string } | null
+  >(null);
 
   useEffect(() => {
     let mounted = true;
@@ -245,7 +250,8 @@ async function geocodeAddress(address: string) {
 
   async function toggleFavorite(businessId: string) {
     if (!userId) {
-      window.location.href = "/entrar";
+      setPendingAuthAction({ type: "favorite", businessId });
+      setAuthModalOpen(true);
       return;
     }
     await saveFavoriteForUser(businessId, userId);
@@ -254,7 +260,8 @@ async function geocodeAddress(address: string) {
   function handleProtectedMenu(path: string, event: MouseEvent<HTMLAnchorElement>) {
     if (!userId) {
       event.preventDefault();
-      window.location.href = "/entrar";
+      setPendingAuthAction({ type: "menu", path });
+      setAuthModalOpen(true);
       return;
     }
     setMobileMenuOpen(false);
@@ -263,8 +270,22 @@ async function geocodeAddress(address: string) {
   function openWhatsApp(url: string, event: MouseEvent<HTMLAnchorElement>) {
     if (!userId) {
       event.preventDefault();
-      window.location.href = "/entrar";
+      setPendingAuthAction({ type: "whatsapp", url });
+      setAuthModalOpen(true);
     }
+  }
+
+  async function handleAuthenticatedFromModal() {
+    const { data } = await supabase.auth.getSession();
+    const currentUserId = data.session?.user.id ?? null;
+    setUserId(currentUserId);
+    setAuthModalOpen(false);
+    const action = pendingAuthAction;
+    setPendingAuthAction(null);
+    if (!currentUserId || !action) return;
+    if (action.type === "favorite") await saveFavoriteForUser(action.businessId, currentUserId);
+    else if (action.type === "menu") window.location.href = action.path;
+    else window.location.href = action.url;
   }
 
   function whatsappUrl(business: Business) {
@@ -305,7 +326,16 @@ async function geocodeAddress(address: string) {
             {userId ? (
               <button type="button" className="marketplace-account" disabled={authLoading} onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}>Sair</button>
             ) : (
-              <Link to="/entrar" className="marketplace-account">Entrar</Link>
+              <button
+                type="button"
+                className="marketplace-account"
+                onClick={() => {
+                  setPendingAuthAction(null);
+                  setAuthModalOpen(true);
+                }}
+              >
+                Entrar
+              </button>
             )}
           </div>
         </div>
