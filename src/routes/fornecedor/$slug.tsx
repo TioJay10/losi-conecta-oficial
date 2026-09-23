@@ -640,18 +640,46 @@ function ProviderPage() {
                 {publicQuote.quote?.status !== "accepted" && publicQuote.quote?.status !== "rejected" && !publicQuoteResponse && (
                   <div className="public-quote-actions">
                     <button type="button" className="public-quote-reject" disabled={publicQuoteResponding || !publicQuoteToken} onClick={async () => {
-                      setPublicQuoteResponding(true); setPublicQuoteResponseMessage("");
-                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_token: publicQuoteToken, p_status: "rejected" });
-                      if (error) { setPublicQuoteResponseMessage(error.message || "Não foi possível recusar a proposta."); }
-                      else { setPublicQuoteResponse("rejected"); setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta recusada."); setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "rejected" } } : current); }
-                      setPublicQuoteResponding(false);
-                    }}>Recusar proposta</button>
-                    <button type="button" className="public-quote-accept" disabled={publicQuoteResponding} onClick={async () => {
-                      setPublicQuoteResponding(true); setPublicQuoteResponseMessage("");
-                      const { data, error } = await supabase.rpc("respond_public_quote", { p_quote_id: publicQuote.quote.id, p_token: publicQuoteToken, p_status: "accepted" });
-                      if (error) { setPublicQuoteResponseMessage(error.message || "Não foi possível aceitar a proposta."); }
-                      else { setPublicQuoteResponse("accepted"); setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta aceita com sucesso."); setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "accepted" } } : current); }
-                      setPublicQuoteResponding(false);
+                      if (!publicQuoteToken) return;
+                      setPublicQuoteResponding(true);
+                      setPublicQuoteResponseMessage("");
+                      try {
+                        const { data, error } = await supabase.rpc("respond_public_quote", {
+                          p_quote_id: publicQuote.quote.id,
+                          p_token: publicQuoteToken,
+                          p_status: "rejected",
+                        });
+                        if (error) throw error;
+                        setPublicQuoteResponse("rejected");
+                        setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta recusada.");
+                        setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "rejected" } } : current);
+                      } catch (error: any) {
+                        console.error("Erro ao recusar proposta:", error);
+                        setPublicQuoteResponseMessage(error?.message || "Não foi possível recusar a proposta.");
+                      } finally {
+                        setPublicQuoteResponding(false);
+                      }
+                    }}>{publicQuoteResponding ? "Registrando..." : "Recusar proposta"}</button>
+                    <button type="button" className="public-quote-accept" disabled={publicQuoteResponding || !publicQuoteToken} onClick={async () => {
+                      if (!publicQuoteToken) return;
+                      setPublicQuoteResponding(true);
+                      setPublicQuoteResponseMessage("");
+                      try {
+                        const { data, error } = await supabase.rpc("respond_public_quote", {
+                          p_quote_id: publicQuote.quote.id,
+                          p_token: publicQuoteToken,
+                          p_status: "accepted",
+                        });
+                        if (error) throw error;
+                        setPublicQuoteResponse("accepted");
+                        setPublicQuoteResponseMessage(data?.already_responded ? "Esta proposta já havia recebido uma resposta." : "Proposta aceita com sucesso.");
+                        setPublicQuote((current: any) => current ? { ...current, quote: { ...current.quote, status: "accepted" } } : current);
+                      } catch (error: any) {
+                        console.error("Erro ao aceitar proposta:", error);
+                        setPublicQuoteResponseMessage(error?.message || "Não foi possível aceitar a proposta.");
+                      } finally {
+                        setPublicQuoteResponding(false);
+                      }
                     }}>{publicQuoteResponding ? "Registrando..." : "Aceitar proposta"}</button>
                   </div>
                 )}
