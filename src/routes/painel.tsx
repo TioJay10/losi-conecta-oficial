@@ -329,10 +329,6 @@ function DashboardPage() {
               <strong>Meus serviços</strong>
               <span>Atualize sua empresa, apresentação, serviços, imagens e localização.</span>
             </button>
-            <button type="button" onClick={() => navigate({ to: "/orcamentos" })}>
-              <strong>Orçamentos</strong>
-              <span>Receba solicitações, envie propostas e acompanhe seus orçamentos.</span>
-            </button>
           </div>
         )}
 
