@@ -727,13 +727,13 @@ function QuotesPage() {
                 </div>
               </div>
 
-              <div className="quote-modal-total quote-modal-request-next">
-                <span>Próxima etapa</span>
-                <strong>{isSupplier ? "Preparar e enviar o orçamento ao cliente." : "Aguardar o fornecedor preparar o orçamento."}</strong>
-              </div>
-
               {isSupplier && (
-                <div className="quote-modal-actions">
+                <>
+                  <div className="quote-modal-total quote-modal-request-next">
+                    <span>Próxima etapa</span>
+                    <strong>Preparar e enviar o orçamento ao cliente.</strong>
+                  </div>
+                  <div className="quote-modal-actions">
                   <button
                     type="button"
                     className="quotes-whatsapp"
@@ -741,7 +741,8 @@ function QuotesPage() {
                   >
                     Responder pelo WhatsApp
                   </button>
-                </div>
+                  </div>
+                </>
               )}
             </section>
           </div>
