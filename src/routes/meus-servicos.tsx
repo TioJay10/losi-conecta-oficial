@@ -54,6 +54,7 @@ function BusinessServicesPage() {
     longitude: null,
   });
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error">("error");
   const [form, setForm] = useState({
     business_name: "",
     description: "",
@@ -317,12 +318,14 @@ async function lookupViaCep(cep: string) {
     if (!supabase || !user) return;
 
     if (!form.business_name.trim()) {
+      setMessageType("error");
       setMessage("Informe o nome comercial.");
       return;
     }
 
     const normalizedCep = form.cep.replace(/\D/g, "");
     if (normalizedCep.length !== 8) {
+      setMessageType("error");
       setMessage("Informe um CEP válido com 8 dígitos.");
       return;
     }
@@ -334,11 +337,13 @@ async function lookupViaCep(cep: string) {
     }
 
     if (!form.bairro.trim() || !form.city.trim() || !form.state.trim()) {
+      setMessageType("error");
       setMessage("Informe CEP, bairro, cidade e estado.");
       return;
     }
 
     setSaving(true);
+    setMessageType("error");
     setMessage("");
 
     const normalizedName = form.business_name
@@ -386,6 +391,7 @@ async function lookupViaCep(cep: string) {
 
     if (result.error) {
       console.error("Erro ao salvar perfil da empresa:", result.error);
+      setMessageType("error");
       setMessage("Não foi possível salvar as informações da empresa: " + result.error.message);
       setSaving(false);
       return;
@@ -393,6 +399,7 @@ async function lookupViaCep(cep: string) {
 
     if (!result.data) {
       console.error("Perfil da empresa não foi retornado após o salvamento.");
+      setMessageType("error");
       setMessage("As informações foram enviadas, mas não foi possível confirmar o cadastro.");
       setSaving(false);
       return;
@@ -406,6 +413,7 @@ async function lookupViaCep(cep: string) {
     });
 
     await loadServices(savedBusiness.id);
+    setMessageType("success");
     setMessage(
       business?.approval_status === "rejected"
         ? "Alterações salvas e enviadas para nova análise."
@@ -673,6 +681,11 @@ async function lookupViaCep(cep: string) {
           <button className="business-primary" disabled={saving}>
             {saving ? "Salvando..." : "Salvar informações da empresa"}
           </button>
+          {message && (
+            <div className={`business-message business-message-${messageType}`} role="status">
+              {message}
+            </div>
+          )}
         </form>
 
         <form onSubmit={editingServiceId ? saveService : addService} className="business-services-card">
@@ -762,7 +775,6 @@ async function lookupViaCep(cep: string) {
           </div>
         )}
 
-        {message && <div className="business-message">{message}</div>}
       </section>
     </main>
   );
