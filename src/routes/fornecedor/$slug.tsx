@@ -45,6 +45,9 @@ function ProviderPage() {
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
   const [availabilityDates, setAvailabilityDates] = useState<string[]>([]);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [publicQuote, setPublicQuote] = useState<any | null>(null);
+  const [publicQuoteLoading, setPublicQuoteLoading] = useState(false);
+  const [publicQuoteError, setPublicQuoteError] = useState("");
   const [availabilityMonth, setAvailabilityMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -55,6 +58,23 @@ function ProviderPage() {
     completedServices: 0, reports: 0, blocked: false,
   });
 
+  useEffect(() => {
+    let mounted = true;
+    const proposalId = new URLSearchParams(window.location.search).get("proposta");
+    if (!proposalId) return;
+    setPublicQuoteLoading(true);
+    supabase.rpc("get_public_quote", { p_quote_id: proposalId }).then(({ data, error }) => {
+      if (!mounted) return;
+      if (error || !data) {
+        console.error("Erro ao carregar proposta pública:", error);
+        setPublicQuoteError("Não foi possível carregar esta proposta.");
+      } else {
+        setPublicQuote(data);
+      }
+      setPublicQuoteLoading(false);
+    });
+    return () => { mounted = false; };
+  }, []);
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -579,6 +599,42 @@ function ProviderPage() {
           </div>
         </aside>
       </section>
+      {(publicQuoteLoading || publicQuote || publicQuoteError) && (
+        <div className="provider-report-modal-backdrop public-quote-modal-backdrop" role="presentation">
+          <section className="provider-report-modal public-quote-modal" role="dialog" aria-modal="true" aria-labelledby="public-quote-title">
+            {publicQuoteLoading && <div className="public-quote-loading">Carregando proposta...</div>}
+            {!publicQuoteLoading && publicQuote && (
+              <>
+                <div className="provider-report-modal-header">
+                  <div>
+                    <div className="catalog-kicker">PROPOSTA</div>
+                    <h2 id="public-quote-title">Orçamento recebido</h2>
+                    <p>Confira os detalhes da proposta enviada pelo fornecedor.</p>
+                  </div>
+                </div>
+                <div className="public-quote-supplier">
+                  {publicQuote.supplier?.logo_url && <img src={publicQuote.supplier.logo_url} alt="" />}
+                  <div><strong>{publicQuote.supplier?.business_name || "Fornecedor"}</strong><span>{publicQuote.request?.event_title || "Proposta comercial"}</span></div>
+                </div>
+                <div className="public-quote-grid">
+                  <div><span>Cliente</span><strong>{publicQuote.request?.client_name || "Não informado"}</strong></div>
+                  <div><span>Evento</span><strong>{publicQuote.request?.event_title || "Não informado"}</strong></div>
+                  <div><span>Data</span><strong>{publicQuote.request?.event_date ? new Date(publicQuote.request.event_date + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"}</strong></div>
+                  <div><span>Local</span><strong>{publicQuote.request?.event_location || "Não informado"}</strong></div>
+                </div>
+                <div className="public-quote-items">
+                  {(publicQuote.items || []).map((item: any) => <div key={item.id}><span>{item.quantity}x {item.description}</span><strong>{Number(item.total).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong></div>)}
+                </div>
+                <div className="public-quote-total"><span>Total da proposta</span><strong>{Number(publicQuote.quote?.total || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong></div>
+                {publicQuote.quote?.validity_until && <p className="public-quote-note"><strong>Validade:</strong> {new Date(publicQuote.quote.validity_until + "T12:00:00").toLocaleDateString("pt-BR")}</p>}
+                {publicQuote.quote?.notes && <p className="public-quote-note"><strong>Observações:</strong> {publicQuote.quote.notes}</p>}
+              </>
+            )}
+            {!publicQuoteLoading && publicQuoteError && <div><h2>Proposta indisponível</h2><p>{publicQuoteError}</p></div>}
+          </section>
+        </div>
+      )}
+
       {reportOpen && (
         <div className="provider-report-modal-backdrop" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget && !reporting) {
@@ -656,6 +712,21 @@ function ProviderPage() {
           </section>
         </div>
       )}
+      <style>{`
+        .public-quote-modal-backdrop{z-index:120}
+        .public-quote-modal{width:min(680px,calc(100vw - 28px));max-height:88vh;overflow:auto}
+        .public-quote-loading{padding:40px;text-align:center;color:#687386}
+        .public-quote-supplier{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid #d9dee8;border-radius:16px;background:#f8f9fb;margin:18px 0}
+        .public-quote-supplier img{width:52px;height:52px;border-radius:14px;object-fit:cover}
+        .public-quote-supplier div{display:grid;gap:4px}.public-quote-supplier span,.public-quote-grid span{color:#687386;font-size:12px}
+        .public-quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+        .public-quote-grid>div{padding:14px;border:1px solid #d9dee8;border-radius:14px;background:#fff;display:grid;gap:5px}
+        .public-quote-items{border:1px solid #d9dee8;border-radius:14px;overflow:hidden;margin-top:16px}
+        .public-quote-items>div{display:flex;justify-content:space-between;gap:14px;padding:13px 15px;border-bottom:1px solid #edf0f4}.public-quote-items>div:last-child{border-bottom:0}
+        .public-quote-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0;font-size:14px}.public-quote-total strong{font-size:22px;color:#8a6d2f}
+        .public-quote-note{padding:12px 14px;border-radius:12px;background:#f8f9fb;color:#687386}
+        @media(max-width:700px){.public-quote-grid{grid-template-columns:1fr}.public-quote-modal{padding:20px}}
+      `}</style>
       {authModalOpen && <AuthModal onClose={() => { setAuthModalOpen(false); setPendingAuthAction(null); }} onAuthenticated={handleAuthenticatedFromModal} />}
     </main>
   );
