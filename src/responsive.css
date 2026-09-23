@@ -12067,3 +12067,66 @@ button.availability-day {
   .admin-profile-actions { display: grid; grid-template-columns: 1fr; }
   .admin-profile-actions button { width: 100%; }
 }
+
+
+/* ADMIN — correção final do cabeçalho mobile */
+.admin-page .admin-header,
+.admin-page .admin-header * {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.admin-page .admin-header {
+  overflow: visible !important;
+  isolation: isolate;
+}
+.admin-page .admin-header-brand {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+.admin-page .admin-profile-link {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+.admin-page .admin-header-user-name {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+@media (max-width: 768px) {
+  .admin-page .admin-header {
+    overflow: visible !important;
+  }
+  .admin-page .admin-header-brand {
+    display: block !important;
+    width: max-content !important;
+    max-width: calc(100% - 112px) !important;
+    background: transparent !important;
+  }
+  .admin-page .admin-header-user-name {
+    display: none !important;
+  }
+  .admin-page .admin-profile-link {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 3px !important;
+    background: transparent !important;
+  }
+  .admin-page .admin-header-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+  .admin-page .admin-header-actions {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .admin-page .admin-mobile-menu-button {
+    position: relative !important;
+    z-index: 5 !important;
+    flex: 0 0 40px !important;
+  }
+}
