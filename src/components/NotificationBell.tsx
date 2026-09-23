@@ -51,8 +51,13 @@ export function NotificationBell() {
       if (mounted) setUserId(id);
     });
 
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) setUserId(session?.user.id ?? null);
+    });
+
     return () => {
       mounted = false;
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
