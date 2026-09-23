@@ -484,34 +484,7 @@ function ProviderPage() {
             </div>
           )}
 
-          {reportOpen && (
-            <div className="provider-profile-card provider-report-card">
-              <div className="catalog-kicker">SEGURANÇA</div>
-              <h2>Denunciar fornecedor</h2>
-              <p>Selecione o motivo da denúncia. Use este canal apenas para situações relacionadas a este fornecedor.</p>
-              <form className="provider-report-form" onSubmit={submitSupplierReport}>
-                <label>Motivo
-                  <select value={reportReason} onChange={(e) => setReportReason(e.target.value)}>
-                    <option value="tentativa_de_golpe">Tentativa de golpe</option>
-                    <option value="perfil_falso">Perfil falso</option>
-                    <option value="cobranca_suspeita">Cobrança suspeita</option>
-                    <option value="servico_nao_realizado">Serviço não realizado</option>
-                    <option value="comportamento_inadequado">Comportamento inadequado</option>
-                    <option value="dados_falsos">Dados falsos</option>
-                    <option value="outro">Outro</option>
-                  </select>
-                </label>
-                <label>Detalhes (opcional)
-                  <textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} maxLength={1000} rows={4} placeholder="Explique brevemente o que aconteceu..." />
-                </label>
-                <div className="provider-report-actions">
-                  <button type="button" className="quotes-secondary" onClick={() => { setReportOpen(false); setReportMessage(""); }}>Cancelar</button>
-                  <button type="submit" className="provider-profile-report-submit" disabled={reporting}>{reporting ? "Enviando..." : "Enviar denúncia"}</button>
-                </div>
-                {reportMessage && <small>{reportMessage}</small>}
-              </form>
-            </div>
-          )}
+
 
           <div className="provider-profile-card provider-reviews-card">
             <div className="catalog-kicker">AVALIAÇÕES</div>
@@ -575,6 +548,46 @@ function ProviderPage() {
           </div>
         </aside>
       </section>
+      {reportOpen && (
+        <div className="provider-report-modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget && !reporting) {
+            setReportOpen(false);
+            setReportMessage("");
+          }
+        }}>
+          <div className="provider-report-modal" role="dialog" aria-modal="true" aria-labelledby="provider-report-title">
+            <div className="provider-report-modal-header">
+              <div>
+                <div className="catalog-kicker">SEGURANÇA</div>
+                <h2 id="provider-report-title">Denunciar fornecedor</h2>
+                <p>Selecione o motivo da denúncia e, se quiser, conte o que aconteceu.</p>
+              </div>
+              <button type="button" className="provider-report-modal-close" aria-label="Fechar" disabled={reporting} onClick={() => { setReportOpen(false); setReportMessage(""); }}>×</button>
+            </div>
+            <form className="provider-report-form" onSubmit={submitSupplierReport}>
+              <label>Motivo
+                <select value={reportReason} onChange={(e) => setReportReason(e.target.value)}>
+                  <option value="tentativa_de_golpe">Tentativa de golpe</option>
+                  <option value="perfil_falso">Perfil falso</option>
+                  <option value="cobranca_suspeita">Cobrança suspeita</option>
+                  <option value="servico_nao_realizado">Serviço não realizado</option>
+                  <option value="comportamento_inadequado">Comportamento inadequado</option>
+                  <option value="dados_falsos">Dados falsos</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </label>
+              <label>Detalhes (opcional)
+                <textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} maxLength={1000} rows={4} placeholder="Explique brevemente o que aconteceu..." />
+              </label>
+              <div className="provider-report-actions">
+                <button type="button" className="quotes-secondary" disabled={reporting} onClick={() => { setReportOpen(false); setReportMessage(""); }}>Cancelar</button>
+                <button type="submit" className="provider-profile-report-submit" disabled={reporting}>{reporting ? "Enviando..." : "Enviar denúncia"}</button>
+              </div>
+              {reportMessage && <small role="status">{reportMessage}</small>}
+            </form>
+          </div>
+        </div>
+      )}
       {authModalOpen && <AuthModal onClose={() => { setAuthModalOpen(false); setPendingAuthAction(null); }} onAuthenticated={handleAuthenticatedFromModal} />}
     </main>
   );
