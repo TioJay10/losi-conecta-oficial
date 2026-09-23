@@ -99,6 +99,18 @@ function SearchPage() {
     return () => { mounted = false; };
   }, []);
 
+async function geocodeAddress(address: string) {
+  const query = encodeURIComponent(address);
+  const response = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" + query, {
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) throw new Error("Não foi possível localizar este endereço.");
+  const results = await response.json();
+  const first = results?.[0];
+  if (!first || !first.lat || !first.lon) throw new Error("Não foi possível encontrar coordenadas para este CEP.");
+  return { latitude: Number(first.lat), longitude: Number(first.lon) };
+}
+
   function distanceInKm(latitude1: number, longitude1: number, latitude2: number, longitude2: number) {
     const earthRadiusKm = 6371;
     const dLat = (latitude2 - latitude1) * Math.PI / 180;
@@ -123,12 +135,14 @@ function SearchPage() {
       const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + cep);
       if (!response.ok) throw new Error("CEP não encontrado.");
       const data = await response.json();
-      if (typeof data.latitude !== "number" || typeof data.longitude !== "number") {
-        throw new Error("Este CEP não possui coordenadas disponíveis.");
-      }
-      setUserLocation({ latitude: data.latitude, longitude: data.longitude });
+      const address = [data.street, data.neighborhood, data.city, data.state, "Brasil"].filter(Boolean).join(", ");
+      const coordinates =
+        typeof data.latitude === "number" && typeof data.longitude === "number"
+          ? { latitude: data.latitude, longitude: data.longitude }
+          : await geocodeAddress(address);
+      setUserLocation(coordinates);
       setCity(data.city ?? data.city_ibge ?? "");
-      setLocationMessage("Local de referência definido por CEP. A distância será calculada a partir dele.");
+      setLocationMessage("Local de referência definido pelo CEP. A distância será calculada a partir dele.");
     } catch (error) {
       setUserLocation(null);
       setLocationMessage(error instanceof Error ? error.message : "Não foi possível consultar o CEP.");
