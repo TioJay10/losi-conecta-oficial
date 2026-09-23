@@ -12,7 +12,6 @@ function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null; user_type: "professional" | "admin" } | null>(null);
   const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
-  const [businessLogoUrl, setBusinessLogoUrl] = useState<string | null>(null);
   const [plans, setPlans] = useState<Array<{id:string;name:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean}>>([]);
   const [currentPlan, setCurrentPlan] = useState<{name:string;ends_at:string|null}|null>(null);
   const [quotesSentThisMonth, setQuotesSentThisMonth] = useState(0);
@@ -86,7 +85,7 @@ function DashboardPage() {
 
       const { data: business, error: businessError } = await supabase
         .from("business_profiles")
-        .select("id,approval_status,logo_url")
+        .select("id,approval_status")
         .eq("owner_id", currentUser.id)
         .maybeSingle();
 
@@ -98,7 +97,6 @@ function DashboardPage() {
         setBusinessStatus(
           (business?.approval_status as "pending" | "approved" | "rejected" | null) ?? null,
         );
-        setBusinessLogoUrl(business?.logo_url ?? null);
       }
 
       const { data: plansRows, error: plansError } = await supabase
@@ -453,10 +451,10 @@ function DashboardPage() {
               )}
             </div>
             <div className="dashboard-header-user">
-              {(businessLogoUrl || profile.avatar_url) ? (
+              {profile.avatar_url ? (
                 <img
                   className="dashboard-header-user-avatar"
-                  src={businessLogoUrl || profile.avatar_url || ""}
+                  src={profile.avatar_url}
                   alt={profile.full_name ? `Foto de ${profile.full_name}` : "Foto do perfil"}
                 />
               ) : (
