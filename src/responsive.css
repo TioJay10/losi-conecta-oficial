@@ -10397,3 +10397,102 @@ button,input,textarea,select{max-width:100%;font:inherit}
   border-color: rgba(102, 67, 170, 0.55) !important;
   box-shadow: 0 0 0 3px rgba(102, 67, 170, 0.10) !important;
 }
+
+
+/* PERFIL PÚBLICO — denúncia em popup */
+.provider-report-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  background: rgba(15, 20, 35, 0.58) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-sizing: border-box !important;
+}
+
+.provider-report-modal {
+  width: min(100%, 520px) !important;
+  max-height: min(90vh, 680px) !important;
+  overflow-y: auto !important;
+  padding: 24px !important;
+  border: 1px solid #e1e4ec !important;
+  border-radius: 18px !important;
+  background: #fff !important;
+  box-shadow: 0 24px 70px rgba(17, 21, 43, 0.22) !important;
+  box-sizing: border-box !important;
+}
+
+.provider-report-modal-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+
+.provider-report-modal-header h2 {
+  margin: 7px 0 8px !important;
+  color: #172033 !important;
+  font-size: 24px !important;
+  line-height: 1.18 !important;
+}
+
+.provider-report-modal-header p {
+  margin: 0 !important;
+  color: #687386 !important;
+  line-height: 1.5 !important;
+}
+
+.provider-report-modal-close {
+  flex: 0 0 auto !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  border: 1px solid #e1e4ec !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #687386 !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+}
+
+.provider-report-modal .provider-report-form {
+  margin-top: 20px !important;
+}
+
+.provider-report-modal .provider-report-actions {
+  margin-top: 16px !important;
+}
+
+@media only screen and (max-width: 600px) {
+  .provider-report-modal-backdrop {
+    align-items: flex-end !important;
+    padding: 10px !important;
+  }
+
+  .provider-report-modal {
+    width: 100% !important;
+    max-height: 92vh !important;
+    padding: 18px !important;
+    border-radius: 16px !important;
+  }
+
+  .provider-report-modal-header {
+    gap: 12px !important;
+  }
+
+  .provider-report-modal-header h2 {
+    font-size: 21px !important;
+  }
+}
+
+@media only screen and (max-width: 380px) {
+  .provider-report-modal {
+    padding: 15px !important;
+  }
+}
