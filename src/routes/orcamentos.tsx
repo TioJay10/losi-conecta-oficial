@@ -100,6 +100,8 @@ function QuotesPage() {
   const [selectedQuote, setSelectedQuote] = useState<QuoteRow | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
   const [dashboardFilter, setDashboardFilter] = useState<"sent" | "accepted" | "rejected" | null>(null);
+  const [dashboardDateFilter, setDashboardDateFilter] = useState<"all" | "day" | "month" | "year">("all");
+  const [dashboardDateValue, setDashboardDateValue] = useState("");
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [clientRequests, setClientRequests] = useState<RequestRow[]>([]);
@@ -466,7 +468,7 @@ function QuotesPage() {
 
   const closeQuoteModal = () => setSelectedQuote(null);
   const closeRequestModal = () => setSelectedRequest(null);
-  const closeDashboardModal = () => setDashboardFilter(null);
+  const closeDashboardModal = () => { setDashboardFilter(null); setDashboardDateFilter("all"); setDashboardDateValue(""); };
 
 
   const isSupplier = Boolean(businessId);
@@ -718,7 +720,7 @@ function QuotesPage() {
         .quotes-dashboard-head h2{margin:5px 0 7px;color:#172033;font-size:24px;line-height:1.2}
         .quotes-dashboard-head p{margin:0;color:#687386;font-size:14px;line-height:1.55}
         .quotes-dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-        .quotes-dashboard-card{min-width:0;padding:20px;border:1px solid rgba(11,24,42,.10);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.06)}.quotes-dashboard-card-button{font:inherit;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.quotes-dashboard-card-button:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(7,17,31,.10)}.quotes-dashboard-card-button:focus-visible{outline:3px solid rgba(214,180,106,.3);outline-offset:3px}.quotes-dashboard-list{display:grid;gap:10px;max-height:58vh;overflow:auto}.quotes-dashboard-list-item{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;padding:16px;border:1px solid #dfe4eb;border-radius:14px;background:#fff;color:#172033;text-align:left;cursor:pointer;transition:.18s ease}.quotes-dashboard-list-item:hover{border-color:#d6b46a;box-shadow:0 8px 20px rgba(7,17,31,.07);transform:translateY(-1px)}.quotes-dashboard-list-item>div:first-child{display:grid;gap:4px;min-width:0}.quotes-dashboard-list-item strong{font-size:14px}.quotes-dashboard-list-item span,.quotes-dashboard-list-item small{color:#687386;font-size:12px}.quotes-dashboard-list-item small{font-size:11px}.quotes-dashboard-list-value{display:grid;justify-items:end;gap:6px;flex:none}.quotes-dashboard-list-value>strong{font-size:15px}.quote-status-pill{padding:5px 9px;border-radius:999px;background:#f2f4f7;color:#475467;font-weight:800}.quote-status-pill.accepted{background:#eefaf3;color:#237345}.quote-status-pill.rejected{background:#fff1f1;color:#a32f2f}.quotes-dashboard-empty{padding:30px 18px;text-align:center;border:1px dashed #d7dce4;border-radius:14px;color:#687386}@media(max-width:700px){.quotes-dashboard-list-item{align-items:flex-start}.quotes-dashboard-list-value{justify-items:end}.quotes-dashboard-list-item>div:first-child{min-width:0}.quotes-dashboard-list-item strong,.quotes-dashboard-list-item span,.quotes-dashboard-list-item small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:54vw}}
+        .quotes-dashboard-card{min-width:0;padding:20px;border:1px solid rgba(11,24,42,.10);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.06)}.quotes-dashboard-card-button{font:inherit;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.quotes-dashboard-card-button:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(7,17,31,.10)}.quotes-dashboard-card-button:focus-visible{outline:3px solid rgba(214,180,106,.3);outline-offset:3px}.quotes-dashboard-filters{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 16px;padding:14px;border:1px solid #e1e5eb;border-radius:14px;background:#f8f9fb}.quotes-dashboard-filters label{display:grid;gap:6px;min-width:150px}.quotes-dashboard-filters label span{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#667085}.quotes-dashboard-filters select,.quotes-dashboard-filters input{height:42px;border:1px solid #d7dce4;border-radius:10px;background:#fff;color:#172033;padding:0 11px;font:inherit;outline:none}.quotes-dashboard-filters select:focus,.quotes-dashboard-filters input:focus{border-color:#d6b46a;box-shadow:0 0 0 3px rgba(214,180,106,.13)}.quotes-dashboard-filter-count{margin-left:auto;padding-bottom:10px;color:#687386;font-size:12px;font-weight:700}.quotes-dashboard-response{font-weight:800}.quotes-dashboard-response.accepted{color:#237345}.quotes-dashboard-response.rejected{color:#a32f2f}.quote-modal-response.accepted{color:#237345}.quote-modal-response.rejected{color:#a32f2f}..quotes-dashboard-list{display:grid;gap:10px;max-height:58vh;overflow:auto}.quotes-dashboard-list-item{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;padding:16px;border:1px solid #dfe4eb;border-radius:14px;background:#fff;color:#172033;text-align:left;cursor:pointer;transition:.18s ease}.quotes-dashboard-list-item:hover{border-color:#d6b46a;box-shadow:0 8px 20px rgba(7,17,31,.07);transform:translateY(-1px)}.quotes-dashboard-list-item>div:first-child{display:grid;gap:4px;min-width:0}.quotes-dashboard-list-item strong{font-size:14px}.quotes-dashboard-list-item span,.quotes-dashboard-list-item small{color:#687386;font-size:12px}.quotes-dashboard-list-item small{font-size:11px}.quotes-dashboard-list-value{display:grid;justify-items:end;gap:6px;flex:none}.quotes-dashboard-list-value>strong{font-size:15px}.quote-status-pill{padding:5px 9px;border-radius:999px;background:#f2f4f7;color:#475467;font-weight:800}.quote-status-pill.accepted{background:#eefaf3;color:#237345}.quote-status-pill.rejected{background:#fff1f1;color:#a32f2f}.quotes-dashboard-empty{padding:30px 18px;text-align:center;border:1px dashed #d7dce4;border-radius:14px;color:#687386}@media(max-width:700px){.quotes-dashboard-list-item{align-items:flex-start}.quotes-dashboard-list-value{justify-items:end}.quotes-dashboard-list-item>div:first-child{min-width:0}.quotes-dashboard-list-item strong,.quotes-dashboard-list-item span,.quotes-dashboard-list-item small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:54vw}}
         .quotes-dashboard-card.accepted{border-color:rgba(35,115,69,.16)}
         .quotes-dashboard-card.rejected{border-color:rgba(163,47,47,.16)}
         .quotes-dashboard-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:flex-start;margin-bottom:15px;background:none;color:#0b182a}
@@ -959,45 +961,88 @@ function QuotesPage() {
           </div>
         </section>
 
-        {dashboardFilter && (
-          <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDashboardModal(); }}>
-            <section className="quote-modal quotes-dashboard-list-modal" role="dialog" aria-modal="true" aria-labelledby="dashboard-list-title">
-              <div className="quote-modal-head">
-                <div>
-                  <div className="quotes-kicker">PAINEL DE ORÇAMENTOS</div>
-                  <h2 id="dashboard-list-title">{dashboardFilter === "sent" ? "Orçamentos enviados" : dashboardFilter === "accepted" ? "Orçamentos aceitos" : "Orçamentos rejeitados"}</h2>
-                  <p>Selecione uma proposta para visualizar o resumo completo.</p>
+        {dashboardFilter && (() => {
+          const categoryQuotes = quotes
+            .filter((quote) => dashboardFilter === "sent"
+              ? Boolean(quote.sent_at) || ["sent", "viewed", "accepted", "rejected"].includes(quote.status)
+              : quote.status === dashboardFilter)
+            .filter((quote) => {
+              if (dashboardDateFilter === "all" || !dashboardDateValue) return true;
+              const sourceDate = quote.sent_at || quote.created_at;
+              const date = new Date(sourceDate);
+              if (Number.isNaN(date.getTime())) return false;
+              const [year, month, day] = dashboardDateValue.split("-").map(Number);
+              if (dashboardDateFilter === "year") return date.getFullYear() === year;
+              if (dashboardDateFilter === "month") return date.getFullYear() === year && date.getMonth() + 1 === month;
+              return date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day;
+            })
+            .sort((a, b) => new Date(b.sent_at || b.created_at).getTime() - new Date(a.sent_at || a.created_at).getTime());
+
+          return (
+            <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDashboardModal(); }}>
+              <section className="quote-modal quotes-dashboard-list-modal" role="dialog" aria-modal="true" aria-labelledby="dashboard-list-title">
+                <div className="quote-modal-head">
+                  <div>
+                    <div className="quotes-kicker">PAINEL DE ORÇAMENTOS</div>
+                    <h2 id="dashboard-list-title">{dashboardFilter === "sent" ? "Orçamentos enviados" : dashboardFilter === "accepted" ? "Orçamentos aceitos" : "Orçamentos rejeitados"}</h2>
+                    <p>Consulte as propostas por período e abra qualquer uma para ver os detalhes.</p>
+                  </div>
+                  <button type="button" className="quotes-secondary quote-modal-close" onClick={closeDashboardModal} aria-label="Fechar">Fechar</button>
                 </div>
-                <button type="button" className="quotes-secondary quote-modal-close" onClick={closeDashboardModal} aria-label="Fechar">Fechar</button>
-              </div>
-              <div className="quotes-dashboard-list">
-                {quotes.filter((quote) => dashboardFilter === "sent" ? Boolean(quote.sent_at) || ["sent","viewed","accepted","rejected"].includes(quote.status) : quote.status === dashboardFilter).length === 0 ? (
-                  <div className="quotes-dashboard-empty">Nenhum orçamento encontrado nesta categoria.</div>
-                ) : (
-                  quotes
-                    .filter((quote) => dashboardFilter === "sent" ? Boolean(quote.sent_at) || ["sent","viewed","accepted","rejected"].includes(quote.status) : quote.status === dashboardFilter)
-                    .sort((a,b) => new Date(b.sent_at || b.created_at).getTime() - new Date(a.sent_at || a.created_at).getTime())
-                    .map((quote) => {
-                      const recipient = quote.quote_requests?.client_name || "Destinatário não informado";
-                      return (
-                        <button key={quote.id} type="button" className="quotes-dashboard-list-item" onClick={() => { setDashboardFilter(null); setSelectedQuote(quote); }}>
-                          <div>
-                            <strong>{recipient}</strong>
-                            <span>{quote.quote_requests?.event_title || "Evento não informado"}</span>
-                            <small>Enviado em {dateTime(quote.sent_at || quote.created_at)}</small>
-                          </div>
-                          <div className="quotes-dashboard-list-value">
-                            <strong>{money(Number(quote.total))}</strong>
-                            <span className={"quote-status-pill " + quote.status}>{statusLabel(quote.status)}</span>
-                          </div>
-                        </button>
-                      );
-                    })
-                )}
-              </div>
-            </section>
-          </div>
-        )}
+
+                <div className="quotes-dashboard-filters">
+                  <label>
+                    <span>Período</span>
+                    <select value={dashboardDateFilter} onChange={(event) => { setDashboardDateFilter(event.target.value as typeof dashboardDateFilter); setDashboardDateValue(""); }}>
+                      <option value="all">Todos</option>
+                      <option value="day">Dia</option>
+                      <option value="month">Mês</option>
+                      <option value="year">Ano</option>
+                    </select>
+                  </label>
+                  {dashboardDateFilter !== "all" && (
+                    <label>
+                      <span>{dashboardDateFilter === "day" ? "Escolha o dia" : dashboardDateFilter === "month" ? "Escolha o mês" : "Escolha o ano"}</span>
+                      <input
+                        type={dashboardDateFilter === "year" ? "number" : dashboardDateFilter === "month" ? "month" : "date"}
+                        value={dashboardDateValue}
+                        onChange={(event) => setDashboardDateValue(event.target.value)}
+                        min={dashboardDateFilter === "year" ? "2000" : undefined}
+                        max={dashboardDateFilter === "year" ? "2100" : undefined}
+                        placeholder={dashboardDateFilter === "year" ? "AAAA" : undefined}
+                      />
+                    </label>
+                  )}
+                  <div className="quotes-dashboard-filter-count">{categoryQuotes.length} {categoryQuotes.length === 1 ? "proposta encontrada" : "propostas encontradas"}</div>
+                </div>
+
+                <div className="quotes-dashboard-list">
+                  {categoryQuotes.length === 0 ? (
+                    <div className="quotes-dashboard-empty">Nenhum orçamento encontrado para este período.</div>
+                  ) : categoryQuotes.map((quote) => {
+                    const recipient = quote.quote_requests?.client_name || "Destinatário não informado";
+                    const responseDate = quote.status === "accepted" || quote.status === "rejected" ? quote.quote_requests?.status === quote.status ? quote.quote_requests?.created_at : null : null;
+                    return (
+                      <button key={quote.id} type="button" className="quotes-dashboard-list-item" onClick={() => { setDashboardFilter(null); setSelectedQuote(quote); }}>
+                        <div>
+                          <strong>{recipient}</strong>
+                          <span>{quote.quote_requests?.event_title || "Evento não informado"}</span>
+                          <small>Enviado em {dateTime(quote.sent_at || quote.created_at)}</small>
+                          {quote.status === "accepted" && <small className="quotes-dashboard-response accepted">Aceito pelo cliente</small>}
+                          {quote.status === "rejected" && <small className="quotes-dashboard-response rejected">Recusado pelo cliente</small>}
+                        </div>
+                        <div className="quotes-dashboard-list-value">
+                          <strong>{money(Number(quote.total))}</strong>
+                          <span className={"quote-status-pill " + quote.status}>{statusLabel(quote.status)}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+          );
+        })()}
 
         {selectedRequest && (
           <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeRequestModal(); }}>
@@ -1089,6 +1134,9 @@ function QuotesPage() {
                 <p><strong>Serviço:</strong> {serviceName(selectedRequester)}</p>
                 <p><strong>Data:</strong> {dateOnly(selectedRequester?.event_date ?? null)}</p>
                 <p><strong>Local:</strong> {selectedRequester?.event_location || "Não informado"}</p>
+                <p><strong>Enviado em:</strong> {dateTime(selectedQuote.sent_at || selectedQuote.created_at)}</p>
+                {selectedQuote.status === "accepted" && <p className="quote-modal-response accepted"><strong>Aceito em:</strong> {selectedQuote.responded_at ? dateTime(selectedQuote.responded_at) : "Resposta registrada"}</p>}
+                {selectedQuote.status === "rejected" && <p className="quote-modal-response rejected"><strong>Recusado em:</strong> {selectedQuote.responded_at ? dateTime(selectedQuote.responded_at) : "Resposta registrada"}</p>}
                 {selectedRequester?.description && <p><strong>Detalhes:</strong> {selectedRequester.description}</p>}
               </div>
 
