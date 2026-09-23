@@ -9824,3 +9824,20 @@ button,input,textarea,select{max-width:100%;font:inherit}
     padding: 11px !important;
   }
 }
+
+
+/* PERFIL PÚBLICO — título do nicho em Serviços */
+.provider-page .provider-service-card .service-category,
+.provider-page .provider-service-card .provider-service-category,
+.provider-page .provider-service-card .category-label,
+.provider-page .provider-service-card .service-niche {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 7px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  text-align: left !important;
+  line-height: 1.25 !important;
+}
