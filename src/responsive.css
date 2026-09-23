@@ -9858,3 +9858,39 @@ button,input,textarea,select{max-width:100%;font:inherit}
   box-sizing: border-box !important;
   max-width: 100% !important;
 }
+
+
+/* BUSCA — foto de perfil sobre a capa do fornecedor */
+.marketplace-page .marketplace-card-media {
+  position: relative !important;
+}
+.marketplace-page .marketplace-card-profile-photo {
+  position: absolute !important;
+  left: 12px !important;
+  bottom: 10px !important;
+  width: 58px !important;
+  height: 58px !important;
+  padding: 2px !important;
+  border: 2px solid #fff !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 5px 14px rgba(25,32,55,.18) !important;
+  z-index: 3 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+.marketplace-page .marketplace-card-profile-photo img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+@media only screen and (max-width: 600px) {
+  .marketplace-page .marketplace-card-profile-photo {
+    left: 9px !important;
+    bottom: 8px !important;
+    width: 46px !important;
+    height: 46px !important;
+  }
+}
