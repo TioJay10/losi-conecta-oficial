@@ -137,14 +137,19 @@ function PersonalProfilePage() {
 
       const nextAvatarUrl = publicUrlData.publicUrl;
 
-      const { error: profileError } = await supabase
+      const { data: savedProfile, error: profileError } = await supabase
         .from("profiles")
         .update({ avatar_url: nextAvatarUrl })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .select("avatar_url")
+        .single();
 
       if (profileError) throw profileError;
+      if (!savedProfile?.avatar_url) {
+        throw new Error("A foto foi enviada, mas não foi possível salvar o endereço no seu perfil.");
+      }
 
-      setAvatarUrl(nextAvatarUrl);
+      setAvatarUrl(savedProfile.avatar_url);
       setMessage("Foto de perfil atualizada com sucesso.");
     } catch (error) {
       console.error("Erro ao atualizar foto de perfil:", error);
