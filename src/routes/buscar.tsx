@@ -105,16 +105,30 @@ function SearchPage() {
     return () => { mounted = false; };
   }, []);
 
-async function geocodeAddress(address: string) {
-  const query = encodeURIComponent(address);
-  const response = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" + query, {
-    headers: { Accept: "application/json" },
-  });
-  if (!response.ok) throw new Error("Não foi possível localizar este endereço.");
-  const results = await response.json();
-  const first = results?.[0];
-  if (!first || !first.lat || !first.lon) throw new Error("Não foi possível encontrar coordenadas para este CEP.");
-  return { latitude: Number(first.lat), longitude: Number(first.lon) };
+async function geocodeAddress(address: string, cep: string, city?: string, state?: string) {
+  const queries = [
+    "CEP " + cep + ", Brasil",
+    address,
+    [city, state, "Brasil"].filter(Boolean).join(", "),
+  ].filter(Boolean);
+
+  for (const queryText of queries) {
+    const query = encodeURIComponent(queryText);
+    const response = await fetch(
+      "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" + query,
+      { headers: { Accept: "application/json" } },
+    );
+    if (!response.ok) continue;
+    const results = await response.json();
+    const first = results?.[0];
+    const latitude = Number(first?.lat);
+    const longitude = Number(first?.lon);
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      return { latitude, longitude };
+    }
+  }
+
+  throw new Error("Não foi possível encontrar coordenadas para este CEP. Tente novamente em alguns instantes.");
 }
 
   function distanceInKm(latitude1: number, longitude1: number, latitude2: number, longitude2: number) {
@@ -142,10 +156,12 @@ async function geocodeAddress(address: string) {
       if (!response.ok) throw new Error("CEP não encontrado.");
       const data = await response.json();
       const address = [data.street, data.neighborhood, data.city, data.state, "Brasil"].filter(Boolean).join(", ");
+      const directLatitude = Number(data.latitude ?? data.location?.coordinates?.latitude);
+      const directLongitude = Number(data.longitude ?? data.location?.coordinates?.longitude);
       const coordinates =
-        typeof data.latitude === "number" && typeof data.longitude === "number"
-          ? { latitude: data.latitude, longitude: data.longitude }
-          : await geocodeAddress(address);
+        Number.isFinite(directLatitude) && Number.isFinite(directLongitude)
+          ? { latitude: directLatitude, longitude: directLongitude }
+          : await geocodeAddress(address, cep, data.city, data.state);
       setUserLocation(coordinates);
       setCity(data.city ?? data.city_ibge ?? "");
       setLocationMessage("Local de referência definido pelo CEP. A distância será calculada a partir dele.");
