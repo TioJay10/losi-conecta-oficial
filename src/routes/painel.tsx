@@ -429,7 +429,7 @@ function DashboardPage() {
                 <span>{price}</span>
                 <small>{plan.description || "Mais recursos para seu perfil."}</small>
                 <a className="dashboard-plan-contract" href={`https://wa.me/5511988187354?text=${encodeURIComponent("Olá! Tenho interesse em contratar o plano " + plan.name + " do LOSI CONECTA.")}`} target="_blank" rel="noreferrer">Quero contratar</a>
-                <button type="button" className="dashboard-plan-specs" onClick={() => setSpecificationsPlan({ name: plan.name, description: plan.description, price })}>Especificações</button>
+                <button type="button" className="auth-modal-submit dashboard-plan-specs" onClick={() => setSpecificationsPlan({ name: plan.name, description: plan.description, price })}>Especificações</button>
               </div>
             );
           })}</div>
@@ -465,7 +465,7 @@ function DashboardPage() {
                     </>
                   )}
                 </div>
-                <button type="button" className="dashboard-plan-modal-action" onClick={() => setSpecificationsPlan(null)}>Entendi</button>
+                <button type="button" className="auth-modal-submit dashboard-plan-modal-action" onClick={() => setSpecificationsPlan(null)}>Entendi</button>
               </div>
             </section>
           </div>
