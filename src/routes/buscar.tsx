@@ -12,7 +12,7 @@ type ReviewSummary = { rating: number };
 type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
-  city: string | null; state: string | null; logo_url: string | null; cover_url: string | null;
+  city: string | null; state: string | null; cep: string | null; bairro: string | null; logo_url: string | null; cover_url: string | null;
   verified: boolean; latitude: number | null; longitude: number | null; services: Service[]; reviews: ReviewSummary[]; plan?: { plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null } | null;
 };
 
@@ -30,6 +30,7 @@ function SearchPage() {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState("");
+  const [locationCep, setLocationCep] = useState("");
   const [sortBy, setSortBy] = useState("relevance");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -108,32 +109,33 @@ function SearchPage() {
     return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  function requestLocation() {
-    if (!navigator.geolocation) {
-      setLocationMessage("Seu navegador não oferece localização.");
+  async function lookupLocationCep(value: string) {
+    const cep = value.replace(/\D/g, "");
+    setLocationCep(value);
+    if (cep.length !== 8) {
+      setUserLocation(null);
+      if (cep.length > 0) setLocationMessage("Informe um CEP válido com 8 números para usar o filtro por distância.");
       return;
     }
     setLocationLoading(true);
     setLocationMessage("");
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUserLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-        setLocationLoading(false);
-        setLocationMessage("");
-      },
-      () => {
-        setUserLocation(null);
-        setRadiusKm(null);
-        setLocationLoading(false);
-        setLocationMessage("Permita o acesso à sua localização para usar a busca por raio.");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
+    try {
+      const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + cep);
+      if (!response.ok) throw new Error("CEP não encontrado.");
+      const data = await response.json();
+      if (typeof data.latitude !== "number" || typeof data.longitude !== "number") {
+        throw new Error("Este CEP não possui coordenadas disponíveis.");
+      }
+      setUserLocation({ latitude: data.latitude, longitude: data.longitude });
+      setCity(data.city ?? data.city_ibge ?? "");
+      setLocationMessage("Local de referência definido por CEP. A distância será calculada a partir dele.");
+    } catch (error) {
+      setUserLocation(null);
+      setLocationMessage(error instanceof Error ? error.message : "Não foi possível consultar o CEP.");
+    } finally {
+      setLocationLoading(false);
+    }
   }
-
-  useEffect(() => {
-    if (radiusKm !== null && !userLocation && !locationLoading) requestLocation();
-  }, [radiusKm, userLocation, locationLoading]);
 
   const results = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
@@ -363,6 +365,19 @@ function SearchPage() {
         <aside className="marketplace-sidebar">
           <div className="marketplace-sidebar-title">Filtrar resultados</div>
           <div className="marketplace-filter-group">
+            <label htmlFor="marketplace-location-cep">Local de referência</label>
+            <input
+              id="marketplace-location-cep"
+              value={locationCep}
+              onChange={(event) => setLocationCep(event.target.value)}
+              onBlur={(event) => lookupLocationCep(event.target.value)}
+              inputMode="numeric"
+              maxLength={9}
+              placeholder="CEP do local do evento"
+            />
+            <small className="marketplace-location-hint">Sem usar a localização do celular.</small>
+          </div>
+          <div className="marketplace-filter-group">
             <label htmlFor="marketplace-radius">Distância</label>
             <select id="marketplace-radius" value={radiusKm ?? ""} onChange={(event) => {
               const value = event.target.value;
@@ -386,7 +401,7 @@ function SearchPage() {
             ))}
           </div>
           {(search || city || categoryId || radiusKm !== null) && (
-            <button type="button" className="marketplace-clear-all" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); setRadiusKm(null); setUserLocation(null); setLocationMessage(""); }}>
+            <button type="button" className="marketplace-clear-all" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); setRadiusKm(null); setUserLocation(null); setLocationCep(""); setLocationMessage(""); }}>
               Limpar filtros
             </button>
           )}
@@ -409,9 +424,14 @@ function SearchPage() {
             </label>
           </div>
 
-          {locationLoading && <div className="marketplace-message">Obtendo sua localização para filtrar por raio...</div>}
+          {locationLoading && <div className="marketplace-message">Consultando o CEP do local de referência...</div>}
           {locationMessage && <div className="marketplace-message marketplace-error">{locationMessage}</div>}
           {error && <div className="marketplace-message marketplace-error">{error}</div>}
+          {radiusKm !== null && !locationLoading && !userLocation && (
+            <div className="marketplace-message marketplace-error">
+              Informe o CEP do local de referência para calcular a distância dos fornecedores.
+            </div>
+          )}
           {radiusKm !== null && !locationLoading && userLocation && businesses.length > 0 &&
             businesses.every((business) => business.latitude === null || business.longitude === null) && (
               <div className="marketplace-message">
@@ -424,6 +444,7 @@ function SearchPage() {
               {search && <span>Busca: {search}</span>}
               {city && <span>Localização: {city}</span>}
               {categoryId && <span>Categoria: {categories.find((category) => category.id === categoryId)?.name}</span>}
+              {locationCep && <span>CEP: {locationCep}</span>}
               {radiusKm !== null && <span>Até {radiusKm} km</span>}
             </div>
           )}
