@@ -17,6 +17,7 @@ type RequestRow = {
   description: string | null;
   status: string;
   created_at: string;
+  source?: "request" | "direct" | null;
   services?: { name: string } | null;
 };
 
@@ -107,7 +108,14 @@ function QuotesPage() {
   const [personalIdentity, setPersonalIdentity] = useState<PersonalIdentity | null>(null);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
+  const [proposalMode, setProposalMode] = useState<"request" | "direct">("direct");
   const [proposalRequestId, setProposalRequestId] = useState("");
+  const [proposalRecipientName, setProposalRecipientName] = useState("");
+  const [proposalRecipientPhone, setProposalRecipientPhone] = useState("");
+  const [proposalEventTitle, setProposalEventTitle] = useState("");
+  const [proposalEventDate, setProposalEventDate] = useState("");
+  const [proposalEventLocation, setProposalEventLocation] = useState("");
+  const [proposalEventDescription, setProposalEventDescription] = useState("");
   const [proposalItems, setProposalItems] = useState([{ description: "", quantity: "1", unitPrice: "" }]);
   const [proposalDiscount, setProposalDiscount] = useState("0");
   const [proposalValidity, setProposalValidity] = useState("");
@@ -151,11 +159,11 @@ function QuotesPage() {
 
         const [{ data: requestRows, error: requestsError }, { data: quoteRows, error: quotesError }] = await Promise.all([
           supabase.from("quote_requests")
-            .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+            .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name)")
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
           supabase.from("quotes")
-            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
         ]);
@@ -165,13 +173,13 @@ function QuotesPage() {
 
         const { data: requestedByUser } = await supabase
           .from("quote_requests")
-          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name)")
           .eq("requester_id", currentUser.id)
           .order("created_at", { ascending: false });
 
         const { data: receivedByUser } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -196,9 +204,9 @@ function QuotesPage() {
         }
 
         if (mounted) {
-          setRequests((requestRows ?? []) as unknown as RequestRow[]);
+          setRequests(((requestRows ?? []).filter((request: any) => request.source !== "direct")) as unknown as RequestRow[]);
           setQuotes((quoteRows ?? []) as unknown as QuoteRow[]);
-          setClientRequests((requestedByUser ?? []) as unknown as RequestRow[]);
+          setClientRequests(((requestedByUser ?? []).filter((request: any) => request.source !== "direct")) as unknown as RequestRow[]);
           setClientQuotes((receivedByUser ?? []) as unknown as QuoteRow[]);
           if (requestsError || quotesError) {
             setMessage("Não foi possível carregar todos os dados de orçamento. Tente atualizar a página.");
@@ -212,13 +220,13 @@ function QuotesPage() {
       } else {
         const { data: requested, error: requestedError } = await supabase
           .from("quote_requests")
-          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name)")
           .eq("requester_id", currentUser.id)
           .order("created_at", { ascending: false });
 
         const { data: received, error: receivedError } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -226,7 +234,7 @@ function QuotesPage() {
         if (receivedError) console.error("Erro ao carregar orçamentos recebidos:", receivedError);
 
         if (mounted) {
-          setClientRequests((requested ?? []) as unknown as RequestRow[]);
+          setClientRequests(((requested ?? []).filter((request: any) => request.source !== "direct")) as unknown as RequestRow[]);
           setClientQuotes((received ?? []) as unknown as QuoteRow[]);
           const firstDay = new Date();
           firstDay.setDate(1);
@@ -263,13 +271,13 @@ function QuotesPage() {
     async function refreshQuoteData() {
       const clientRequestsPromise = supabase
         .from("quote_requests")
-        .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+        .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name)")
         .eq("requester_id", userId)
         .order("created_at", { ascending: false });
 
       const clientQuotesPromise = supabase
         .from("quotes")
-        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
         .eq("client_id", userId)
         .order("created_at", { ascending: false });
 
@@ -281,7 +289,7 @@ function QuotesPage() {
       if (!active) return;
 
       if (!requestedResult.error) {
-        setClientRequests((requestedResult.data ?? []) as unknown as RequestRow[]);
+        setClientRequests(((requestedResult.data ?? []).filter((request: any) => request.source !== "direct")) as unknown as RequestRow[]);
         const firstDay = new Date();
         firstDay.setDate(1);
         firstDay.setHours(0, 0, 0, 0);
@@ -295,12 +303,12 @@ function QuotesPage() {
         const [supplierRequestsResult, supplierQuotesResult] = await Promise.all([
           supabase
             .from("quote_requests")
-            .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name)")
+            .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name)")
             .eq("business_id", businessId)
             .order("created_at", { ascending: false }),
           supabase
             .from("quotes")
-            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,services(name))")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
             .eq("business_id", businessId)
             .order("created_at", { ascending: false }),
         ]);
@@ -308,7 +316,7 @@ function QuotesPage() {
         if (!active) return;
 
         if (!supplierRequestsResult.error) {
-          setRequests((supplierRequestsResult.data ?? []) as unknown as RequestRow[]);
+          setRequests(((supplierRequestsResult.data ?? []).filter((request: any) => request.source !== "direct")) as unknown as RequestRow[]);
         }
         if (!supplierQuotesResult.error) {
           setQuotes((supplierQuotesResult.data ?? []) as unknown as QuoteRow[]);
@@ -467,11 +475,11 @@ function QuotesPage() {
   const supplierQuoteRequestIds = new Set(quotes.map((quote) => quote.request_id));
 
   const clientPendingRequests = clientRequests.filter(
-    (request) => !clientQuoteRequestIds.has(request.id),
+    (request) => request.source !== "direct" && !clientQuoteRequestIds.has(request.id),
   );
 
   const supplierPendingRequests = requests.filter(
-    (request) => !supplierQuoteRequestIds.has(request.id),
+    (request) => request.source !== "direct" && !supplierQuoteRequestIds.has(request.id),
   );
 
   function dateOnly(value: string | null) {
@@ -509,7 +517,14 @@ function QuotesPage() {
   }
 
   function resetProposalForm() {
+    setProposalMode("direct");
     setProposalRequestId("");
+    setProposalRecipientName("");
+    setProposalRecipientPhone("");
+    setProposalEventTitle("");
+    setProposalEventDate("");
+    setProposalEventLocation("");
+    setProposalEventDescription("");
     setProposalItems([{ description: "", quantity: "1", unitPrice: "" }]);
     setProposalDiscount("0");
     setProposalValidity("");
@@ -525,12 +540,11 @@ function QuotesPage() {
     return match?.[1]?.replace(/\/$/, "") || "";
   }
 
-  async function resolveProposalRecipient(value: string, request: RequestRow): Promise<BusinessContact | null> {
+  async function resolveProposalRecipient(value: string, request?: RequestRow): Promise<BusinessContact | null> {
     setProposalProfileLink(value);
     setResolvedProposalRecipient(null);
     const slug = extractPublicProfileSlug(value);
     if (!slug) return null;
-
     setResolvingProposalRecipient(true);
     try {
       const { data, error } = await supabase
@@ -539,17 +553,14 @@ function QuotesPage() {
         .eq("slug", slug)
         .eq("active", true)
         .maybeSingle();
-
       if (error) throw error;
       if (!data) throw new Error("Perfil público não encontrado. Confira o link informado.");
-      if (data.owner_id !== request.requester_id) {
-        throw new Error("Este perfil público não pertence ao solicitante desta solicitação. Confira o link antes de enviar.");
-      }
-      if (!data.whatsapp && !data.phone) {
-        throw new Error("O perfil público foi encontrado, mas não possui WhatsApp ou telefone cadastrado.");
-      }
+      if (request && data.owner_id !== request.requester_id) throw new Error("Este perfil público não pertence ao solicitante desta solicitação. Confira o link antes de enviar.");
+      if (!data.whatsapp && !data.phone) throw new Error("O perfil público foi encontrado, mas não possui WhatsApp ou telefone cadastrado.");
       const recipient = data as BusinessContact;
       setResolvedProposalRecipient(recipient);
+      setProposalRecipientName(recipient.business_name || "");
+      setProposalRecipientPhone(recipient.whatsapp || recipient.phone || "");
       return recipient;
     } catch (error: any) {
       console.error("Erro ao identificar destinatário pelo perfil público:", error);
@@ -563,149 +574,93 @@ function QuotesPage() {
 
   async function createAndSendProposal() {
     if (!businessId || !userId) return;
-    const request = supplierPendingRequests.find((item) => item.id === proposalRequestId);
-    if (!request) {
-      setMessageType("error");
-      setMessage("Selecione uma solicitação para montar a proposta.");
-      return;
+    const request = proposalMode === "request" ? supplierPendingRequests.find((item) => item.id === proposalRequestId) : null;
+    if (proposalMode === "request" && !request) {
+      setMessageType("error"); setMessage("Selecione uma solicitação para montar a proposta."); return;
     }
-
+    const recipientName = proposalRecipientName.trim();
     const profileLink = proposalProfileLink.trim();
     let linkedRecipient = resolvedProposalRecipient;
+    if (profileLink && !linkedRecipient) linkedRecipient = await resolveProposalRecipient(profileLink, request ?? undefined);
     if (profileLink && !linkedRecipient) {
-      linkedRecipient = await resolveProposalRecipient(profileLink, request);
+      setMessageType("error"); setMessage("Identifique o destinatário pelo link do perfil público antes de enviar a proposta."); return;
     }
-    if (profileLink) {
-      const slug = extractPublicProfileSlug(profileLink);
-      if (!slug || !linkedRecipient) {
-        setMessageType("error");
-        setMessage("Identifique o destinatário pelo link do perfil público antes de enviar a proposta.");
-        return;
-      }
-      if (linkedRecipient.owner_id !== request.requester_id) {
-        setMessageType("error");
-        setMessage("O perfil público informado não corresponde ao solicitante desta solicitação.");
-        return;
-      }
+    if (request && linkedRecipient && linkedRecipient.owner_id !== request.requester_id) {
+      setMessageType("error"); setMessage("O perfil público informado não corresponde ao solicitante desta solicitação."); return;
     }
+    const finalRecipientName = linkedRecipient?.business_name || recipientName;
+    const recipientPhone = linkedRecipient?.whatsapp || linkedRecipient?.phone || proposalRecipientPhone.trim() || request?.client_phone || "";
+    if (!finalRecipientName) { setMessageType("error"); setMessage("Informe o nome do destinatário."); return; }
+    if (!recipientPhone) { setMessageType("error"); setMessage("Informe o WhatsApp do destinatário ou use o link de um perfil público que possua WhatsApp cadastrado."); return; }
+    if (!proposalEventTitle.trim()) { setMessageType("error"); setMessage("Informe o nome ou título do evento."); return; }
 
-    const recipientPhone = linkedRecipient?.whatsapp || linkedRecipient?.phone || request.client_phone;
-    if (!recipientPhone) {
-      setMessageType("error");
-      setMessage("Não encontramos um WhatsApp para este destinatário. Informe o link do perfil público que possui o WhatsApp cadastrado.");
-      return;
-    }
-
-    const validItems = proposalItems
-      .map((item) => ({
-        description: item.description.trim(),
-        quantity: Number(item.quantity),
-        unit_price: Number(item.unitPrice.replace(",", ".")),
-      }))
-      .filter((item) => item.description && item.quantity > 0 && Number.isFinite(item.unit_price) && item.unit_price >= 0);
-
-    if (!validItems.length) {
-      setMessageType("error");
-      setMessage("Adicione pelo menos um item válido à proposta.");
-      return;
-    }
-
+    const validItems = proposalItems.map((item) => ({
+      description: item.description.trim(), quantity: Number(item.quantity), unit_price: Number(item.unitPrice.replace(",", "."))
+    })).filter((item) => item.description && item.quantity > 0 && Number.isFinite(item.unit_price) && item.unit_price >= 0);
+    if (!validItems.length) { setMessageType("error"); setMessage("Adicione pelo menos um item válido à proposta."); return; }
     const subtotal = validItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
     const discount = Math.max(0, Number(proposalDiscount.replace(",", ".")) || 0);
     const total = Math.max(0, subtotal - discount);
-
-    setSavingProposal(true);
-    setMessage("");
+    setSavingProposal(true); setMessage("");
     try {
-      const { data: quote, error: quoteError } = await supabase
-        .from("quotes")
-        .insert({
-          request_id: request.id,
-          business_id: businessId,
-          client_id: request.requester_id,
-          subtotal,
-          discount,
-          total,
-          validity_until: proposalValidity || null,
-          notes: proposalNotes.trim() || null,
-          status: "sent",
-          sent_at: new Date().toISOString(),
-        })
-        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at")
-        .single();
-
+      const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || userId;
+      const requestPayload = {
+        business_id: businessId, requester_id: recipientOwnerId, service_id: request?.service_id || null,
+        client_name: finalRecipientName, client_email: request?.client_email || null, client_phone: recipientPhone,
+        event_title: proposalEventTitle.trim(), event_date: proposalEventDate || request?.event_date || null,
+        event_location: proposalEventLocation.trim() || request?.event_location || null,
+        description: proposalEventDescription.trim() || request?.description || null,
+        status: "quoted", source: proposalMode,
+      };
+      let quoteRequest = request;
+      if (!quoteRequest) {
+        const { data: createdRequest, error: requestError } = await supabase.from("quote_requests").insert(requestPayload)
+          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source").single();
+        if (requestError || !createdRequest) throw requestError || new Error("Não foi possível criar os dados da proposta.");
+        quoteRequest = createdRequest as RequestRow;
+      }
+      const { data: quote, error: quoteError } = await supabase.from("quotes").insert({
+        request_id: quoteRequest.id, business_id: businessId, client_id: recipientOwnerId, subtotal, discount, total,
+        validity_until: proposalValidity || null, notes: proposalNotes.trim() || null, status: "sent", sent_at: new Date().toISOString(),
+      }).select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at").single();
       if (quoteError || !quote) throw quoteError || new Error("Não foi possível criar a proposta.");
 
-      const { error: itemsError } = await supabase.from("quote_items").insert(
-        validItems.map((item) => ({
-          quote_id: quote.id,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total: item.quantity * item.unit_price,
-        })),
-      );
-
+      const { error: itemsError } = await supabase.from("quote_items").insert(validItems.map((item) => ({
+        quote_id: quote.id, description: item.description, quantity: item.quantity, unit_price: item.unit_price, total: item.quantity * item.unit_price,
+      })));
       if (itemsError) {
         await supabase.from("quotes").delete().eq("id", quote.id).eq("business_id", businessId);
+        if (!request) await supabase.from("quote_requests").delete().eq("id", quoteRequest.id).eq("business_id", businessId);
         throw itemsError;
       }
-
-      await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", request.id).eq("business_id", businessId);
+      if (request) await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", request.id).eq("business_id", businessId);
 
       const supplier = businessContacts[businessId];
-      const profileUrl = supplier?.slug
-        ? window.location.origin + "/fornecedor/" + supplier.slug + "?proposta=" + quote.id
-        : "";
+      const profileUrl = supplier?.slug ? window.location.origin + "/fornecedor/" + supplier.slug + "?proposta=" + quote.id : "";
       const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
       const whatsappMessage = [
-        "Olá, " + request.client_name + "!",
-        "",
-        "Preparei sua proposta pelo LOSI CONECTA.",
-        "",
-        "Fornecedor: " + supplierName,
-        "Empresa: " + (supplier?.business_name || "Não informada"),
-        "Telefone: " + (supplier?.phone || supplier?.whatsapp || "Não informado"),
-        "E-mail: " + userEmail,
+        "Olá, " + finalRecipientName + "!", "", "Preparei sua proposta pelo LOSI CONECTA.", "",
+        "Fornecedor: " + supplierName, "Empresa: " + (supplier?.business_name || "Não informada"),
+        "Telefone: " + (supplier?.phone || supplier?.whatsapp || "Não informado"), "E-mail: " + userEmail,
         linkedRecipient ? "Perfil público do destinatário: " + (window.location.origin + "/fornecedor/" + linkedRecipient.slug) : "",
-        linkedRecipient ? "WhatsApp do destinatário: " + recipientPhone : "",
-        "",
-        "Valor total: " + money(total),
-        proposalValidity ? "Validade: " + formatQuoteDate(proposalValidity) : "",
-        "",
-        profileUrl ? "Acesse sua proposta pelo link abaixo:" : "",
-        profileUrl,
+        "Evento: " + proposalEventTitle.trim(), proposalEventDate ? "Data do evento: " + formatQuoteDate(proposalEventDate) : "",
+        proposalEventLocation.trim() ? "Local: " + proposalEventLocation.trim() : "", "", "Valor total: " + money(total),
+        proposalValidity ? "Validade: " + formatQuoteDate(proposalValidity) : "", "",
+        profileUrl ? "Acesse sua proposta pelo link abaixo:" : "", profileUrl,
       ].filter(Boolean).join("\n");
-
       const number = normalizeWhatsAppNumber(recipientPhone);
-      const whatsappUrl = number
-        ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage)
-        : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
+      const whatsappUrl = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage) : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
       window.open(whatsappUrl, "_blank", "noopener,noreferrer");
 
-      const createdQuote = {
-        ...(quote as QuoteRow),
-        quote_items: validItems.map((item, index) => ({
-          id: "local-" + index,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total: item.quantity * item.unit_price,
-        })),
-        quote_requests: request,
-      } as QuoteRow;
+      const createdQuote = { ...(quote as QuoteRow), quote_items: validItems.map((item, index) => ({
+        id: "local-" + index, description: item.description, quantity: item.quantity, unit_price: item.unit_price, total: item.quantity * item.unit_price,
+      })), quote_requests: quoteRequest } as QuoteRow;
       setQuotes((current) => [createdQuote, ...current]);
-      setRequests((current) => current.map((item) => item.id === request.id ? { ...item, status: "quoted" } : item));
-      resetProposalForm();
-      setMessageType("success");
-      setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
+      if (request) setRequests((current) => current.map((item) => item.id === request.id ? { ...item, status: "quoted" } : item));
+      resetProposalForm(); setMessageType("success"); setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
     } catch (error: any) {
-      console.error("Erro ao criar proposta:", error);
-      setMessageType("error");
-      setMessage(error?.message || "Não foi possível criar a proposta.");
-    } finally {
-      setSavingProposal(false);
-    }
+      console.error("Erro ao criar proposta:", error); setMessageType("error"); setMessage(error?.message || "Não foi possível criar a proposta.");
+    } finally { setSavingProposal(false); }
   }
 
   async function deleteQuote(quote: QuoteRow) {
@@ -799,7 +754,7 @@ function QuotesPage() {
         .proposal-recipient{padding:19px;border-radius:17px;background:linear-gradient(145deg,#f8f9fb,#fff);border:1px solid #dfe4eb;margin-bottom:20px;box-shadow:0 8px 22px rgba(7,17,31,.04)}
         .proposal-recipient-head strong{display:block;color:#172033;font-size:13px;letter-spacing:.04em}
         .proposal-recipient-head span{display:block;color:#687386;font-size:12px;line-height:1.5;margin-top:4px}
-        .proposal-recipient-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px;margin-top:14px}
+        .proposal-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.proposal-mode-button{width:100%}.proposal-mode-button.active{border-color:#d6b46a;color:#8a6d2f;background:#fffaf0}.proposal-recipient-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px;margin-top:14px}
         .proposal-recipient-grid label{display:block;margin-bottom:6px;color:#475467;font-size:11px;font-weight:800;text-transform:uppercase}
         .proposal-recipient-grid input{width:100%;box-sizing:border-box;border:1px solid #d0d5dd;border-radius:11px;background:#fff;color:#101828;padding:12px 13px;font:inherit;outline:none}
         .proposal-recipient-grid input:focus{border-color:#d6b46a;box-shadow:0 0 0 3px rgba(214,180,106,.15)}
@@ -811,6 +766,7 @@ function QuotesPage() {
         .proposal-recipient-status a{display:inline-block;margin-top:8px;color:#8a6d2f;font-size:12px;font-weight:800;text-decoration:none}
 
         @media(max-width:700px){
+          .proposal-mode-grid{grid-template-columns:1fr !important}
           .proposal-builder{padding:18px;margin-top:20px;border-radius:16px}
           .proposal-builder-head{display:block}
           .proposal-builder-head h2{font-size:21px}
@@ -851,68 +807,52 @@ function QuotesPage() {
               <div>
                 <div className="quotes-kicker">NOVA PROPOSTA</div>
                 <h2 id="proposal-builder-title">Preparar orçamento para o cliente</h2>
-                <p>Monte uma proposta detalhada com os dados do fornecedor e envie o acesso diretamente pelo WhatsApp.</p>
+                <p>Monte uma proposta completa e envie diretamente pelo WhatsApp, mesmo quando o cliente ainda não criou uma solicitação no LOSI CONECTA.</p>
               </div>
             </div>
 
-            
-                <div className="proposal-field" style={{ marginBottom: 18 }}>
-                  <label htmlFor="proposal-request">Cliente e solicitação</label>
-                  <select id="proposal-request" value={proposalRequestId} onChange={(event) => setProposalRequestId(event.target.value)}>
-                    <option value="">Selecione a solicitação</option>
-                    {supplierPendingRequests.map((request) => (
-                      <option key={request.id} value={request.id}>
-                        {request.client_name} — {request.event_title} — {serviceName(request)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {proposalRequestId && (() => {
-                  const request = supplierPendingRequests.find((item) => item.id === proposalRequestId);
-                  if (!request) return null;
-                  return (
-                    <div className="proposal-recipient">
-                      <div className="proposal-recipient-head">
-                        <strong>DESTINATÁRIO DA PROPOSTA</strong>
-                        <span>Use o link do perfil público quando o solicitante também for fornecedor.</span>
-                      </div>
-                      <div className="proposal-recipient-grid">
-                        <div>
-                          <label htmlFor="proposal-profile-link">Link do perfil público do solicitante</label>
-                          <input
-                            id="proposal-profile-link"
-                            value={proposalProfileLink}
-                            onChange={(event) => {
-                              setProposalProfileLink(event.target.value);
-                              setResolvedProposalRecipient(null);
-                            }}
-                            onBlur={(event) => resolveProposalRecipient(event.target.value, request)}
-                            placeholder="Cole aqui o link /fornecedor/..."
-                          />
-                          <small>O sistema usa esse perfil para encontrar automaticamente o WhatsApp cadastrado.</small>
-                        </div>
-                        <div className="proposal-recipient-status">
-                          <span>Solicitante</span>
-                          <strong>{resolvedProposalRecipient?.business_name || request.client_name}</strong>
-                          <p>
-                            WhatsApp:{" "}
-                            {resolvingProposalRecipient
-                              ? "Identificando..."
-                              : resolvedProposalRecipient
-                                ? (resolvedProposalRecipient.whatsapp || resolvedProposalRecipient.phone)
-                                : (proposalProfileLink ? "Aguardando identificação" : (request.client_phone || "Não informado"))}
-                          </p>
-                          {resolvedProposalRecipient?.slug && (
-                            <a href={window.location.origin + "/fornecedor/" + resolvedProposalRecipient.slug} target="_blank" rel="noreferrer">
-                              Abrir perfil público
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
+            <div className="proposal-field" style={{ marginBottom: 18 }}>
+              <label>Tipo de envio</label>
+              <div className="proposal-mode-grid">
+                <button type="button" className={"quotes-secondary proposal-mode-button " + (proposalMode === "direct" ? "active" : "")} onClick={() => setProposalMode("direct")}>Enviar diretamente</button>
+                <button type="button" className={"quotes-secondary proposal-mode-button " + (proposalMode === "request" ? "active" : "")} onClick={() => setProposalMode("request")}>A partir de uma solicitação</button>
+              </div>
+            </div>
+            {proposalMode === "request" && (
+              <div className="proposal-field" style={{ marginBottom: 18 }}>
+                <label htmlFor="proposal-request">Solicitação existente</label>
+                <select id="proposal-request" value={proposalRequestId} onChange={(event) => {
+                  const id = event.target.value; setProposalRequestId(id);
+                  const selected = supplierPendingRequests.find((item) => item.id === id);
+                  if (selected) {
+                    setProposalRecipientName(selected.client_name || ""); setProposalRecipientPhone(selected.client_phone || "");
+                    setProposalEventTitle(selected.event_title || ""); setProposalEventDate(selected.event_date || "");
+                    setProposalEventLocation(selected.event_location || ""); setProposalEventDescription(selected.description || "");
+                  }
+                }}>
+                  <option value="">Selecione a solicitação</option>
+                  {supplierPendingRequests.map((request) => <option key={request.id} value={request.id}>{request.client_name} — {request.event_title} — {serviceName(request)}</option>)}
+                </select>
+              </div>
+            )}
+            <div className="proposal-recipient">
+              <div className="proposal-recipient-head"><strong>DADOS DO DESTINATÁRIO</strong><span>Preencha o WhatsApp manualmente ou use o link do perfil público caso o destinatário também seja fornecedor.</span></div>
+              <div className="proposal-recipient-grid">
+                <div><label htmlFor="proposal-recipient-name">Nome do cliente</label><input id="proposal-recipient-name" value={proposalRecipientName} onChange={(event) => setProposalRecipientName(event.target.value)} placeholder="Nome do cliente ou empresa" /></div>
+                <div><label htmlFor="proposal-recipient-phone">WhatsApp</label><input id="proposal-recipient-phone" inputMode="tel" value={proposalRecipientPhone} onChange={(event) => setProposalRecipientPhone(event.target.value)} placeholder="(11) 99999-9999" /></div>
+                <div><label htmlFor="proposal-profile-link">Link do perfil público</label><input id="proposal-profile-link" value={proposalProfileLink} onChange={(event) => { setProposalProfileLink(event.target.value); setResolvedProposalRecipient(null); }} onBlur={(event) => resolveProposalRecipient(event.target.value, proposalMode === "request" ? supplierPendingRequests.find((item) => item.id === proposalRequestId) : undefined)} placeholder="https://.../fornecedor/..." /><small>Se o destinatário for fornecedor, o sistema identifica o perfil e usa o WhatsApp cadastrado nele.</small></div>
+                <div className="proposal-recipient-status"><span>Destinatário</span><strong>{resolvedProposalRecipient?.business_name || proposalRecipientName || "Aguardando dados"}</strong><p>WhatsApp: {resolvingProposalRecipient ? "Identificando..." : resolvedProposalRecipient ? (resolvedProposalRecipient.whatsapp || resolvedProposalRecipient.phone) : (proposalRecipientPhone || "Não informado")}</p>{resolvedProposalRecipient?.slug && <a href={window.location.origin + "/fornecedor/" + resolvedProposalRecipient.slug} target="_blank" rel="noreferrer">Abrir perfil público</a>}</div>
+              </div>
+            </div>
+            <div className="proposal-recipient">
+              <div className="proposal-recipient-head"><strong>DADOS DO EVENTO</strong><span>Esses dados também ficam registrados junto à proposta.</span></div>
+              <div className="proposal-form-grid" style={{ marginTop: 14, marginBottom: 0 }}>
+                <div className="proposal-field"><label htmlFor="proposal-event-title">Nome do evento</label><input id="proposal-event-title" value={proposalEventTitle} onChange={(event) => setProposalEventTitle(event.target.value)} placeholder="Ex.: Festa de aniversário, evento corporativo..." /></div>
+                <div className="proposal-field"><label htmlFor="proposal-event-date">Data do evento</label><input id="proposal-event-date" type="date" value={proposalEventDate} onChange={(event) => setProposalEventDate(event.target.value)} /></div>
+                <div className="proposal-field"><label htmlFor="proposal-event-location">Local do evento</label><input id="proposal-event-location" value={proposalEventLocation} onChange={(event) => setProposalEventLocation(event.target.value)} placeholder="Cidade, espaço ou endereço" /></div>
+                <div className="proposal-field"><label htmlFor="proposal-event-description">Descrição</label><textarea id="proposal-event-description" value={proposalEventDescription} onChange={(event) => setProposalEventDescription(event.target.value)} placeholder="Detalhes importantes do evento ou serviço." /></div>
+              </div>
+            </div>
 
                 <div className="proposal-items">
                   <div className="proposal-items-title">
@@ -965,11 +905,11 @@ function QuotesPage() {
 
                 <div className="proposal-actions">
                   <button type="button" className="quotes-secondary" onClick={resetProposalForm}>Limpar</button>
-                  <button type="button" className="proposal-primary" disabled={savingProposal || !proposalRequestId} onClick={createAndSendProposal}>
+                  <button type="button" className="proposal-primary" disabled={savingProposal} onClick={createAndSendProposal}>
                     {savingProposal ? "Preparando proposta..." : "Criar proposta e enviar pelo WhatsApp"}
                   </button>
                 </div>
-                <p className="proposal-hint">O WhatsApp será aberto com a mensagem pronta e o link da proposta.</p>
+                <p className="proposal-hint">O WhatsApp será aberto com a mensagem pronta e o link da proposta. O formulário pode ser usado com ou sem uma solicitação anterior.</p>
           </section>
         )}
 
