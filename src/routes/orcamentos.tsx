@@ -471,22 +471,6 @@ function QuotesPage() {
     (request) => !supplierQuoteRequestIds.has(request.id),
   );
 
-  const metricRequests =
-    activeMetric === "pending"
-      ? clientPendingRequests
-      : activeMetric === "received"
-        ? requests
-        : activeMetric === "supplier-pending"
-          ? supplierPendingRequests
-          : [];
-
-  const metricQuotes =
-    activeMetric === "total"
-      ? clientQuotes
-      : activeMetric === "supplier-sent"
-        ? quotes
-        : [];
-
   function dateOnly(value: string | null) {
     return value ? new Date(value + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada";
   }
@@ -496,17 +480,6 @@ function QuotesPage() {
       ? new Date(value).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
       : "Não informada";
   }
-
-  useEffect(() => {
-    if (!activeMetric) return;
-    const timer = window.setTimeout(() => {
-      const element = detailsRef.current;
-      if (!element) return;
-      const top = element.getBoundingClientRect().top + window.scrollY - 18;
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-    }, 60);
-    return () => window.clearTimeout(timer);
-  }, [activeMetric]);
 
   function proposalSubtotal() {
     return proposalItems.reduce((sum, item) => {
