@@ -530,6 +530,15 @@ async function geocodeAddress(address: string) {
           </div>
         </section>
       </main>
+      {authModalOpen && (
+        <AuthModal
+          onClose={() => {
+            setAuthModalOpen(false);
+            setPendingAuthAction(null);
+          }}
+          onAuthenticated={handleAuthenticatedFromModal}
+        />
+      )}
     </main>
   );
 
