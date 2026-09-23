@@ -65,7 +65,7 @@ function SearchPage() {
       const [businessResult, categoryResult, planResult] = await Promise.all([
         supabase
           .from("business_profiles")
-          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,logo_url,cover_url,verified,latitude,longitude,services(id,name,category_id,categories(name)),reviews(rating)")
+          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,cep,bairro,logo_url,cover_url,verified,latitude,longitude,services(id,name,category_id,categories(name)),reviews(rating)")
           .eq("active", true)
           .eq("approval_status", "approved")
           .order("business_name"),
