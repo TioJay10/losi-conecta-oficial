@@ -12,6 +12,7 @@ function AdminPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
@@ -51,13 +52,14 @@ function AdminPage() {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) { navigate({ to: "/entrar" }); return; }
       const currentUser = sessionData.session.user;
-      const { data, error } = await supabase.from("profiles").select("full_name,user_type,blocked").eq("id", currentUser.id).maybeSingle();
+      const { data, error } = await supabase.from("profiles").select("full_name,avatar_url,user_type,blocked").eq("id", currentUser.id).maybeSingle();
       if (!mounted) return;
       if (error || !data) { await supabase.auth.signOut(); navigate({ to: "/entrar" }); return; }
       if (data.blocked) { await supabase.auth.signOut(); navigate({ to: "/entrar" }); return; }
       if (data.user_type !== "admin") { navigate({ to: "/painel" }); return; }
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
+      setAvatarUrl(data.avatar_url ?? null);
       const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state,blocked,phone,created_at").order("created_at",{ascending:false}),
         supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status").order("created_at",{ascending:false}),
@@ -306,8 +308,17 @@ function AdminPage() {
         <button type="button" id="admin-mobile-menu" className="admin-mobile-menu-button" aria-label={mobileMenuOpen ? "Fechar menu administrativo" : "Abrir menu administrativo"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(value => !value)}>
           <span></span><span></span><span></span>
         </button>
-        <div><div className="mobile-centered-brand">LOSI <span>CONECTA</span></div><div className="admin-mobile-subtitle">PAINEL ADMINISTRATIVO</div></div>
-        <button type="button" className="admin-logout" onClick={logout}>Sair do painel</button>
+        <div className="admin-header-brand">
+          <div className="mobile-centered-brand">LOSI <span>CONECTA</span></div>
+          <div className="admin-mobile-subtitle">PAINEL ADMINISTRATIVO</div>
+        </div>
+        <div className="admin-header-actions">
+          <button type="button" className="admin-profile-link" onClick={() => navigate({ to: "/admin-perfil" })} aria-label="Abrir perfil do administrador">
+            {avatarUrl ? <img src={avatarUrl} alt="" className="admin-header-avatar" /> : <span className="admin-header-avatar admin-header-avatar-fallback">{name.slice(0, 1).toUpperCase()}</span>}
+            <span className="admin-header-user-name">{name}</span>
+          </button>
+          <button type="button" className="admin-logout" onClick={logout}>Sair</button>
+        </div>
       </header>
       <div className="admin-shell">
         {mobileMenuOpen && <button type="button" className="admin-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
