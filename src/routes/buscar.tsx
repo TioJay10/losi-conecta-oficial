@@ -88,9 +88,13 @@ function SearchPage() {
         setBusinesses(loadedBusinesses);
         setCategories(categoryResult.data ?? []);
       }
-      setLoading(false);
     }
-    loadCatalog();
+    loadCatalog().catch((loadError) => {
+      console.error("Erro inesperado ao carregar catálogo:", loadError);
+      if (mounted) setError("Não foi possível carregar os fornecedores.");
+    }).finally(() => {
+      if (mounted) setLoading(false);
+    });
     return () => { mounted = false; };
   }, []);
 
