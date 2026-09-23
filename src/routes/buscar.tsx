@@ -24,6 +24,7 @@ function SearchPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
+  const [submittedSearch, setSubmittedSearch] = useState("");
   const [city, setCity] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
@@ -173,8 +174,12 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
     }
   }
 
+  function handleSearch() {
+    setSubmittedSearch(search.trim());
+  }
+
   const results = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
+    const normalizedSearch = submittedSearch.trim().toLocaleLowerCase("pt-BR");
     const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
     return businesses.filter((business) => {
       const isOfficial = business.id === OFFICIAL_BUSINESS_ID;
@@ -191,10 +196,10 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
         (radiusKm === null || Boolean(userLocation && business.latitude !== null && business.longitude !== null && distanceInKm(userLocation.latitude, userLocation.longitude, business.latitude, business.longitude) <= radiusKm))
       );
     });
-  }, [businesses, search, city, categoryId, radiusKm, userLocation]);
+  }, [businesses, submittedSearch, city, categoryId, radiusKm, userLocation]);
 
   const scoredResults = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("pt-BR");
+    const query = submittedSearch.trim().toLocaleLowerCase("pt-BR");
     const tokens = query.split(/\s+/).map((token) => token.trim()).filter((token) => token.length >= 2);
 
     function normalize(value: string) {
@@ -225,7 +230,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
       searchScore: score(business),
       reputation: calculateReputation(business.plan?.plan_slug, business.reviews.map((review) => review.rating)),
     }));
-  }, [results, search]);
+  }, [results, submittedSearch]);
 
   const sortedResults = useMemo(() => {
     const copy = [...scoredResults];
@@ -335,7 +340,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
               placeholder="Buscar fornecedores, serviços ou categorias"
               aria-label="Buscar fornecedores, serviços ou categorias"
             />
-            <button type="button" onClick={() => document.getElementById("marketplace-search")?.focus()} aria-label="Buscar">⌕</button>
+            <button type="button" onClick={handleSearch} aria-label="Buscar">⌕</button>
           </div>
           <div className="marketplace-header-actions">
             {userId && userBusinessSlug && <Link to="/painel" className="marketplace-account">Minha conta</Link>}
@@ -412,7 +417,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
               {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
           </div>
-          <button type="button" className="marketplace-search-button" onClick={() => document.getElementById("marketplace-service")?.focus()}>Buscar</button>
+          <button type="button" className="marketplace-search-button" onClick={handleSearch}>Buscar</button>
         </div>
       </section>
 
@@ -455,8 +460,8 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
               <button type="button" key={category.id} className={categoryId === category.id ? "selected" : ""} onClick={() => setCategoryId(category.id)}>{category.name}</button>
             ))}
           </div>
-          {(search || city || categoryId || radiusKm !== null) && (
-            <button type="button" className="marketplace-clear-all" onClick={() => { setSearch(""); setCity(""); setCategoryId(""); setRadiusKm(null); setUserLocation(null); setLocationCep(""); setLocationMessage(""); }}>
+          {(submittedSearch || city || categoryId || radiusKm !== null) && (
+            <button type="button" className="marketplace-clear-all" onClick={() => { setSearch(""); setSubmittedSearch(""); setCity(""); setCategoryId(""); setRadiusKm(null); setUserLocation(null); setLocationCep(""); setLocationMessage(""); }}>
               Limpar filtros
             </button>
           )}
@@ -466,7 +471,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
           <div className="marketplace-results-top">
             <div>
               <div className="marketplace-results-context">{loading ? "CARREGANDO" : results.length + " RESULTADO" + (results.length === 1 ? "" : "S")}</div>
-              <h2>{search ? `Fornecedores para "${search}"` : "Fornecedores em destaque"}</h2>
+              <h2>{submittedSearch ? `Fornecedores para "${submittedSearch}"` : "Fornecedores em destaque"}</h2>
             </div>
             <label className="marketplace-sort">
               <span>Ordenar por</span>
@@ -496,7 +501,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
 
           {(search || city || categoryId || radiusKm !== null) && (
             <div className="marketplace-active-filters" aria-label="Filtros ativos">
-              {search && <span>Busca: {search}</span>}
+              {submittedSearch && <span>Busca: {submittedSearch}</span>}
               {city && <span>Localização: {city}</span>}
               {categoryId && <span>Categoria: {categories.find((category) => category.id === categoryId)?.name}</span>}
               {locationCep && <span>CEP: {locationCep}</span>}
