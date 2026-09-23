@@ -341,38 +341,45 @@ function ProviderPage() {
     }
 
     const serviceName = business.services.find((service) => service.id === payload.service_id)?.name || "Não informado";
-    const { data: requesterBusiness } = await supabase
-      .from("business_profiles")
-      .select("slug,business_name")
-      .eq("owner_id", currentUser.id)
-      .eq("active", true)
-      .maybeSingle();
+    const [{ data: requesterBusiness }, { data: requesterProfile }] = await Promise.all([
+      supabase
+        .from("business_profiles")
+        .select("slug,business_name,address,bairro,city,state,cep")
+        .eq("owner_id", currentUser.id)
+        .eq("active", true)
+        .maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("full_name,address,city,state,cep")
+        .eq("id", currentUser.id)
+        .maybeSingle(),
+    ]);
     const requesterProfileUrl = requesterBusiness?.slug
       ? window.location.origin + "/fornecedor/" + requesterBusiness.slug
       : "";
+    const requesterName = requesterProfile?.full_name || payload.client_name;
+    const requesterAddress = requesterBusiness?.address
+      || requesterProfile?.address
+      || [requesterProfile?.city, requesterProfile?.state].filter(Boolean).join(" — ")
+      || requesterProfile?.cep
+      || "Não informado";
+    const requesterCompany = requesterBusiness?.business_name || "";
     const whatsappNumber = (business.whatsapp || business.phone || "").replace(/\D/g, "");
     const normalizedWhatsapp = whatsappNumber
       ? (whatsappNumber.startsWith("55") ? whatsappNumber : "55" + whatsappNumber)
       : "";
 
     const whatsappMessage = [
-      "Olá! Recebi sua solicitação de orçamento pelo LOSI CONECTA.",
+      "Olá, " + business.business_name,
       "",
-      "INFORMAÇÕES DE QUEM SOLICITOU",
-      "Nome: " + payload.client_name,
-      payload.client_phone ? "WhatsApp/Telefone: " + payload.client_phone : "",
-      payload.client_email ? "E-mail: " + payload.client_email : "",
+      "Encontrei o seu perfil no Losi Conecta e gostaria de solicitar um orçamento dos seus serviços.",
       "",
-      "DADOS DA SOLICITAÇÃO",
-      "Serviço: " + serviceName,
-      "Tipo de evento: " + payload.event_title,
-      "Data do evento: " + (payload.event_date ? new Date(payload.event_date + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"),
-      payload.event_location ? "Local: " + payload.event_location : "",
-      payload.description ? "Detalhes: " + payload.description : "",
-      requesterProfileUrl ? "" : "",
-      requesterProfileUrl ? "🔗 PERFIL PÚBLICO DE QUEM SOLICITOU: " + requesterProfileUrl : "",
+      "Dados do solicitante:",
       "",
-      "Esta solicitação foi registrada no LOSI CONECTA.",
+      "Nome: " + requesterName,
+      "Endereço completo: " + requesterAddress,
+      requesterCompany ? "Nome da empresa: " + requesterCompany : "",
+      requesterProfileUrl ? "Link do perfil público: " + requesterProfileUrl : "",
     ].filter(Boolean).join("\n");
 
     formElement.reset();
