@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
-import { NotificationBell } from "../components/NotificationBell";
 
 export const Route = createFileRoute("/painel")({
   component: DashboardPage,
@@ -288,7 +287,6 @@ function DashboardPage() {
           </button>
           <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>Seu espaço profissional</strong></div>
           <div className="dashboard-header-right">
-            <NotificationBell />
             <div className="dashboard-header-user">
               <span>{(profile.full_name || user.email || "P").slice(0, 1).toUpperCase()}</span>
               <div><strong>{profile.full_name || "Profissional"}</strong><small>{user.email}</small></div>
