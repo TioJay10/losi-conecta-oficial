@@ -303,6 +303,9 @@ async function geocodeAddress(address: string) {
       <header className="marketplace-header">
         <div className="marketplace-header-inner">
           <AppLogo className="marketplace-logo" aria-label="LOSI CONECTA">LOSI <span>CONECTA</span></AppLogo>
+          <div className="marketplace-mobile-header-tools">
+            {userId && <NotificationBell />}
+          </div>
           <button
             type="button"
             className={"marketplace-mobile-menu-button" + (mobileMenuOpen ? " is-open" : "")}
@@ -323,7 +326,6 @@ async function geocodeAddress(address: string) {
             <button type="button" onClick={() => document.getElementById("marketplace-search")?.focus()} aria-label="Buscar">⌕</button>
           </div>
           <div className="marketplace-header-actions">
-            {userId && <NotificationBell />}
             {userId && userBusinessSlug && <Link to="/painel" className="marketplace-account">Minha conta</Link>}
             {userId ? (
               <button type="button" className="marketplace-account" disabled={authLoading} onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}>Sair</button>
