@@ -11387,3 +11387,83 @@ button.availability-day {
     max-height:calc(100vh - 90px);
   }
 }
+
+
+/* PAINEL — cabeçalho mobile: espaçamento, altura e camada das notificações */
+@media only screen and (max-width: 720px) {
+  .dashboard-page .dashboard-header {
+    min-height: 88px !important;
+    height: 88px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .dashboard-page .dashboard-header-context {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(42vw, 190px) !important;
+    margin: 0 !important;
+    text-align: center !important;
+    z-index: 10 !important;
+  }
+
+  .dashboard-page .dashboard-header-right {
+    position: relative !important;
+    z-index: 30 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-page .dashboard-notifications {
+    position: relative !important;
+    display: flex !important;
+    flex: 0 0 42px !important;
+    z-index: 2000 !important;
+  }
+
+  .dashboard-page .dashboard-notification-bell {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .dashboard-page .dashboard-header-user {
+    display: flex !important;
+    flex: 0 0 34px !important;
+    width: 34px !important;
+    min-width: 34px !important;
+  }
+
+  .dashboard-page .dashboard-header-user > div {
+    display: none !important;
+  }
+
+  .dashboard-page .dashboard-logout {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 48px !important;
+    height: 38px !important;
+    padding: 0 11px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .dashboard-page .dashboard-notification-popover {
+    position: fixed !important;
+    top: 98px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-height: calc(100vh - 112px) !important;
+    z-index: 3000 !important;
+  }
+}
