@@ -18,6 +18,7 @@ function PersonalProfilePage() {
     phone: "",
     city: "",
     state: "",
+    cep: "",
   });
 
   useEffect(() => {
@@ -38,7 +39,7 @@ function PersonalProfilePage() {
       const currentUser = data.user;
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("full_name,phone,city,state")
+        .select("full_name,phone,city,state,cep")
         .eq("id", currentUser.id)
         .maybeSingle();
 
@@ -55,6 +56,7 @@ function PersonalProfilePage() {
         phone: profile?.phone ?? "",
         city: profile?.city ?? "",
         state: profile?.state ?? "",
+        cep: profile?.cep ?? "",
       });
       setLoading(false);
     }
@@ -70,6 +72,24 @@ function PersonalProfilePage() {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  async function lookupCep(value: string) {
+    const cep = value.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+
+    const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + cep);
+    if (!response.ok) throw new Error("CEP não encontrado.");
+
+    const data = await response.json();
+    if (data.erro) throw new Error("CEP não encontrado.");
+
+    setForm((current) => ({
+      ...current,
+      cep: cep.replace(/(\d{5})(\d{3})/, "$1-$2"),
+      city: data.city ?? current.city,
+      state: data.state ?? current.state,
+    }));
+  }
+
   async function saveProfile(event: FormEvent) {
     event.preventDefault();
 
@@ -77,6 +97,12 @@ function PersonalProfilePage() {
 
     if (!form.full_name.trim()) {
       setMessage("Informe seu nome completo.");
+      return;
+    }
+
+    const normalizedCep = form.cep.replace(/\D/g, "");
+    if (normalizedCep.length !== 8) {
+      setMessage("Informe um CEP válido com 8 números.");
       return;
     }
 
@@ -90,6 +116,7 @@ function PersonalProfilePage() {
         phone: form.phone.trim() || null,
         city: form.city.trim() || null,
         state: form.state.trim() || null,
+        cep: normalizedCep,
       })
       .eq("id", user.id);
 
@@ -137,6 +164,23 @@ function PersonalProfilePage() {
             <Field label="Telefone" value={form.phone} onChange={(v) => update("phone", v)} />
             <Field label="Cidade" value={form.city} onChange={(v) => update("city", v)} />
             <Field label="Estado" value={form.state} onChange={(v) => update("state", v)} />
+            <div>
+              <label className="personal-profile-label">CEP *</label>
+              <input
+                value={form.cep}
+                onChange={(e) => update("cep", e.target.value)}
+                onBlur={(e) => {
+                  lookupCep(e.target.value).catch((error) =>
+                    setMessage(error instanceof Error ? error.message : "Não foi possível consultar o CEP.")
+                  );
+                }}
+                inputMode="numeric"
+                maxLength={9}
+                placeholder="00000-000"
+                className="personal-profile-input"
+              />
+              <small className="personal-profile-field-hint">Seu CEP será usado como referência para filtros por distância.</small>
+            </div>
           </div>
 
           <div className="personal-profile-readonly">
