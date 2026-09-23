@@ -855,10 +855,7 @@ function QuotesPage() {
               </div>
             </div>
 
-            {
-              <div className="quotes-empty">Não há solicitações aguardando orçamento no momento.</div>
-            ) : (
-              <>
+            
                 <div className="proposal-field" style={{ marginBottom: 18 }}>
                   <label htmlFor="proposal-request">Cliente e solicitação</label>
                   <select id="proposal-request" value={proposalRequestId} onChange={(event) => setProposalRequestId(event.target.value)}>
@@ -973,7 +970,6 @@ function QuotesPage() {
                   </button>
                 </div>
                 <p className="proposal-hint">O WhatsApp será aberto com a mensagem pronta e o link da proposta.</p>
-              </>
           </section>
         )}
 
