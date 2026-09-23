@@ -251,9 +251,6 @@ function DashboardPage() {
     navigate({ to: "/entrar" });
   }
 
-  if (loading) return <main className="dashboard-loading">Carregando sua conta...</main>;
-  if (!user || !profile) return null;
-
   useEffect(() => {
     if (!user || !supabase) return;
 
@@ -329,6 +326,9 @@ function DashboardPage() {
     setNotificationsOpen(false);
     if (notification.link) window.location.href = notification.link;
   }
+
+  if (loading) return <main className="dashboard-loading">Carregando sua conta...</main>;
+  if (!user || !profile) return null;
 
   return (
     <main className="dashboard-page">
