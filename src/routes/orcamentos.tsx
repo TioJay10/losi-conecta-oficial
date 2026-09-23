@@ -763,10 +763,10 @@ function QuotesPage() {
         .quotes-dashboard-card{min-width:0;padding:20px;border:1px solid rgba(11,24,42,.10);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.06)}
         .quotes-dashboard-card.accepted{border-color:rgba(35,115,69,.16)}
         .quotes-dashboard-card.rejected{border-color:rgba(163,47,47,.16)}
-        .quotes-dashboard-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:transparent;color:#0b182a}
+        .quotes-dashboard-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:flex-start;margin-bottom:15px;background:none;color:#0b182a}
         .quotes-dashboard-card.accepted .quotes-dashboard-icon{background:transparent;color:#237345}
         .quotes-dashboard-card.rejected .quotes-dashboard-icon{background:transparent;color:#a32f2f}
-        .quotes-dashboard-icon svg{width:28px;height:28px;display:block}
+        .quotes-dashboard-icon svg{width:30px;height:30px;display:block;overflow:visible;filter:drop-shadow(0 2px 3px rgba(7,17,31,.08))}
         .quotes-dashboard-label{margin-bottom:5px;color:#687386;font-size:11px;font-weight:800;letter-spacing:.12em}
         .quotes-dashboard-card strong{display:block;color:#172033;font-size:34px;line-height:1.05;font-weight:850}
         .quotes-dashboard-card span{display:block;margin-top:8px;color:#687386;font-size:13px;line-height:1.45}
@@ -998,21 +998,21 @@ function QuotesPage() {
 
           <div className="quotes-dashboard-grid">
             <article className="quotes-dashboard-card">
-              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19 19 5"/><path d="M9 5h10v10"/></svg></div>
+              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round"><path d="M7 3.75h7.2L19 8.55V20.25H7z"/><path d="M14 3.75v4.8h5"/><path d="M10 15.25h7"/><path d="M14.5 11.75 18 15.25l-3.5 3.5"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS ENVIADOS</div>
               <strong>{sentQuotesCount}</strong>
               <span>Total de propostas enviadas aos clientes</span>
             </article>
 
             <article className="quotes-dashboard-card accepted">
-              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="9"/></svg></div>
+              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.75"/><path d="m8.25 12.15 2.55 2.55 4.95-5.2"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS ACEITOS</div>
               <strong>{acceptedQuotesCount}</strong>
               <span>Propostas que foram aceitas pelo cliente</span>
             </article>
 
             <article className="quotes-dashboard-card rejected">
-              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg></div>
+              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.75"/><path d="m9.15 9.15 5.7 5.7M14.85 9.15l-5.7 5.7"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS REJEITADOS</div>
               <strong>{rejectedQuotesCount}</strong>
               <span>Propostas que foram recusadas pelo cliente</span>
