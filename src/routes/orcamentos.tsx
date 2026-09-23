@@ -525,11 +525,11 @@ function QuotesPage() {
     return match?.[1]?.replace(/\/$/, "") || "";
   }
 
-  async function resolveProposalRecipient(value: string, request: RequestRow) {
+  async function resolveProposalRecipient(value: string, request: RequestRow): Promise<BusinessContact | null> {
     setProposalProfileLink(value);
     setResolvedProposalRecipient(null);
     const slug = extractPublicProfileSlug(value);
-    if (!slug) return;
+    if (!slug) return null;
 
     setResolvingProposalRecipient(true);
     try {
@@ -548,11 +548,14 @@ function QuotesPage() {
       if (!data.whatsapp && !data.phone) {
         throw new Error("O perfil público foi encontrado, mas não possui WhatsApp ou telefone cadastrado.");
       }
-      setResolvedProposalRecipient(data as BusinessContact);
+      const recipient = data as BusinessContact;
+      setResolvedProposalRecipient(recipient);
+      return recipient;
     } catch (error: any) {
       console.error("Erro ao identificar destinatário pelo perfil público:", error);
       setMessageType("error");
       setMessage(error?.message || "Não foi possível identificar o destinatário pelo perfil público.");
+      return null;
     } finally {
       setResolvingProposalRecipient(false);
     }
@@ -568,21 +571,25 @@ function QuotesPage() {
     }
 
     const profileLink = proposalProfileLink.trim();
+    let linkedRecipient = resolvedProposalRecipient;
+    if (profileLink && !linkedRecipient) {
+      linkedRecipient = await resolveProposalRecipient(profileLink, request);
+    }
     if (profileLink) {
       const slug = extractPublicProfileSlug(profileLink);
-      if (!slug || !resolvedProposalRecipient) {
+      if (!slug || !linkedRecipient) {
         setMessageType("error");
         setMessage("Identifique o destinatário pelo link do perfil público antes de enviar a proposta.");
         return;
       }
-      if (resolvedProposalRecipient.owner_id !== request.requester_id) {
+      if (linkedRecipient.owner_id !== request.requester_id) {
         setMessageType("error");
         setMessage("O perfil público informado não corresponde ao solicitante desta solicitação.");
         return;
       }
     }
 
-    const recipientPhone = resolvedProposalRecipient?.whatsapp || resolvedProposalRecipient?.phone || request.client_phone;
+    const recipientPhone = linkedRecipient?.whatsapp || linkedRecipient?.phone || request.client_phone;
     if (!recipientPhone) {
       setMessageType("error");
       setMessage("Não encontramos um WhatsApp para este destinatário. Informe o link do perfil público que possui o WhatsApp cadastrado.");
@@ -660,8 +667,8 @@ function QuotesPage() {
         "Empresa: " + (supplier?.business_name || "Não informada"),
         "Telefone: " + (supplier?.phone || supplier?.whatsapp || "Não informado"),
         "E-mail: " + userEmail,
-        resolvedProposalRecipient ? "Perfil público do destinatário: " + (window.location.origin + "/fornecedor/" + resolvedProposalRecipient.slug) : "",
-        resolvedProposalRecipient ? "WhatsApp do destinatário: " + recipientPhone : "",
+        linkedRecipient ? "Perfil público do destinatário: " + (window.location.origin + "/fornecedor/" + linkedRecipient.slug) : "",
+        linkedRecipient ? "WhatsApp do destinatário: " + recipientPhone : "",
         "",
         "Valor total: " + money(total),
         proposalValidity ? "Validade: " + formatQuoteDate(proposalValidity) : "",
