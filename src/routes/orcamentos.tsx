@@ -99,6 +99,7 @@ function QuotesPage() {
   const [userEmail, setUserEmail] = useState("");
   const [selectedQuote, setSelectedQuote] = useState<QuoteRow | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<RequestRow | null>(null);
+  const [dashboardFilter, setDashboardFilter] = useState<"sent" | "accepted" | "rejected" | null>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [clientRequests, setClientRequests] = useState<RequestRow[]>([]);
@@ -465,6 +466,7 @@ function QuotesPage() {
 
   const closeQuoteModal = () => setSelectedQuote(null);
   const closeRequestModal = () => setSelectedRequest(null);
+  const closeDashboardModal = () => setDashboardFilter(null);
 
 
   const isSupplier = Boolean(businessId);
@@ -716,7 +718,7 @@ function QuotesPage() {
         .quotes-dashboard-head h2{margin:5px 0 7px;color:#172033;font-size:24px;line-height:1.2}
         .quotes-dashboard-head p{margin:0;color:#687386;font-size:14px;line-height:1.55}
         .quotes-dashboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-        .quotes-dashboard-card{min-width:0;padding:20px;border:1px solid rgba(11,24,42,.10);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.06)}
+        .quotes-dashboard-card{min-width:0;padding:20px;border:1px solid rgba(11,24,42,.10);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.06)}.quotes-dashboard-card-button{font:inherit;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.quotes-dashboard-card-button:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(7,17,31,.10)}.quotes-dashboard-card-button:focus-visible{outline:3px solid rgba(214,180,106,.3);outline-offset:3px}.quotes-dashboard-list{display:grid;gap:10px;max-height:58vh;overflow:auto}.quotes-dashboard-list-item{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;padding:16px;border:1px solid #dfe4eb;border-radius:14px;background:#fff;color:#172033;text-align:left;cursor:pointer;transition:.18s ease}.quotes-dashboard-list-item:hover{border-color:#d6b46a;box-shadow:0 8px 20px rgba(7,17,31,.07);transform:translateY(-1px)}.quotes-dashboard-list-item>div:first-child{display:grid;gap:4px;min-width:0}.quotes-dashboard-list-item strong{font-size:14px}.quotes-dashboard-list-item span,.quotes-dashboard-list-item small{color:#687386;font-size:12px}.quotes-dashboard-list-item small{font-size:11px}.quotes-dashboard-list-value{display:grid;justify-items:end;gap:6px;flex:none}.quotes-dashboard-list-value>strong{font-size:15px}.quote-status-pill{padding:5px 9px;border-radius:999px;background:#f2f4f7;color:#475467;font-weight:800}.quote-status-pill.accepted{background:#eefaf3;color:#237345}.quote-status-pill.rejected{background:#fff1f1;color:#a32f2f}.quotes-dashboard-empty{padding:30px 18px;text-align:center;border:1px dashed #d7dce4;border-radius:14px;color:#687386}@media(max-width:700px){.quotes-dashboard-list-item{align-items:flex-start}.quotes-dashboard-list-value{justify-items:end}.quotes-dashboard-list-item>div:first-child{min-width:0}.quotes-dashboard-list-item strong,.quotes-dashboard-list-item span,.quotes-dashboard-list-item small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:54vw}}
         .quotes-dashboard-card.accepted{border-color:rgba(35,115,69,.16)}
         .quotes-dashboard-card.rejected{border-color:rgba(163,47,47,.16)}
         .quotes-dashboard-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:flex-start;margin-bottom:15px;background:none;color:#0b182a}
@@ -934,28 +936,68 @@ function QuotesPage() {
           </div>
 
           <div className="quotes-dashboard-grid">
-            <article className="quotes-dashboard-card">
+            <button type="button" className="quotes-dashboard-card quotes-dashboard-card-button" onClick={() => setDashboardFilter("sent")}>
               <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round"><path d="M7 3.75h7.2L19 8.55V20.25H7z"/><path d="M14 3.75v4.8h5"/><path d="M10 15.25h7"/><path d="M14.5 11.75 18 15.25l-3.5 3.5"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS ENVIADOS</div>
               <strong>{sentQuotesCount}</strong>
               <span>Total de propostas enviadas aos clientes</span>
-            </article>
+            </button>
 
-            <article className="quotes-dashboard-card accepted">
+            <button type="button" className="quotes-dashboard-card accepted quotes-dashboard-card-button" onClick={() => setDashboardFilter("accepted")}>
               <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.75"/><path d="m8.25 12.15 2.55 2.55 4.95-5.2"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS ACEITOS</div>
               <strong>{acceptedQuotesCount}</strong>
               <span>Propostas que foram aceitas pelo cliente</span>
-            </article>
+            </button>
 
-            <article className="quotes-dashboard-card rejected">
+            <button type="button" className="quotes-dashboard-card rejected quotes-dashboard-card-button" onClick={() => setDashboardFilter("rejected")}>
               <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.75"/><path d="m9.15 9.15 5.7 5.7M14.85 9.15l-5.7 5.7"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS REJEITADOS</div>
               <strong>{rejectedQuotesCount}</strong>
               <span>Propostas que foram recusadas pelo cliente</span>
-            </article>
+            </button>
           </div>
         </section>
+
+        {dashboardFilter && (
+          <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDashboardModal(); }}>
+            <section className="quote-modal quotes-dashboard-list-modal" role="dialog" aria-modal="true" aria-labelledby="dashboard-list-title">
+              <div className="quote-modal-head">
+                <div>
+                  <div className="quotes-kicker">PAINEL DE ORÇAMENTOS</div>
+                  <h2 id="dashboard-list-title">{dashboardFilter === "sent" ? "Orçamentos enviados" : dashboardFilter === "accepted" ? "Orçamentos aceitos" : "Orçamentos rejeitados"}</h2>
+                  <p>Selecione uma proposta para visualizar o resumo completo.</p>
+                </div>
+                <button type="button" className="quotes-secondary quote-modal-close" onClick={closeDashboardModal} aria-label="Fechar">Fechar</button>
+              </div>
+              <div className="quotes-dashboard-list">
+                {quotes.filter((quote) => dashboardFilter === "sent" ? Boolean(quote.sent_at) || ["sent","viewed","accepted","rejected"].includes(quote.status) : quote.status === dashboardFilter).length === 0 ? (
+                  <div className="quotes-dashboard-empty">Nenhum orçamento encontrado nesta categoria.</div>
+                ) : (
+                  quotes
+                    .filter((quote) => dashboardFilter === "sent" ? Boolean(quote.sent_at) || ["sent","viewed","accepted","rejected"].includes(quote.status) : quote.status === dashboardFilter)
+                    .sort((a,b) => new Date(b.sent_at || b.created_at).getTime() - new Date(a.sent_at || a.created_at).getTime())
+                    .map((quote) => {
+                      const recipient = quote.quote_requests?.client_name || "Destinatário não informado";
+                      return (
+                        <button key={quote.id} type="button" className="quotes-dashboard-list-item" onClick={() => { setDashboardFilter(null); setSelectedQuote(quote); }}>
+                          <div>
+                            <strong>{recipient}</strong>
+                            <span>{quote.quote_requests?.event_title || "Evento não informado"}</span>
+                            <small>Enviado em {dateTime(quote.sent_at || quote.created_at)}</small>
+                          </div>
+                          <div className="quotes-dashboard-list-value">
+                            <strong>{money(Number(quote.total))}</strong>
+                            <span className={"quote-status-pill " + quote.status}>{statusLabel(quote.status)}</span>
+                          </div>
+                        </button>
+                      );
+                    })
+                )}
+              </div>
+            </section>
+          </div>
+        )}
 
         {selectedRequest && (
           <div className="quote-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeRequestModal(); }}>
