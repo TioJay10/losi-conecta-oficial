@@ -12130,3 +12130,25 @@ button.availability-day {
     flex: 0 0 40px !important;
   }
 }
+
+
+/* ADMIN PERFIL — cabeçalho sempre acima do conteúdo e da transição de página */
+.admin-profile-page .admin-profile-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10001 !important;
+  isolation: isolate;
+  background: #fff !important;
+  opacity: 1 !important;
+  box-shadow: 0 2px 14px rgba(17, 21, 43, .06);
+}
+.admin-profile-page .admin-profile-header::before,
+.admin-profile-page .admin-profile-header::after {
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .admin-profile-page .admin-profile-header {
+    z-index: 10001 !important;
+    background: #fff !important;
+  }
+}
