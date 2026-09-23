@@ -129,6 +129,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AdminPerfilRoute: typeof AdminPerfilRoute
   EntrarRoute: typeof EntrarRoute
   MeuPerfilRoute: typeof MeuPerfilRoute
   PainelRoute: typeof PainelRoute
