@@ -11,8 +11,6 @@ import "../responsive.css";
 import "../montserrat.css";
 import "../panel-header-contrast.css";
 
-
-
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -80,7 +78,7 @@ function RootComponent() {
         setAuthChecked(true);
       });
       unsubscribe = () => listener.subscription.unsubscribe();
-    });
+    }).catch(() => {});
 
     return () => {
       mounted = false;
@@ -88,7 +86,11 @@ function RootComponent() {
     };
   }, []);
 
-  const publicRoute = location.pathname === "/" || location.pathname === "/entrar" || location.pathname === "/buscar" || location.pathname.startsWith("/fornecedor/");
+  const publicRoute =
+    location.pathname === "/" ||
+    location.pathname === "/entrar" ||
+    location.pathname === "/buscar" ||
+    location.pathname.startsWith("/fornecedor/");
 
   if (!authChecked && !publicRoute) {
     return (
@@ -119,6 +121,16 @@ function RootComponent() {
 }
 
 function RootErrorComponent() {
+  const recover = () => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("_refresh", String(Date.now()));
+      window.location.replace(url.toString());
+    } catch {
+      window.location.href = "/";
+    }
+  };
+
   return (
     <main
       style={{
@@ -136,11 +148,11 @@ function RootErrorComponent() {
         <strong style={{ color: "#4f46c7", letterSpacing: ".08em" }}>LOSI CONECTA</strong>
         <h1 style={{ margin: "14px 0 8px" }}>Não foi possível carregar esta página.</h1>
         <p style={{ color: "#687386", lineHeight: 1.6 }}>
-          Ocorreu um erro inesperado. Recarregue a página e tente novamente.
+          Ocorreu um erro inesperado. Tente carregar novamente.
         </p>
         <button
           type="button"
-          onClick={() => window.location.reload()}
+          onClick={recover}
           style={{
             border: 0,
             borderRadius: 10,
@@ -151,7 +163,7 @@ function RootErrorComponent() {
             cursor: "pointer",
           }}
         >
-          Recarregar
+          Tentar novamente
         </button>
       </section>
     </main>
