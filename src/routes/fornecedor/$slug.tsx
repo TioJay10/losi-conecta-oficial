@@ -385,13 +385,10 @@ function ProviderPage() {
     formElement.reset();
 
     if (normalizedWhatsapp) {
-      window.open(
-        "https://wa.me/" + normalizedWhatsapp + "?text=" + encodeURIComponent(whatsappMessage),
-        "_blank",
-        "noopener,noreferrer",
-      );
+      window.location.href =
+        "https://wa.me/" + normalizedWhatsapp + "?text=" + encodeURIComponent(whatsappMessage);
       setQuoteMessageType("success");
-      setQuoteMessage("SOLICITAÇÃO REGISTRADA. O WHATSAPP FOI ABERTO COM OS DADOS PARA ENVIO.");
+      setQuoteMessage("SOLICITAÇÃO REGISTRADA. O WHATSAPP FOI ABERTO COM A MENSAGEM DO SOLICITANTE PRONTA PARA ENVIO.");
     } else {
       setQuoteMessageType("error");
       setQuoteMessage("SOLICITAÇÃO REGISTRADA, MAS ESTE FORNECEDOR NÃO POSSUI WHATSAPP CADASTRADO.");
