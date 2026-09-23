@@ -9388,3 +9388,50 @@ button,input,textarea,select{max-width:100%;font:inherit}
     font-size: 10px;
   }
 }
+
+
+/* ADMIN COMERCIAL — alinhamento do card de assinaturas */
+.admin-page .admin-commercial-subscriptions {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 18px !important;
+  align-self: stretch !important;
+  overflow: visible !important;
+}
+
+.admin-page .admin-commercial-subscriptions .admin-commercial-activation,
+.admin-page .admin-commercial-subscriptions .admin-subscriptions-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.admin-page .admin-commercial-subscriptions .admin-list-item {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.admin-page .admin-commercial-subscriptions .admin-item-main {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+@media only screen and (max-width: 768px) {
+  .admin-page .admin-commercial-subscriptions {
+    padding: 15px !important;
+    margin: 0 !important;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .admin-page .admin-commercial-subscriptions {
+    padding: 14px !important;
+  }
+}
