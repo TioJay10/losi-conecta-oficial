@@ -22,6 +22,8 @@ type Business = {
   instagram: string | null;
   city: string | null;
   state: string | null;
+  cep: string | null;
+  bairro: string | null;
   address: string | null;
   logo_url: string | null;
   cover_url: string | null;
@@ -46,7 +48,7 @@ function BusinessServicesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<"logo" | "cover" | "portfolio" | null>(null);
-  const [locationSaving, setLocationSaving] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
   const [coordinates, setCoordinates] = useState<{ latitude: number | null; longitude: number | null }>({
     latitude: null,
     longitude: null,
@@ -61,6 +63,8 @@ function BusinessServicesPage() {
     instagram: "",
     city: "",
     state: "",
+    cep: "",
+    bairro: "",
     address: "",
     logo_url: "",
     cover_url: "",
@@ -125,6 +129,8 @@ function BusinessServicesPage() {
           instagram: loaded.instagram ?? "",
           city: loaded.city ?? "",
           state: loaded.state ?? "",
+          cep: loaded.cep ?? "",
+          bairro: loaded.bairro ?? "",
           address: loaded.address ?? "",
           logo_url: loaded.logo_url ?? "",
           cover_url: loaded.cover_url ?? "",
@@ -230,30 +236,32 @@ function BusinessServicesPage() {
     setUploading(null);
   }
 
-  function useCurrentLocation() {
-    if (!navigator.geolocation) {
-      setMessage("Seu navegador não oferece localização.");
-      return;
-    }
-
-    setLocationSaving(true);
+  async function lookupCep(value: string) {
+    const cep = value.replace(/\D/g, "");
+    update("cep", value);
+    if (cep.length !== 8) return;
+    setCepLoading(true);
     setMessage("");
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCoordinates({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setLocationSaving(false);
-        setMessage("Localização capturada. Salve as informações da empresa para confirmar.");
-      },
-      () => {
-        setLocationSaving(false);
-        setMessage("Não foi possível obter sua localização. Verifique a permissão do navegador.");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
+    try {
+      const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + cep);
+      if (!response.ok) throw new Error("CEP não encontrado.");
+      const data = await response.json();
+      if (data.erro) throw new Error("CEP não encontrado.");
+      update("address", data.street ?? data.address ?? "");
+      update("bairro", data.neighborhood ?? "");
+      update("city", data.city ?? "");
+      update("state", data.state ?? "");
+      setCoordinates({
+        latitude: typeof data.latitude === "number" ? data.latitude : null,
+        longitude: typeof data.longitude === "number" ? data.longitude : null,
+      });
+      setMessage("CEP localizado. Cidade, bairro, estado e coordenadas foram preenchidos automaticamente.");
+    } catch (error) {
+      setCoordinates({ latitude: null, longitude: null });
+      setMessage(error instanceof Error ? error.message : "Não foi possível consultar o CEP.");
+    } finally {
+      setCepLoading(false);
+    }
   }
 
   async function saveBusiness(event: FormEvent) {
@@ -263,6 +271,16 @@ function BusinessServicesPage() {
 
     if (!form.business_name.trim()) {
       setMessage("Informe o nome comercial.");
+      return;
+    }
+
+    const normalizedCep = form.cep.replace(/\D/g, "");
+    if (normalizedCep.length !== 8 || !form.bairro.trim() || !form.city.trim() || !form.state.trim()) {
+      setMessage("Para publicar a empresa, informe CEP, bairro, cidade e estado.");
+      return;
+    }
+    if (coordinates.latitude === null || coordinates.longitude === null) {
+      setMessage("Consulte o CEP novamente para gerar a localização usada no filtro por distância.");
       return;
     }
 
@@ -292,8 +310,10 @@ function BusinessServicesPage() {
       whatsapp: form.whatsapp.trim() || null,
       website: form.website.trim() || null,
       instagram: form.instagram.trim() || null,
-      city: form.city.trim() || null,
-      state: form.state.trim() || null,
+      city: form.city.trim(),
+      state: form.state.trim(),
+      cep: normalizedCep,
+      bairro: form.bairro.trim(),
       address: form.address.trim() || null,
       logo_url: form.logo_url.trim() || null,
       cover_url: form.cover_url.trim() || null,
@@ -504,18 +524,23 @@ function BusinessServicesPage() {
             <Field label="Telefone comercial" value={form.phone} onChange={(v) => update("phone", v)} />
             <Field label="Instagram" value={form.instagram} onChange={(v) => update("instagram", v)} />
             <Field label="Site" value={form.website} onChange={(v) => update("website", v)} />
-            <Field label="Cidade" value={form.city} onChange={(v) => update("city", v)} />
-            <Field label="Estado" value={form.state} onChange={(v) => update("state", v)} />
+            <div>
+              <Field label="CEP *" value={form.cep} onChange={(v) => update("cep", v)} />
+              <button
+                type="button"
+                onClick={() => lookupCep(form.cep)}
+                disabled={cepLoading}
+                className="business-location-button"
+              >
+                {cepLoading ? "Consultando CEP..." : coordinates.latitude !== null ? "Localização por CEP ✓" : "Consultar CEP"}
+              </button>
+            </div>
+            <Field label="Bairro *" value={form.bairro} onChange={(v) => update("bairro", v)} />
+            <Field label="Cidade *" value={form.city} onChange={(v) => update("city", v)} />
+            <Field label="Estado *" value={form.state} onChange={(v) => update("state", v)} />
             <div>
               <Field label="Endereço" value={form.address} onChange={(v) => update("address", v)} />
-              <button type="button" onClick={useCurrentLocation} disabled={locationSaving} className="business-location-button">
-                {locationSaving
-                  ? "Obtendo localização..."
-                  : coordinates.latitude !== null
-                    ? "Localização cadastrada ✓"
-                    : "Usar minha localização atual"}
-              </button>
-              <p className="business-hint">Usada somente para calcular a distância no filtro por raio.</p>
+              <p className="business-hint">A localização usada no filtro por distância vem do CEP cadastrado, não do GPS do celular.</p>
             </div>
 
             <div>
