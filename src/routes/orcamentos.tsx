@@ -336,43 +336,20 @@ function QuotesPage() {
   }
 
   function buildRequestWhatsAppMessage(request: RequestRow) {
-    const profileUrl = publicProfileUrl(request.requester_id);
-    return [
-      "SOLICITAÇÃO DE ORÇAMENTO — LOSI CONECTA",
-      "",
-      "DESTINATÁRIO: " + (businessContacts[request.business_id]?.business_name || "Sua empresa"),
-      "SOLICITANTE: " + request.client_name,
-      "",
-      "CONTATO DO SOLICITANTE",
-      "Nome: " + request.client_name,
-      request.client_phone ? "WhatsApp/Telefone: " + request.client_phone : "",
-      request.client_email ? "E-mail: " + request.client_email : "",
-      "",
-      "DADOS DO EVENTO",
-      "Evento: " + (request.event_title || "Não informado"),
-      "Serviço: " + serviceName(request),
-      "Data: " + formatQuoteDate(request.event_date),
-      request.event_location ? "Local: " + request.event_location : "",
-      request.description ? "Detalhes: " + request.description : "",
-      profileUrl ? "" : "",
-      profileUrl ? "🔗 PERFIL PÚBLICO DE QUEM SOLICITOU: " + profileUrl : "",
-      "",
-      "Vou enviar o orçamento por aqui pelo WhatsApp.",
-    ].filter(Boolean).join("\n");
-  }
-
-  function buildQuoteWhatsAppMessage(quote: QuoteRow, recipientName: string, senderName: string) {
-    const supplier = businessContacts[quote.business_id];
+    const supplier = businessContacts[request.business_id];
     const supplierAddress = supplier?.address
       || [supplier?.bairro, supplier?.city, supplier?.state].filter(Boolean).join(" — ")
       || [supplier?.cep, supplier?.city, supplier?.state].filter(Boolean).join(" — ")
+      || personalIdentity?.address
+      || [personalIdentity?.city, personalIdentity?.state].filter(Boolean).join(" — ")
+      || personalIdentity?.cep
       || "Não informado";
     const supplierProfileUrl = supplier?.slug
       ? window.location.origin + "/fornecedor/" + supplier.slug
       : "";
 
     return [
-      "Olá, " + recipientName,
+      "Olá, " + request.client_name,
       "",
       "Recebemos a sua solicitação pelo Losi Conecta e vou preparar uma proposta para você.",
       "",
@@ -380,10 +357,49 @@ function QuotesPage() {
       "",
       "Dados do fornecedor:",
       "",
-      "Nome: " + (personalIdentity?.full_name || senderName),
+      "Nome: " + (personalIdentity?.full_name || supplier?.business_name || "Fornecedor"),
       "Endereço completo: " + supplierAddress,
-      "Nome da empresa: " + senderName,
+      "Nome da empresa: " + (supplier?.business_name || "Não informado"),
       supplierProfileUrl ? "Link do perfil público: " + supplierProfileUrl : "",
+    ].filter(Boolean).join("\n");
+  }
+
+  function buildQuoteWhatsAppMessage(quote: QuoteRow, recipientName: string, senderName: string) {
+    const request = quote.quote_requests;
+    const profileUrl = publicProfileUrl(request?.requester_id);
+    const itemLines = (quote.quote_items ?? [])
+      .map((item) => "• " + item.quantity + "x " + item.description + " — " + money(Number(item.total)))
+      .join("\n");
+
+    return [
+      "ORÇAMENTO — LOSI CONECTA",
+      "",
+      "DESTINATÁRIO: " + recipientName,
+      "FORNECEDOR: " + senderName,
+      "SOLICITANTE: " + (request?.client_name || "Cliente"),
+      "",
+      "CONTATO DO SOLICITANTE",
+      "Nome: " + (request?.client_name || recipientName),
+      request?.client_phone ? "WhatsApp/Telefone: " + request.client_phone : "",
+      request?.client_email ? "E-mail: " + request.client_email : "",
+      "",
+      "DADOS DO EVENTO",
+      "Evento: " + (request?.event_title || "Não informado"),
+      "Data: " + formatQuoteDate(request?.event_date ?? null),
+      request?.event_location ? "Local: " + request.event_location : "",
+      profileUrl ? "" : "",
+      profileUrl ? "🔗 PERFIL PÚBLICO DE QUEM SOLICITOU: " + profileUrl : "",
+      "",
+      "Itens:",
+      itemLines || "• Itens conforme orçamento no LOSI CONECTA",
+      "",
+      "Subtotal: " + money(Number(quote.subtotal)),
+      "Desconto: " + money(Number(quote.discount)),
+      "TOTAL: " + money(Number(quote.total)),
+      quote.validity_until ? "Validade: " + formatQuoteDate(quote.validity_until) : "",
+      quote.notes ? "Observações: " + quote.notes : "",
+      "",
+      "Orçamento enviado pelo LOSI CONECTA.",
     ].filter(Boolean).join("\n");
   }
 
