@@ -541,7 +541,7 @@ function DashboardPage() {
                   {goldenHeartClaiming ? "Ativando benefício..." : "Ativar 1 mês grátis"}
                 </button>
                 {goldenHeartMessage && <p className="dashboard-golden-heart-message">{goldenHeartMessage}</p>}
-                <button type="button" className="auth-modal-close" onClick={() => setGoldenHeartOpen(false)} aria-label="Fechar conquista">×</button>
+                <button type="button" className="auth-modal-close dashboard-golden-heart-close" onClick={() => setGoldenHeartOpen(false)} aria-label="Fechar conquista">×</button>
               </div>
             </section>
           </div>
