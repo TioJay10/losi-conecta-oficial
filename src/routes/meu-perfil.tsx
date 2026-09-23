@@ -229,6 +229,34 @@ function PersonalProfilePage() {
             </div>
           </div>
 
+          <div className="personal-profile-photo-section">
+            <div className="personal-profile-photo-preview">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={form.full_name ? `Foto de ${form.full_name}` : "Foto do perfil"} />
+              ) : (
+                <span>{(form.full_name || user?.email || "P").slice(0, 1).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="personal-profile-photo-copy">
+              <strong>Foto de perfil</strong>
+              <p>Essa foto aparecerá ao lado do botão “Sair” no seu painel.</p>
+              <label className="personal-profile-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={uploadingAvatar}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void uploadProfilePhoto(file);
+                    event.currentTarget.value = "";
+                  }}
+                />
+                {uploadingAvatar ? "Enviando foto..." : "Escolher foto"}
+              </label>
+              <small>JPG, PNG ou WEBP • máximo de 5 MB</small>
+            </div>
+          </div>
+
           <div className="profile-form-grid personal-profile-form-grid">
             <Field label="Nome completo *" value={form.full_name} onChange={(v) => update("full_name", v)} />
             <Field label="Telefone" value={form.phone} onChange={(v) => update("phone", v)} />
