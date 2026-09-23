@@ -10903,3 +10903,21 @@ button,input,textarea,select{max-width:100%;font:inherit}
     width: 100%;
   }
 }
+
+
+/* ORÇAMENTOS — identificação clara de quem iniciou cada etapa */
+.quote-context-label {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 7px 0 2px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f0efff;
+  color: #4f46c7;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  line-height: 1.2;
+}
