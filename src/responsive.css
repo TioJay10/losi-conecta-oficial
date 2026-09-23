@@ -7655,6 +7655,7 @@ a.profile-logo:hover,
 }
 
 .quotes-metric-details {
+  scroll-margin-top: 24px !important;
   margin-top: 18px !important;
   padding: 20px !important;
   border: 1px solid #e6eaf0 !important;
