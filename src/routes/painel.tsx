@@ -27,6 +27,9 @@ function DashboardPage() {
   const [specificationsPlan, setSpecificationsPlan] = useState<{ name: string; description: string | null; price: string } | null>(null);
   const [notifications, setNotifications] = useState<Array<{ id: string; type: string; title: string; message: string; link: string | null; read_at: string | null; created_at: string }>>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
+  const [goldenHeartClaiming, setGoldenHeartClaiming] = useState(false);
+  const [goldenHeartMessage, setGoldenHeartMessage] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -295,6 +298,15 @@ function DashboardPage() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("conquista") === "coracao-dourado") {
+      setGoldenHeartOpen(true);
+      window.history.replaceState({}, "", "/painel");
+    }
+  }, [user]);
+
   async function markNotificationAsRead(notificationId: string) {
     if (!supabase || !user) return;
 
@@ -324,7 +336,31 @@ function DashboardPage() {
       await markNotificationAsRead(notification.id);
     }
     setNotificationsOpen(false);
+    if (notification.type === "golden_heart") {
+      setGoldenHeartMessage("");
+      setGoldenHeartOpen(true);
+      return;
+    }
     if (notification.link) window.location.href = notification.link;
+  }
+
+  async function claimGoldenHeartReward() {
+    if (goldenHeartClaiming || !supabase) return;
+    setGoldenHeartClaiming(true);
+    setGoldenHeartMessage("");
+    const { data, error } = await supabase.rpc("claim_golden_heart_reward");
+    if (error) {
+      console.error("Erro ao ativar benefício do Coração Dourado:", error);
+      setGoldenHeartMessage("Não foi possível ativar o benefício agora. Tente novamente.");
+    } else {
+      const result = Array.isArray(data) ? data[0] : data;
+      if (result?.success) {
+        setGoldenHeartMessage("Plano Destaque gratuito de 1 mês ativado com sucesso.");
+      } else {
+        setGoldenHeartMessage(result?.message || "Nenhum benefício disponível para ativação.");
+      }
+    }
+    setGoldenHeartClaiming(false);
   }
 
   if (loading) return <main className="dashboard-loading">Carregando sua conta...</main>;
@@ -488,6 +524,29 @@ function DashboardPage() {
             );
           })}</div>
         </section>
+        {goldenHeartOpen && (
+          <div className="dashboard-golden-heart-backdrop" role="presentation" onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setGoldenHeartOpen(false);
+          }}>
+            <section className="dashboard-golden-heart-modal" role="dialog" aria-modal="true" aria-labelledby="golden-heart-title">
+              <div className="dashboard-golden-heart-top">
+                <div className="dashboard-golden-heart-icon" aria-hidden="true">♥</div>
+                <div className="dashboard-badge">CONQUISTA ESPECIAL</div>
+                <h2 id="golden-heart-title">Parabéns pelo Coração Dourado!</h2>
+                <p>Seu perfil alcançou a marca de 250 curtidas no LOSI CONECTA.</p>
+              </div>
+              <div className="dashboard-golden-heart-body">
+                <p>Você conquistou <strong>1 mês gratuito do Plano Destaque</strong>. Clique no botão abaixo para ativar seu benefício.</p>
+                <button type="button" className="auth-modal-submit dashboard-golden-heart-action" onClick={() => void claimGoldenHeartReward()} disabled={goldenHeartClaiming || Boolean(goldenHeartMessage && goldenHeartMessage.includes("ativado com sucesso"))}>
+                  {goldenHeartClaiming ? "Ativando benefício..." : "Ativar 1 mês grátis"}
+                </button>
+                {goldenHeartMessage && <p className="dashboard-golden-heart-message">{goldenHeartMessage}</p>}
+                <button type="button" className="auth-modal-close" onClick={() => setGoldenHeartOpen(false)} aria-label="Fechar conquista">×</button>
+              </div>
+            </section>
+          </div>
+        )}
+
         {specificationsPlan && (
           <div className="auth-modal-backdrop dashboard-plan-modal-backdrop" role="presentation" onMouseDown={(event) => {
             if (event.target === event.currentTarget) setSpecificationsPlan(null);
