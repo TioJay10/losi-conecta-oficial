@@ -14,7 +14,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; address: string | null; logo_url: string | null;
-  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[]; owner_id: string; created_at: string; reputation_report_count: number; reputation_service_count: number;
+  cover_url: string | null; verified: boolean; portfolio_urls: string[]; services: Service[]; owner_id: string; created_at: string; reputation_report_count: number; reputation_service_count: number; show_availability: boolean;
 };
 
 export const Route = createFileRoute("/fornecedor/$slug")({
@@ -43,6 +43,11 @@ function ProviderPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "whatsapp" | null>(null);
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
+  const [availabilityDates, setAvailabilityDates] = useState<string[]>([]);
+  const [availabilityMonth, setAvailabilityMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [reputation, setReputation] = useState<ReputationSummary & { completedServices: number; reports: number; blocked: boolean }>({
     planSlug: "gratis", planName: "Grátis", planPriority: 0, baseStars: 0, stars: 0,
     positiveReviews: 0, totalReviews: 0, satisfaction: null, level: 0, label: "Sem reputação", rankingScore: 0,
@@ -56,7 +61,7 @@ function ProviderPage() {
       if (mounted) setUserId(sessionData.session?.user.id ?? null);
       const { data, error: queryError } = await supabase
         .from("business_profiles")
-        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,created_at,reputation_report_count,reputation_service_count,services(id,name,description,categories(name))")
+        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,created_at,reputation_report_count,reputation_service_count,show_availability,services(id,name,description,categories(name))")
         .eq("slug", slug)
         .eq("active", true)
         .maybeSingle();
@@ -69,6 +74,16 @@ function ProviderPage() {
         const loaded = (data ?? null) as unknown as Business;
         setBusiness(loaded);
         if (loaded) {
+          if (loaded.show_availability) {
+            const { data: availabilityData, error: availabilityError } = await supabase
+              .from("provider_availability")
+              .select("availability_date,status")
+              .eq("business_id", loaded.id)
+              .eq("status", "unavailable")
+              .order("availability_date");
+            if (availabilityError) console.error("Erro ao carregar agenda pública:", availabilityError);
+            if (mounted) setAvailabilityDates((availabilityData ?? []).map((item) => item.availability_date));
+          }
           const { data: reviewData, error: reviewLoadError } = await supabase
             .from("reviews")
             .select("id,rating,comment,created_at,reviewer:profiles(full_name)")
@@ -489,6 +504,37 @@ function ProviderPage() {
           )}
 
 
+
+{business.show_availability && (
+            <div className="provider-profile-card provider-availability-public">
+              <div className="catalog-kicker">DISPONIBILIDADE</div>
+              <h2>Agenda do fornecedor</h2>
+              <p>Consulte as datas que este fornecedor informa como livres.</p>
+              <div className="availability-calendar-head">
+                <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() - 1, 1))}>←</button>
+                <strong>{availabilityMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</strong>
+                <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() + 1, 1))}>→</button>
+              </div>
+              <div className="availability-weekdays">{["DOM","SEG","TER","QUA","QUI","SEX","SÁB"].map((day) => <span key={day}>{day}</span>)}</div>
+              <div className="availability-calendar-grid">
+                {(() => {
+                  const year = availabilityMonth.getFullYear();
+                  const month = availabilityMonth.getMonth();
+                  const firstDay = new Date(year, month, 1).getDay();
+                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+                  const cells = [];
+                  for (let i = 0; i < firstDay; i++) cells.push(<span key={"public-empty-" + i} className="availability-day empty" />);
+                  for (let day = 1; day <= daysInMonth; day++) {
+                    const date = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+                    const unavailable = availabilityDates.includes(date);
+                    cells.push(<div key={date} className={"availability-day public " + (unavailable ? "unavailable" : "available")}><strong>{day}</strong><small>{unavailable ? "Indisponível" : "Livre"}</small></div>);
+                  }
+                  return cells;
+                })()}
+              </div>
+              <div className="availability-legend"><span><i className="available-dot" /> Livre</span><span><i className="unavailable-dot" /> Indisponível</span></div>
+            </div>
+          )}
 
           <div className="provider-profile-card provider-reviews-card">
             <div className="catalog-kicker">AVALIAÇÕES</div>
