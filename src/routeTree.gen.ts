@@ -8,6 +8,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminPerfilRouteImport } from './routes/admin-perfil'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as PainelRouteImport } from './routes/painel'
@@ -25,6 +26,12 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const AdminPerfilRoute = AdminPerfilRouteImport.update({
+  id: '/admin-perfil',
+  path: '/admin-perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -73,6 +80,7 @@ const PainelRoute = PainelRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-perfil': typeof AdminPerfilRoute
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
@@ -85,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-perfil': typeof AdminPerfilRoute
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
@@ -98,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-perfil': typeof AdminPerfilRoute
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
@@ -109,10 +119,10 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
+  fullPaths: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
-  id: '__root__' | '/' | '/admin' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
+  to: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
+  id: '__root__' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
   fileRoutesById: FileRoutesById
 }
 
@@ -142,6 +152,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-perfil': {
+      id: '/admin-perfil'
+      path: '/admin-perfil'
+      fullPath: '/admin-perfil'
+      preLoaderRoute: typeof AdminPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/entrar': {
@@ -199,6 +216,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute,
   AdminRoute,
+  AdminPerfilRoute,
   EntrarRoute,
   MeuPerfilRoute,
   PainelRoute,
