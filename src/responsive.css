@@ -9860,54 +9860,6 @@ button,input,textarea,select{max-width:100%;font:inherit}
 }
 
 
-/* BUSCA — parallax suave baseado no scroll (experimental) */
-@supports (animation-timeline: scroll()) {
-  .marketplace-page .marketplace-search-panel {
-    transform-origin: center top;
-    animation: marketplace-parallax-hero linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0 520px;
-    will-change: transform, opacity;
-  }
-
-  .marketplace-page .marketplace-content {
-    animation: marketplace-parallax-content linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0 700px;
-    will-change: transform;
-  }
-
-  @keyframes marketplace-parallax-hero {
-    from {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-    }
-    to {
-      transform: translateY(-18px) scale(.965);
-      opacity: .38;
-    }
-  }
-
-  @keyframes marketplace-parallax-content {
-    from {
-      transform: translateY(18px);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-}
-
-/* Respeita usuários que preferem menos movimento */
-@media (prefers-reduced-motion: reduce) {
-  .marketplace-page .marketplace-search-panel,
-  .marketplace-page .marketplace-content {
-    animation: none !important;
-    transform: none !important;
-  }
-}
-
-
 /* BUSCA — foto de perfil sobre a capa do fornecedor */
 .marketplace-page .marketplace-card-media {
   position: relative !important;
