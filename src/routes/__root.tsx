@@ -53,11 +53,23 @@ function RootComponent() {
   useEffect(() => {
     let mounted = true;
 
-    import("../lib/supabase").then(({ supabase }) => supabase.auth.getSession()).then(({ data }) => {
-      if (!mounted) return;
-      setIsAuthenticated(Boolean(data.session));
-      setAuthChecked(true);
-    });
+    const sessionCheck = import("../lib/supabase")
+      .then(({ supabase }) => supabase.auth.getSession());
+
+    Promise.race([
+      sessionCheck,
+      new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 10000)),
+    ])
+      .then((result) => {
+        if (!mounted) return;
+        setIsAuthenticated(Boolean(result && "data" in result ? result.data.session : null));
+        setAuthChecked(true);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+      });
 
     let unsubscribe = () => {};
     import("../lib/supabase").then(({ supabase }) => {
