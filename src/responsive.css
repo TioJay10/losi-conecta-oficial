@@ -9841,3 +9841,20 @@ button,input,textarea,select{max-width:100%;font:inherit}
   text-align: left !important;
   line-height: 1.25 !important;
 }
+
+
+/* PERFIL PÚBLICO — campo de data do formulário de orçamento */
+.provider-page .provider-quote-form input[type="date"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+.provider-page .provider-quote-form input,
+.provider-page .provider-quote-form select,
+.provider-page .provider-quote-form textarea {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
