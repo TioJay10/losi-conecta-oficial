@@ -13,7 +13,7 @@ type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
   city: string | null; state: string | null; cep: string | null; bairro: string | null; logo_url: string | null; cover_url: string | null;
-  verified: boolean; latitude: number | null; longitude: number | null; services: Service[]; reviews: ReviewSummary[]; plan?: { plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null } | null;
+  verified: boolean; latitude: number | null; longitude: number | null; reputation_service_count: number; services: Service[]; reviews: ReviewSummary[]; plan?: { plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null } | null;
 };
 
 export const Route = createFileRoute("/buscar")({ component: SearchPage });
@@ -72,7 +72,7 @@ function SearchPage() {
       const [businessResult, categoryResult, planResult] = await Promise.all([
         supabase
           .from("business_profiles")
-          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,cep,bairro,logo_url,cover_url,verified,latitude,longitude,services(id,name,category_id,categories(name)),reviews(rating)")
+          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count,services(id,name,category_id,categories(name)),reviews(rating)")
           .eq("active", true)
           .eq("approval_status", "approved")
           .order("business_name"),
@@ -228,7 +228,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
     return results.map((business) => ({
       business,
       searchScore: score(business),
-      reputation: calculateReputation(business.plan?.plan_slug, business.reviews.map((review) => review.rating)),
+      reputation: calculateReputation(business.plan?.plan_slug, business.reviews.map((review) => review.rating), business.reputation_service_count),
     }));
   }, [results, submittedSearch]);
 
@@ -524,7 +524,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
               const avg = isOfficial ? 5 : business.reviews.length ? business.reviews.reduce((sum, review) => sum + review.rating, 0) / business.reviews.length : 0;
               const reputation = isOfficial
                 ? { planSlug: "destaque", planName: "Destaque", planPriority: 45, baseStars: 4, stars: 6, positiveReviews: business.reviews.length, totalReviews: business.reviews.length, satisfaction: 100, level: 3, label: "Boa satisfação", rankingScore: 100 }
-                : calculateReputation(business.plan?.plan_slug, business.reviews.map((review) => review.rating));
+                : calculateReputation(business.plan?.plan_slug, business.reviews.map((review) => review.rating), business.reputation_service_count);
               const reputationClass = reputation.level === 3 ? "green" : reputation.level === 2 ? "yellow" : reputation.level === 1 ? "red" : "none";
               return (
                 <article className="marketplace-card" key={business.id}>
