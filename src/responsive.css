@@ -10496,3 +10496,60 @@ button,input,textarea,select{max-width:100%;font:inherit}
     padding: 15px !important;
   }
 }
+
+
+/* BUSCA — compactação visual sem alterar a estrutura */
+.marketplace-page .marketplace-search-panel {
+  padding-top: 20px !important;
+  padding-bottom: 18px !important;
+}
+.marketplace-page .marketplace-search-panel h1 {
+  margin: 7px 0 5px !important;
+  line-height: 1.15 !important;
+}
+.marketplace-page .marketplace-search-panel > p {
+  margin: 0 0 14px !important;
+  line-height: 1.4 !important;
+}
+.marketplace-page .marketplace-filter-row {
+  gap: 10px !important;
+}
+.marketplace-page .marketplace-content {
+  padding-top: 18px !important;
+}
+.marketplace-page .marketplace-results-top {
+  margin-bottom: 10px !important;
+}
+.marketplace-page .marketplace-results-top h2 {
+  margin: 4px 0 0 !important;
+  line-height: 1.2 !important;
+}
+.marketplace-page .marketplace-grid {
+  gap: 11px !important;
+}
+.marketplace-page .marketplace-sidebar {
+  padding: 13px !important;
+}
+.marketplace-page .marketplace-sidebar-section,
+.marketplace-page .marketplace-filter-group {
+  margin-bottom: 10px !important;
+}
+@media only screen and (max-width: 600px) {
+  .marketplace-page .marketplace-search-panel {
+    padding-top: 14px !important;
+    padding-bottom: 13px !important;
+  }
+  .marketplace-page .marketplace-search-panel h1 {
+    margin-top: 5px !important;
+    font-size: 25px !important;
+  }
+  .marketplace-page .marketplace-search-panel > p {
+    margin-bottom: 11px !important;
+  }
+  .marketplace-page .marketplace-content {
+    padding-top: 12px !important;
+  }
+  .marketplace-page .marketplace-results-top {
+    margin-bottom: 8px !important;
+  }
+}
