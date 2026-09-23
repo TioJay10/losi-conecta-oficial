@@ -128,7 +128,11 @@ function RootComponent() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <main className="losi-page-transition">
+      <Outlet />
+    </main>
+  );
 }
 
 function RootErrorComponent() {
