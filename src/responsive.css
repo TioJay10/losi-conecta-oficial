@@ -11392,8 +11392,8 @@ button.availability-day {
 /* PAINEL — cabeçalho mobile: espaçamento, altura e camada das notificações */
 @media only screen and (max-width: 720px) {
   .dashboard-page .dashboard-header {
-    min-height: 88px !important;
-    height: 88px !important;
+    min-height: 104px !important;
+    height: 104px !important;
     padding: 0 12px !important;
     box-sizing: border-box !important;
     overflow: visible !important;
@@ -11402,14 +11402,7 @@ button.availability-day {
   }
 
   .dashboard-page .dashboard-header-context {
-    position: absolute !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    width: min(42vw, 190px) !important;
-    margin: 0 !important;
-    text-align: center !important;
-    z-index: 10 !important;
+    display: none !important;
   }
 
   .dashboard-page .dashboard-header-right {
@@ -11459,11 +11452,11 @@ button.availability-day {
 
   .dashboard-page .dashboard-notification-popover {
     position: fixed !important;
-    top: 98px !important;
+    top: 114px !important;
     right: 12px !important;
     left: 12px !important;
     width: auto !important;
-    max-height: calc(100vh - 112px) !important;
+    max-height: calc(100vh - 128px) !important;
     z-index: 3000 !important;
   }
 }
