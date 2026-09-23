@@ -239,7 +239,7 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: 900,
   },
   gradientText: {
-    background: "linear-gradient(100deg, #4f46c7, #7c3aed)",
+    background: "linear-gradient(100deg, #d6b46a, #f0d99a)",
     WebkitBackgroundClip: "text",
     color: "transparent",
   },
@@ -396,7 +396,7 @@ const styles: Record<string, CSSProperties> = {
     fontWeight: 750,
     fontSize: 14,
   },
-  categoryMark: { color: "#6355d9", fontSize: 20, fontWeight: 300 },
+  categoryMark: { color: "#8a6d2f", fontSize: 20, fontWeight: 300 },
   ctaSection: { padding: "16px 5vw 64px" },
   ctaCard: {
     maxWidth: 1060,
