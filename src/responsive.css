@@ -9895,24 +9895,3 @@ button,input,textarea,select{max-width:100%;font:inherit}
   }
 }
 
-/* BUSCA — parallax suave somente no mobile */
-@media only screen and (max-width: 768px) {
-  .marketplace-page .marketplace-search-panel {
-    transform-origin: center top;
-    will-change: transform, opacity;
-    transition: transform 80ms linear, opacity 80ms linear;
-  }
-
-  .marketplace-page .marketplace-content {
-    will-change: transform;
-    transition: transform 80ms linear;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marketplace-page .marketplace-search-panel,
-  .marketplace-page .marketplace-content {
-    transition: none !important;
-    transform: none !important;
-  }
-}
