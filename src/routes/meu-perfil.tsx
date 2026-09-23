@@ -13,6 +13,7 @@ function PersonalProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [cepValidated, setCepValidated] = useState(false);
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -58,6 +59,7 @@ function PersonalProfilePage() {
         state: profile?.state ?? "",
         cep: profile?.cep ?? "",
       });
+      setCepValidated(Boolean(profile?.cep && profile.cep.replace(/\\D/g, "").length === 8));
       setLoading(false);
     }
 
@@ -74,7 +76,10 @@ function PersonalProfilePage() {
 
   async function lookupCep(value: string) {
     const cep = value.replace(/\D/g, "");
-    if (cep.length !== 8) return;
+    if (cep.length !== 8) {
+      setCepValidated(false);
+      return;
+    }
 
     const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + cep);
     if (!response.ok) throw new Error("CEP não encontrado.");
@@ -82,6 +87,8 @@ function PersonalProfilePage() {
     const data = await response.json();
     if (data.erro) throw new Error("CEP não encontrado.");
 
+    setCepValidated(true);
+    setMessage("");
     setForm((current) => ({
       ...current,
       cep: cep.replace(/(\d{5})(\d{3})/, "$1-$2"),
@@ -103,6 +110,11 @@ function PersonalProfilePage() {
     const normalizedCep = form.cep.replace(/\D/g, "");
     if (normalizedCep.length !== 8) {
       setMessage("Informe um CEP válido com 8 números.");
+      return;
+    }
+
+    if (!cepValidated) {
+      setMessage("Consulte e valide o CEP antes de salvar.");
       return;
     }
 
@@ -168,7 +180,11 @@ function PersonalProfilePage() {
               <label className="personal-profile-label">CEP *</label>
               <input
                 value={form.cep}
-                onChange={(e) => update("cep", e.target.value)}
+                onChange={(e) => {
+                update("cep", e.target.value);
+                setCepValidated(false);
+                setMessage("");
+              }}
                 onBlur={(e) => {
                   lookupCep(e.target.value).catch((error) =>
                     setMessage(error instanceof Error ? error.message : "Não foi possível consultar o CEP.")
