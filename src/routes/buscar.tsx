@@ -52,13 +52,19 @@ function SearchPage() {
       const currentUserId = sessionData.session?.user.id ?? null;
       if (currentUserId) {
         setUserId(currentUserId);
-        const [{ data: favoriteData }, { data: ownBusiness }] = await Promise.all([
+        const [{ data: favoriteData }, { data: ownBusiness }, { data: personalProfile }] = await Promise.all([
           supabase.from("favorites").select("business_id").eq("user_id", currentUserId),
           supabase.from("business_profiles").select("slug").eq("owner_id", currentUserId).maybeSingle(),
+          supabase.from("profiles").select("cep,city,state").eq("id", currentUserId).maybeSingle(),
         ]);
         if (mounted) {
           setFavoriteIds((favoriteData ?? []).map((item) => item.business_id));
           setUserBusinessSlug(ownBusiness?.slug ?? null);
+          if (personalProfile?.cep) {
+            setLocationCep(personalProfile.cep.replace(/(\d{5})(\d{3})/, "$1-$2"));
+            if (personalProfile.city) setCity(personalProfile.city);
+            void lookupLocationCep(personalProfile.cep);
+          }
         }
       }
       if (mounted) setAuthLoading(false);
