@@ -254,6 +254,82 @@ function DashboardPage() {
   if (loading) return <main className="dashboard-loading">Carregando sua conta...</main>;
   if (!user || !profile) return null;
 
+  useEffect(() => {
+    if (!user || !supabase) return;
+
+    let mounted = true;
+
+    async function loadNotifications() {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("id,type,title,message,link,read_at,created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(30);
+
+      if (error) {
+        console.error("Erro ao carregar notificações:", error);
+        return;
+      }
+
+      if (mounted) setNotifications((data ?? []) as typeof notifications);
+    }
+
+    void loadNotifications();
+
+    const channel = supabase
+      .channel("panel-notifications-" + user.id)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: "user_id=eq." + user.id },
+        (payload) => {
+          const notification = payload.new as typeof notifications[number];
+          setNotifications((current) => [
+            notification,
+            ...current.filter((item) => item.id !== notification.id),
+          ].slice(0, 30));
+        },
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      void supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  async function markNotificationAsRead(notificationId: string) {
+    if (!supabase || !user) return;
+
+    const readAt = new Date().toISOString();
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read_at: readAt })
+      .eq("id", notificationId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Erro ao marcar notificação como lida:", error);
+      return;
+    }
+
+    setNotifications((current) =>
+      current.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, read_at: readAt }
+          : notification,
+      ),
+    );
+  }
+
+  async function openNotification(notification: typeof notifications[number]) {
+    if (!notification.read_at) {
+      await markNotificationAsRead(notification.id);
+    }
+    setNotificationsOpen(false);
+    if (notification.link) window.location.href = notification.link;
+  }
+
   return (
     <main className="dashboard-page">
       {mobileMenuOpen && <button type="button" className="dashboard-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
