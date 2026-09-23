@@ -20,6 +20,7 @@ function PersonalProfilePage() {
     city: "",
     state: "",
     cep: "",
+    address: "",
   });
 
   useEffect(() => {
@@ -40,7 +41,7 @@ function PersonalProfilePage() {
       const currentUser = data.user;
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("full_name,phone,city,state,cep")
+        .select("full_name,phone,city,state,cep,address")
         .eq("id", currentUser.id)
         .maybeSingle();
 
@@ -58,6 +59,7 @@ function PersonalProfilePage() {
         city: profile?.city ?? "",
         state: profile?.state ?? "",
         cep: profile?.cep ?? "",
+        address: profile?.address ?? "",
       });
       setCepValidated(Boolean(profile?.cep && profile.cep.replace(/\\D/g, "").length === 8));
       setLoading(false);
@@ -129,6 +131,7 @@ function PersonalProfilePage() {
         city: form.city.trim() || null,
         state: form.state.trim() || null,
         cep: normalizedCep,
+        address: form.address.trim() || null,
       })
       .eq("id", user.id);
 
@@ -176,6 +179,7 @@ function PersonalProfilePage() {
             <Field label="Telefone" value={form.phone} onChange={(v) => update("phone", v)} />
             <Field label="Cidade" value={form.city} onChange={(v) => update("city", v)} />
             <Field label="Estado" value={form.state} onChange={(v) => update("state", v)} />
+            <Field label="Endereço completo" value={form.address} onChange={(v) => update("address", v)} />
             <div>
               <label className="personal-profile-label">CEP *</label>
               <input
