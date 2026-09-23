@@ -40,16 +40,30 @@ type QuoteRow = {
 
 type BusinessContact = {
   id: string;
+  owner_id: string;
   business_name: string;
   slug: string | null;
   whatsapp: string | null;
   phone: string | null;
+  address: string | null;
+  bairro: string | null;
+  city: string | null;
+  state: string | null;
+  cep: string | null;
 };
 
 type PublicProfile = {
   owner_id: string;
   slug: string;
   business_name: string;
+};
+
+type PersonalIdentity = {
+  full_name: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  cep: string | null;
 };
 
 
@@ -89,6 +103,7 @@ function QuotesPage() {
   const [clientQuotes, setClientQuotes] = useState<QuoteRow[]>([]);
   const [businessContacts, setBusinessContacts] = useState<Record<string, BusinessContact>>({});
   const [requesterProfiles, setRequesterProfiles] = useState<Record<string, PublicProfile>>({});
+  const [personalIdentity, setPersonalIdentity] = useState<PersonalIdentity | null>(null);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [activeMetric, setActiveMetric] = useState<"pending" | "total" | "received" | "supplier-pending" | "supplier-sent" | null>(null);
@@ -109,7 +124,7 @@ function QuotesPage() {
 
       const { data: business } = await supabase
         .from("business_profiles")
-        .select("id,business_name")
+        .select("id,owner_id,business_name,slug,whatsapp,phone,address,bairro,city,state,cep")
         .eq("owner_id", currentUser.id)
         .maybeSingle();
 
@@ -117,8 +132,16 @@ function QuotesPage() {
       setUserId(currentUser.id);
       setUserEmail(currentUser.email || "");
 
+      const { data: identityData } = await supabase
+        .from("profiles")
+        .select("full_name,address,city,state,cep")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+      if (mounted) setPersonalIdentity((identityData ?? null) as PersonalIdentity | null);
+
       if (business?.id) {
         setBusinessId(business.id);
+        setBusinessContacts({ [business.id]: business as BusinessContact });
 
         const [{ data: requestRows, error: requestsError }, { data: quoteRows, error: quotesError }] = await Promise.all([
           supabase.from("quote_requests")
@@ -207,7 +230,7 @@ function QuotesPage() {
           if (businessIds.length > 0) {
             const { data: businesses } = await supabase
               .from("business_profiles")
-              .select("id,business_name,slug,whatsapp,phone")
+              .select("id,owner_id,business_name,slug,whatsapp,phone,address,bairro,city,state,cep")
               .in("id", businessIds);
 
             const contacts = (businesses ?? []).reduce<Record<string, BusinessContact>>((map, business) => {
@@ -339,41 +362,28 @@ function QuotesPage() {
   }
 
   function buildQuoteWhatsAppMessage(quote: QuoteRow, recipientName: string, senderName: string) {
-    const request = quote.quote_requests;
-    const profileUrl = publicProfileUrl(request?.requester_id);
-    const itemLines = (quote.quote_items ?? [])
-      .map((item) => "• " + item.quantity + "x " + item.description + " — " + money(Number(item.total)))
-      .join("\n");
+    const supplier = businessContacts[quote.business_id];
+    const supplierAddress = supplier?.address
+      || [supplier?.bairro, supplier?.city, supplier?.state].filter(Boolean).join(" — ")
+      || [supplier?.cep, supplier?.city, supplier?.state].filter(Boolean).join(" — ")
+      || "Não informado";
+    const supplierProfileUrl = supplier?.slug
+      ? window.location.origin + "/fornecedor/" + supplier.slug
+      : "";
 
     return [
-      "ORÇAMENTO — LOSI CONECTA",
+      "Olá, " + recipientName,
       "",
-      "DESTINATÁRIO: " + recipientName,
-      "FORNECEDOR: " + senderName,
-      "SOLICITANTE: " + (request?.client_name || "Cliente"),
+      "Recebemos a sua solicitação pelo Losi Conecta e vou preparar uma proposta para você.",
       "",
-      "CONTATO DO SOLICITANTE",
-      "Nome: " + (request?.client_name || recipientName),
-      request?.client_phone ? "WhatsApp/Telefone: " + request.client_phone : "",
-      request?.client_email ? "E-mail: " + request.client_email : "",
+      "Me diga: Como eu posso colaborar contigo?",
       "",
-      "DADOS DO EVENTO",
-      "Evento: " + (request?.event_title || "Não informado"),
-      "Data: " + formatQuoteDate(request?.event_date ?? null),
-      request?.event_location ? "Local: " + request.event_location : "",
-      profileUrl ? "" : "",
-      profileUrl ? "🔗 PERFIL PÚBLICO DE QUEM SOLICITOU: " + profileUrl : "",
+      "Dados do fornecedor:",
       "",
-      "Itens:",
-      itemLines || "• Itens conforme orçamento no LOSI CONECTA",
-      "",
-      "Subtotal: " + money(Number(quote.subtotal)),
-      "Desconto: " + money(Number(quote.discount)),
-      "TOTAL: " + money(Number(quote.total)),
-      quote.validity_until ? "Validade: " + formatQuoteDate(quote.validity_until) : "",
-      quote.notes ? "Observações: " + quote.notes : "",
-      "",
-      "Orçamento enviado pelo LOSI CONECTA.",
+      "Nome: " + (personalIdentity?.full_name || senderName),
+      "Endereço completo: " + supplierAddress,
+      "Nome da empresa: " + senderName,
+      supplierProfileUrl ? "Link do perfil público: " + supplierProfileUrl : "",
     ].filter(Boolean).join("\n");
   }
 
