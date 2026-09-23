@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
 import { AuthModal } from "../components/AuthModal";
 import { calculateReputation } from "../lib/reputation";
+import { NotificationBell } from "../components/NotificationBell";
 
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
@@ -322,6 +323,7 @@ async function geocodeAddress(address: string) {
             <button type="button" onClick={() => document.getElementById("marketplace-search")?.focus()} aria-label="Buscar">⌕</button>
           </div>
           <div className="marketplace-header-actions">
+            {userId && <NotificationBell />}
             {userId && userBusinessSlug && <Link to="/painel" className="marketplace-account">Minha conta</Link>}
             {userId ? (
               <button type="button" className="marketplace-account" disabled={authLoading} onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}>Sair</button>
