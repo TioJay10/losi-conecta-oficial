@@ -44,6 +44,7 @@ function ProviderPage() {
   const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "whatsapp" | null>(null);
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
   const [availabilityDates, setAvailabilityDates] = useState<string[]>([]);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [availabilityMonth, setAvailabilityMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -510,29 +511,9 @@ function ProviderPage() {
               <div className="catalog-kicker">DISPONIBILIDADE</div>
               <h2>Agenda do fornecedor</h2>
               <p>Consulte as datas que este fornecedor informa como livres.</p>
-              <div className="availability-calendar-head">
-                <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() - 1, 1))}>←</button>
-                <strong>{availabilityMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</strong>
-                <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() + 1, 1))}>→</button>
-              </div>
-              <div className="availability-weekdays">{["DOM","SEG","TER","QUA","QUI","SEX","SÁB"].map((day) => <span key={day}>{day}</span>)}</div>
-              <div className="availability-calendar-grid">
-                {(() => {
-                  const year = availabilityMonth.getFullYear();
-                  const month = availabilityMonth.getMonth();
-                  const firstDay = new Date(year, month, 1).getDay();
-                  const daysInMonth = new Date(year, month + 1, 0).getDate();
-                  const cells = [];
-                  for (let i = 0; i < firstDay; i++) cells.push(<span key={"public-empty-" + i} className="availability-day empty" />);
-                  for (let day = 1; day <= daysInMonth; day++) {
-                    const date = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
-                    const unavailable = availabilityDates.includes(date);
-                    cells.push(<div key={date} className={"availability-day public " + (unavailable ? "unavailable" : "available")}><strong>{day}</strong><small>{unavailable ? "Indisponível" : "Livre"}</small></div>);
-                  }
-                  return cells;
-                })()}
-              </div>
-              <div className="availability-legend"><span><i className="available-dot" /> Livre</span><span><i className="unavailable-dot" /> Indisponível</span></div>
+              <button type="button" className="provider-availability-open" onClick={() => setAvailabilityOpen(true)}>
+                Ver agenda
+              </button>
             </div>
           )}
 
@@ -636,6 +617,43 @@ function ProviderPage() {
               {reportMessage && <small role="status">{reportMessage}</small>}
             </form>
           </div>
+        </div>
+      )}
+      {availabilityOpen && (
+        <div className="availability-modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setAvailabilityOpen(false);
+        }}>
+          <section className="availability-modal-card" role="dialog" aria-modal="true" aria-labelledby="availability-modal-title">
+            <button type="button" className="availability-modal-close" onClick={() => setAvailabilityOpen(false)} aria-label="Fechar">×</button>
+            <div className="availability-modal-header">
+              <div className="catalog-kicker">DISPONIBILIDADE</div>
+              <h2 id="availability-modal-title">Agenda do fornecedor</h2>
+              <p>Consulte as datas que este fornecedor informa como livres.</p>
+            </div>
+            <div className="availability-calendar-head">
+              <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() - 1, 1))}>←</button>
+              <strong>{availabilityMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</strong>
+              <button type="button" className="business-small-button" onClick={() => setAvailabilityMonth(new Date(availabilityMonth.getFullYear(), availabilityMonth.getMonth() + 1, 1))}>→</button>
+            </div>
+            <div className="availability-weekdays">{["DOM","SEG","TER","QUA","QUI","SEX","SÁB"].map((day) => <span key={day}>{day}</span>)}</div>
+            <div className="availability-calendar-grid">
+              {(() => {
+                const year = availabilityMonth.getFullYear();
+                const month = availabilityMonth.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const cells = [];
+                for (let i = 0; i < firstDay; i++) cells.push(<span key={"public-empty-" + i} className="availability-day empty" />);
+                for (let day = 1; day <= daysInMonth; day++) {
+                  const date = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+                  const unavailable = availabilityDates.includes(date);
+                  cells.push(<div key={date} className={"availability-day public " + (unavailable ? "unavailable" : "available")}><strong>{day}</strong><small>{unavailable ? "Indisponível" : "Livre"}</small></div>);
+                }
+                return cells;
+              })()}
+            </div>
+            <div className="availability-legend"><span><i className="available-dot" /> Livre</span><span><i className="unavailable-dot" /> Indisponível</span></div>
+          </section>
         </div>
       )}
       {authModalOpen && <AuthModal onClose={() => { setAuthModalOpen(false); setPendingAuthAction(null); }} onAuthenticated={handleAuthenticatedFromModal} />}
