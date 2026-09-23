@@ -5532,6 +5532,12 @@ a {
 
 
 /* AJUSTE MOBILE — menu hambúrguer e tipografia sem sobreposição */
+.marketplace-mobile-header-tools {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
 .marketplace-mobile-menu-button {
   display: none;
   border: 1px solid rgba(214,180,106,.35);
@@ -5578,10 +5584,26 @@ a {
     font-size: 15px !important;
     line-height: 1.1;
   }
-  .marketplace-page .marketplace-mobile-menu-button {
-    display: inline-flex !important;
+  .marketplace-page .marketplace-mobile-header-tools {
+    display: flex !important;
     grid-column: 3;
     grid-row: 1;
+    justify-content: flex-end;
+  }
+  .marketplace-page .marketplace-mobile-menu-button {
+    display: inline-flex !important;
+    width: 38px;
+    height: 38px;
+  }
+  .marketplace-page .marketplace-mobile-header-tools .notification-bell-button {
+    width: 38px;
+    height: 38px;
+  }
+  .marketplace-page .marketplace-mobile-header-tools {
+    gap: 6px;
+  }
+  .marketplace-page .marketplace-mobile-header-tools .notification-bell-wrap {
+    display: block !important;
   }
   .marketplace-page .marketplace-main-search {
     grid-column: 1 / -1;
