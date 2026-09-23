@@ -10,7 +10,7 @@ export const Route = createFileRoute("/painel")({
 function DashboardPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<{ full_name: string | null; user_type: "professional" | "admin" } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null; user_type: "professional" | "admin" } | null>(null);
   const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
   const [plans, setPlans] = useState<Array<{id:string;name:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean}>>([]);
   const [currentPlan, setCurrentPlan] = useState<{name:string;ends_at:string|null}|null>(null);
@@ -53,7 +53,7 @@ function DashboardPage() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name,user_type,blocked")
+        .select("full_name,avatar_url,user_type,blocked")
         .eq("id", currentUser.id)
         .maybeSingle();
 
@@ -451,7 +451,15 @@ function DashboardPage() {
               )}
             </div>
             <div className="dashboard-header-user">
-              <span>{(profile.full_name || user.email || "P").slice(0, 1).toUpperCase()}</span>
+              {profile.avatar_url ? (
+                <img
+                  className="dashboard-header-user-avatar"
+                  src={profile.avatar_url}
+                  alt={profile.full_name ? `Foto de ${profile.full_name}` : "Foto do perfil"}
+                />
+              ) : (
+                <span>{(profile.full_name || user.email || "P").slice(0, 1).toUpperCase()}</span>
+              )}
               <div><strong>{profile.full_name || "Profissional"}</strong><small>{user.email}</small></div>
             </div>
             <button className="dashboard-logout" onClick={logout}>Sair</button>
