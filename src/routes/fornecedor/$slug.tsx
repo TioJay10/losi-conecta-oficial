@@ -110,8 +110,8 @@ function ProviderPage() {
               .eq("business_id", loaded.id)
               .maybeSingle();
             const calculated = loaded.id === OFFICIAL_BUSINESS_ID
-              ? calculateReputation("destaque", activeReviews.map((review) => review.rating))
-              : calculateReputation(planData?.plan_slug ?? "gratis", activeReviews.map((review) => review.rating));
+              ? calculateReputation("destaque", activeReviews.map((review) => review.rating), completedServices)
+              : calculateReputation(planData?.plan_slug ?? "gratis", activeReviews.map((review) => review.rating), completedServices);
             if (mounted) setReputation({
               ...calculated,
               completedServices,
