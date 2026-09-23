@@ -10845,3 +10845,61 @@ button,input,textarea,select{max-width:100%;font:inherit}
     height: 44px;
   }
 }
+
+
+/* ORÇAMENTOS — detalhamento de solicitações em popup no mesmo padrão da proposta */
+.quote-request-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.quote-detail-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.quote-modal-request-description {
+  padding: 14px 16px;
+  border: 1px solid #edf0f5;
+  border-radius: 12px;
+  background: #fafbfe;
+}
+.quote-modal-request-description p {
+  margin: 0;
+  color: #4b5565;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.quote-modal-request-next {
+  display: grid !important;
+  gap: 5px;
+}
+.quote-modal-request-next span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.quote-modal-request-next strong {
+  color: #172033;
+  line-height: 1.45;
+}
+.quote-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+@media only screen and (max-width: 600px) {
+  .quote-request-actions,
+  .quote-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .quote-request-actions > *,
+  .quote-modal-actions > * {
+    width: 100%;
+  }
+}
