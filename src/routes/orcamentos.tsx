@@ -34,6 +34,7 @@ type QuoteRow = {
   status: string;
   sent_at: string | null;
   viewed_at: string | null;
+  responded_at: string | null;
   created_at: string;
   public_response_token?: string;
   quote_items?: { id: string; description: string; quantity: number; unit_price: number; total: number }[];
@@ -167,7 +168,7 @@ function QuotesPage() {
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
           supabase.from("quotes")
-            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,public_response_token,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,public_response_token,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
             .eq("business_id", business.id)
             .order("created_at", { ascending: false }),
         ]);
@@ -183,7 +184,7 @@ function QuotesPage() {
 
         const { data: receivedByUser } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -230,7 +231,7 @@ function QuotesPage() {
 
         const { data: received, error: receivedError } = await supabase
           .from("quotes")
-          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
+          .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
           .eq("client_id", currentUser.id)
           .order("created_at", { ascending: false });
 
@@ -281,7 +282,7 @@ function QuotesPage() {
 
       const clientQuotesPromise = supabase
         .from("quotes")
-        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
+        .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
         .eq("client_id", userId)
         .order("created_at", { ascending: false });
 
@@ -312,7 +313,7 @@ function QuotesPage() {
             .order("created_at", { ascending: false }),
           supabase
             .from("quotes")
-            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
+            .select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,quote_items(id,description,quantity,unit_price,total),quote_requests(id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source,services(name))")
             .eq("business_id", businessId)
             .order("created_at", { ascending: false }),
         ]);
@@ -627,7 +628,7 @@ function QuotesPage() {
       const { data: quote, error: quoteError } = await supabase.from("quotes").insert({
         request_id: quoteRequest.id, business_id: businessId, client_id: recipientOwnerId, subtotal, discount, total,
         validity_until: proposalValidity || null, notes: proposalNotes.trim() || null, status: "sent", sent_at: new Date().toISOString(),
-      }).select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,created_at,public_response_token").single();
+      }).select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,public_response_token").single();
       if (quoteError || !quote) throw quoteError || new Error("Não foi possível criar a proposta.");
 
       const { error: itemsError } = await supabase.from("quote_items").insert(validItems.map((item) => ({
