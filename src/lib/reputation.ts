@@ -33,6 +33,7 @@ export function getPlanDefaults(slug: PlanSlug) {
 export function calculateReputation(
   planSlug: string | null | undefined,
   ratings: number[],
+  confirmedBudgets = 0,
 ): ReputationSummary {
   const normalizedPlan = normalizePlanSlug(planSlug);
   const defaults = getPlanDefaults(normalizedPlan);
@@ -45,7 +46,9 @@ export function calculateReputation(
     ? Math.round((positiveReviews / totalReviews) * 100)
     : defaults.baselineSatisfaction;
 
-  const stars = Math.min(6, defaults.baseStars + Math.floor(positiveReviews / 2));
+  // Cada 25 orçamentos confirmados acrescenta 2 estrelas à reputação, até o limite de 6.
+  const confirmedBudgetStars = Math.floor(Math.max(0, confirmedBudgets) / 25) * 2;
+  const stars = Math.min(6, defaults.baseStars + Math.floor(positiveReviews / 2) + confirmedBudgetStars);
 
   let level: 0 | 1 | 2 | 3 = 0;
   let label: ReputationSummary["label"] = "Sem reputação";
