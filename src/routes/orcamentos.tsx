@@ -755,7 +755,7 @@ function QuotesPage() {
   return (
     <main className="quotes-page">
       <style>{`
-        .quotes-dashboard{margin:28px 0 34px;padding:24px;border:1px solid rgba(11,24,42,.10);border-radius:20px;background:#f4f5f8;box-shadow:0 12px 30px rgba(7,17,31,.07)}
+        .quotes-dashboard{margin:28px 0 34px;padding:26px;border:1px solid rgba(11,24,42,.09);border-radius:22px;background:linear-gradient(145deg,#fff,#f7f8fa);box-shadow:0 16px 36px rgba(7,17,31,.07)}
         .quotes-dashboard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px}
         .quotes-dashboard-head h2{margin:5px 0 7px;color:#172033;font-size:24px;line-height:1.2}
         .quotes-dashboard-head p{margin:0;color:#687386;font-size:14px;line-height:1.55}
@@ -763,38 +763,40 @@ function QuotesPage() {
         .quotes-dashboard-card{min-width:0;padding:20px;border:1px solid rgba(11,24,42,.10);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.06)}
         .quotes-dashboard-card.accepted{border-color:rgba(35,115,69,.16)}
         .quotes-dashboard-card.rejected{border-color:rgba(163,47,47,.16)}
-        .quotes-dashboard-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;border-radius:10px;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;font-size:18px;font-weight:900}
-        .quotes-dashboard-card.accepted .quotes-dashboard-icon{background:#eefaf3;color:#237345}
-        .quotes-dashboard-card.rejected .quotes-dashboard-icon{background:#fff1f1;color:#a32f2f}
+        .quotes-dashboard-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:transparent;color:#0b182a}
+        .quotes-dashboard-card.accepted .quotes-dashboard-icon{background:transparent;color:#237345}
+        .quotes-dashboard-card.rejected .quotes-dashboard-icon{background:transparent;color:#a32f2f}
+        .quotes-dashboard-icon svg{width:28px;height:28px;display:block}
         .quotes-dashboard-label{margin-bottom:5px;color:#687386;font-size:11px;font-weight:800;letter-spacing:.12em}
         .quotes-dashboard-card strong{display:block;color:#172033;font-size:34px;line-height:1.05;font-weight:850}
         .quotes-dashboard-card span{display:block;margin-top:8px;color:#687386;font-size:13px;line-height:1.45}
-        .proposal-builder{margin:28px 0 34px;padding:24px;border:1px solid rgba(31,41,55,.12);border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(31,41,55,.07)}
-        .proposal-builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:22px}
-        .proposal-builder-head h2{margin:4px 0 6px;font-size:24px;line-height:1.2}
+        .proposal-builder{margin:28px 0 34px;padding:30px;border:1px solid rgba(11,24,42,.10);border-radius:24px;background:linear-gradient(145deg,#fff,#fafbfc);box-shadow:0 18px 44px rgba(7,17,31,.09)}
+        .proposal-builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid #edf0f4}
+        .proposal-builder-head h2{margin:4px 0 7px;color:#172033;font-size:25px;line-height:1.2;letter-spacing:-.02em}
         .proposal-builder-head p{margin:0;color:#667085;font-size:14px;line-height:1.55}
-        .proposal-form-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(180px,.6fr);gap:16px;margin-bottom:18px}
-        .proposal-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+        .proposal-form-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(180px,.6fr);gap:18px;margin-bottom:20px}
+        .proposal-field{display:flex;flex-direction:column;gap:8px;min-width:0}
         .proposal-field label{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#475467}
-        .proposal-field input,.proposal-field select,.proposal-field textarea{width:100%;box-sizing:border-box;border:1px solid #d0d5dd;border-radius:11px;background:#fff;color:#101828;padding:12px 13px;font:inherit;outline:none}
-        .proposal-field input:focus,.proposal-field select:focus,.proposal-field textarea:focus{border-color:#667085;box-shadow:0 0 0 3px rgba(102,112,133,.12)}
+        .proposal-field input,.proposal-field select,.proposal-field textarea{width:100%;box-sizing:border-box;border:1px solid #d7dce4;border-radius:13px;background:#fff;color:#172033;padding:13px 14px;font:inherit;outline:none;min-height:48px;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+        .proposal-field input:focus,.proposal-field select:focus,.proposal-field textarea:focus{border-color:#d6b46a;box-shadow:0 0 0 4px rgba(214,180,106,.14)}
         .proposal-field textarea{min-height:94px;resize:vertical}
-        .proposal-items{border:1px solid #eaecf0;border-radius:15px;overflow:hidden;margin:18px 0}
-        .proposal-items-title{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 16px;background:#f8f9fb;border-bottom:1px solid #eaecf0}
+        .proposal-items{border:1px solid #e1e5eb;border-radius:17px;overflow:hidden;margin:22px 0;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.04)}
+        .proposal-items-title{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;background:#f7f8fa;border-bottom:1px solid #e7eaf0}
         .proposal-items-title strong{font-size:14px;color:#101828}
         .proposal-add{border:0;background:transparent;color:#344054;font-weight:700;cursor:pointer;padding:8px 4px}
-        .proposal-item{display:grid;grid-template-columns:minmax(0,1fr) 92px 145px 42px;gap:10px;padding:14px 16px;border-bottom:1px solid #eaecf0}
+        .proposal-item{display:grid;grid-template-columns:minmax(0,1fr) 92px 145px 42px;gap:12px;padding:17px 18px;border-bottom:1px solid #edf0f4}
         .proposal-item:last-child{border-bottom:0}
         .proposal-remove{border:1px solid #d0d5dd;background:#fff;border-radius:10px;cursor:pointer;font-size:18px;color:#667085}
         .proposal-summary{display:flex;justify-content:flex-end;margin:18px 0}
-        .proposal-summary-box{width:min(100%,360px);border:1px solid #eaecf0;border-radius:15px;padding:16px;background:#fafafa}
+        .proposal-summary-box{width:min(100%,380px);border:1px solid #dfe4eb;border-radius:17px;padding:18px;background:#f8f9fb;box-shadow:0 8px 20px rgba(7,17,31,.04)}
         .proposal-summary-line{display:flex;justify-content:space-between;gap:20px;margin:7px 0;color:#475467;font-size:14px}
         .proposal-summary-line.total{margin-top:12px;padding-top:12px;border-top:1px solid #d0d5dd;color:#101828;font-size:17px;font-weight:800}
         .proposal-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:18px}
-        .proposal-primary{border:0;border-radius:11px;padding:12px 18px;background:#1f2937;color:#fff;font-weight:800;cursor:pointer;min-height:44px}
+        .proposal-primary{border:1px solid #d6b46a;border-radius:13px;padding:13px 21px;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;font-weight:850;letter-spacing:.01em;cursor:pointer;min-height:48px;box-shadow:0 10px 22px rgba(7,17,31,.16);transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease}
+        .proposal-primary:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 13px 26px rgba(7,17,31,.20)}
         .proposal-primary:disabled{opacity:.55;cursor:not-allowed}
         .proposal-hint{margin:12px 0 0;color:#667085;font-size:12px;line-height:1.5}
-        .proposal-recipient{padding:16px;border-radius:15px;background:#f8f9fb;border:1px solid #d9dee8;margin-bottom:18px}
+        .proposal-recipient{padding:19px;border-radius:17px;background:linear-gradient(145deg,#f8f9fb,#fff);border:1px solid #dfe4eb;margin-bottom:20px;box-shadow:0 8px 22px rgba(7,17,31,.04)}
         .proposal-recipient-head strong{display:block;color:#172033;font-size:13px;letter-spacing:.04em}
         .proposal-recipient-head span{display:block;color:#687386;font-size:12px;line-height:1.5;margin-top:4px}
         .proposal-recipient-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,1fr);gap:14px;margin-top:14px}
@@ -997,21 +999,21 @@ function QuotesPage() {
 
           <div className="quotes-dashboard-grid">
             <article className="quotes-dashboard-card">
-              <div className="quotes-dashboard-icon">↗</div>
+              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19 19 5"/><path d="M9 5h10v10"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS ENVIADOS</div>
               <strong>{sentQuotesCount}</strong>
               <span>Total de propostas enviadas aos clientes</span>
             </article>
 
             <article className="quotes-dashboard-card accepted">
-              <div className="quotes-dashboard-icon">✓</div>
+              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="9"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS ACEITOS</div>
               <strong>{acceptedQuotesCount}</strong>
               <span>Propostas que foram aceitas pelo cliente</span>
             </article>
 
             <article className="quotes-dashboard-card rejected">
-              <div className="quotes-dashboard-icon">×</div>
+              <div className="quotes-dashboard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg></div>
               <div className="quotes-dashboard-label">ORÇAMENTOS REJEITADOS</div>
               <strong>{rejectedQuotesCount}</strong>
               <span>Propostas que foram recusadas pelo cliente</span>
