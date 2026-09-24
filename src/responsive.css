@@ -13111,3 +13111,27 @@ button.availability-day {
   .admin-alert-card{align-items:flex-start;flex-direction:column;padding:16px}
   .admin-alert-card .admin-action-button{width:100%}
 }
+
+
+/* CONTRASTE OBRIGATÓRIO — textos dentro de blocos navy */
+.admin-page .admin-finance-hero p,
+.admin-page .admin-security-hero p,
+.admin-page .admin-alerts-hero p,
+.admin-page .dashboard-notification-head p,
+.admin-page .dashboard-notification-head span,
+.admin-page .admin-finance-hero .admin-text,
+.admin-page .admin-security-hero .admin-text,
+.admin-page .admin-alerts-hero .admin-text {
+  color: #f0d99a !important;
+}
+
+.admin-page .admin-finance-hero h2,
+.admin-page .admin-security-hero h2,
+.admin-page .admin-alerts-hero h2,
+.admin-page .dashboard-notification-head strong {
+  color: #fff !important;
+}
+
+.admin-page .dashboard-notification-head button {
+  color: #fff !important;
+}
