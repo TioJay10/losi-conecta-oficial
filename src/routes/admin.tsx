@@ -196,7 +196,7 @@ function AdminPage() {
     document.addEventListener("visibilitychange", handleRefresh);
 
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","notifications","communication","activity"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","communication","activity"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -457,6 +457,7 @@ function AdminPage() {
     { id: "categories" as const, label: "Categorias", count: stats.categories },
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
     { id: "commercial" as const, label: "Comercial" },
+    { id: "coupons" as const, label: "Cupons", count: coupons.filter(item => item.active && !item.used_at).length },
     { id: "notifications" as const, label: "Notificações", count: unreadAdminNotifications },
     { id: "communication" as const, label: "Central de comunicação" },
     { id: "activity" as const, label: "Auditoria" },
@@ -476,7 +477,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "notifications" ? "Notificações administrativas" : section === "communication" ? "Central de comunicação" : "Auditoria administrativa";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "communication" ? "Central de comunicação" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -962,6 +963,37 @@ function AdminPage() {
                   <div className="admin-broadcast-history">
                     <div className="admin-broadcast-history-head"><h3>Histórico de envios</h3><span>{broadcasts.reduce((sum,item)=>sum+item.recipient_count,0)} destinatários nos últimos 100 envios</span></div>
                     {broadcasts.length===0 ? <div className="admin-empty">Nenhuma comunicação enviada ainda.</div> : broadcasts.map(item=><article key={item.id} className="admin-broadcast-item"><div><span>{item.target_type==="all_suppliers"?"FORNECEDORES":item.target_type==="all_users"?"TODOS OS USUÁRIOS":item.target_type==="plan"?"PLANO":"USUÁRIO"}</span><h4>{item.title}</h4><p>{item.message}</p><small>{new Date(item.created_at).toLocaleString("pt-BR")} · {item.recipient_count} destinatário(s)</small></div></article>)}
+                  </div>
+                </div>
+              ) : section === "coupons" ? (
+                <div className="admin-admin-center">
+                  <section className="admin-admin-center-hero">
+                    <div><div className="admin-badge">COMERCIAL</div><h2>Cupons de desconto</h2><p>Crie cupons exclusivos para usuários, defina o desconto, prazo e plano. Cada cupom pertence a um único usuário e só pode ser utilizado uma vez.</p></div>
+                    <strong>{coupons.filter(item => item.active && !item.used_at).length} disponível(is)</strong>
+                  </section>
+
+                  <form className="admin-plan-editor" onSubmit={saveCoupon}>
+                    <input type="hidden" name="id" value={editingCouponId ? editingCouponId : ""} />
+                    <label>Código do cupom<input name="code" defaultValue={editingCouponId ? coupons.find(item => item.id === editingCouponId)?.code ?? "" : ""} placeholder="Ex.: JAY20OFF" maxLength={40} required /></label>
+                    <label>Usuário<select name="assigned_user_id" defaultValue={editingCouponId ? coupons.find(item => item.id === editingCouponId)?.assigned_user_id ?? "" : ""} required><option value="">Selecione o usuário</option>{users.filter(item => !item.blocked).map(item => <option key={item.id} value={item.id}>{item.full_name || "Sem nome"}{item.city ? ` · ${item.city}` : ""}</option>)}</select></label>
+                    <label>Plano<select name="plan_id" defaultValue={editingCouponId ? coupons.find(item => item.id === editingCouponId)?.plan_id ?? "" : ""}><option value="">Qualquer plano pago</option>{plans.filter(item => item.active && item.billing_period !== "free").map(plan => <option key={plan.id} value={plan.id}>{plan.name}</option>)}</select></label>
+                    <label>Tipo de desconto<select name="discount_type" defaultValue={editingCouponId ? coupons.find(item => item.id === editingCouponId)?.discount_type ?? "percent" : "percent"}><option value="percent">Percentual (%)</option><option value="fixed">Valor fixo (R$)</option></select></label>
+                    <label>Desconto<input name="discount_value" type="number" min="0.01" step="0.01" defaultValue={editingCouponId ? (coupons.find(item => item.id === editingCouponId)?.discount_type === "fixed" ? ((coupons.find(item => item.id === editingCouponId)?.discount_value ?? 0) / 100).toFixed(2) : coupons.find(item => item.id === editingCouponId)?.discount_value ?? "") : ""} placeholder="Ex.: 20" required /></label>
+                    <label>Validade<input name="expires_at" type="date" defaultValue={editingCouponId && coupons.find(item => item.id === editingCouponId)?.expires_at ? new Date(coupons.find(item => item.id === editingCouponId)!.expires_at!).toISOString().slice(0,10) : ""} /></label>
+                    <div className="admin-plan-checks"><label><input name="active" type="checkbox" defaultChecked={editingCouponId ? Boolean(coupons.find(item => item.id === editingCouponId)?.active) : true} /> Cupom ativo</label></div>
+                    <div className="admin-item-actions"><button type="submit" className="admin-action-button" disabled={couponSaving}>{couponSaving ? "Salvando..." : editingCouponId ? "Salvar cupom" : "Criar cupom"}</button>{editingCouponId && <button type="button" className="admin-action-button" onClick={() => setEditingCouponId(null)}>Cancelar edição</button>}</div>
+                  </form>
+
+                  {couponMessage && <div className="admin-category-message">{couponMessage}</div>}
+                  <div className="admin-admin-toolbar"><input value={couponSearch} onChange={e => setCouponSearch(e.target.value)} placeholder="Buscar código ou usuário..." aria-label="Buscar cupons" /><span className="admin-filter-count">{coupons.filter(item => { const userName = users.find(u => u.id === item.assigned_user_id)?.full_name || ""; return `${item.code} ${userName}`.toLocaleLowerCase("pt-BR").includes(couponSearch.trim().toLocaleLowerCase("pt-BR")); }).length} cupom(ns)</span></div>
+                  <div className="admin-list">
+                    {coupons.filter(item => { const userName = users.find(u => u.id === item.assigned_user_id)?.full_name || ""; return `${item.code} ${userName}`.toLocaleLowerCase("pt-BR").includes(couponSearch.trim().toLocaleLowerCase("pt-BR")); }).map(item => {
+                      const assigned = users.find(u => u.id === item.assigned_user_id);
+                      const plan = plans.find(p => p.id === item.plan_id);
+                      const status = item.used_at ? "Utilizado" : !item.active ? "Desativado" : item.expires_at && new Date(item.expires_at).getTime() < Date.now() ? "Expirado" : item.claimed_at ? "Resgatado — aguardando pagamento" : "Disponível";
+                      return <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.code}</strong><span>{assigned?.full_name || "Usuário"} · {item.discount_type === "percent" ? item.discount_value + "%" : "R$ " + (item.discount_value/100).toFixed(2).replace(".",",")} de desconto{plan ? " · " + plan.name : " · qualquer plano pago"}</span><span>Status: {status}{item.claimed_at ? " · resgatado em " + new Date(item.claimed_at).toLocaleString("pt-BR") : ""}{item.used_at ? " · usado em " + new Date(item.used_at).toLocaleString("pt-BR") : ""}</span></div><div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => setEditingCouponId(item.id)} disabled={Boolean(item.used_at)}>Editar</button><button type="button" className="admin-category-delete" onClick={() => void removeCoupon(item.id)}>Remover</button></div></div></article>;
+                    })}
+                    {coupons.length === 0 && <div className="admin-empty">Nenhum cupom cadastrado.</div>}
                   </div>
                 </div>
               ) : section === "notifications" ? (
