@@ -196,10 +196,18 @@ function AdminPage() {
     else endsAt.setFullYear(endsAt.getFullYear() + 100);
 
     const existing = subscriptions.find((item) => item.business_id === businessId && item.status === "active");
+    if (existing) {
+      const { data: cancelData, error: cancelError } = await supabase.functions.invoke("admin-manage-user", {
+        body: { user_id: existing.business_id, action: "cancel_subscription", subscription_id: existing.id },
+      });
+      if (cancelError || cancelData?.error) {
+        setActivatingBusinessId(null);
+        setDataError(cancelData?.error || cancelError?.message || "Não foi possível encerrar o plano atual.");
+        return;
+      }
+    }
     const payload = { plan_id: planId, status: "active", starts_at: now.toISOString(), ends_at: endsAt.toISOString(), activated_by: user?.id ?? null };
-    const result = existing
-      ? await supabase.from("business_subscriptions").update(payload).eq("id", existing.id).select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").single()
-      : await supabase.from("business_subscriptions").insert({ business_id: businessId, ...payload }).select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").single();
+    const result = await supabase.from("business_subscriptions").insert({ business_id: businessId, ...payload }).select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").single();
 
     setActivatingBusinessId(null);
     if (result.error || !result.data) {
