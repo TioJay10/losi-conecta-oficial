@@ -22,6 +22,17 @@ export const Route = createRootRoute({
         content: "Encontre fornecedores e profissionais para seu evento.",
       },
     ],
+    links: [
+      {
+        rel: "icon",
+        href: "https://bpvaftobiosjesdbaany.supabase.co/storage/v1/object/public/provider-media/628003ac-1ed5-4e25-a725-b12b742f9bde/logo-53aa0fd9-1cec-4321-912d-8c8903e71a53.png",
+        type: "image/png",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "https://bpvaftobiosjesdbaany.supabase.co/storage/v1/object/public/provider-media/628003ac-1ed5-4e25-a725-b12b742f9bde/logo-53aa0fd9-1cec-4321-912d-8c8903e71a53.png",
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -195,7 +206,7 @@ function NotFoundComponent() {
         padding: 24,
         background: "#f7f8fc",
         color: "#172033",
-        fontFamily: "\"Montserrat\", Arial, sans-serif",
+        fontFamily: "\"Montserrat\", Arial, sans-serif,
         textAlign: "center",
       }}
     >
