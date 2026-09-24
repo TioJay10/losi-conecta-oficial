@@ -13135,3 +13135,53 @@ button.availability-day {
 .admin-page .dashboard-notification-head button {
   color: #fff !important;
 }
+
+
+/* CONTRASTE GLOBAL DE SUPERFÍCIES NAVY — regra de design do LOSI CONECTA */
+:where(
+  .admin-finance-hero,
+  .admin-security-hero,
+  .admin-alerts-hero,
+  .admin-subscriptions-hero,
+  .dashboard-main .dashboard-status-card,
+  .dashboard-main .dashboard-golden-heart-card
+){
+  --navy-text-primary:#ffffff;
+  --navy-text-secondary:#f0d99a;
+  --navy-text-muted:#c4cbd7;
+  --navy-border:rgba(214,180,106,.42);
+}
+
+:where(
+  .admin-finance-hero,
+  .admin-security-hero,
+  .admin-alerts-hero,
+  .admin-subscriptions-hero
+) :where(h1,h2,h3,h4,strong){color:var(--navy-text-primary);}
+
+:where(
+  .admin-finance-hero,
+  .admin-security-hero,
+  .admin-alerts-hero,
+  .admin-subscriptions-hero
+) :where(p,small,.admin-text){color:var(--navy-text-secondary) !important;}
+
+:where(
+  .admin-finance-hero,
+  .admin-security-hero,
+  .admin-alerts-hero,
+  .admin-subscriptions-hero
+) :where(button,input,select){border-color:var(--navy-border);}
+
+:where(
+  .dashboard-main .dashboard-status-card,
+  .dashboard-main .dashboard-golden-heart-card
+) :where(h1,h2,h3,h4,strong){color:var(--navy-text-primary);}
+
+:where(
+  .dashboard-main .dashboard-status-card,
+  .dashboard-main .dashboard-golden-heart-card
+) :where(p,small,.dashboard-text){color:var(--navy-text-secondary) !important;}
+
+/* Impede texto escuro em superfícies navy criadas posteriormente */
+:where(.admin-page,.dashboard-main) :where([style*="background: #0b182a"],[style*="background: \"#0b182a\""],[style*="#121f32"],[style*="#07111f"]) :where(p,small,h1,h2,h3,h4,strong,span){color:#f0d99a !important;}
