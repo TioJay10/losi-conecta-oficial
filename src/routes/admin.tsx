@@ -424,7 +424,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "notifications" ? "Notificações administrativas" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -606,6 +606,15 @@ function AdminPage() {
               <div className="admin-metric"><span>Serviços</span><strong>{stats.services}</strong><small>cadastrados</small></div>
               <div className="admin-metric"><span>Avaliação média</span><strong>{averageRating ? averageRating.toFixed(1) : "—"}</strong><small>{visibleReviews.length} visíveis</small></div>
             </div>
+            <section className="admin-operational-metrics">
+              <div className="admin-operational-head"><div><div className="admin-badge">OPERAÇÃO</div><h2>Indicadores da plataforma</h2><p>Visão rápida da saúde operacional do LOSI CONECTA.</p></div><span>Últimos 30 dias: {recentBusinessCount} novo(s) fornecedor(es)</span></div>
+              <div className="admin-operational-grid">
+                <article><span>Assinaturas ativas</span><strong>{activeSubscriptions.length}</strong><small>com acesso no momento</small></article>
+                <article><span>Pagamentos confirmados</span><strong>{paidSubscriptions.length}</strong><small>registros com pagamento Asaas</small></article>
+                <article><span>Pagamentos pendentes</span><strong>{pendingSubscriptions.length}</strong><small>aguardando conclusão</small></article>
+                <article><span>Denúncias</span><strong>{supplierReports.length}</strong><small>registros recebidos</small></article>
+              </div>
+            </section>
             {pendingBusinesses.length > 0 && (
               <section className="admin-pending-panel">
                 <div className="admin-section-head"><div><div className="admin-badge">AÇÃO NECESSÁRIA</div><h2 className="admin-section-title">Fornecedores aguardando análise</h2><p className="admin-text admin-text-compact">Revise os perfis pendentes diretamente desta tela.</p></div><button className="admin-back-button" onClick={() => { setSection("businesses"); setBusinessStatusFilter("pending"); window.history.replaceState(null, "", "/admin?section=businesses&status=pending"); }}>Ver todos</button></div>
