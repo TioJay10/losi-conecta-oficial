@@ -12,7 +12,7 @@ function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ full_name: string | null; avatar_url: string | null; user_type: "professional" | "admin" } | null>(null);
   const [hasBusinessProfile, setHasBusinessProfile] = useState(false);
-  const [plans, setPlans] = useState<Array<{id:string;name:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean}>>([]);
+  const [plans, setPlans] = useState<Array<{id:string;name:string;slug:string;description:string|null;price_cents:number;billing_period:string;highlighted:boolean}>>([]);
   const [currentPlan, setCurrentPlan] = useState<{name:string;ends_at:string|null}|null>(null);
   const [quotesSentThisMonth, setQuotesSentThisMonth] = useState(0);
   const [supplierRequestsReceived, setSupplierRequestsReceived] = useState(0);
@@ -30,6 +30,12 @@ function DashboardPage() {
   const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
   const [goldenHeartClaiming, setGoldenHeartClaiming] = useState(false);
   const [goldenHeartMessage, setGoldenHeartMessage] = useState("");
+  const [paymentPlan, setPaymentPlan] = useState<{ slug: string; name: string; price: string } | null>(null);
+  const [paymentBillingType, setPaymentBillingType] = useState<"PIX" | "BOLETO" | "CREDIT_CARD">("PIX");
+  const [paymentCpfCnpj, setPaymentCpfCnpj] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState<{ invoiceUrl: string | null; dueDate: string | null } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -101,7 +107,7 @@ function DashboardPage() {
 
       const { data: plansRows, error: plansError } = await supabase
         .from("plans")
-        .select("id,name,description,price_cents,billing_period,highlighted")
+        .select("id,name,slug,description,price_cents,billing_period,highlighted")
         .eq("active", true)
         .order("price_cents");
 
@@ -352,6 +358,62 @@ function DashboardPage() {
     if (notification.link) window.location.href = notification.link;
   }
 
+  function openPaymentModal(plan: { slug: string; name: string; price: string }) {
+    setPaymentPlan(plan);
+    setPaymentBillingType("PIX");
+    setPaymentCpfCnpj("");
+    setPaymentError("");
+    setPaymentSuccess(null);
+  }
+
+  function closePaymentModal() {
+    if (paymentLoading) return;
+    setPaymentPlan(null);
+    setPaymentError("");
+    setPaymentSuccess(null);
+  }
+
+  async function startPayment() {
+    if (!paymentPlan || !supabase || paymentLoading) return;
+    const cleanCpfCnpj = paymentCpfCnpj.replace(/\D/g, "");
+    if (cleanCpfCnpj.length !== 11 && cleanCpfCnpj.length !== 14) {
+      setPaymentError("Informe um CPF com 11 números ou um CNPJ com 14 números.");
+      return;
+    }
+    setPaymentLoading(true);
+    setPaymentError("");
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Sua sessão expirou. Entre novamente para continuar.");
+
+      const nextDueDate = new Date();
+      nextDueDate.setDate(nextDueDate.getDate() + 1);
+      const nextDueDateText = [
+        nextDueDate.getFullYear(),
+        String(nextDueDate.getMonth() + 1).padStart(2, "0"),
+        String(nextDueDate.getDate()).padStart(2, "0"),
+      ].join("-");
+
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-create-subscription", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+        body: JSON.stringify({ planSlug: paymentPlan.slug, billingType: paymentBillingType, cpfCnpj: cleanCpfCnpj, nextDueDate: nextDueDateText }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result?.success) throw new Error(result?.error || "Não foi possível iniciar a contratação.");
+
+      setPaymentSuccess({
+        invoiceUrl: result.payment?.invoiceUrl ?? null,
+        dueDate: result.payment?.dueDate ?? nextDueDateText,
+      });
+    } catch (error) {
+      setPaymentError(error instanceof Error ? error.message : "Não foi possível iniciar a contratação.");
+    } finally {
+      setPaymentLoading(false);
+    }
+  }
+
   async function claimGoldenHeartReward() {
     if (goldenHeartClaiming || !supabase) return;
     setGoldenHeartClaiming(true);
@@ -534,7 +596,7 @@ function DashboardPage() {
                 <strong>{plan.name}</strong>
                 <span>{price}</span>
                 <small>{plan.description || "Mais recursos para seu perfil."}</small>
-                <a className="dashboard-plan-contract" href={`https://wa.me/5511988187354?text=${encodeURIComponent("Olá! Tenho interesse em contratar o plano " + plan.name + " do LOSI CONECTA.")}`} target="_blank" rel="noreferrer">Quero contratar</a>
+                <button type="button" className="dashboard-plan-contract" onClick={() => openPaymentModal({ slug: plan.slug, name: plan.name, price })}>Quero contratar</button>
                 <button type="button" className="auth-modal-submit dashboard-plan-specs" onClick={() => setSpecificationsPlan({ name: plan.name, description: plan.description, price })}>Especificações</button>
               </div>
             );
@@ -558,6 +620,52 @@ function DashboardPage() {
                 </button>
                 {goldenHeartMessage && <p className="dashboard-golden-heart-message">{goldenHeartMessage}</p>}
                 <button type="button" className="auth-modal-close dashboard-golden-heart-close" onClick={() => setGoldenHeartOpen(false)} aria-label="Fechar conquista">×</button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {paymentPlan && (
+          <div className="auth-modal-backdrop" role="presentation" onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !paymentLoading) closePaymentModal();
+          }}>
+            <section className="auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+              <button type="button" className="auth-modal-close" onClick={closePaymentModal} disabled={paymentLoading} aria-label="Fechar">×</button>
+              <div className="auth-modal-brand-panel">
+                <div className="auth-modal-brand">LOSI <span>CONECTA</span></div>
+                <div className="auth-modal-eyebrow">CONTRATAÇÃO SEGURA</div>
+                <h1 id="payment-modal-title">{paymentSuccess ? "Contratação iniciada" : "Assinar " + paymentPlan.name}</h1>
+                <p>{paymentSuccess ? "Sua assinatura foi criada no Asaas. O plano será ativado no LOSI CONECTA após a confirmação do pagamento." : "Preencha os dados abaixo para iniciar sua assinatura mensal."}</p>
+              </div>
+              <div className="auth-modal-form-panel">
+                {paymentSuccess ? (
+                  <div className="auth-modal-form">
+                    <div className="auth-modal-success">
+                      Assinatura criada com sucesso. Vencimento da primeira cobrança: {paymentSuccess.dueDate ? new Date(paymentSuccess.dueDate + "T00:00:00").toLocaleDateString("pt-BR") : "a confirmar"}.
+                    </div>
+                    {paymentSuccess.invoiceUrl ? (
+                      <button type="button" className="auth-modal-submit" onClick={() => window.open(paymentSuccess.invoiceUrl as string, "_blank", "noopener,noreferrer")}>Continuar para pagamento</button>
+                    ) : (
+                      <div className="auth-modal-success">A cobrança ainda está sendo gerada pelo Asaas. Aguarde alguns instantes e tente novamente.</div>
+                    )}
+                    <button type="button" className="auth-modal-link" onClick={closePaymentModal}>Fechar</button>
+                  </div>
+                ) : (
+                  <form className="auth-modal-form" onSubmit={(event) => { event.preventDefault(); void startPayment(); }}>
+                    <label>Plano<input value={paymentPlan.name + " — " + paymentPlan.price} readOnly /></label>
+                    <label>CPF ou CNPJ<input value={paymentCpfCnpj} onChange={(event) => setPaymentCpfCnpj(event.target.value)} inputMode="numeric" autoComplete="off" placeholder="Somente números ou com pontuação" required /></label>
+                    <label>Forma de pagamento
+                      <select value={paymentBillingType} onChange={(event) => setPaymentBillingType(event.target.value as typeof paymentBillingType)}>
+                        <option value="PIX">PIX</option>
+                        <option value="BOLETO">Boleto</option>
+                        <option value="CREDIT_CARD">Cartão de crédito</option>
+                      </select>
+                    </label>
+                    <div className="auth-modal-success">A primeira cobrança será criada para o próximo dia. A ativação do plano acontece somente após a confirmação do pagamento.</div>
+                    {paymentError && <div className="auth-modal-error">{paymentError}</div>}
+                    <button disabled={paymentLoading} type="submit" className="auth-modal-submit">{paymentLoading ? "Criando assinatura..." : "Continuar"}</button>
+                  </form>
+                )}
               </div>
             </section>
           </div>
