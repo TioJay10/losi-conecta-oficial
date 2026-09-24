@@ -88,7 +88,7 @@ function AdminPage() {
     }
     load();
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["overview","security","users","businesses","categories","services","reviews","commercial"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","categories","services","reviews","commercial"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
