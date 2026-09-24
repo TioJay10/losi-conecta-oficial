@@ -125,10 +125,11 @@ function AdminPage() {
   const [categories, setCategories] = useState<Array<{ id:string; name:string; slug:string; active:boolean }>>([]);
   const [services, setServices] = useState<Array<{ id:string; name:string; description:string|null; active:boolean; business:{business_name:string}|null; category:{name:string}|null }>>([]);
   const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);
-  const [supplierReports, setSupplierReports] = useState<Array<{ id:string; business_id:string; reporter_id:string; reason:string; details:string|null; status:"open"|"resolved"|"dismissed"; resolved_by:string|null; resolved_at:string|null; resolution_note:string|null; created_at:string; business:{business_name:string; owner_id:string}|null; reporter:{full_name:string|null}|null }>>([]);
+  const [supplierReports, setSupplierReports] = useState<Array<{ id:string; business_id:string; reporter_id:string; reason:string; details:string|null; status:"open"|"resolved"|"dismissed"; resolved_by:string|null; resolved_at:string|null; resolution_note:string|null; resolution_action:"none"|"keep_active"|"suspend_supplier"|"block_supplier"; created_at:string; business:{business_name:string; owner_id:string}|null; reporter:{full_name:string|null}|null }>>([]);
   const [selectedReportId, setSelectedReportId] = useState<string|null>(null);
   const [reportResolutionNote, setReportResolutionNote] = useState("");
   const [reportResolutionStatus, setReportResolutionStatus] = useState<"resolved"|"dismissed">("resolved");
+  const [reportResolutionAction, setReportResolutionAction] = useState<"none"|"keep_active"|"suspend_supplier"|"block_supplier">("none");
   const [reportSaving, setReportSaving] = useState(false);
   const [securitySearch, setSecuritySearch] = useState("");
   const [subscriptionSearch, setSubscriptionSearch] = useState("");
@@ -167,7 +168,7 @@ function AdminPage() {
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
         supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").order("created_at",{ascending:false}),
-        supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,status,resolved_by,resolved_at,resolution_note,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
+        supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,status,resolved_by,resolved_at,resolution_note,resolution_action,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
         supabase.from("admin_audit_logs").select("id,admin_user_id,action,entity_type,entity_id,entity_name,details,created_at,admin:profiles(full_name)").order("created_at",{ascending:false}).limit(200),
         supabase.from("admin_broadcasts").select("id,title,message,target_type,target_value,recipient_count,created_at").order("created_at",{ascending:false}).limit(100),
@@ -263,14 +264,31 @@ function AdminPage() {
     if (!user || reportSaving) return;
     const report = supplierReports.find(item => item.id === reportId);
     if (!report) return;
-    if (!window.confirm(status === "resolved" ? "Confirmar a resolução desta denúncia?" : "Confirmar que esta denúncia será arquivada sem procedência?")) return;
+    if (status === "dismissed" && reportResolutionAction !== "none") {
+      setDataError("Uma denúncia arquivada sem procedência não pode aplicar uma medida ao fornecedor.");
+      return;
+    }
+    if (!window.confirm(status === "resolved" ? "Confirmar a resolução desta denúncia e a medida selecionada?" : "Confirmar que esta denúncia será arquivada sem procedência?")) return;
     setReportSaving(true);
     const resolvedAt = new Date().toISOString();
+    if (status === "resolved" && reportResolutionAction === "suspend_supplier") {
+      const { error } = await supabase.from("business_profiles").update({active:false}).eq("id", report.business_id);
+      if (error) { setReportSaving(false); setDataError(error.message || "Não foi possível suspender o fornecedor."); return; }
+      setBusinesses(current => current.map(item => item.id === report.business_id ? {...item, active:false} : item));
+    }
+    if (status === "resolved" && reportResolutionAction === "block_supplier") {
+      const ownerId = report.business?.owner_id;
+      if (!ownerId) { setReportSaving(false); setDataError("Não foi possível identificar o responsável pelo fornecedor."); return; }
+      const { data, error } = await supabase.functions.invoke("admin-manage-user", { body:{user_id:ownerId, action:"block"} });
+      if (error || data?.error) { setReportSaving(false); setDataError(data?.error || error?.message || "Não foi possível bloquear o responsável."); return; }
+      setUsers(current => current.map(item => item.id === ownerId ? {...item, blocked:true} : item));
+    }
     const { error } = await supabase.from("supplier_reports").update({
       status,
       resolved_by: user.id,
       resolved_at: resolvedAt,
       resolution_note: reportResolutionNote.trim() || null,
+      resolution_action: reportResolutionAction,
     }).eq("id", reportId);
     setReportSaving(false);
     if (error) {
@@ -278,10 +296,11 @@ function AdminPage() {
       return;
     }
     setSupplierReports(current => current.map(item => item.id === reportId ? {...item, status, resolved_by:user.id, resolved_at:resolvedAt, resolution_note:reportResolutionNote.trim() || null} : item));
-    await recordAdminAction(status === "resolved" ? "resolve_supplier_report" : "dismiss_supplier_report", "supplier_report", reportId, report.business?.business_name || "Denúncia", {status,business_id:report.business_id,reporter_id:report.reporter_id,reason:report.reason,resolution_note:reportResolutionNote.trim() || null});
+    await recordAdminAction(status === "resolved" ? "resolve_supplier_report" : "dismiss_supplier_report", "supplier_report", reportId, report.business?.business_name || "Denúncia", {status,business_id:report.business_id,reporter_id:report.reporter_id,reason:report.reason,resolution_action:reportResolutionAction,resolution_note:reportResolutionNote.trim() || null});
     setSelectedReportId(null);
     setReportResolutionNote("");
     setReportResolutionStatus("resolved");
+    setReportResolutionAction("none");
     setDataError("");
   }
 
@@ -795,7 +814,7 @@ function AdminPage() {
                     {visibleUsers.length===0&&visibleBusinesses.length===0&&<div className="admin-empty">Nenhum sinal de risco encontrado.</div>}
                   </div></section>
                   <section className="admin-security-section"><div className="admin-security-section-head"><div><div className="admin-badge">DENÚNCIAS NOVAS</div><h3>Últimas denúncias</h3></div><span>{newReports.length} nos últimos 7 dias</span></div><div className="admin-security-list">
-                    {newReports.slice(0,20).map(report=><article className="admin-security-card" key={report.id}><div className="admin-security-card-main"><strong>{report.business?.business_name||"Fornecedor"}</strong><span>{report.reporter?.full_name||"Usuário"} · {new Date(report.created_at).toLocaleString("pt-BR")}</span><div className="admin-security-reasons"><span>{report.reason.replaceAll("_"," ")}</span></div>{report.details&&<p>{report.details}</p>}</div><div className="admin-security-actions"><button type="button" className="admin-action-button" onClick={()=>{setSelectedReportId(report.id);setReportResolutionNote(report.resolution_note||"");setReportResolutionStatus(report.status==="dismissed"?"dismissed":"resolved");}}>Ver denúncia</button>{report.status==="open"&&<button type="button" className="admin-security-danger" onClick={()=>{setSelectedReportId(report.id);setReportResolutionNote("");setReportResolutionStatus("resolved");}}>Resolver denúncia</button>}</div></article>)}
+                    {newReports.slice(0,20).map(report=><article className="admin-security-card" key={report.id}><div className="admin-security-card-main"><strong>{report.business?.business_name||"Fornecedor"}</strong><span>{report.reporter?.full_name||"Usuário"} · {new Date(report.created_at).toLocaleString("pt-BR")}</span><div className="admin-security-reasons"><span>{report.reason.replaceAll("_"," ")}</span></div>{report.details&&<p>{report.details}</p>}</div><div className="admin-security-actions"><button type="button" className="admin-action-button" onClick={()=>{setSelectedReportId(report.id);setReportResolutionNote(report.resolution_note||"");setReportResolutionStatus(report.status==="dismissed"?"dismissed":"resolved");setReportResolutionAction(report.resolution_action||"none");}}>Ver denúncia</button>{report.status==="open"&&<button type="button" className="admin-security-danger" onClick={()=>{setSelectedReportId(report.id);setReportResolutionNote("");setReportResolutionStatus("resolved");setReportResolutionAction("none");}}>Resolver denúncia</button>}</div></article>)}
                     {newReports.length===0&&<div className="admin-empty">Nenhuma denúncia nova nos últimos 7 dias.</div>}
                   </div></section>
                   {selectedReportId && (() => {
@@ -810,7 +829,7 @@ function AdminPage() {
                           <p><strong>Motivo:</strong> {report.reason.replaceAll("_"," ")}</p>
                           <p><strong>Data:</strong> {new Date(report.created_at).toLocaleString("pt-BR")}</p>
                           {report.details && <div className="admin-modal-detail"><strong>Relato</strong><p>{report.details}</p></div>}
-                          <label className="admin-form-field"><span>Resultado da análise</span><select value={reportResolutionStatus} onChange={event => setReportResolutionStatus(event.target.value as "resolved"|"dismissed")} disabled={reportSaving}><option value="resolved">Denúncia procedente / resolvida</option><option value="dismissed">Denúncia sem procedência / arquivada</option></select></label>
+                          <label className="admin-form-field"><span>Resultado da análise</span><select value={reportResolutionStatus} onChange={event => setReportResolutionStatus(event.target.value as "resolved"|"dismissed")} disabled={reportSaving}><option value="resolved">Denúncia procedente / resolvida</option><option value="dismissed">Denúncia sem procedência / arquivada</option></select></label><label className="admin-form-field"><span>Medida sobre o fornecedor</span><select value={reportResolutionAction} onChange={event => setReportResolutionAction(event.target.value as "none"|"keep_active"|"suspend_supplier"|"block_supplier")} disabled={reportSaving || report.status!=="open"}><option value="none">Nenhuma medida</option><option value="keep_active">Manter fornecedor ativo</option><option value="suspend_supplier">Suspender fornecedor</option><option value="block_supplier">Bloquear responsável pela conta</option></select></label>
                           <label className="admin-form-field"><span>Observação administrativa</span><textarea value={reportResolutionNote} onChange={event => setReportResolutionNote(event.target.value)} placeholder="Registre o que foi analisado ou qual medida foi tomada." maxLength={1000} disabled={reportSaving} /></label>
                           {report.status!=="open" && <p><strong>Status:</strong> {report.status==="resolved"?"Resolvida":"Arquivada"}{report.resolved_at ? " · " + new Date(report.resolved_at).toLocaleString("pt-BR") : ""}</p>}
                         </div>
