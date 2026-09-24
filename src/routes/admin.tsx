@@ -54,7 +54,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "notifications" | "activity">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "notifications" | "communication" | "activity">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -89,6 +89,13 @@ function AdminPage() {
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<"all" | "active" | "pending" | "cancelled">("all");
   const [adminAlertFilter, setAdminAlertFilter] = useState<"all" | "urgent" | "finance" | "moderation">("all");
   const [adminNotifications, setAdminNotifications] = useState<Array<{id:string;type:string;title:string;message:string;link:string|null;entity_id:string|null;read_at:string|null;created_at:string}>>([]);
+  const [broadcasts, setBroadcasts] = useState<Array<{id:string;title:string;message:string;target_type:string;target_value:string|null;recipient_count:number;created_at:string}>>([]);
+  const [broadcastTitle, setBroadcastTitle] = useState("");
+  const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [broadcastTarget, setBroadcastTarget] = useState<"all_suppliers"|"all_users"|"plan"|"user">("all_suppliers");
+  const [broadcastTargetValue, setBroadcastTargetValue] = useState("");
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastMessageStatus, setBroadcastMessageStatus] = useState("");
   const [auditLogs, setAuditLogs] = useState<Array<{id:string;admin_user_id:string;action:string;entity_type:string;entity_id:string|null;entity_name:string|null;details:Record<string, unknown>;created_at:string;admin:{full_name:string|null}|null}>>([]);
   const [activitySearch, setActivitySearch] = useState("");
   const [activityActionFilter, setActivityActionFilter] = useState("all");
@@ -106,7 +113,7 @@ function AdminPage() {
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
       setAvatarUrl(data.avatar_url ?? null);
-      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult,notificationsResult,auditResult] = await Promise.all([
+      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult,notificationsResult,auditResult,broadcastsResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state,blocked,phone,created_at").order("created_at",{ascending:false}),
         supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status,created_at").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
@@ -117,9 +124,10 @@ function AdminPage() {
         supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
         supabase.from("admin_audit_logs").select("id,admin_user_id,action,entity_type,entity_id,entity_name,details,created_at,admin:profiles(full_name)").order("created_at",{ascending:false}).limit(200),
+        supabase.from("admin_broadcasts").select("id,title,message,target_type,target_value,recipient_count,created_at").order("created_at",{ascending:false}).limit(100),
       ]);
       if (!mounted) return;
-      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, reportsResult, notificationsResult, auditResult].find((result) => result.error)?.error;
+      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, reportsResult, notificationsResult, auditResult, broadcastsResult].find((result) => result.error)?.error;
       if (firstError) setDataError(firstError.message);
       setUsers((usersResult.data ?? []) as typeof users);
       setBusinesses((businessesResult.data ?? []) as typeof businesses);
@@ -131,6 +139,7 @@ function AdminPage() {
       setSupplierReports((reportsResult.data ?? []) as unknown as typeof supplierReports);
       setAdminNotifications((notificationsResult.data ?? []) as typeof adminNotifications);
       setAuditLogs((auditResult.data ?? []) as unknown as typeof auditLogs);
+      setBroadcasts((broadcastsResult.data ?? []) as typeof broadcasts);
       setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
       setLoading(false);
     }
@@ -145,7 +154,7 @@ function AdminPage() {
     document.addEventListener("visibilitychange", handleRefresh);
 
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","notifications","activity"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","notifications","communication","activity"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -407,6 +416,7 @@ function AdminPage() {
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
     { id: "commercial" as const, label: "Comercial" },
     { id: "notifications" as const, label: "Notificações", count: unreadAdminNotifications },
+    { id: "communication" as const, label: "Central de comunicação" },
     { id: "activity" as const, label: "Auditoria" },
   ];
   const pendingBusinesses = businesses.filter((item) => item.approval_status === "pending");
@@ -424,7 +434,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "notifications" ? "Notificações administrativas" : "Auditoria administrativa";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "notifications" ? "Notificações administrativas" : section === "communication" ? "Central de comunicação" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -861,7 +871,58 @@ function AdminPage() {
                   </div>
                 );
               })()
-              : section === "notifications" ? (
+              : section === "communication" ? (
+                <div className="admin-admin-center">
+                  <section className="admin-admin-center-hero">
+                    <div><div className="admin-badge">COMUNICAÇÃO</div><h2>Central de comunicação</h2><p>Envie avisos personalizados para usuários, fornecedores ou assinantes de um plano.</p></div>
+                    <strong>{broadcasts.length} envio(s)</strong>
+                  </section>
+                  <form className="admin-broadcast-form" onSubmit={async (event: FormEvent) => {
+                    event.preventDefault();
+                    if (!user || broadcastSending) return;
+                    setBroadcastMessageStatus("");
+                    if (!broadcastTitle.trim() || !broadcastMessage.trim()) { setBroadcastMessageStatus("Preencha o título e a mensagem."); return; }
+                    if ((broadcastTarget === "plan" || broadcastTarget === "user") && !broadcastTargetValue) { setBroadcastMessageStatus("Selecione o público."); return; }
+                    if (!window.confirm("Enviar esta comunicação agora para o público selecionado?")) return;
+                    setBroadcastSending(true);
+                    const { data, error } = await supabase.functions.invoke("admin-manage-user", { body: {
+                      action: "send_broadcast",
+                      title: broadcastTitle.trim(),
+                      message: broadcastMessage.trim(),
+                      target_type: broadcastTarget,
+                      target_value: broadcastTargetValue || null
+                    }});
+                    if (error || data?.error) { setBroadcastMessageStatus(data?.error || error?.message || "Não foi possível enviar a comunicação."); setBroadcastSending(false); return; }
+                    const recipientCount = Number(data?.recipient_count ?? 0);
+                    await recordAdminAction("send_broadcast","communication",null,broadcastTitle.trim(),{target_type:broadcastTarget,target_value:broadcastTargetValue||null,recipient_count:recipientCount});
+                    setBroadcasts(current => [{id:data?.broadcast?.id || crypto.randomUUID(),title:broadcastTitle.trim(),message:broadcastMessage.trim(),target_type:broadcastTarget,target_value:broadcastTargetValue||null,recipient_count:recipientCount,created_at:new Date().toISOString()},...current].slice(0,100));
+                    setBroadcastTitle("");
+                    setBroadcastMessage("");
+                    setBroadcastTargetValue("");
+                    setBroadcastMessageStatus(`Comunicação enviada para ${recipientCount} destinatário(s).`);
+                    setBroadcastSending(false);
+                  }}>
+                    <div className="admin-broadcast-fields">
+                      <label><span>Título</span><input maxLength={120} value={broadcastTitle} onChange={e=>setBroadcastTitle(e.target.value)} placeholder="Ex.: Novidade no LOSI CONECTA" /></label>
+                      <label><span>Mensagem</span><textarea maxLength={1000} rows={5} value={broadcastMessage} onChange={e=>setBroadcastMessage(e.target.value)} placeholder="Escreva a comunicação que aparecerá no sino de notificações do usuário." /></label>
+                      <label><span>Público</span><select value={broadcastTarget} onChange={e=>{setBroadcastTarget(e.target.value as typeof broadcastTarget);setBroadcastTargetValue("");}}>
+                        <option value="all_suppliers">Todos os fornecedores ativos</option>
+                        <option value="all_users">Todos os usuários</option>
+                        <option value="plan">Usuários de um plano</option>
+                        <option value="user">Usuário específico</option>
+                      </select></label>
+                      {broadcastTarget === "plan" && <label><span>Plano</span><select value={broadcastTargetValue} onChange={e=>setBroadcastTargetValue(e.target.value)}><option value="">Selecione o plano</option>{plans.filter(item=>item.active).map(plan=><option key={plan.id} value={plan.id}>{plan.name}</option>)}</select></label>}
+                      {broadcastTarget === "user" && <label><span>Usuário</span><select value={broadcastTargetValue} onChange={e=>setBroadcastTargetValue(e.target.value)}><option value="">Selecione o usuário</option>{users.filter(item=>!item.blocked).map(item=><option key={item.id} value={item.id}>{item.full_name || "Sem nome"}{item.city ? ` · ${item.city}` : ""}</option>)}</select></label>}
+                    </div>
+                    <div className="admin-broadcast-footer"><small>A mensagem será entregue como uma notificação normal no painel do usuário.</small><button type="submit" className="admin-action-button" disabled={broadcastSending}>{broadcastSending ? "Enviando..." : "Enviar comunicação"}</button></div>
+                    {broadcastMessageStatus && <div className="admin-broadcast-status">{broadcastMessageStatus}</div>}
+                  </form>
+                  <div className="admin-broadcast-history">
+                    <div className="admin-broadcast-history-head"><h3>Histórico de envios</h3><span>{broadcasts.reduce((sum,item)=>sum+item.recipient_count,0)} destinatários nos últimos 100 envios</span></div>
+                    {broadcasts.length===0 ? <div className="admin-empty">Nenhuma comunicação enviada ainda.</div> : broadcasts.map(item=><article key={item.id} className="admin-broadcast-item"><div><span>{item.target_type==="all_suppliers"?"FORNECEDORES":item.target_type==="all_users"?"TODOS OS USUÁRIOS":item.target_type==="plan"?"PLANO":"USUÁRIO"}</span><h4>{item.title}</h4><p>{item.message}</p><small>{new Date(item.created_at).toLocaleString("pt-BR")} · {item.recipient_count} destinatário(s)</small></div></article>)}
+                  </div>
+                </div>
+              ) : section === "notifications" ? (
                 <div className="admin-admin-center">
                   <section className="admin-admin-center-hero"><div><div className="admin-badge">CENTRAL ADMINISTRATIVA</div><h2>Notificações administrativas</h2><p>Eventos importantes da operação ficam registrados aqui até você marcar como lidos.</p></div><strong>{unreadAdminNotifications} não lida(s)</strong></section>
                   <div className="admin-admin-center-actions"><button type="button" className="admin-action-button" onClick={markAllAdminNotificationsRead} disabled={!unreadAdminNotifications}>Marcar todas como lidas</button></div>
