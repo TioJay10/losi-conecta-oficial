@@ -309,13 +309,28 @@ function ProviderPage() {
     document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function openWhatsApp() {
+  async function openWhatsApp() {
     if (!whatsapp) return;
     if (!userId) {
       setPendingAuthAction("whatsapp");
       setAuthModalOpen(true);
       return;
     }
+
+    const { data, error } = await supabase.rpc("consume_free_whatsapp_contact");
+    if (error) {
+      console.error("Erro ao validar limite de WhatsApp:", error);
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    if (!result?.allowed) {
+      setQuoteMessageType("error");
+      setQuoteMessage(result?.message || "Você atingiu o limite de contatos pelo WhatsApp do seu plano gratuito. Faça um upgrade para continuar.");
+      document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
     window.location.href = whatsapp;
   }
 
@@ -333,8 +348,8 @@ function ProviderPage() {
       await toggleLikeForUser();
     } else if (action === "quote") {
       window.setTimeout(() => document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
-    } else if (whatsapp) {
-      window.location.href = whatsapp;
+    } else if (action === "whatsapp") {
+      await openWhatsApp();
     }
   }
 
@@ -466,6 +481,22 @@ function ProviderPage() {
     formElement.reset();
 
     if (normalizedWhatsapp) {
+      const { data: whatsappQuota, error: whatsappQuotaError } = await supabase.rpc("consume_free_whatsapp_contact");
+
+      if (whatsappQuotaError) {
+        console.error("Erro ao validar limite de WhatsApp:", whatsappQuotaError);
+        setQuoteMessageType("error");
+        setQuoteMessage("SOLICITAÇÃO REGISTRADA, MAS NÃO FOI POSSÍVEL ABRIR O WHATSAPP AGORA.");
+        return;
+      }
+
+      const quotaResult = Array.isArray(whatsappQuota) ? whatsappQuota[0] : whatsappQuota;
+      if (!quotaResult?.allowed) {
+        setQuoteMessageType("error");
+        setQuoteMessage(quotaResult?.message || "SOLICITAÇÃO REGISTRADA, MAS VOCÊ ATINGIU O LIMITE DE contatos pelo WhatsApp do seu plano gratuito.");
+        return;
+      }
+
       window.location.href =
         "https://wa.me/" + normalizedWhatsapp + "?text=" + encodeURIComponent(whatsappMessage);
       setQuoteMessageType("success");
