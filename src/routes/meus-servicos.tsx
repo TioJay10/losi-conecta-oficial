@@ -43,6 +43,7 @@ function BusinessServicesPage() {
   const [user, setUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [business, setBusiness] = useState<Business | null>(null);
+  const [isPaidPlan, setIsPaidPlan] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -124,6 +125,18 @@ function BusinessServicesPage() {
       setCategoryId(categoryResult.data?.[0]?.id ?? "");
 
       if (loaded) {
+        const { data: activeSubscription } = await supabase
+          .from("business_subscriptions")
+          .select("plan:plans(price_cents)")
+          .eq("business_id", loaded.id)
+          .eq("status", "active")
+          .maybeSingle();
+
+        const activePlan = Array.isArray(activeSubscription?.plan)
+          ? activeSubscription?.plan[0]
+          : activeSubscription?.plan;
+        setIsPaidPlan(Number(activePlan?.price_cents ?? 0) > 0);
+
         setCoordinates({
           latitude: loaded.latitude ?? null,
           longitude: loaded.longitude ?? null,
@@ -252,6 +265,19 @@ function BusinessServicesPage() {
     if (file.size > 5 * 1024 * 1024) {
       setMessage("A imagem deve ter no máximo 5 MB.");
       return;
+    }
+
+    if (kind === "portfolio" && !isPaidPlan) {
+      const currentPortfolioCount = form.portfolio_urls
+        .split("\n")
+        .map((url) => url.trim())
+        .filter(Boolean).length;
+
+      if (currentPortfolioCount >= 4) {
+        setMessageType("error");
+        setMessage("Você atingiu o limite de 4 fotos do seu portfólio no plano gratuito. Faça um upgrade para adicionar mais fotos.");
+        return;
+      }
     }
 
     setUploading(kind);
@@ -410,6 +436,20 @@ async function lookupViaCep(cep: string) {
       .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
+
+    if (!isPaidPlan) {
+      const portfolioCount = form.portfolio_urls
+        .split("\n")
+        .map((url) => url.trim())
+        .filter(Boolean).length;
+
+      if (portfolioCount > 4) {
+        setMessageType("error");
+        setMessage("Seu plano gratuito permite até 4 fotos no portfólio. Faça um upgrade para adicionar mais fotos.");
+        setSaving(false);
+        return;
+      }
+    }
 
     const payload = {
       owner_id: user.id,
