@@ -206,7 +206,7 @@ function NotFoundComponent() {
         padding: 24,
         background: "#f7f8fc",
         color: "#172033",
-        fontFamily: "\"Montserrat\", Arial, sans-serif,
+        fontFamily: "\"Montserrat\", Arial, sans-serif",
         textAlign: "center",
       }}
     >
