@@ -13072,3 +13072,42 @@ button.availability-day {
   .admin-subscription-meta{width:100%;align-items:flex-start}
   .admin-subscription-details{gap:7px 12px}
 }
+
+
+/* =========================================================
+   CENTRAL DE ALERTAS — ADMIN
+   ========================================================= */
+.admin-alerts-page{display:flex;flex-direction:column;gap:18px;width:100%}
+.admin-alerts-hero{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:25px 28px;border-radius:20px;border:1px solid rgba(214,180,106,.42);
+  background:linear-gradient(145deg,#121f32,#07111f);box-shadow:0 18px 40px rgba(7,17,31,.16);
+}
+.admin-alerts-hero h2{margin:5px 0 5px;color:#fff;font-size:25px}
+.admin-alerts-hero p{margin:0;color:#f0d99a;font-size:12px}
+.admin-alerts-hero>strong{color:#f0d99a;font-size:14px;white-space:nowrap}
+.admin-alerts-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.admin-alerts-summary article{padding:17px;border:1px solid #e3e7ed;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(15,23,42,.05)}
+.admin-alerts-summary span{display:block;color:#64748b;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.admin-alerts-summary strong{display:block;margin-top:7px;color:#0b182a;font-size:25px}
+.admin-alerts-filters{display:flex;gap:7px;flex-wrap:wrap}
+.admin-alerts-filters button{min-height:36px;padding:0 13px;border:1px solid #dbe1e8;border-radius:999px;background:#fff;color:#526074;font-size:11px;font-weight:800;cursor:pointer}
+.admin-alerts-filters button.active{border-color:#d6b46a;background:#0b182a;color:#f0d99a}
+.admin-alerts-list{display:flex;flex-direction:column;gap:11px}
+.admin-alert-card{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border:1px solid #e1e5eb;border-radius:17px;background:#fff;box-shadow:0 9px 24px rgba(15,23,42,.05)}
+.admin-alert-card-main{min-width:0}
+.admin-alert-type{font-size:9px;font-weight:900;letter-spacing:.1em;color:#8a6d2f}
+.admin-alert-card h3{margin:5px 0 4px;color:#172033;font-size:14px}
+.admin-alert-card p{margin:0;color:#64748b;font-size:11px;line-height:1.45}
+.admin-alert-card small{display:block;margin-top:7px;color:#94a3b8;font-size:10px}
+.admin-alert-card .admin-action-button{flex:0 0 auto}
+.admin-alert-urgent{border-left:4px solid #d6b46a}
+.admin-alert-finance{border-left:4px solid #8a6d2f}
+.admin-alert-moderation{border-left:4px solid #64748b}
+@media(max-width:620px){
+  .admin-alerts-hero{align-items:flex-start;flex-direction:column;padding:21px 18px;border-radius:18px}
+  .admin-alerts-hero h2{font-size:22px}
+  .admin-alerts-summary{grid-template-columns:1fr}
+  .admin-alert-card{align-items:flex-start;flex-direction:column;padding:16px}
+  .admin-alert-card .admin-action-button{width:100%}
+}
