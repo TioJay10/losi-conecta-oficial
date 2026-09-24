@@ -12647,3 +12647,241 @@ button.availability-day {
 @media(max-width:560px){
   .admin-content .admin-finance-line-chart{height:250px;min-height:250px;padding:10px 8px}
 }
+
+
+/* =========================================================
+   LOSI CONECTA — REORGANIZAÇÃO VISUAL FINAL DO DASHBOARD
+   Identidade baseada na tela de login: navy + dourado + branco
+   ========================================================= */
+
+.admin-content .admin-finance-dashboard{
+  gap:24px;
+  color:#172033;
+}
+
+/* Bloco principal */
+.admin-content .admin-finance-hero{
+  min-height:168px;
+  padding:30px 32px;
+  border-radius:22px;
+  border:1px solid rgba(214,180,106,.46);
+  background:
+    radial-gradient(circle at 88% 15%,rgba(214,180,106,.13),transparent 30%),
+    linear-gradient(145deg,#121f32 0%,#07111f 100%);
+  box-shadow:0 20px 48px rgba(7,17,31,.20);
+}
+.admin-content .admin-finance-hero .admin-badge{
+  color:#f0d99a;
+}
+.admin-content .admin-finance-hero h2{
+  font-size:28px;
+  letter-spacing:-.025em;
+}
+.admin-content .admin-finance-hero p{
+  color:#d1d7e0;
+}
+
+/* Controles ficam como um bloco único */
+.admin-content .admin-finance-controls{
+  padding:7px;
+  border:1px solid rgba(214,180,106,.28);
+  border-radius:13px;
+  background:rgba(4,12,23,.55);
+}
+.admin-content .admin-finance-controls input{
+  border-color:#d6b46a;
+  box-shadow:0 0 0 3px rgba(214,180,106,.08);
+}
+
+/* Bloco de indicadores */
+.admin-content .admin-finance-kpis{
+  gap:16px;
+}
+.admin-content .admin-finance-kpis article{
+  min-height:152px;
+  padding:22px 23px;
+  border-radius:18px;
+  border:1px solid #e3e7ed;
+  box-shadow:0 10px 26px rgba(15,23,42,.065);
+}
+.admin-content .admin-finance-kpis article::before{
+  height:4px;
+}
+.admin-content .admin-finance-kpis article:nth-child(1),
+.admin-content .admin-finance-kpis article:nth-child(2),
+.admin-content .admin-finance-kpis article:nth-child(3),
+.admin-content .admin-finance-kpis article:nth-child(4){
+  background:linear-gradient(145deg,#fff 0%,#fafaf8 100%);
+}
+.admin-content .admin-finance-kpis strong{
+  font-size:26px;
+}
+.admin-content .admin-finance-kpis small{
+  color:#8a6d2f;
+}
+
+/* Cada área do dashboard vira um bloco visual bem definido */
+.admin-content .admin-finance-growth-grid,
+.admin-content .admin-finance-grid{
+  gap:20px;
+}
+
+.admin-content .admin-finance-panel{
+  border-radius:20px;
+  border:1px solid #e1e5eb;
+  box-shadow:
+    0 12px 30px rgba(15,23,42,.065),
+    0 2px 0 rgba(214,180,106,.08);
+}
+
+.admin-content .admin-finance-panel-head{
+  min-height:86px;
+  padding:19px 22px;
+  background:linear-gradient(145deg,#fff 0%,#fafaf8 100%);
+  border-bottom:1px solid #e8ebef;
+}
+.admin-content .admin-finance-panel-head .admin-badge{
+  color:#8a6d2f;
+  letter-spacing:.10em;
+}
+.admin-content .admin-finance-panel-head h3{
+  font-size:18px;
+}
+.admin-content .admin-finance-panel-head > strong{
+  color:#8a6d2f;
+  font-size:18px;
+}
+
+/* Gráficos com área interna organizada */
+.admin-content .admin-finance-line-chart{
+  min-height:300px;
+  height:300px;
+  padding:20px 22px 15px;
+  background:#fff;
+}
+.admin-content .admin-finance-chart{
+  min-height:300px;
+  height:300px;
+  padding:24px 22px 16px;
+  background:#fff;
+}
+
+/* Lista de planos: cada item ganha leitura em bloco */
+.admin-content .admin-finance-plan-list{
+  padding:10px 22px;
+  background:#fff;
+}
+.admin-content .admin-finance-plan-row{
+  min-height:72px;
+  margin:0;
+  padding:14px 2px;
+}
+.admin-content .admin-finance-plan-row > div strong{
+  font-size:14px;
+}
+.admin-content .admin-finance-plan-row > strong{
+  padding:7px 10px;
+  border-radius:9px;
+  background:#fbf7ed;
+  border:1px solid rgba(214,180,106,.24);
+}
+
+/* Histórico de vendas como bloco independente */
+.admin-content .admin-finance-sales{
+  border-radius:20px;
+}
+.admin-content .admin-finance-sales-list{
+  padding:8px 22px;
+  background:#fff;
+}
+.admin-content .admin-finance-sale{
+  min-height:76px;
+  padding:15px 4px;
+}
+.admin-content .admin-finance-sale > strong{
+  padding:7px 10px;
+  border-radius:9px;
+  background:#fbf7ed;
+  border:1px solid rgba(214,180,106,.24);
+}
+
+/* Separação visual entre grupos */
+.admin-content .admin-finance-growth-grid::before,
+.admin-content .admin-finance-grid::before{
+  display:none;
+}
+
+/* Estados vazios também respeitam o bloco */
+.admin-content .admin-finance-panel .admin-empty{
+  margin:20px;
+  padding:24px 18px;
+  border:1px dashed #d9dee6;
+  border-radius:12px;
+  background:#fafbfc;
+  color:#64748b;
+  text-align:center;
+}
+
+/* Mobile */
+@media(max-width:760px){
+  .admin-content .admin-finance-dashboard{
+    gap:16px;
+  }
+  .admin-content .admin-finance-hero{
+    min-height:0;
+    padding:23px 19px;
+    border-radius:18px;
+  }
+  .admin-content .admin-finance-hero h2{
+    font-size:23px;
+  }
+  .admin-content .admin-finance-controls{
+    padding:6px;
+  }
+  .admin-content .admin-finance-kpis{
+    gap:12px;
+  }
+  .admin-content .admin-finance-kpis article{
+    min-height:132px;
+    padding:19px;
+  }
+  .admin-content .admin-finance-panel{
+    border-radius:17px;
+  }
+  .admin-content .admin-finance-panel-head{
+    min-height:76px;
+    padding:16px 17px;
+  }
+  .admin-content .admin-finance-chart,
+  .admin-content .admin-finance-line-chart{
+    height:250px;
+    min-height:250px;
+    padding:16px 10px 12px;
+  }
+  .admin-content .admin-finance-plan-list,
+  .admin-content .admin-finance-sales-list{
+    padding:6px 16px;
+  }
+  .admin-content .admin-finance-plan-row,
+  .admin-content .admin-finance-sale{
+    min-height:68px;
+    padding:13px 1px;
+  }
+}
+
+@media(max-width:560px){
+  .admin-content .admin-finance-hero{
+    padding:20px 16px;
+  }
+  .admin-content .admin-finance-kpis article{
+    min-height:124px;
+  }
+  .admin-content .admin-finance-panel-head h3{
+    font-size:16px;
+  }
+  .admin-content .admin-finance-plan-row > strong,
+  .admin-content .admin-finance-sale > strong{
+    font-size:12px;
+    padding:6px 8px;
+  }
+}
