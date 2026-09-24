@@ -54,7 +54,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "categories" | "services" | "reviews" | "commercial">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -87,6 +87,7 @@ function AdminPage() {
   const [securitySearch, setSecuritySearch] = useState("");
   const [subscriptionSearch, setSubscriptionSearch] = useState("");
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<"all" | "active" | "pending" | "cancelled">("all");
+  const [adminAlertFilter, setAdminAlertFilter] = useState<"all" | "urgent" | "finance" | "moderation">("all");
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -127,7 +128,7 @@ function AdminPage() {
     }
     load();
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","categories","services","reviews","commercial"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -327,6 +328,7 @@ function AdminPage() {
     { id: "users" as const, label: "Usuários", count: stats.users },
     { id: "businesses" as const, label: "Empresas", count: stats.businesses },
     { id: "subscriptions" as const, label: "Assinaturas", count: subscriptions.filter(item => item.status === "pending").length },
+    { id: "alerts" as const, label: "Central de alertas" },
     { id: "services" as const, label: "Serviços", count: stats.services },
     { id: "categories" as const, label: "Categorias", count: stats.categories },
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
@@ -343,7 +345,7 @@ function AdminPage() {
     return matchesSearch && (businessStatusFilter === "all" || item.approval_status === businessStatusFilter);
   });
   const selectedBusiness = selectedBusinessId ? businesses.find((item) => item.id === selectedBusinessId) ?? null : null;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
 
   return (
     <main className="admin-page">
@@ -665,6 +667,37 @@ function AdminPage() {
                 )}
                 <div className="admin-list">{filteredBusinesses.length === 0 ? <div className="admin-empty">Nenhuma empresa encontrada com esses filtros.</div> : filteredBusinesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button className="admin-action-button" onClick={() => setSelectedBusinessId(item.id)}>Analisar</button><button className="admin-action-button" onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button>{item.approval_status !== "approved" && <button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button>}{item.approval_status !== "rejected" && <button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button>}<button className="admin-action-button" onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               </div>
+              : section === "alerts" ? (() => {
+                const alerts = [
+                  ...businesses.filter(item => item.approval_status === "pending").map(item => ({ id:`business-${item.id}`, kind:"urgent" as const, title:"Fornecedor aguardando aprovação", message:`${item.business_name} ainda precisa ser analisado.`, date:null as string|null, action:"Analisar fornecedor", run:()=>{setSelectedBusinessId(item.id);setSection("businesses");window.history.replaceState(null,"","/admin?section=businesses");} })),
+                  ...subscriptions.filter(item => item.status === "pending").map(item => ({ id:`subscription-${item.id}`, kind:"finance" as const, title:"Pagamento pendente", message:`${item.business?.business_name || "Fornecedor"} · ${item.plan?.name || "Plano"} aguardando conclusão.`, date:item.created_at, action:"Ver assinatura", run:()=>{setSection("subscriptions");window.history.replaceState(null,"","/admin?section=subscriptions");} })),
+                  ...supplierReports.map(item => ({ id:`report-${item.id}`, kind:"moderation" as const, title:"Nova denúncia registrada", message:`${item.business?.business_name || "Fornecedor"} · ${item.reason.replaceAll("_"," ")}`, date:item.created_at, action:"Analisar denúncia", run:()=>{setSection("security");window.history.replaceState(null,"","/admin?section=security");} })),
+                  ...subscriptions.filter(item => item.status === "active" && item.asaas_payment_id && item.paid_at).map(item => ({ id:`payment-${item.id}`, kind:"finance" as const, title:"Pagamento confirmado", message:`${item.business?.business_name || "Fornecedor"} · ${item.plan?.name || "Plano"}`, date:item.paid_at, action:"Ver assinatura", run:()=>{setSection("subscriptions");window.history.replaceState(null,"","/admin?section=subscriptions");} })),
+                ];
+                const filteredAlerts = alerts.filter(item => adminAlertFilter === "all" || item.kind === adminAlertFilter);
+                return (
+                  <div className="admin-alerts-page">
+                    <div className="admin-alerts-hero">
+                      <div><div className="admin-badge">OPERAÇÃO</div><h2>Central de alertas</h2><p>Um único lugar para acompanhar situações que precisam da sua atenção.</p></div>
+                      <strong>{alerts.length} alerta(s)</strong>
+                    </div>
+                    <div className="admin-alerts-summary">
+                      <article><span>Urgentes</span><strong>{alerts.filter(x=>x.kind==="urgent").length}</strong></article>
+                      <article><span>Financeiro</span><strong>{alerts.filter(x=>x.kind==="finance").length}</strong></article>
+                      <article><span>Moderação</span><strong>{alerts.filter(x=>x.kind==="moderation").length}</strong></article>
+                    </div>
+                    <div className="admin-alerts-filters">
+                      {([["all","Todos"],["urgent","Urgentes"],["finance","Financeiro"],["moderation","Moderação"]] as const).map(([value,label]) => <button type="button" key={value} className={adminAlertFilter===value?"active":""} onClick={()=>setAdminAlertFilter(value)}>{label}</button>)}
+                    </div>
+                    <div className="admin-alerts-list">
+                      {filteredAlerts.length===0 ? <div className="admin-empty">Nenhum alerta nesta categoria.</div> : filteredAlerts.map(alert => <article className={`admin-alert-card admin-alert-${alert.kind}`} key={alert.id}>
+                        <div className="admin-alert-card-main"><span className="admin-alert-type">{alert.kind==="urgent"?"AÇÃO NECESSÁRIA":alert.kind==="finance"?"FINANCEIRO":"MODERAÇÃO"}</span><h3>{alert.title}</h3><p>{alert.message}</p>{alert.date&&<small>{new Date(alert.date).toLocaleString("pt-BR")}</small>}</div>
+                        <button type="button" className="admin-action-button" onClick={alert.run}>{alert.action}</button>
+                      </article>)}
+                    </div>
+                  </div>
+                );
+              })()
               : section === "subscriptions" ? (() => {
                 const query = subscriptionSearch.trim().toLocaleLowerCase("pt-BR");
                 const filteredSubscriptions = subscriptions.filter(item => {
