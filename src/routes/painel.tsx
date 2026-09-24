@@ -703,7 +703,7 @@ function DashboardPage() {
               </div>
             </div>
             <div style={{ padding: "20px 22px 22px" }}>
-              <p style={{ margin: "0 0 18px", color: "#c4cbd7", lineHeight: 1.55, fontSize: 14 }}>Você iniciou a contratação do plano <strong style={{ color: "#f0d99a" }}>{pendingSubscription.planName}</strong>, mas o pagamento ainda está aguardando conclusão.</p>
+              <p style={{ margin: "0 0 18px", color: "#f0d99a", lineHeight: 1.55, fontSize: 14 }}>Você iniciou a contratação do plano <strong style={{ color: "#f0d99a" }}>{pendingSubscription.planName}</strong>, mas o pagamento ainda está aguardando conclusão.</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 20 }}>
                 <div style={{ padding: "12px 14px", borderRadius: 12, background: "#fff", border: "1px solid #e5e7eb" }}><span style={{ display: "block", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Plano</span><strong style={{ fontSize: 14, color: "#0b182a" }}>{pendingSubscription.planName}</strong></div>
                 <div style={{ padding: "12px 14px", borderRadius: 12, background: "#fff", border: "1px solid #e5e7eb" }}><span style={{ display: "block", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Pagamento</span><strong style={{ fontSize: 14, color: "#111827" }}>{pendingSubscription.billingType === "PIX" ? "PIX" : pendingSubscription.billingType === "BOLETO" ? "Boleto" : pendingSubscription.billingType === "CREDIT_CARD" ? "Cartão de crédito" : "Pagamento"}</strong></div>
