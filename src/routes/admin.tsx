@@ -8,6 +8,43 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
+function FinanceLineChart({ data, valueLabel }: { data: Array<{ label: string; value: number }>; valueLabel: string }) {
+  const width = 720;
+  const height = 250;
+  const padding = { top: 20, right: 18, bottom: 38, left: 58 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const maxValue = Math.max(1, ...data.map(item => item.value));
+  const points = data.map((item, index) => {
+    const x = data.length === 1 ? padding.left + chartWidth / 2 : padding.left + (index / (data.length - 1)) * chartWidth;
+    const y = padding.top + chartHeight - (item.value / maxValue) * chartHeight;
+    return { ...item, x, y };
+  });
+  const linePath = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
+  const areaPath = points.length ? `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${(padding.top + chartHeight).toFixed(1)} L ${points[0].x.toFixed(1)} ${(padding.top + chartHeight).toFixed(1)} Z` : "";
+  const money = (value: number) => (value / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  return (
+    <div className="admin-finance-line-chart">
+      {data.length === 0 ? <div className="admin-empty">Ainda não há faturamento suficiente para gerar o gráfico.</div> : (
+        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={valueLabel}>
+          {[0, 1, 2, 3, 4].map(step => {
+            const y = padding.top + (step / 4) * chartHeight;
+            const value = maxValue * (1 - step / 4);
+            return <g key={step}><line x1={padding.left} x2={width - padding.right} y1={y} y2={y} className="admin-finance-grid-line" /><text x={padding.left - 8} y={y + 4} textAnchor="end" className="admin-finance-axis-label">{money(value)}</text></g>;
+          })}
+          {areaPath && <path d={areaPath} className="admin-finance-area" />}
+          {linePath && <path d={linePath} className="admin-finance-line" />}
+          {points.map((point, index) => <g key={`${point.label}-${index}`}>
+            <title>{`${point.label}: ${money(point.value)}`}</title>
+            <circle cx={point.x} cy={point.y} r="4.5" className="admin-finance-line-point" />
+            <text x={point.x} y={height - 12} textAnchor="middle" className="admin-finance-axis-label admin-finance-x-label">{point.label}</text>
+          </g>)}
+        </svg>
+      )}
+    </div>
+  );
+}
+
 function AdminPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -392,6 +429,18 @@ function AdminPage() {
                       return { label: new Date(Number(dashboardDate.slice(0, 4)), index, 1).toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), count: items.length, revenue: revenue(items) };
                     });
               const maxRevenue = Math.max(1, ...periods.map(item => item.revenue));
+              const currentMonthIndex = today.getMonth();
+              const monthlyHistory = Array.from({ length: 12 }, (_, index) => {
+                const date = new Date(today.getFullYear(), currentMonthIndex - (11 - index), 1);
+                const key = monthKey(date);
+                const items = closedSubscriptions.filter(item => monthKey(item.starts_at) === key);
+                return { label: date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), value: revenue(items), period: key };
+              });
+              const availableYears = Array.from(new Set(closedSubscriptions.map(item => yearKey(item.starts_at)))).sort();
+              const annualHistory = availableYears.map(year => ({
+                label: year,
+                value: revenue(closedSubscriptions.filter(item => yearKey(item.starts_at) === year)),
+              }));
               const selectedDateInput = dashboardView === "day" ? dashboardDate : dashboardView === "month" ? dashboardDate.slice(0, 7) : dashboardDate.slice(0, 4);
               const selectedInputType = dashboardView === "day" ? "date" : dashboardView === "month" ? "month" : "number";
               return (
@@ -419,6 +468,17 @@ function AdminPage() {
                     <article><span>Faturamento da semana</span><strong>{money(revenue(weekClosed))}</strong><small>{weekClosed.length} plano(s) fechado(s)</small></article>
                     <article><span>Faturamento do mês</span><strong>{money(revenue(monthClosed))}</strong><small>{monthClosed.length} plano(s) fechado(s)</small></article>
                     <article><span>Total de planos fechados</span><strong>{selectedClosed.length}</strong><small>{money(selectedRevenue)} no período selecionado</small></article>
+                  </div>
+
+                  <div className="admin-finance-growth-grid">
+                    <section className="admin-finance-panel">
+                      <div className="admin-finance-panel-head"><div><div className="admin-badge">EVOLUÇÃO</div><h3>Faturamento mensal</h3></div><span>Últimos 12 meses</span></div>
+                      <FinanceLineChart data={monthlyHistory.map(item => ({ label: item.label, value: item.value }))} valueLabel="Evolução do faturamento mensal nos últimos 12 meses" />
+                    </section>
+                    <section className="admin-finance-panel">
+                      <div className="admin-finance-panel-head"><div><div className="admin-badge">CRESCIMENTO</div><h3>Faturamento por ano</h3></div><span>{annualHistory.length} ano(s)</span></div>
+                      <FinanceLineChart data={annualHistory} valueLabel="Evolução do faturamento anual da empresa" />
+                    </section>
                   </div>
 
                   <div className="admin-finance-grid">
