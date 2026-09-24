@@ -376,7 +376,7 @@ function AdminPage() {
     event.currentTarget.reset();
     const { data: refreshedUsers } = await supabase
       .from("profiles")
-      .select("id,full_name,user_type,city,state,blocked")
+      .select("id,full_name,user_type,city,state,blocked,phone,created_at")
       .order("created_at", { ascending: false });
     if (refreshedUsers) {
       setUsers(refreshedUsers as typeof users);
