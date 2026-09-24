@@ -45,13 +45,11 @@ function DashboardPage() {
     billingType: string | null;
     asaasSubscriptionId: string;
   } | null>(null);
-  const [pendingSubscriptionLoading, setPendingSubscriptionLoading] = useState(false);
   const [pendingSubscriptionAction, setPendingSubscriptionAction] = useState<"resume" | "cancel" | null>(null);
   const [pendingSubscriptionMessage, setPendingSubscriptionMessage] = useState("");
 
   async function loadPendingSubscription() {
     if (!supabase || !user) return;
-    setPendingSubscriptionLoading(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
@@ -68,8 +66,6 @@ function DashboardPage() {
       }
     } catch (error) {
       console.error("Erro ao carregar contratação pendente:", error);
-    } finally {
-      setPendingSubscriptionLoading(false);
     }
   }
 
