@@ -764,9 +764,11 @@ function AdminPage() {
                             {item.status === "active" && <div className="admin-item-actions">
                               <button type="button" className="admin-security-danger" onClick={async () => {
                                 if (!window.confirm(`Encerrar o acesso de ${item.business?.business_name || "este fornecedor"} a este plano?`)) return;
+                                const { data: cancelData, error: cancelError } = await supabase.functions.invoke("admin-manage-user", {
+                                  body: { user_id: item.business_id, action: "cancel_subscription", subscription_id: item.id },
+                                });
+                                if (cancelError || cancelData?.error) { setDataError(cancelData?.error || cancelError?.message || "Não foi possível encerrar o acesso."); return; }
                                 const now = new Date().toISOString();
-                                const { error } = await supabase.from("business_subscriptions").update({ status: "cancelled", ends_at: now }).eq("id", item.id);
-                                if (error) { setDataError(error.message); return; }
                                 setSubscriptions(current => current.map(x => x.id === item.id ? { ...x, status: "cancelled", ends_at: now } : x));
                                 setDataError("");
                               }}>Encerrar acesso</button>
