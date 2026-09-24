@@ -1166,7 +1166,7 @@ function AdminPage() {
                     </div>
                     <div className="admin-audit-details">
                       {Object.entries(item.details ?? {}).map(([key,value]) => (
-                        <span key={key}><strong>{auditDetailLabel(key, key)}</strong>: {auditDetailLabel(key,value)}</span>
+                        <span key={key}><strong>{key === "recipient_count" ? "Destinatários" : key === "target_type" ? "Público" : key === "target_value" ? "Destino específico" : key === "plan" ? "Plano" : key === "status" ? "Resultado" : key === "resolution_action" ? "Medida aplicada" : key === "resolution_note" ? "Observação" : key === "business_id" ? "Fornecedor" : key === "reporter_id" ? "Denunciante" : key === "reason" ? "Motivo" : key}</strong>: {auditDetailLabel(key,value)}</span>
                       ))}
                     </div>
                   </article>)}</div>
