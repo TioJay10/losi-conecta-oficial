@@ -638,6 +638,24 @@ function AdminPage() {
                     </div>
                   </section>
 
+                  <section className="admin-finance-panel admin-dashboard-activity">
+                    <div className="admin-finance-panel-head">
+                      <div><div className="admin-badge">ATIVIDADE RECENTE</div><h3>O que aconteceu recentemente</h3></div>
+                      <span>Últimas movimentações</span>
+                    </div>
+                    <div className="admin-dashboard-activity-list">
+                      {[
+                        ...businesses.map(item => ({ id:`business-${item.id}`, date:item.created_at, title:"Novo fornecedor cadastrado", detail:`${item.business_name} · ${item.city || "Localização não informada"}`, action:"Ver fornecedor", run:()=>{setSection("businesses");setSelectedBusinessId(item.id);window.history.replaceState(null,"","/admin?section=businesses");} })),
+                        ...subscriptions.map(item => ({ id:`subscription-${item.id}`, date:item.created_at, title:item.status==="pending"?"Nova assinatura pendente":"Assinatura registrada", detail:`${item.business?.business_name || "Fornecedor"} · ${item.plan?.name || "Plano"}`, action:"Ver assinatura", run:()=>{setSection("subscriptions");window.history.replaceState(null,"","/admin?section=subscriptions");} })),
+                        ...supplierReports.map(item => ({ id:`report-${item.id}`, date:item.created_at, title:"Denúncia registrada", detail:`${item.business?.business_name || "Fornecedor"} · ${item.reason.replaceAll("_"," ")}`, action:"Ver segurança", run:()=>{setSection("security");window.history.replaceState(null,"","/admin?section=security");} }))
+                      ].sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime()).slice(0,8).map(item=><article key={item.id}>
+                        <div><strong>{item.title}</strong><span>{item.detail}</span><small>{new Date(item.date).toLocaleString("pt-BR")}</small></div>
+                        <button type="button" className="admin-action-button" onClick={item.run}>{item.action}</button>
+                      </article>)}
+                      {businesses.length===0 && subscriptions.length===0 && supplierReports.length===0 && <div className="admin-empty">Nenhuma movimentação recente encontrada.</div>}
+                    </div>
+                  </section>
+
                   <div className="admin-finance-kpis">
                     <article><span>Faturamento hoje</span><strong>{money(revenue(todayClosed))}</strong><small>{todayClosed.length} plano(s) fechado(s)</small></article>
                     <article><span>Faturamento da semana</span><strong>{money(revenue(weekClosed))}</strong><small>{weekClosed.length} plano(s) fechado(s)</small></article>
