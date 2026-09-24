@@ -35,7 +35,7 @@ function DashboardPage() {
   const [paymentCpfCnpj, setPaymentCpfCnpj] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
-  const [paymentSuccess, setPaymentSuccess] = useState<{ invoiceUrl: string | null; dueDate: string | null } | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState<{ invoiceUrl: string | null; dueDate: string | null; pixPayload: string | null; pixEncodedImage: string | null } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -427,6 +427,8 @@ function DashboardPage() {
       setPaymentSuccess({
         invoiceUrl: result.payment?.invoiceUrl ?? null,
         dueDate: result.payment?.dueDate ?? nextDueDateText,
+        pixPayload: result.payment?.pixQrCode?.payload ?? null,
+        pixEncodedImage: result.payment?.pixQrCode?.encodedImage ?? null,
       });
     } catch (error) {
       setPaymentError(error instanceof Error ? error.message : "Não foi possível iniciar a contratação.");
@@ -664,7 +666,17 @@ function DashboardPage() {
                     <div className="auth-modal-success">
                       Assinatura criada com sucesso. Vencimento da primeira cobrança: {paymentSuccess.dueDate ? new Date(paymentSuccess.dueDate + "T00:00:00").toLocaleDateString("pt-BR") : "a confirmar"}.
                     </div>
-                    {paymentSuccess.invoiceUrl ? (
+                    {paymentSuccess.pixEncodedImage && paymentSuccess.pixPayload ? (
+                      <div className="auth-modal-form">
+                        <div className="auth-modal-success">PIX selecionado. Escaneie o QR Code abaixo ou copie o código Pix.</div>
+                        <img
+                          src={paymentSuccess.pixEncodedImage.startsWith("data:") ? paymentSuccess.pixEncodedImage : "data:image/png;base64," + paymentSuccess.pixEncodedImage}
+                          alt="QR Code Pix para pagamento"
+                          style={{ display: "block", width: 220, height: 220, margin: "0 auto 16px", objectFit: "contain" }}
+                        />
+                        <button type="button" className="auth-modal-submit" onClick={() => void navigator.clipboard?.writeText(paymentSuccess.pixPayload as string)}>Copiar código Pix</button>
+                      </div>
+                    ) : paymentSuccess.invoiceUrl ? (
                       <button type="button" className="auth-modal-submit" onClick={() => window.open(paymentSuccess.invoiceUrl as string, "_blank", "noopener,noreferrer")}>Continuar para pagamento</button>
                     ) : (
                       <div className="auth-modal-success">A cobrança ainda está sendo gerada pelo Asaas. Aguarde alguns instantes e tente novamente.</div>
