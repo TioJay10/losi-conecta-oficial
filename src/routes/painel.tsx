@@ -694,25 +694,26 @@ function DashboardPage() {
         )}
 
         {pendingSubscription && (
-          <section className="dashboard-status-card" style={{ marginBottom: 24 }}>
-            <div className="dashboard-badge">PAGAMENTO PENDENTE</div>
-            <h2 className="dashboard-status-title">Você tem uma contratação em andamento</h2>
-            <p className="dashboard-text dashboard-status-text">
-              O plano <strong>{pendingSubscription.planName}</strong> ainda aguarda o pagamento. Você pode continuar o pagamento no Asaas ou cancelar esta contratação.
-            </p>
-            <div className="dashboard-status-grid">
-              <div><span>Plano</span><strong>{pendingSubscription.planName}</strong></div>
-              <div><span>Forma de pagamento</span><strong>{pendingSubscription.billingType === "PIX" ? "PIX" : pendingSubscription.billingType === "BOLETO" ? "Boleto" : pendingSubscription.billingType === "CREDIT_CARD" ? "Cartão de crédito" : "Pagamento"}</strong></div>
-              <div><span>Vencimento</span><strong>{pendingSubscription.dueDate ? new Date(pendingSubscription.dueDate + "T00:00:00").toLocaleDateString("pt-BR") : "A confirmar"}</strong></div>
+          <section style={{ marginBottom: 24, borderRadius: 18, border: "1px solid rgba(99,102,241,.18)", background: "linear-gradient(135deg,#fff,#f7f8ff)", boxShadow: "0 14px 35px rgba(15,23,42,.08)", overflow: "hidden" }}>
+            <div style={{ padding: "20px 22px", borderBottom: "1px solid rgba(99,102,241,.1)", display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 46, height: 46, borderRadius: 14, display: "grid", placeItems: "center", background: "rgba(99,102,241,.1)", fontSize: 21 }}>💳</div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".08em", color: "#6366f1", textTransform: "uppercase" }}>Pagamento pendente</div>
+                <h2 style={{ margin: "4px 0 0", fontSize: 20, lineHeight: 1.25, color: "#111827" }}>Sua contratação ainda não foi concluída</h2>
+              </div>
             </div>
-            {pendingSubscriptionMessage && <div className="auth-modal-success" style={{ marginTop: 16 }}>{pendingSubscriptionMessage}</div>}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 18 }}>
-              <button type="button" className="auth-modal-submit" onClick={() => void resumePendingSubscription()} disabled={pendingSubscriptionAction !== null || !pendingSubscription.invoiceUrl}>
-                {pendingSubscriptionAction === "resume" ? "Abrindo pagamento..." : "Continuar pagamento"}
-              </button>
-              <button type="button" className="auth-modal-link" onClick={() => void cancelPendingSubscription()} disabled={pendingSubscriptionAction !== null}>
-                {pendingSubscriptionAction === "cancel" ? "Cancelando..." : "Cancelar contratação"}
-              </button>
+            <div style={{ padding: "20px 22px 22px" }}>
+              <p style={{ margin: "0 0 18px", color: "#64748b", lineHeight: 1.55, fontSize: 14 }}>Você iniciou a contratação do plano <strong style={{ color: "#111827" }}>{pendingSubscription.planName}</strong>, mas o pagamento ainda está aguardando conclusão.</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10, marginBottom: 20 }}>
+                <div style={{ padding: "12px 14px", borderRadius: 12, background: "#fff", border: "1px solid #e5e7eb" }}><span style={{ display: "block", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Plano</span><strong style={{ fontSize: 14, color: "#111827" }}>{pendingSubscription.planName}</strong></div>
+                <div style={{ padding: "12px 14px", borderRadius: 12, background: "#fff", border: "1px solid #e5e7eb" }}><span style={{ display: "block", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Pagamento</span><strong style={{ fontSize: 14, color: "#111827" }}>{pendingSubscription.billingType === "PIX" ? "PIX" : pendingSubscription.billingType === "BOLETO" ? "Boleto" : pendingSubscription.billingType === "CREDIT_CARD" ? "Cartão de crédito" : "Pagamento"}</strong></div>
+                <div style={{ padding: "12px 14px", borderRadius: 12, background: "#fff", border: "1px solid #e5e7eb" }}><span style={{ display: "block", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Vencimento</span><strong style={{ fontSize: 14, color: "#111827" }}>{pendingSubscription.dueDate ? new Date(pendingSubscription.dueDate + "T00:00:00").toLocaleDateString("pt-BR") : "A confirmar"}</strong></div>
+              </div>
+              {pendingSubscriptionMessage && <div className="auth-modal-success" style={{ marginBottom: 16 }}>{pendingSubscriptionMessage}</div>}
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button type="button" className="auth-modal-submit" style={{ minWidth: 180 }} onClick={() => void resumePendingSubscription()} disabled={pendingSubscriptionAction !== null || !pendingSubscription.invoiceUrl}>{pendingSubscriptionAction === "resume" ? "Abrindo pagamento..." : "Continuar pagamento"}</button>
+                <button type="button" className="auth-modal-link" style={{ minHeight: 46, padding: "0 18px", borderRadius: 10, border: "1px solid #e5e7eb", background: "#fff", textDecoration: "none" }} onClick={() => void cancelPendingSubscription()} disabled={pendingSubscriptionAction !== null}>{pendingSubscriptionAction === "cancel" ? "Cancelando..." : "Cancelar contratação"}</button>
+              </div>
             </div>
           </section>
         )}
