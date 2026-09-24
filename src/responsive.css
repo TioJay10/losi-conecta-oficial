@@ -13247,3 +13247,33 @@ button.availability-day {
 .admin-audit-details span{padding:5px 7px;border:1px solid #e6eaf0;border-radius:8px;background:#f8fafc;color:#64748b;font-size:9px;overflow-wrap:anywhere}
 @media(max-width:900px){.admin-operational-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-operational-head{align-items:flex-start;flex-direction:column}.admin-admin-notification{align-items:flex-start;flex-direction:column}.admin-admin-notification .admin-item-actions{width:100%}.admin-admin-notification .admin-item-actions .admin-action-button{flex:1}.admin-audit-details{max-width:none;justify-content:flex-start}}
 @media(max-width:620px){.admin-operational-metrics{padding:17px;border-radius:17px}.admin-operational-grid{grid-template-columns:1fr}.admin-admin-center-hero{align-items:flex-start;flex-direction:column;padding:21px 18px;border-radius:18px}.admin-admin-center-hero>strong{width:100%;box-sizing:border-box}.admin-admin-toolbar{grid-template-columns:1fr}.admin-admin-notification{padding:15px}.admin-admin-notification .admin-item-actions{display:grid;grid-template-columns:1fr;gap:7px}}
+
+/* =========================================================
+   CENTRAL DE COMUNICAÇÃO — ENVIO E HISTÓRICO
+   ========================================================= */
+.admin-broadcast-form,.admin-broadcast-history{display:flex;flex-direction:column;gap:16px;padding:20px;border:1px solid #e1e5eb;border-radius:18px;background:#fff;box-shadow:0 9px 24px rgba(15,23,42,.05)}
+.admin-broadcast-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.admin-broadcast-fields label{display:flex;flex-direction:column;gap:7px;color:#172033;font-size:11px;font-weight:900}
+.admin-broadcast-fields label:nth-child(2){grid-column:1/-1}
+.admin-broadcast-fields input,.admin-broadcast-fields textarea,.admin-broadcast-fields select{width:100%;box-sizing:border-box;border:1px solid #dbe1e8;border-radius:11px;background:#fff;color:#172033;padding:11px 12px;font:700 12px "Montserrat",Arial,sans-serif;outline:0}
+.admin-broadcast-fields textarea{resize:vertical;min-height:120px;line-height:1.5}
+.admin-broadcast-fields input:focus,.admin-broadcast-fields textarea:focus,.admin-broadcast-fields select:focus{border-color:#d6b46a;box-shadow:0 0 0 3px rgba(214,180,106,.12)}
+.admin-broadcast-footer{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.admin-broadcast-footer small{color:#64748b;font-size:10px;line-height:1.45}
+.admin-broadcast-footer .admin-action-button{flex:0 0 auto}
+.admin-broadcast-status{padding:10px 12px;border:1px solid rgba(214,180,106,.45);border-radius:10px;background:#fffaf0;color:#8a6d2f;font-size:11px;font-weight:800}
+.admin-broadcast-history{gap:12px}
+.admin-broadcast-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.admin-broadcast-history-head h3{margin:0;color:#172033;font-size:15px}
+.admin-broadcast-history-head span{color:#8a6d2f;font-size:10px;font-weight:800}
+.admin-broadcast-item{padding:15px;border:1px solid #e1e5eb;border-radius:14px;background:#fff}
+.admin-broadcast-item>div>span{display:block;color:#8a6d2f;font-size:9px;font-weight:900;letter-spacing:.08em}
+.admin-broadcast-item h4{margin:5px 0 4px;color:#172033;font-size:13px}
+.admin-broadcast-item p{margin:0;color:#64748b;font-size:11px;line-height:1.5}
+.admin-broadcast-item small{display:block;margin-top:7px;color:#94a3b8;font-size:10px}
+@media(max-width:700px){
+  .admin-broadcast-fields{grid-template-columns:1fr}
+  .admin-broadcast-fields label:nth-child(2){grid-column:auto}
+  .admin-broadcast-footer,.admin-broadcast-history-head{align-items:flex-start;flex-direction:column}
+  .admin-broadcast-footer .admin-action-button{width:100%}
+}
