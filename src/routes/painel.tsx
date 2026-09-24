@@ -317,11 +317,7 @@ function DashboardPage() {
       setHasBusinessProfile(Boolean(business));
       setLoading(false);
 
-      if (business?.id) {
-        window.setTimeout(() => {
-          void loadPendingSubscription();
-        }, 0);
-      }
+
     }
 
     load();
@@ -340,6 +336,11 @@ function DashboardPage() {
     if (supabase) await supabase.auth.signOut();
     navigate({ to: "/entrar" });
   }
+
+  useEffect(() => {
+    if (!user || !supabase) return;
+    void loadPendingSubscription();
+  }, [user]);
 
   useEffect(() => {
     if (!user || !supabase) return;
