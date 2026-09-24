@@ -432,7 +432,11 @@ function ProviderPage() {
     if (requestError) {
       console.error("Erro ao solicitar orçamento:", requestError);
       setQuoteMessageType("error");
-      setQuoteMessage("NÃO FOI POSSÍVEL SOLICITAR O ORÇAMENTO");
+      if (requestError.message.includes("limite de 4 solicitações de orçamento")) {
+        setQuoteMessage("Você atingiu o limite de 4 solicitações de orçamento do seu plano gratuito. Faça um upgrade para continuar.");
+      } else {
+        setQuoteMessage("NÃO FOI POSSÍVEL SOLICITAR O ORÇAMENTO");
+      }
       return;
     }
 
