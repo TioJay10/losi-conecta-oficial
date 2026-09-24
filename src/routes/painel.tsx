@@ -36,6 +36,81 @@ function DashboardPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState<{ invoiceUrl: string | null; dueDate: string | null; pixPayload: string | null; pixEncodedImage: string | null } | null>(null);
+  const [pendingSubscription, setPendingSubscription] = useState<{
+    id: string;
+    planName: string;
+    planSlug: string;
+    dueDate: string | null;
+    invoiceUrl: string | null;
+    billingType: string | null;
+    asaasSubscriptionId: string;
+  } | null>(null);
+  const [pendingSubscriptionLoading, setPendingSubscriptionLoading] = useState(false);
+  const [pendingSubscriptionAction, setPendingSubscriptionAction] = useState<"resume" | "cancel" | null>(null);
+  const [pendingSubscriptionMessage, setPendingSubscriptionMessage] = useState("");
+
+  async function loadPendingSubscription() {
+    if (!supabase || !user) return;
+    setPendingSubscriptionLoading(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) return;
+
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-manage-pending-subscription", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "get" }),
+      });
+      const result = await response.json();
+      if (response.ok && result?.success) {
+        setPendingSubscription(result.pending ?? null);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar contratação pendente:", error);
+    } finally {
+      setPendingSubscriptionLoading(false);
+    }
+  }
+
+  async function resumePendingSubscription() {
+    if (!pendingSubscription?.invoiceUrl || pendingSubscriptionAction) return;
+    setPendingSubscriptionAction("resume");
+    setPendingSubscriptionMessage("");
+    window.open(pendingSubscription.invoiceUrl, "_blank", "noopener,noreferrer");
+    setPendingSubscriptionAction(null);
+  }
+
+  async function cancelPendingSubscription() {
+    if (!pendingSubscription || pendingSubscriptionAction || !supabase) return;
+    const confirmed = window.confirm("Deseja realmente cancelar esta contratação pendente? Depois disso você poderá iniciar uma nova contratação.");
+    if (!confirmed) return;
+
+    setPendingSubscriptionAction("cancel");
+    setPendingSubscriptionMessage("");
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Sua sessão expirou. Entre novamente para continuar.");
+
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-manage-pending-subscription", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel" }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || "Não foi possível cancelar a contratação.");
+      }
+
+      setPendingSubscription(null);
+      setPendingSubscriptionMessage("Contratação cancelada. Você já pode contratar outro plano.");
+    } catch (error) {
+      setPendingSubscriptionMessage(error instanceof Error ? error.message : "Não foi possível cancelar a contratação.");
+    } finally {
+      setPendingSubscriptionAction(null);
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -241,6 +316,12 @@ function DashboardPage() {
       setProfile(data);
       setHasBusinessProfile(Boolean(business));
       setLoading(false);
+
+      if (business?.id) {
+        window.setTimeout(() => {
+          void loadPendingSubscription();
+        }, 0);
+      }
     }
 
     load();
@@ -430,6 +511,15 @@ function DashboardPage() {
         pixPayload: result.payment?.pixQrCode?.payload ?? null,
         pixEncodedImage: result.payment?.pixQrCode?.encodedImage ?? null,
       });
+      setPendingSubscription({
+        id: result.subscription?.id ?? "",
+        planName: result.subscription?.plan ?? paymentPlan.name,
+        planSlug: paymentPlan.slug,
+        dueDate: result.payment?.dueDate ?? nextDueDateText,
+        invoiceUrl: result.payment?.invoiceUrl ?? null,
+        billingType: result.subscription?.billingType ?? paymentBillingType,
+        asaasSubscriptionId: result.subscription?.asaas_subscription_id ?? "",
+      });
     } catch (error) {
       setPaymentError(error instanceof Error ? error.message : "Não foi possível iniciar a contratação.");
     } finally {
@@ -604,6 +694,34 @@ function DashboardPage() {
             </div>
             <button type="button" onClick={() => navigate({ to: "/meus-servicos" })} className="dashboard-secondary">Gerenciar empresa</button>
           </section>
+        )}
+
+        {pendingSubscription && (
+          <section className="dashboard-status-card" style={{ marginBottom: 24 }}>
+            <div className="dashboard-badge">PAGAMENTO PENDENTE</div>
+            <h2 className="dashboard-status-title">Você tem uma contratação em andamento</h2>
+            <p className="dashboard-text dashboard-status-text">
+              O plano <strong>{pendingSubscription.planName}</strong> ainda aguarda o pagamento. Você pode continuar o pagamento no Asaas ou cancelar esta contratação.
+            </p>
+            <div className="dashboard-status-grid">
+              <div><span>Plano</span><strong>{pendingSubscription.planName}</strong></div>
+              <div><span>Forma de pagamento</span><strong>{pendingSubscription.billingType === "PIX" ? "PIX" : pendingSubscription.billingType === "BOLETO" ? "Boleto" : pendingSubscription.billingType === "CREDIT_CARD" ? "Cartão de crédito" : "Pagamento"}</strong></div>
+              <div><span>Vencimento</span><strong>{pendingSubscription.dueDate ? new Date(pendingSubscription.dueDate + "T00:00:00").toLocaleDateString("pt-BR") : "A confirmar"}</strong></div>
+            </div>
+            {pendingSubscriptionMessage && <div className="auth-modal-success" style={{ marginTop: 16 }}>{pendingSubscriptionMessage}</div>}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 18 }}>
+              <button type="button" className="auth-modal-submit" onClick={() => void resumePendingSubscription()} disabled={pendingSubscriptionAction !== null || !pendingSubscription.invoiceUrl}>
+                {pendingSubscriptionAction === "resume" ? "Abrindo pagamento..." : "Continuar pagamento"}
+              </button>
+              <button type="button" className="auth-modal-link" onClick={() => void cancelPendingSubscription()} disabled={pendingSubscriptionAction !== null}>
+                {pendingSubscriptionAction === "cancel" ? "Cancelando..." : "Cancelar contratação"}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {!pendingSubscription && pendingSubscriptionMessage && (
+          <div className="auth-modal-success" style={{ marginBottom: 24 }}>{pendingSubscriptionMessage}</div>
         )}
 
         <section id="planos" className="dashboard-commercial dashboard-status">
