@@ -12164,3 +12164,42 @@ button.availability-day {
     padding-top: calc(64px + env(safe-area-inset-top)) !important;
   }
 }
+
+
+/* DASHBOARD FINANCEIRO DO ADMIN */
+.admin-finance-dashboard{display:flex;flex-direction:column;gap:20px}
+.admin-finance-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:24px;border:1px solid rgba(214,180,106,.28);border-radius:20px;background:linear-gradient(145deg,#121f32,#07111f);box-shadow:0 18px 45px rgba(7,17,31,.14)}
+.admin-finance-hero h2{margin:6px 0 8px;color:#fff;font-size:26px}
+.admin-finance-hero p{margin:0;color:#c4cbd7;line-height:1.5}
+.admin-finance-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.admin-finance-periods{display:flex;padding:4px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.admin-finance-periods button{border:0;background:transparent;color:#c4cbd7;padding:9px 14px;border-radius:7px;font-weight:700;cursor:pointer}
+.admin-finance-periods button.active{background:#f0d99a;color:#0b182a}
+.admin-finance-controls input{min-height:40px;border:1px solid rgba(214,180,106,.35);border-radius:9px;background:#fff;color:#0b182a;padding:0 11px;font:inherit;font-weight:700}
+.admin-finance-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.admin-finance-kpis article{padding:20px;border:1px solid #e5e7eb;border-radius:16px;background:#fff;box-shadow:0 8px 25px rgba(15,23,42,.06)}
+.admin-finance-kpis span,.admin-finance-kpis small{display:block;color:#64748b}
+.admin-finance-kpis span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.admin-finance-kpis strong{display:block;margin:8px 0 5px;color:#0b182a;font-size:24px}
+.admin-finance-kpis small{font-size:12px}
+.admin-finance-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.85fr);gap:20px}
+.admin-finance-panel{border:1px solid #e5e7eb;border-radius:18px;background:#fff;overflow:hidden;box-shadow:0 8px 25px rgba(15,23,42,.05)}
+.admin-finance-panel-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding:20px;border-bottom:1px solid #eef2f7}
+.admin-finance-panel-head h3{margin:5px 0 0;color:#0b182a;font-size:18px}
+.admin-finance-panel-head>strong{color:#8a6d2f;font-size:18px}
+.admin-finance-panel-head>span{color:#64748b;font-size:13px}
+.admin-finance-chart{height:270px;padding:22px 18px 18px;display:flex;align-items:flex-end;gap:6px;overflow-x:auto}
+.admin-finance-bar-wrap{height:100%;min-width:24px;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;position:relative}
+.admin-finance-bar{width:min(22px,80%);min-height:4px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#d6b46a,#8a6d2f)}
+.admin-finance-bar-wrap>span{font-size:9px;color:#64748b;white-space:nowrap}
+.admin-finance-bar-wrap em{position:absolute;top:0;font-size:10px;font-style:normal;font-weight:800;color:#8a6d2f}
+.admin-finance-plan-list,.admin-finance-sales-list{padding:8px 20px}
+.admin-finance-plan-row,.admin-finance-sale{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:15px 0;border-bottom:1px solid #eef2f7}
+.admin-finance-plan-row:last-child,.admin-finance-sale:last-child{border-bottom:0}
+.admin-finance-plan-row div,.admin-finance-sale div{min-width:0}
+.admin-finance-plan-row strong,.admin-finance-sale strong{color:#0b182a}
+.admin-finance-plan-row span,.admin-finance-sale span{display:block;margin-top:4px;color:#64748b;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-finance-plan-row>strong,.admin-finance-sale>strong{color:#8a6d2f;white-space:nowrap}
+.admin-finance-sales{margin-bottom:4px}
+@media(max-width:900px){.admin-finance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-finance-grid{grid-template-columns:1fr}.admin-finance-hero{align-items:stretch;flex-direction:column}.admin-finance-controls{justify-content:flex-start}}
+@media(max-width:560px){.admin-finance-kpis{grid-template-columns:1fr}.admin-finance-hero{padding:18px}.admin-finance-hero h2{font-size:22px}.admin-finance-controls{display:grid;grid-template-columns:1fr;width:100%}.admin-finance-periods{width:100%}.admin-finance-periods button{flex:1}.admin-finance-controls input{width:100%;box-sizing:border-box}.admin-finance-panel-head{align-items:flex-start;flex-direction:column}.admin-finance-chart{height:230px}}
