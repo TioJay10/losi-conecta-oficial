@@ -12661,6 +12661,7 @@ button.availability-day {
 
 /* Bloco principal */
 .admin-content .admin-finance-hero{
+  align-items:center;
   min-height:168px;
   padding:30px 32px;
   border-radius:22px;
@@ -12678,7 +12679,7 @@ button.availability-day {
   letter-spacing:-.025em;
 }
 .admin-content .admin-finance-hero p{
-  color:#d1d7e0;
+  color:#f0d99a;
 }
 
 /* Controles ficam como um bloco único */
@@ -12828,6 +12829,8 @@ button.availability-day {
     gap:16px;
   }
   .admin-content .admin-finance-hero{
+    flex-direction:column;
+    align-items:stretch;
     min-height:0;
     padding:23px 19px;
     border-radius:18px;
@@ -12836,7 +12839,22 @@ button.availability-day {
     font-size:23px;
   }
   .admin-content .admin-finance-controls{
+    width:100%;
+    box-sizing:border-box;
+    justify-content:stretch;
     padding:6px;
+  }
+  .admin-content .admin-finance-periods{
+    flex:1 1 auto;
+    justify-content:stretch;
+  }
+  .admin-content .admin-finance-periods button{
+    flex:1 1 0;
+    min-width:0;
+  }
+  .admin-content .admin-finance-controls input{
+    flex:1 1 140px;
+    min-width:0;
   }
   .admin-content .admin-finance-kpis{
     gap:12px;
