@@ -300,10 +300,18 @@ function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
+
     const params = new URLSearchParams(window.location.search);
     if (params.get("conquista") === "coracao-dourado") {
       setGoldenHeartOpen(true);
       window.history.replaceState({}, "", "/painel");
+      return;
+    }
+
+    if (window.location.hash === "#planos") {
+      window.setTimeout(() => {
+        document.getElementById("planos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
     }
   }, [user]);
 
@@ -513,7 +521,7 @@ function DashboardPage() {
           </section>
         )}
 
-        <section className="dashboard-commercial dashboard-status">
+        <section id="planos" className="dashboard-commercial dashboard-status">
           <div>
             <div className="dashboard-badge">PLANOS PARA FORNECEDORES</div>
             <h2 className="dashboard-status-title">{currentPlan ? currentPlan.name : "Plano gratuito"}</h2>
