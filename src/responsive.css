@@ -13277,3 +13277,49 @@ button.availability-day {
   .admin-broadcast-footer,.admin-broadcast-history-head{align-items:flex-start;flex-direction:column}
   .admin-broadcast-footer .admin-action-button{width:100%}
 }
+
+
+/* =========================================================
+   CENTRAL DE COMUNICAÇÃO — CONTRASTE DO BLOCO NAVY
+   Regra LOSI: nenhum elemento escuro dentro de superfície navy.
+   ========================================================= */
+.admin-communication-center .admin-admin-center-hero {
+  border-color: rgba(214,180,106,.42);
+  background: linear-gradient(145deg,#121f32,#07111f);
+}
+
+.admin-communication-center .admin-admin-center-hero :where(h1,h2,h3,h4,strong) {
+  color: #fff !important;
+}
+
+.admin-communication-center .admin-admin-center-hero :where(p,small,.admin-text) {
+  color: #f0d99a !important;
+}
+
+.admin-communication-center .admin-admin-center-hero .admin-badge {
+  color: #f0d99a !important;
+  border-color: rgba(214,180,106,.42);
+  background: rgba(214,180,106,.12);
+}
+
+.admin-communication-center .admin-admin-center-hero > strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(214,180,106,.55);
+  border-radius: 999px;
+  background: rgba(214,180,106,.12);
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+@media(max-width:620px) {
+  .admin-communication-center .admin-admin-center-hero > strong {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
