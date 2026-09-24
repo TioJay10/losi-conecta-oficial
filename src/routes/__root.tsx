@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { MobileBottomNav } from "../components/mobile-bottom-nav";
 import "../responsive.css";
 import "../montserrat.css";
 import "../panel-header-contrast.css";
@@ -130,9 +129,8 @@ function RootComponent() {
   }
 
   return (
-    <main className={"losi-page-transition" + (location.pathname === "/" ? "" : " has-mobile-bottom-nav")}>
+    <main className="losi-page-transition">
       <Outlet />
-      {location.pathname !== "/" ? <MobileBottomNav /> : null}
     </main>
   );
 }
