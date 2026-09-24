@@ -853,24 +853,8 @@ function AdminPage() {
                     </div>;
                   })()}
                   <section className="admin-security-section"><div className="admin-security-section-head"><div><div className="admin-badge">CONTAS BLOQUEADAS</div><h3>Contas atualmente bloqueadas</h3></div><span>{blockedUsers.length}</span></div><div className="admin-security-list">
-                    {blockedUsers.map(item=>{
-                      const userBusiness=businesses.find(b=>b.owner_id===item.id);
-                      const userReports=userBusiness?supplierReports.filter(r=>r.business_id===userBusiness.id):[];
-                      const lastAction=auditLogs.find(a=>a.entity_id===item.id&&(a.action==="block_user"||a.action==="resolve_supplier_report"||a.action==="dismiss_supplier_report"));
-                      return <article className="admin-security-card" key={item.id}>
-                        <div className="admin-security-card-main">
-                          <strong>{item.full_name||"Usuário sem nome"}</strong>
-                          <span>Conta bloqueada{item.city ? " · "+item.city : ""}</span>
-                          {userBusiness&&<span>Fornecedor: {userBusiness.business_name}</span>}
-                          {lastAction&&<span>Última ação: {lastAction.action==="block_user"?"Bloqueio administrativo":"Ação relacionada a denúncia"} · {new Date(lastAction.created_at).toLocaleString("pt-BR")}</span>}
-                          {userReports.length>0&&<span>{userReports.length} denúncia(s) relacionada(s)</span>}
-                        </div>
-                        <div className="admin-security-actions">
-                          <button type="button" className="admin-action-button" onClick={()=>{setSection("audit");setActivitySearch(item.full_name||item.id);window.history.replaceState(null,"","/admin?section=audit");}}>Ver histórico</button>
-                          <button type="button" className="admin-action-button" onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button>
-                        </div>
-                      </article>;
-                    })}{blockedUsers.length===0&&<div className="admin-empty">Nenhuma conta bloqueada.</div>}
+                    {blockedUsers.map(item=><article className="admin-security-card" key={item.id}><div className="admin-security-card-main"><strong>{item.full_name||"Usuário sem nome"}</strong><span>Conta bloqueada{item.city?` · ${item.city}`:""}</span></div><div className="admin-security-actions"><button type="button" className="admin-action-button" onClick={()=>manageUser(item.id,"unblock")}>Desbloquear</button></div></article>)}
+                    {blockedUsers.length===0&&<div className="admin-empty">Nenhuma conta bloqueada.</div>}
                   </div></section>
                   <section className="admin-security-section"><div className="admin-security-section-head"><div><div className="admin-badge">AGUARDANDO VERIFICAÇÃO</div><h3>Perfis aguardando verificação</h3></div><span>{pendingVerification.length}</span></div><div className="admin-security-list">
                     {pendingVerification.map(business=><article className="admin-security-card" key={business.id}><div className="admin-security-card-main"><strong>{business.business_name}</strong><span>{business.city||"Localização não informada"}{business.state?` - ${business.state}`:""}</span></div><div className="admin-security-actions"><button type="button" className="admin-action-button" onClick={()=>{setSection("businesses");setSelectedBusinessId(business.id);window.history.replaceState(null,"","/admin?section=businesses");}}>Analisar</button><button type="button" className="admin-action-button" onClick={()=>updateBusiness(business.id,{approval_status:"approved",verified:true,active:true})}>Aprovar</button></div></article>)}
