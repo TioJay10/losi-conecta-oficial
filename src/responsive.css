@@ -12134,3 +12134,33 @@ button.availability-day {
   }
 }
 
+
+/* ADMIN — cabeçalho realmente fixo: último override para neutralizar regras anteriores */
+.admin-page .admin-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 10001 !important;
+  box-sizing: border-box !important;
+}
+.admin-page .admin-shell {
+  padding-top: 76px !important;
+}
+@media (max-width: 768px) {
+  .admin-page .admin-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-height: calc(64px + env(safe-area-inset-top)) !important;
+    height: calc(64px + env(safe-area-inset-top)) !important;
+    padding-top: env(safe-area-inset-top) !important;
+    box-sizing: border-box !important;
+  }
+  .admin-page .admin-shell {
+    padding-top: calc(64px + env(safe-area-inset-top)) !important;
+  }
+}
