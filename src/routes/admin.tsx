@@ -972,7 +972,7 @@ function AdminPage() {
                     <strong>{coupons.filter(item => item.active && !item.used_at).length} disponível(is)</strong>
                   </section>
 
-                  <form className="admin-plan-editor" onSubmit={saveCoupon}>
+                  <form key={editingCouponId ?? "new"} className="admin-plan-editor" onSubmit={saveCoupon}>
                     <input type="hidden" name="id" value={editingCouponId ? editingCouponId : ""} />
                     <label>Código do cupom<input name="code" defaultValue={editingCouponId ? coupons.find(item => item.id === editingCouponId)?.code ?? "" : ""} placeholder="Ex.: JAY20OFF" maxLength={40} required /></label>
                     <label>Usuário<select name="assigned_user_id" defaultValue={editingCouponId ? coupons.find(item => item.id === editingCouponId)?.assigned_user_id ?? "" : ""} required><option value="">Selecione o usuário</option>{users.filter(item => !item.blocked).map(item => <option key={item.id} value={item.id}>{item.full_name || "Sem nome"}{item.city ? ` · ${item.city}` : ""}</option>)}</select></label>
