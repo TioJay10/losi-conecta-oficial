@@ -809,6 +809,22 @@ function DashboardPage() {
             );
           })}</div>
         </section>
+        {userCoupons.filter(c => c.active && !c.used_at && !c.claimed_at && (!c.expires_at || new Date(c.expires_at).getTime() >= Date.now())).length > 0 && (
+          <section className="dashboard-saved" style={{ marginTop: 24 }}>
+            <div className="dashboard-badge">BENEFÍCIO DISPONÍVEL</div>
+            <h2 className="dashboard-status-title">Seus cupons</h2>
+            <p className="dashboard-text dashboard-status-text">Use o código no momento da contratação do plano correspondente.</p>
+            <div className="dashboard-saved-list">
+              {userCoupons.filter(c => c.active && !c.used_at && !c.claimed_at && (!c.expires_at || new Date(c.expires_at).getTime() >= Date.now())).map(coupon => {
+                const couponPlan = plans.find(p => p.id === coupon.plan_id);
+                return <article key={coupon.id} className="dashboard-saved-card" style={{ cursor: "default" }}>
+                  <strong>{coupon.code}</strong>
+                  <span>{coupon.discount_type === "percent" ? coupon.discount_value + "% de desconto" : "R$ " + (coupon.discount_value / 100).toFixed(2).replace(".", ",") + " de desconto"}{couponPlan ? " · " + couponPlan.name : " · plano pago"}</span>
+                </article>;
+              })}
+            </div>
+          </section>
+        )}
         {goldenHeartOpen && (
           <div className="dashboard-golden-heart-backdrop" role="presentation" onMouseDown={(event) => {
             if (event.target === event.currentTarget) setGoldenHeartOpen(false);
