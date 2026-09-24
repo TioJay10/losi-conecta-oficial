@@ -193,6 +193,13 @@ function DashboardPage() {
 
       if (mounted) setPlans((plansRows ?? []) as typeof plans);
 
+      const { data: couponRows, error: couponLoadError } = await supabase
+        .from("coupons")
+        .select("id,code,plan_id,discount_type,discount_value,active,expires_at,claimed_at,used_at")
+        .order("created_at", { ascending: false });
+      if (couponLoadError) console.error("Erro ao carregar cupons:", couponLoadError);
+      if (mounted) setUserCoupons((couponRows ?? []) as typeof userCoupons);
+
       if (business?.id) {
         const { data: sub, error: subscriptionError } = await supabase
           .from("business_subscriptions")
