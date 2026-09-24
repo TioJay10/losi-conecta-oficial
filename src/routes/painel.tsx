@@ -36,6 +36,11 @@ function DashboardPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState<{ invoiceUrl: string | null; dueDate: string | null; pixPayload: string | null; pixEncodedImage: string | null } | null>(null);
+  const [userCoupons, setUserCoupons] = useState<Array<{id:string;code:string;plan_id:string|null;discount_type:"percent"|"fixed";discount_value:number;active:boolean;expires_at:string|null;claimed_at:string|null;used_at:string|null}>>([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{id:string;code:string;discountCents:number} | null>(null);
+  const [couponApplying, setCouponApplying] = useState(false);
   const [pendingSubscription, setPendingSubscription] = useState<{
     id: string;
     planName: string;
@@ -455,6 +460,46 @@ function DashboardPage() {
     setPaymentCpfCnpj("");
     setPaymentError("");
     setPaymentSuccess(null);
+    setCouponCode("");
+    setCouponError("");
+    setAppliedCoupon(null);
+  }
+
+  async function applyCoupon() {
+    if (!paymentPlan || !supabase || couponApplying) return;
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      setCouponError("Informe o código do cupom.");
+      return;
+    }
+    setCouponApplying(true);
+    setCouponError("");
+    setAppliedCoupon(null);
+    try {
+      const { data: coupon, error } = await supabase
+        .from("coupons")
+        .select("id,code,plan_id,discount_type,discount_value,active,expires_at,claimed_at,used_at")
+        .eq("code", code)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (!coupon) throw new Error("Cupom não encontrado para esta conta.");
+      if (!coupon.active) throw new Error("Este cupom não está disponível.");
+      if (coupon.used_at) throw new Error("Este cupom já foi utilizado.");
+      if (coupon.claimed_at) throw new Error("Este cupom já foi resgatado.");
+      if (coupon.expires_at && new Date(coupon.expires_at).getTime() < Date.now()) throw new Error("Este cupom está expirado.");
+      const selectedPlan = plans.find(item => item.slug === paymentPlan.slug);
+      if (!selectedPlan) throw new Error("Não foi possível identificar o plano.");
+      if (coupon.plan_id && coupon.plan_id !== selectedPlan.id) throw new Error("Este cupom não é válido para este plano.");
+      const discountCents = coupon.discount_type === "percent"
+        ? Math.min(selectedPlan.price_cents, Math.round(selectedPlan.price_cents * (coupon.discount_value / 100)))
+        : Math.min(selectedPlan.price_cents, coupon.discount_value);
+      if (discountCents <= 0 || discountCents >= selectedPlan.price_cents) throw new Error("Este cupom não gera um desconto válido.");
+      setAppliedCoupon({ id: coupon.id, code: coupon.code, discountCents });
+    } catch (error) {
+      setCouponError(error instanceof Error ? error.message : "Não foi possível aplicar o cupom.");
+    } finally {
+      setCouponApplying(false);
+    }
   }
 
   function closePaymentModal() {
@@ -462,6 +507,9 @@ function DashboardPage() {
     setPaymentPlan(null);
     setPaymentError("");
     setPaymentSuccess(null);
+    setCouponCode("");
+    setCouponError("");
+    setAppliedCoupon(null);
   }
 
   async function startPayment() {
@@ -489,7 +537,7 @@ function DashboardPage() {
       const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-create-subscription", {
         method: "POST",
         headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
-        body: JSON.stringify({ planSlug: paymentPlan.slug, billingType: paymentBillingType, cpfCnpj: cleanCpfCnpj, nextDueDate: nextDueDateText }),
+        body: JSON.stringify({ planSlug: paymentPlan.slug, billingType: paymentBillingType, cpfCnpj: cleanCpfCnpj, nextDueDate: nextDueDateText, couponCode: appliedCoupon?.code || null }),
       });
       const result = await response.json();
       if (!response.ok || !result?.success) {
@@ -815,6 +863,12 @@ function DashboardPage() {
                 ) : (
                   <form className="auth-modal-form" onSubmit={(event) => { event.preventDefault(); void startPayment(); }}>
                     <label>Plano<input value={paymentPlan.name + " — " + paymentPlan.price} readOnly /></label>
+                    <div className="auth-modal-coupon">
+                      <label>Cupom de desconto<input value={couponCode} onChange={event => { setCouponCode(event.target.value.toUpperCase()); setCouponError(""); setAppliedCoupon(null); }} placeholder="Digite seu cupom" maxLength={40} disabled={couponApplying} /></label>
+                      <button type="button" className="auth-modal-link" onClick={() => void applyCoupon()} disabled={couponApplying || !couponCode.trim()}>{couponApplying ? "Verificando..." : "Aplicar cupom"}</button>
+                      {appliedCoupon && <div className="auth-modal-success">Cupom <strong>{appliedCoupon.code}</strong> aplicado. Desconto de <strong>R$ {(appliedCoupon.discountCents / 100).toFixed(2).replace(".", ",")}</strong>. Valor desta contratação: <strong>R$ {((Math.max(1, (plans.find(item => item.slug === paymentPlan.slug)?.price_cents ?? 0) - appliedCoupon.discountCents)) / 100).toFixed(2).replace(".", ",")}</strong>.</div>}
+                      {couponError && <div className="auth-modal-error">{couponError}</div>}
+                    </div>
                     <label>CPF ou CNPJ<input value={paymentCpfCnpj} onChange={(event) => setPaymentCpfCnpj(event.target.value)} inputMode="numeric" autoComplete="off" placeholder="Somente números ou com pontuação" required /></label>
                     <label>Forma de pagamento
                       <select value={paymentBillingType} onChange={(event) => setPaymentBillingType(event.target.value as typeof paymentBillingType)}>
