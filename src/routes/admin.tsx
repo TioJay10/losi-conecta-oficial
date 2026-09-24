@@ -401,7 +401,7 @@ function AdminPage() {
     { id: "users" as const, label: "Usuários", count: stats.users },
     { id: "businesses" as const, label: "Empresas", count: stats.businesses },
     { id: "subscriptions" as const, label: "Assinaturas", count: subscriptions.filter(item => item.status === "pending").length },
-    { id: "alerts" as const, label: "Central de alertas", count: unreadAdminNotifications },
+    { id: "alerts" as const, label: "Central de alertas" },
     { id: "services" as const, label: "Serviços", count: stats.services },
     { id: "categories" as const, label: "Categorias", count: stats.categories },
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
