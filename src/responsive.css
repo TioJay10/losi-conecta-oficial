@@ -12885,3 +12885,9 @@ button.availability-day {
     padding:6px 8px;
   }
 }
+
+
+/* Correção de contraste do título do hero comercial */
+.admin-content .admin-finance-hero h2{
+  color:#f0d99a;
+}
