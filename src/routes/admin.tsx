@@ -54,7 +54,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "notifications" | "activity">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -88,6 +88,10 @@ function AdminPage() {
   const [subscriptionSearch, setSubscriptionSearch] = useState("");
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<"all" | "active" | "pending" | "cancelled">("all");
   const [adminAlertFilter, setAdminAlertFilter] = useState<"all" | "urgent" | "finance" | "moderation">("all");
+  const [adminNotifications, setAdminNotifications] = useState<Array<{id:string;type:string;title:string;message:string;link:string|null;entity_id:string|null;read_at:string|null;created_at:string}>>([]);
+  const [auditLogs, setAuditLogs] = useState<Array<{id:string;admin_user_id:string;action:string;entity_type:string;entity_id:string|null;entity_name:string|null;details:Record<string, unknown>;created_at:string;admin:{full_name:string|null}|null}>>([]);
+  const [activitySearch, setActivitySearch] = useState("");
+  const [activityActionFilter, setActivityActionFilter] = useState("all");
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -102,7 +106,7 @@ function AdminPage() {
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
       setAvatarUrl(data.avatar_url ?? null);
-      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult] = await Promise.all([
+      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult,notificationsResult,auditResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state,blocked,phone,created_at").order("created_at",{ascending:false}),
         supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status,created_at").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
@@ -111,9 +115,11 @@ function AdminPage() {
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
         supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").order("created_at",{ascending:false}),
         supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
+        supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
+        supabase.from("admin_audit_logs").select("id,admin_user_id,action,entity_type,entity_id,entity_name,details,created_at,admin:profiles(full_name)").order("created_at",{ascending:false}).limit(200),
       ]);
       if (!mounted) return;
-      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, reportsResult].find((result) => result.error)?.error;
+      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, reportsResult, notificationsResult, auditResult].find((result) => result.error)?.error;
       if (firstError) setDataError(firstError.message);
       setUsers((usersResult.data ?? []) as typeof users);
       setBusinesses((businessesResult.data ?? []) as typeof businesses);
@@ -123,6 +129,8 @@ function AdminPage() {
       setPlans((plansResult.data ?? []) as typeof plans);
       setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);
       setSupplierReports((reportsResult.data ?? []) as unknown as typeof supplierReports);
+      setAdminNotifications((notificationsResult.data ?? []) as typeof adminNotifications);
+      setAuditLogs((auditResult.data ?? []) as unknown as typeof auditLogs);
       setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
       setLoading(false);
     }
@@ -137,7 +145,7 @@ function AdminPage() {
     document.addEventListener("visibilitychange", handleRefresh);
 
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","notifications","activity"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -148,6 +156,26 @@ function AdminPage() {
       listener.subscription.unsubscribe();
     };
   }, [navigate]);
+
+  async function recordAdminAction(action:string, entityType:string, entityId:string|null, entityName:string|null, details:Record<string, unknown> = {}) {
+    if (!user) return;
+    const { data } = await supabase.from("admin_audit_logs").insert({admin_user_id:user.id,action,entity_type:entityType,entity_id:entityId,entity_name:entityName,details}).select("id,admin_user_id,action,entity_type,entity_id,entity_name,details,created_at,admin:profiles(full_name)").single();
+    if (data) setAuditLogs(current => [data as unknown as typeof auditLogs[number], ...current].slice(0,200));
+  }
+
+  async function markAdminNotificationRead(id:string) {
+    if (!user) return;
+    const stamp=new Date().toISOString();
+    const { error } = await supabase.from("admin_notifications").update({read_at:stamp}).eq("id",id).eq("admin_user_id",user.id);
+    if (!error) setAdminNotifications(current => current.map(item => item.id===id ? {...item,read_at:stamp}:item));
+  }
+
+  async function markAllAdminNotificationsRead() {
+    if (!user) return;
+    const stamp=new Date().toISOString();
+    const { error } = await supabase.from("admin_notifications").update({read_at:stamp}).eq("admin_user_id",user.id).is("read_at",null);
+    if (!error) setAdminNotifications(current => current.map(item => ({...item,read_at:item.read_at ?? stamp})));
+  }
 
   async function manageUser(userId: string, action: "block" | "unblock" | "delete") {
     const target = users.find((item) => item.id === userId);
@@ -172,16 +200,33 @@ function AdminPage() {
     } else {
       setUsers((current) => current.map((item) => item.id === userId ? { ...item, blocked: action === "block" } : item));
     }
+    await recordAdminAction(action === "delete" ? "delete_user" : action === "block" ? "block_user" : "unblock_user", "user", userId, label);
     setDataError("");
   }
 
   async function updateBusiness(id: string, changes: { verified?: boolean; active?: boolean; approval_status?: "pending" | "approved" | "rejected" }) {
-    const { error } = await supabase.from("business_profiles").update(changes).eq("id", id);
+    const current = businesses.find(item => item.id === id);
+    if (!current) return;
+    const normalized = {...changes};
+    if (normalized.approval_status === "pending" || normalized.approval_status === "rejected") {
+      normalized.active = false;
+      if (normalized.approval_status === "rejected") normalized.verified = false;
+    }
+    if (normalized.active === true && (normalized.approval_status ?? current.approval_status) !== "approved") {
+      setDataError("Um fornecedor só pode ficar ativo depois de aprovado.");
+      return;
+    }
+    if (normalized.verified === true && (normalized.approval_status ?? current.approval_status) !== "approved") {
+      setDataError("A verificação só pode ser concedida a um fornecedor aprovado.");
+      return;
+    }
+    const { error } = await supabase.from("business_profiles").update(normalized).eq("id", id);
     if (error) {
       setDataError(error.message || "Não foi possível atualizar a empresa.");
       return;
     }
-    setBusinesses((current) => current.map((item) => item.id === id ? { ...item, ...changes } : item));
+    setBusinesses((current) => current.map((item) => item.id === id ? { ...item, ...normalized } : item));
+    await recordAdminAction("update_business", "business", id, current.business_name, {changes:normalized});
     setDataError("");
   }
 
@@ -195,6 +240,7 @@ function AdminPage() {
     }
     setPlans((current) => current.map((item) => item.id === id ? data as typeof item : item));
     setEditingPlanId(null);
+    await recordAdminAction("update_plan", "plan", id, data.name, {changes});
     setDataError("");
   }
 
@@ -231,6 +277,7 @@ function AdminPage() {
     const updated = result.data as unknown as typeof subscriptions[number];
     setSubscriptions((current) => existing ? [{...updated}, ...current.map((item) => item.id === existing.id ? {...item, status:"cancelled", ends_at:now.toISOString()} : item)] : [updated, ...current]);
     setActivationPlanByBusiness((current) => ({ ...current, [businessId]: "" }));
+    await recordAdminAction("manual_activate_subscription", "subscription", updated.id, plan.name, {business_id:businessId,plan_id:planId,previous_subscription_id:existing?.id ?? null});
   }
 
   function categorySlug(value: string) {
@@ -260,6 +307,7 @@ function AdminPage() {
     setStats((current) => ({ ...current, categories: current.categories + 1 }));
     setNewCategoryName("");
     setShowCreateCategory(false);
+    await recordAdminAction("create_category", "category", data.id, data.name);
     setCategoryMessage("Categoria adicionada com sucesso.");
     setCategorySaving(false);
   }
@@ -274,16 +322,17 @@ function AdminPage() {
     }
     setCategories((current) => current.filter((item) => item.id !== id));
     setStats((current) => ({ ...current, categories: Math.max(0, current.categories - 1) }));
+    await recordAdminAction("delete_category", "category", id, name);
     setCategoryMessage("Categoria removida com sucesso.");
   }
 
   async function updateReview(id:string, changes:{active?:boolean}) {
     const { error } = await supabase.from("reviews").update(changes).eq("id",id);
-    if (!error) setReviews(current=>current.map(item=>item.id===id?{...item,...changes}:item));
+    if (!error) { setReviews(current=>current.map(item=>item.id===id?{...item,...changes}:item)); await recordAdminAction("update_review","review",id,"Avaliação",{changes}); }
   }
   async function deleteReview(id:string) {
     const { error } = await supabase.from("reviews").delete().eq("id",id);
-    if (!error) setReviews(current=>current.filter(item=>item.id!==id));
+    if (!error) { setReviews(current=>current.filter(item=>item.id!==id)); await recordAdminAction("delete_review","review",id,"Avaliação"); }
   }
   async function createManualUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -333,6 +382,7 @@ function AdminPage() {
       setUsers(refreshedUsers as typeof users);
       setStats((current) => ({ ...current, users: refreshedUsers.length }));
     }
+    await recordAdminAction("create_user","user",null,payload.full_name,{email:payload.email,user_type:payload.user_type});
   }
 
   async function logout() {
@@ -343,6 +393,7 @@ function AdminPage() {
   if (loading) return <main className="admin-loading">Carregando administração...</main>;
   if (!user) return null;
 
+  const unreadAdminNotifications = adminNotifications.filter(item => !item.read_at).length;
   const menu = [
     { id: "dashboard" as const, label: "Dashboard financeiro" },
     { id: "overview" as const, label: "Visão geral" },
@@ -350,11 +401,13 @@ function AdminPage() {
     { id: "users" as const, label: "Usuários", count: stats.users },
     { id: "businesses" as const, label: "Empresas", count: stats.businesses },
     { id: "subscriptions" as const, label: "Assinaturas", count: subscriptions.filter(item => item.status === "pending").length },
-    { id: "alerts" as const, label: "Central de alertas" },
+    { id: "alerts" as const, label: "Central de alertas", count: unreadAdminNotifications },
     { id: "services" as const, label: "Serviços", count: stats.services },
     { id: "categories" as const, label: "Categorias", count: stats.categories },
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
     { id: "commercial" as const, label: "Comercial" },
+    { id: "notifications" as const, label: "Notificações", count: unreadAdminNotifications },
+    { id: "activity" as const, label: "Auditoria" },
   ];
   const pendingBusinesses = businesses.filter((item) => item.approval_status === "pending");
   const approvedBusinesses = businesses.filter((item) => item.approval_status === "approved");
@@ -788,6 +841,7 @@ function AdminPage() {
                                 if (cancelError || cancelData?.error) { setDataError(cancelData?.error || cancelError?.message || "Não foi possível encerrar o acesso."); return; }
                                 const now = new Date().toISOString();
                                 setSubscriptions(current => current.map(x => x.id === item.id ? { ...x, status: "cancelled", ends_at: now } : x));
+                                await recordAdminAction("cancel_subscription","subscription",item.id,item.business?.business_name || "Fornecedor",{plan:item.plan?.name || null});
                                 setDataError("");
                               }}>Encerrar acesso</button>
                             </div>}
@@ -798,7 +852,20 @@ function AdminPage() {
                   </div>
                 );
               })()
-              : section === "commercial" ? <div className="admin-commercial-grid">
+              : section === "notifications" ? (
+                <div className="admin-admin-center">
+                  <section className="admin-admin-center-hero"><div><div className="admin-badge">CENTRAL ADMINISTRATIVA</div><h2>Notificações administrativas</h2><p>Eventos importantes da operação ficam registrados aqui até você marcar como lidos.</p></div><strong>{unreadAdminNotifications} não lida(s)</strong></section>
+                  <div className="admin-admin-center-actions"><button type="button" className="admin-action-button" onClick={markAllAdminNotificationsRead} disabled={!unreadAdminNotifications}>Marcar todas como lidas</button></div>
+                  <div className="admin-admin-notification-list">{adminNotifications.length===0 ? <div className="admin-empty">Nenhuma notificação administrativa registrada.</div> : adminNotifications.map(item=><article className={`admin-admin-notification ${item.read_at ? "read" : "unread"}`} key={item.id}><div><span>{item.type.replaceAll("_"," ").toUpperCase()}</span><h3>{item.title}</h3><p>{item.message}</p><small>{new Date(item.created_at).toLocaleString("pt-BR")}</small></div><div className="admin-item-actions">{!item.read_at&&<button type="button" className="admin-action-button" onClick={()=>markAdminNotificationRead(item.id)}>Marcar como lida</button>}{item.link&&<button type="button" className="admin-action-button" onClick={()=>{const target=item.link!;const url=new URL(target,window.location.origin);setSection((url.searchParams.get("section") as typeof section)||"dashboard");window.history.replaceState(null,"",target);void markAdminNotificationRead(item.id);}}>Abrir</button>}</div></article>)}</div>
+                </div>
+              ) : section === "activity" ? (
+                <div className="admin-admin-center">
+                  <section className="admin-admin-center-hero"><div><div className="admin-badge">AUDITORIA</div><h2>Atividade administrativa</h2><p>Histórico das ações executadas dentro do painel administrativo.</p></div><strong>{auditLogs.length} registro(s)</strong></section>
+                  <div className="admin-admin-toolbar"><input value={activitySearch} onChange={e=>setActivitySearch(e.target.value)} placeholder="Buscar ação, administrador ou item..." aria-label="Buscar atividade administrativa" /><select value={activityActionFilter} onChange={e=>setActivityActionFilter(e.target.value)} aria-label="Filtrar ação"><option value="all">Todas as ações</option>{Array.from(new Set(auditLogs.map(item=>item.action))).map(action=><option key={action} value={action}>{action.replaceAll("_"," ")}</option>)}</select></div>
+                  <div className="admin-admin-notification-list">{auditLogs.filter(item=>{const q=activitySearch.trim().toLocaleLowerCase("pt-BR");const hay=[item.action,item.entity_type,item.entity_name??"",item.admin?.full_name??""].join(" ").toLocaleLowerCase("pt-BR");return(!q||hay.includes(q))&&(activityActionFilter==="all"||item.action===activityActionFilter)}).map(item=><article className="admin-admin-notification read" key={item.id}><div><span>{item.action.replaceAll("_"," ").toUpperCase()}</span><h3>{item.entity_name||item.entity_type}</h3><p>Administrador: {item.admin?.full_name||"Administrador"} · {item.entity_type}</p><small>{new Date(item.created_at).toLocaleString("pt-BR")}</small></div><div className="admin-audit-details">{Object.entries(item.details??{}).map(([key,value])=><span key={key}>{key}: {typeof value==="string"?value:JSON.stringify(value)}</span>)}</div></article>)}</div>
+                  {auditLogs.length===0&&<div className="admin-empty">Nenhuma ação administrativa registrada ainda.</div>}
+                </div>
+              ) : section === "commercial" ? <div className="admin-commercial-grid">
                 {plans.map(plan => <article className="admin-commercial-card" key={plan.id}>
                   <div className="admin-commercial-card-head"><span>{plan.billing_period === "free" ? "PLANO GRATUITO" : "PLANO PAGO"}</span><button type="button" className="admin-action-button" onClick={() => setEditingPlanId(editingPlanId === plan.id ? null : plan.id)}>{editingPlanId === plan.id ? "Fechar" : "Editar plano"}</button></div>
                   {editingPlanId === plan.id ? (
