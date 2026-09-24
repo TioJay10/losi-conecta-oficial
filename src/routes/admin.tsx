@@ -127,12 +127,26 @@ function AdminPage() {
       setLoading(false);
     }
     load();
+
+    // Recarrega os dados quando o administrador volta para a aba.
+    // Isso faz novas assinaturas/pagamentos aparecerem sem precisar sair da página.
+    const handleRefresh = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    window.addEventListener("focus", handleRefresh);
+    document.addEventListener("visibilitychange", handleRefresh);
+
     const requestedSection = new URLSearchParams(window.location.search).get("section");
     if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
-    return () => { mounted = false; listener.subscription.unsubscribe(); };
+    return () => {
+      mounted = false;
+      window.removeEventListener("focus", handleRefresh);
+      document.removeEventListener("visibilitychange", handleRefresh);
+      listener.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   async function manageUser(userId: string, action: "block" | "unblock" | "delete") {
