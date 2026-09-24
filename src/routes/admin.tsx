@@ -53,7 +53,7 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
-  const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
+  const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
   const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -104,7 +104,7 @@ function AdminPage() {
       setAvatarUrl(data.avatar_url ?? null);
       const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state,blocked,phone,created_at").order("created_at",{ascending:false}),
-        supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status").order("created_at",{ascending:false}),
+        supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status,created_at").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
@@ -229,7 +229,7 @@ function AdminPage() {
       return;
     }
     const updated = result.data as unknown as typeof subscriptions[number];
-    setSubscriptions((current) => existing ? current.map((item) => item.id === existing.id ? updated : item) : [updated, ...current]);
+    setSubscriptions((current) => existing ? [{...updated}, ...current.map((item) => item.id === existing.id ? {...item, status:"cancelled", ends_at:now.toISOString()} : item)] : [updated, ...current]);
     setActivationPlanByBusiness((current) => ({ ...current, [businessId]: "" }));
   }
 
@@ -367,6 +367,10 @@ function AdminPage() {
     return matchesSearch && (businessStatusFilter === "all" || item.approval_status === businessStatusFilter);
   });
   const selectedBusiness = selectedBusinessId ? businesses.find((item) => item.id === selectedBusinessId) ?? null : null;
+  const activeSubscriptions = subscriptions.filter(item => item.status === "active");
+  const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
+  const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
+  const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
   const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
 
   return (
