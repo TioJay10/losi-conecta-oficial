@@ -872,7 +872,7 @@ function AdminPage() {
                 );
               })()
               : section === "communication" ? (
-                <div className="admin-admin-center">
+                <div className="admin-admin-center admin-communication-center">
                   <section className="admin-admin-center-hero">
                     <div><div className="admin-badge">COMUNICAÇÃO</div><h2>Central de comunicação</h2><p>Envie avisos personalizados para usuários, fornecedores ou assinantes de um plano.</p></div>
                     <strong>{broadcasts.length} envio(s)</strong>
