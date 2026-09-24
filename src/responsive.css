@@ -12203,3 +12203,389 @@ button.availability-day {
 .admin-finance-sales{margin-bottom:4px}
 @media(max-width:900px){.admin-finance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-finance-grid{grid-template-columns:1fr}.admin-finance-hero{align-items:stretch;flex-direction:column}.admin-finance-controls{justify-content:flex-start}}
 @media(max-width:560px){.admin-finance-kpis{grid-template-columns:1fr}.admin-finance-hero{padding:18px}.admin-finance-hero h2{font-size:22px}.admin-finance-controls{display:grid;grid-template-columns:1fr;width:100%}.admin-finance-periods{width:100%}.admin-finance-periods button{flex:1}.admin-finance-controls input{width:100%;box-sizing:border-box}.admin-finance-panel-head{align-items:flex-start;flex-direction:column}.admin-finance-chart{height:230px}}
+
+
+/* =========================================================
+   LOSI CONECTA — DASHBOARD FINANCEIRO PREMIUM
+   ========================================================= */
+.admin-content .admin-finance-dashboard{
+  width:100%;
+  max-width:1400px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  box-sizing:border-box;
+  font-family:"Montserrat",Arial,sans-serif;
+}
+.admin-content .admin-finance-dashboard *{box-sizing:border-box}
+
+.admin-content .admin-finance-hero{
+  width:100%;
+  min-height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:28px;
+  padding:28px 30px;
+  border:1px solid rgba(214,180,106,.42);
+  border-radius:22px;
+  background:linear-gradient(145deg,#121f32 0%,#07111f 100%);
+  box-shadow:
+    0 18px 45px rgba(7,17,31,.18),
+    inset 0 1px rgba(255,255,255,.07),
+    inset 0 -1px rgba(214,180,106,.08);
+  position:relative;
+  overflow:hidden;
+}
+.admin-content .admin-finance-hero::after{
+  content:"";
+  position:absolute;
+  width:260px;height:260px;
+  right:-100px;top:-150px;
+  border-radius:50%;
+  background:rgba(214,180,106,.08);
+  pointer-events:none;
+}
+.admin-content .admin-finance-hero > *{position:relative;z-index:1}
+.admin-content .admin-finance-hero h2{
+  margin:7px 0 8px;
+  color:#fff;
+  font-size:27px;
+  line-height:1.2;
+  letter-spacing:-.02em;
+}
+.admin-content .admin-finance-hero p{
+  margin:0;
+  max-width:650px;
+  color:#c4cbd7;
+  font-size:13px;
+  line-height:1.55;
+}
+.admin-content .admin-finance-controls{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  padding:8px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:rgba(255,255,255,.055);
+  backdrop-filter:blur(8px);
+}
+.admin-content .admin-finance-periods{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  padding:3px;
+  margin:0;
+  border:0;
+  border-radius:10px;
+  background:rgba(0,0,0,.18);
+}
+.admin-content .admin-finance-periods button{
+  min-width:64px;
+  height:38px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#c4cbd7;
+  font-family:inherit;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.admin-content .admin-finance-periods button:hover{color:#fff;background:rgba(255,255,255,.07)}
+.admin-content .admin-finance-periods button.active{
+  color:#0b182a;
+  background:#f0d99a;
+  box-shadow:0 4px 12px rgba(214,180,106,.18);
+}
+.admin-content .admin-finance-controls input{
+  width:145px;
+  height:40px;
+  min-height:40px;
+  margin:0;
+  padding:0 11px;
+  border:1px solid rgba(214,180,106,.45);
+  border-radius:9px;
+  outline:0;
+  background:#fff;
+  color:#0b182a;
+  font-family:inherit;
+  font-size:11px;
+  font-weight:800;
+}
+
+.admin-content .admin-finance-kpis{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  align-items:stretch;
+}
+.admin-content .admin-finance-kpis article{
+  position:relative;
+  min-width:0;
+  min-height:145px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:22px;
+  border:1px solid rgba(214,180,106,.28);
+  border-radius:18px;
+  background:linear-gradient(145deg,#fff 0%,#fbfaf7 100%);
+  box-shadow:
+    0 12px 28px rgba(15,23,42,.07),
+    0 3px 0 rgba(214,180,106,.07),
+    inset 0 1px #fff;
+  transform:translateY(0);
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+  overflow:hidden;
+}
+.admin-content .admin-finance-kpis article::before{
+  content:"";
+  position:absolute;
+  left:0;top:0;right:0;
+  height:3px;
+  background:linear-gradient(90deg,#d6b46a,#f0d99a,#d6b46a);
+}
+.admin-content .admin-finance-kpis article:hover{
+  transform:translateY(-4px);
+  border-color:rgba(214,180,106,.52);
+  box-shadow:
+    0 18px 38px rgba(15,23,42,.11),
+    0 6px 0 rgba(214,180,106,.08),
+    inset 0 1px #fff;
+}
+.admin-content .admin-finance-kpis span{
+  margin:0;
+  color:#64748b;
+  font-size:10px;
+  line-height:1.3;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.admin-content .admin-finance-kpis strong{
+  margin:9px 0 5px;
+  color:#0b182a;
+  font-size:25px;
+  line-height:1.15;
+  letter-spacing:-.03em;
+  overflow-wrap:anywhere;
+}
+.admin-content .admin-finance-kpis small{
+  margin:0;
+  color:#8a6d2f;
+  font-size:11px;
+  line-height:1.4;
+  font-weight:700;
+}
+
+.admin-content .admin-finance-grid{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);
+  gap:18px;
+  align-items:stretch;
+}
+.admin-content .admin-finance-panel{
+  min-width:0;
+  border:1px solid rgba(214,180,106,.23);
+  border-radius:20px;
+  background:#fff;
+  box-shadow:
+    0 12px 30px rgba(15,23,42,.065),
+    inset 0 1px rgba(255,255,255,.95);
+  overflow:hidden;
+}
+.admin-content .admin-finance-panel-head{
+  min-height:80px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px 20px;
+  border-bottom:1px solid #eef2f7;
+  background:linear-gradient(180deg,#fff,#fcfcfb);
+}
+.admin-content .admin-finance-panel-head h3{
+  margin:5px 0 0;
+  color:#0b182a;
+  font-size:17px;
+  line-height:1.25;
+}
+.admin-content .admin-finance-panel-head > strong{
+  color:#8a6d2f;
+  font-size:17px;
+  white-space:nowrap;
+}
+.admin-content .admin-finance-panel-head > span{
+  color:#64748b;
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.admin-content .admin-finance-chart{
+  min-height:290px;
+  height:290px;
+  display:flex;
+  align-items:stretch;
+  gap:5px;
+  padding:22px 18px 15px;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+.admin-content .admin-finance-bar-wrap{
+  position:relative;
+  height:100%;
+  min-width:25px;
+  flex:1 0 25px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  align-items:center;
+  gap:6px;
+}
+.admin-content .admin-finance-bar-wrap::before{
+  content:"";
+  position:absolute;
+  left:50%;top:0;bottom:27px;
+  width:1px;
+  background:#f1f3f6;
+  z-index:0;
+}
+.admin-content .admin-finance-bar{
+  position:relative;
+  z-index:1;
+  width:18px;
+  min-height:5px;
+  border-radius:6px 6px 3px 3px;
+  background:linear-gradient(180deg,#f0d99a 0%,#d6b46a 45%,#8a6d2f 100%);
+  box-shadow:0 5px 12px rgba(138,109,47,.18);
+  transition:height .25s ease,filter .2s ease;
+}
+.admin-content .admin-finance-bar:hover{filter:brightness(1.08)}
+.admin-content .admin-finance-bar-wrap > span{
+  position:relative;
+  z-index:2;
+  color:#64748b;
+  font-size:8px;
+  line-height:1;
+  white-space:nowrap;
+}
+.admin-content .admin-finance-bar-wrap em{
+  position:absolute;
+  top:0;
+  z-index:3;
+  min-width:18px;
+  text-align:center;
+  color:#8a6d2f;
+  font-size:9px;
+  font-style:normal;
+  font-weight:800;
+}
+
+.admin-content .admin-finance-plan-list,
+.admin-content .admin-finance-sales-list{
+  display:flex;
+  flex-direction:column;
+  padding:7px 20px;
+}
+.admin-content .admin-finance-plan-row,
+.admin-content .admin-finance-sale{
+  min-height:65px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:12px 0;
+  border-bottom:1px solid #eef2f7;
+}
+.admin-content .admin-finance-plan-row:last-child,
+.admin-content .admin-finance-sale:last-child{border-bottom:0}
+.admin-content .admin-finance-plan-row > div,
+.admin-content .admin-finance-sale > div{min-width:0}
+.admin-content .admin-finance-plan-row > div strong,
+.admin-content .admin-finance-sale > div strong{
+  display:block;
+  color:#172033;
+  font-size:13px;
+  line-height:1.3;
+}
+.admin-content .admin-finance-plan-row span,
+.admin-content .admin-finance-sale span{
+  display:block;
+  margin-top:4px;
+  color:#687386;
+  font-size:10px;
+  line-height:1.35;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.admin-content .admin-finance-plan-row > strong,
+.admin-content .admin-finance-sale > strong{
+  flex:0 0 auto;
+  color:#8a6d2f;
+  font-size:13px;
+  white-space:nowrap;
+}
+.admin-content .admin-finance-sales{
+  width:100%;
+}
+.admin-content .admin-finance-sales .admin-finance-sales-list{
+  max-height:390px;
+  overflow-y:auto;
+}
+
+@media(max-width:1100px){
+  .admin-content .admin-finance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-content .admin-finance-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .admin-content .admin-finance-hero{
+    align-items:stretch;
+    flex-direction:column;
+    padding:22px;
+  }
+  .admin-content .admin-finance-controls{
+    width:100%;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 145px;
+    justify-content:stretch;
+  }
+  .admin-content .admin-finance-periods{width:100%}
+  .admin-content .admin-finance-periods button{flex:1;min-width:0}
+  .admin-content .admin-finance-controls input{width:100%}
+}
+@media(max-width:560px){
+  .admin-content .admin-finance-dashboard{gap:15px}
+  .admin-content .admin-finance-kpis{grid-template-columns:1fr;gap:12px}
+  .admin-content .admin-finance-kpis article{min-height:126px;padding:19px}
+  .admin-content .admin-finance-kpis strong{font-size:23px}
+  .admin-content .admin-finance-hero{padding:20px 17px;border-radius:18px}
+  .admin-content .admin-finance-hero h2{font-size:22px}
+  .admin-content .admin-finance-controls{grid-template-columns:1fr}
+  .admin-content .admin-finance-panel{border-radius:17px}
+  .admin-content .admin-finance-panel-head{
+    align-items:flex-start;
+    flex-direction:column;
+    padding:17px;
+  }
+  .admin-content .admin-finance-chart{
+    min-height:245px;
+    height:245px;
+    padding:19px 10px 13px;
+    gap:3px;
+  }
+  .admin-content .admin-finance-bar-wrap{min-width:21px;flex-basis:21px}
+  .admin-content .admin-finance-bar{width:15px}
+  .admin-content .admin-finance-plan-list,
+  .admin-content .admin-finance-sales-list{padding:5px 16px}
+  .admin-content .admin-finance-plan-row,
+  .admin-content .admin-finance-sale{gap:10px;min-height:62px}
+}
