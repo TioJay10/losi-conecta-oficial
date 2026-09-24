@@ -12904,3 +12904,171 @@ button.availability-day {
   }
 }
 
+
+
+/* =========================================================
+   CENTRAL DE ASSINATURAS — ADMIN
+   ========================================================= */
+.admin-subscriptions-page{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+.admin-subscriptions-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+.admin-subscriptions-summary article{
+  min-width:0;
+  padding:20px;
+  border:1px solid #e3e7ed;
+  border-radius:17px;
+  background:linear-gradient(145deg,#fff,#fafaf8);
+  box-shadow:0 10px 25px rgba(15,23,42,.06);
+}
+.admin-subscriptions-summary span{
+  display:block;
+  color:#64748b;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.admin-subscriptions-summary strong{
+  display:block;
+  margin:8px 0 4px;
+  color:#0b182a;
+  font-size:25px;
+  line-height:1.15;
+}
+.admin-subscriptions-summary small{
+  color:#8a6d2f;
+  font-size:11px;
+  font-weight:700;
+}
+.admin-subscriptions-toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 190px auto;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:1px solid #e3e7ed;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 8px 22px rgba(15,23,42,.045);
+}
+.admin-subscriptions-toolbar input,
+.admin-subscriptions-toolbar select{
+  width:100%;
+  min-width:0;
+  height:42px;
+  margin:0;
+  padding:0 12px;
+  border:1px solid #dbe1e8;
+  border-radius:10px;
+  background:#fff;
+  color:#172033;
+  outline:0;
+  font:700 12px "Montserrat",Arial,sans-serif;
+}
+.admin-subscriptions-toolbar input:focus,
+.admin-subscriptions-toolbar select:focus{
+  border-color:#d6b46a;
+  box-shadow:0 0 0 3px rgba(214,180,106,.12);
+}
+.admin-subscriptions-toolbar > span{
+  color:#64748b;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.admin-subscriptions-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.admin-subscription-card{
+  padding:18px 20px;
+  border:1px solid #e1e5eb;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 10px 25px rgba(15,23,42,.05);
+}
+.admin-subscription-main{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.admin-subscription-plan{
+  color:#8a6d2f;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.admin-subscription-main h3{
+  margin:5px 0 4px;
+  color:#172033;
+  font-size:15px;
+}
+.admin-subscription-main p{
+  margin:0;
+  color:#687386;
+  font-size:11px;
+  line-height:1.45;
+}
+.admin-subscription-meta{
+  flex:0 0 auto;
+  display:flex;
+  align-items:flex-end;
+  flex-direction:column;
+  gap:7px;
+}
+.admin-subscription-meta strong{
+  color:#8a6d2f;
+  font-size:17px;
+  white-space:nowrap;
+}
+.admin-subscription-status{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+}
+.admin-subscription-status-active{color:#166534;background:#dcfce7;border:1px solid #bbf7d0}
+.admin-subscription-status-pending{color:#92400e;background:#fef3c7;border:1px solid #fde68a}
+.admin-subscription-status-cancelled{color:#991b1b;background:#fee2e2;border:1px solid #fecaca}
+.admin-subscription-details{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 18px;
+  margin-top:15px;
+  padding-top:12px;
+  border-top:1px solid #eef2f7;
+}
+.admin-subscription-details span{
+  color:#64748b;
+  font-size:10px;
+  overflow-wrap:anywhere;
+}
+@media(max-width:900px){
+  .admin-subscriptions-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-subscriptions-toolbar{grid-template-columns:minmax(0,1fr) 180px}
+  .admin-subscriptions-toolbar > span{grid-column:1/-1}
+}
+@media(max-width:560px){
+  .admin-subscriptions-page{gap:14px}
+  .admin-subscriptions-summary{grid-template-columns:1fr;gap:10px}
+  .admin-subscriptions-summary article{padding:17px}
+  .admin-subscriptions-toolbar{grid-template-columns:1fr;padding:10px}
+  .admin-subscription-card{padding:16px}
+  .admin-subscription-main{align-items:flex-start;flex-direction:column;gap:12px}
+  .admin-subscription-meta{width:100%;align-items:flex-start}
+  .admin-subscription-details{gap:7px 12px}
+}
