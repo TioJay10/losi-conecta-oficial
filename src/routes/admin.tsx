@@ -601,6 +601,43 @@ function AdminPage() {
                     </div>
                   </div>
 
+                  <section className="admin-operational-metrics admin-dashboard-operations">
+                    <div className="admin-operational-head">
+                      <div>
+                        <div className="admin-badge">OPERAÇÃO</div>
+                        <h2>Pendências e atividade</h2>
+                        <p>Veja rapidamente o que precisa da sua atenção antes de acompanhar os indicadores financeiros.</p>
+                      </div>
+                      <span>{unreadAdminNotifications} notificação(ões) não lida(s)</span>
+                    </div>
+                    <div className="admin-operational-grid">
+                      <article>
+                        <span>Fornecedores pendentes</span>
+                        <strong>{pendingBusinesses.length}</strong>
+                        <small>aguardando aprovação</small>
+                        {pendingBusinesses.length > 0 && <button type="button" className="admin-action-button" onClick={() => { setSection("businesses"); setBusinessStatusFilter("pending"); window.history.replaceState(null, "", "/admin?section=businesses&status=pending"); }}>Analisar</button>}
+                      </article>
+                      <article>
+                        <span>Pagamentos pendentes</span>
+                        <strong>{pendingSubscriptions.length}</strong>
+                        <small>aguardando conclusão</small>
+                        {pendingSubscriptions.length > 0 && <button type="button" className="admin-action-button" onClick={() => { setSection("subscriptions"); window.history.replaceState(null, "", "/admin?section=subscriptions"); }}>Ver assinaturas</button>}
+                      </article>
+                      <article>
+                        <span>Denúncias recebidas</span>
+                        <strong>{supplierReports.length}</strong>
+                        <small>registros para análise</small>
+                        {supplierReports.length > 0 && <button type="button" className="admin-action-button" onClick={() => { setSection("security"); window.history.replaceState(null, "", "/admin?section=security"); }}>Analisar</button>}
+                      </article>
+                      <article>
+                        <span>Notificações administrativas</span>
+                        <strong>{unreadAdminNotifications}</strong>
+                        <small>pendentes de leitura</small>
+                        {unreadAdminNotifications > 0 && <button type="button" className="admin-action-button" onClick={() => { setSection("notifications"); window.history.replaceState(null, "", "/admin?section=notifications"); }}>Abrir</button>}
+                      </article>
+                    </div>
+                  </section>
+
                   <div className="admin-finance-kpis">
                     <article><span>Faturamento hoje</span><strong>{money(revenue(todayClosed))}</strong><small>{todayClosed.length} plano(s) fechado(s)</small></article>
                     <article><span>Faturamento da semana</span><strong>{money(revenue(weekClosed))}</strong><small>{weekClosed.length} plano(s) fechado(s)</small></article>
