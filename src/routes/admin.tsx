@@ -111,7 +111,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "notifications" | "communication" | "activity">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "communication" | "activity">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -121,6 +121,11 @@ function AdminPage() {
   const [activatingBusinessId, setActivatingBusinessId] = useState<string | null>(null);
   const [activationPlanByBusiness, setActivationPlanByBusiness] = useState<Record<string, string>>({});
   const [subscriptions, setSubscriptions] = useState<Array<{id:string;business_id:string;plan_id:string;status:string;starts_at:string;created_at:string;ends_at:string|null;activated_by:string|null;asaas_payment_id:string|null;paid_amount:number|null;paid_at:string|null;business:{business_name:string}|null;plan:{name:string;price_cents:number;slug:string}|null}>>([]);
+  const [coupons, setCoupons] = useState<Array<{id:string;code:string;assigned_user_id:string;plan_id:string|null;discount_type:"percent"|"fixed";discount_value:number;active:boolean;expires_at:string|null;claimed_at:string|null;used_at:string|null}>>([]);
+  const [couponSearch, setCouponSearch] = useState("");
+  const [editingCouponId, setEditingCouponId] = useState<string | null>(null);
+  const [couponSaving, setCouponSaving] = useState(false);
+  const [couponMessage, setCouponMessage] = useState("");
   const [dataError, setDataError] = useState("");
   const [businessSearch, setBusinessSearch] = useState("");
   const [businessStatusFilter, setBusinessStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
@@ -175,7 +180,7 @@ function AdminPage() {
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
       setAvatarUrl(data.avatar_url ?? null);
-      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,reportsResult,notificationsResult,auditResult,broadcastsResult] = await Promise.all([
+      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,couponsResult,reportsResult,notificationsResult,auditResult,broadcastsResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state,blocked,phone,created_at").order("created_at",{ascending:false}),
         supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status,created_at").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
@@ -183,13 +188,14 @@ function AdminPage() {
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
         supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").order("created_at",{ascending:false}),
+        supabase.from("coupons").select("id,code,assigned_user_id,plan_id,discount_type,discount_value,active,expires_at,claimed_at,used_at").order("created_at",{ascending:false}),
         supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,status,resolved_by,resolved_at,resolution_note,resolution_action,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
         supabase.from("admin_audit_logs").select("id,admin_user_id,action,entity_type,entity_id,entity_name,details,created_at,admin:profiles(full_name)").order("created_at",{ascending:false}).limit(200),
         supabase.from("admin_broadcasts").select("id,title,message,target_type,target_value,recipient_count,created_at").order("created_at",{ascending:false}).limit(100),
       ]);
       if (!mounted) return;
-      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, reportsResult, notificationsResult, auditResult, broadcastsResult].find((result) => result.error)?.error;
+      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, couponsResult, reportsResult, notificationsResult, auditResult, broadcastsResult].find((result) => result.error)?.error;
       if (firstError) setDataError(firstError.message);
       setUsers((usersResult.data ?? []) as typeof users);
       setBusinesses((businessesResult.data ?? []) as typeof businesses);
@@ -198,6 +204,7 @@ function AdminPage() {
       setReviews((reviewsResult.data ?? []) as unknown as typeof reviews);
       setPlans((plansResult.data ?? []) as typeof plans);
       setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);
+      setCoupons((couponsResult.data ?? []) as typeof coupons);
       setSupplierReports((reportsResult.data ?? []) as unknown as typeof supplierReports);
       setAdminNotifications((notificationsResult.data ?? []) as typeof adminNotifications);
       setAuditLogs((auditResult.data ?? []) as unknown as typeof auditLogs);
@@ -393,6 +400,63 @@ function AdminPage() {
     setSubscriptions((current) => existing ? [{...updated}, ...current.map((item) => item.id === existing.id ? {...item, status:"cancelled", ends_at:now.toISOString()} : item)] : [updated, ...current]);
     setActivationPlanByBusiness((current) => ({ ...current, [businessId]: "" }));
     await recordAdminAction("manual_activate_subscription", "subscription", updated.id, plan.name, {business_id:businessId,plan_id:planId,previous_subscription_id:existing?.id ?? null});
+  }
+
+  async function saveCoupon(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (couponSaving) return;
+    setCouponSaving(true);
+    setCouponMessage("");
+    const form = new FormData(event.currentTarget);
+    const id = String(form.get("id") || "").trim() || null;
+    const code = String(form.get("code") || "").trim().toUpperCase();
+    const assignedUserId = String(form.get("assigned_user_id") || "").trim();
+    const planId = String(form.get("plan_id") || "").trim() || null;
+    const discountType = String(form.get("discount_type") || "percent") as "percent" | "fixed";
+    const rawDiscount = Number(String(form.get("discount_value") || "0").replace(",", "."));
+    const discountValue = discountType === "fixed" ? Math.round(rawDiscount * 100) : Math.round(rawDiscount);
+    const expiresRaw = String(form.get("expires_at") || "").trim();
+    const expiresAt = expiresRaw ? new Date(expiresRaw + "T23:59:59").toISOString() : null;
+    const active = form.get("active") === "on";
+
+    if (!code || !assignedUserId || !Number.isFinite(rawDiscount) || rawDiscount <= 0 || (discountType === "percent" && rawDiscount > 100)) {
+      setCouponMessage(discountType === "percent" ? "Informe um desconto percentual entre 0,01% e 100%." : "Informe um valor de desconto maior que zero.");
+      setCouponSaving(false);
+      return;
+    }
+
+    const payload = { code, assigned_user_id: assignedUserId, plan_id: planId, discount_type: discountType, discount_value: discountValue, active, expires_at: expiresAt };
+    const result = id
+      ? await supabase.from("coupons").update(payload).eq("id", id).select("id,code,assigned_user_id,plan_id,discount_type,discount_value,active,expires_at,claimed_at,used_at").single()
+      : await supabase.from("coupons").insert(payload).select("id,code,assigned_user_id,plan_id,discount_type,discount_value,active,expires_at,claimed_at,used_at").single();
+
+    if (result.error || !result.data) {
+      setCouponMessage(result.error?.message || "Não foi possível salvar o cupom.");
+      setCouponSaving(false);
+      return;
+    }
+
+    const saved = result.data as typeof coupons[number];
+    setCoupons(current => id ? current.map(item => item.id === id ? saved : item) : [saved, ...current]);
+    setEditingCouponId(null);
+    setCouponMessage(id ? "Cupom atualizado com sucesso." : "Cupom criado com sucesso.");
+    await recordAdminAction(id ? "update_coupon" : "create_coupon", "coupon", saved.id, saved.code, { assigned_user_id: saved.assigned_user_id, plan_id: saved.plan_id, discount_type: saved.discount_type, discount_value: saved.discount_value, active: saved.active });
+    setCouponSaving(false);
+  }
+
+  async function removeCoupon(id: string) {
+    const coupon = coupons.find(item => item.id === id);
+    if (!coupon) return;
+    if (!window.confirm(`Remover o cupom "${coupon.code}"? Esta ação não pode ser desfeita.`)) return;
+    const { error } = await supabase.from("coupons").delete().eq("id", id);
+    if (error) {
+      setCouponMessage(error.message || "Não foi possível remover o cupom.");
+      return;
+    }
+    setCoupons(current => current.filter(item => item.id !== id));
+    if (editingCouponId === id) setEditingCouponId(null);
+    setCouponMessage("Cupom removido com sucesso.");
+    await recordAdminAction("delete_coupon", "coupon", id, coupon.code);
   }
 
   function categorySlug(value: string) {
