@@ -63,7 +63,7 @@ function AdminPage() {
   const [planSavingId, setPlanSavingId] = useState<string | null>(null);
   const [activatingBusinessId, setActivatingBusinessId] = useState<string | null>(null);
   const [activationPlanByBusiness, setActivationPlanByBusiness] = useState<Record<string, string>>({});
-  const [subscriptions, setSubscriptions] = useState<Array<{id:string;business_id:string;plan_id:string;status:string;starts_at:string;created_at:string;ends_at:string|null;activated_by:string|null;asaas_payment_id:string|null;business:{business_name:string}|null;plan:{name:string;price_cents:number;slug:string}|null}>>([]);
+  const [subscriptions, setSubscriptions] = useState<Array<{id:string;business_id:string;plan_id:string;status:string;starts_at:string;created_at:string;ends_at:string|null;activated_by:string|null;asaas_payment_id:string|null;paid_amount:number|null;paid_at:string|null;business:{business_name:string}|null;plan:{name:string;price_cents:number;slug:string}|null}>>([]);
   const [dataError, setDataError] = useState("");
   const [businessSearch, setBusinessSearch] = useState("");
   const [businessStatusFilter, setBusinessStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
@@ -106,7 +106,7 @@ function AdminPage() {
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
-        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").order("created_at",{ascending:false}),
+        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").order("created_at",{ascending:false}),
         supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
       ]);
       if (!mounted) return;
@@ -195,7 +195,7 @@ function AdminPage() {
     const existing = subscriptions.find((item) => item.business_id === businessId && item.status === "active");
     const payload = { plan_id: planId, status: "active", starts_at: now.toISOString(), ends_at: endsAt.toISOString(), activated_by: user?.id ?? null };
     const result = existing
-      ? await supabase.from("business_subscriptions").update(payload).eq("id", existing.id).select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").single()
+      ? await supabase.from("business_subscriptions").update(payload).eq("id", existing.id).select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").single()
       : await supabase.from("business_subscriptions").insert({ business_id: businessId, ...payload }).select("id,business_id,plan_id,status,ends_at,business:business_profiles(business_name),plan:plans(name)").single();
 
     setActivatingBusinessId(null);
@@ -386,7 +386,7 @@ function AdminPage() {
               const monthKey = (value: string | Date) => localKey(value).slice(0, 7);
               const yearKey = (value: string | Date) => String(new Date(value).getFullYear());
               const closedSubscriptions = subscriptions.filter(item => item.status === "active" || Boolean(item.asaas_payment_id) || Boolean(item.activated_by));
-              const subscriptionValue = (item: typeof subscriptions[number]) => item.plan?.price_cents ?? 0;
+              const subscriptionValue = (item: typeof subscriptions[number]) => item.asaas_payment_id && item.paid_amount != null ? Math.round(Number(item.paid_amount) * 100) : (item.plan?.price_cents ?? 0);
               const today = new Date();
               const todayKey = localKey(today);
               const currentMonthKey = monthKey(today);
@@ -395,14 +395,15 @@ function AdminPage() {
               const dayOfWeek = weekStart.getDay();
               weekStart.setDate(weekStart.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
               weekStart.setHours(0, 0, 0, 0);
-              const todayClosed = closedSubscriptions.filter(item => localKey(item.starts_at) === todayKey);
-              const weekClosed = closedSubscriptions.filter(item => new Date(item.starts_at) >= weekStart && new Date(item.starts_at) <= today);
-              const monthClosed = closedSubscriptions.filter(item => monthKey(item.starts_at) === currentMonthKey);
+              const paymentDate = (item: typeof subscriptions[number]) => item.paid_at || item.starts_at;
+              const todayClosed = closedSubscriptions.filter(item => localKey(paymentDate(item)) === todayKey);
+              const weekClosed = closedSubscriptions.filter(item => new Date(paymentDate(item)) >= weekStart && new Date(paymentDate(item)) <= today);
+              const monthClosed = closedSubscriptions.filter(item => monthKey(paymentDate(item)) === currentMonthKey);
               const revenue = (items: typeof closedSubscriptions) => items.reduce((sum, item) => sum + subscriptionValue(item), 0);
               const selectedMatch = (item: typeof subscriptions[number]) => {
-                if (dashboardView === "day") return localKey(item.starts_at) === dashboardDate;
-                if (dashboardView === "year") return yearKey(item.starts_at) === dashboardDate.slice(0, 4);
-                return monthKey(item.starts_at) === dashboardDate.slice(0, 7);
+                if (dashboardView === "day") return localKey(paymentDate(item)) === dashboardDate;
+                if (dashboardView === "year") return yearKey(paymentDate(item)) === dashboardDate.slice(0, 4);
+                return monthKey(paymentDate(item)) === dashboardDate.slice(0, 7);
               };
               const selectedClosed = closedSubscriptions.filter(selectedMatch);
               const selectedRevenue = revenue(selectedClosed);
@@ -420,12 +421,12 @@ function AdminPage() {
                   ? Array.from({ length: new Date(Number(dashboardDate.slice(0, 4)), Number(dashboardDate.slice(5, 7)), 0).getDate() }, (_, index) => {
                       const day = index + 1;
                       const key = `${dashboardDate.slice(0, 7)}-${String(day).padStart(2, "0")}`;
-                      const items = selectedClosed.filter(item => localKey(item.starts_at) === key);
+                      const items = selectedClosed.filter(item => localKey(paymentDate(item)) === key);
                       return { label: String(day).padStart(2, "0"), count: items.length, revenue: revenue(items) };
                     })
                   : Array.from({ length: 12 }, (_, index) => {
                       const key = `${dashboardDate.slice(0, 4)}-${String(index + 1).padStart(2, "0")}`;
-                      const items = selectedClosed.filter(item => monthKey(item.starts_at) === key);
+                      const items = selectedClosed.filter(item => monthKey(paymentDate(item)) === key);
                       return { label: new Date(Number(dashboardDate.slice(0, 4)), index, 1).toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), count: items.length, revenue: revenue(items) };
                     });
               const maxRevenue = Math.max(1, ...periods.map(item => item.revenue));
@@ -433,13 +434,13 @@ function AdminPage() {
               const monthlyHistory = Array.from({ length: 12 }, (_, index) => {
                 const date = new Date(today.getFullYear(), currentMonthIndex - (11 - index), 1);
                 const key = monthKey(date);
-                const items = closedSubscriptions.filter(item => monthKey(item.starts_at) === key);
+                const items = closedSubscriptions.filter(item => monthKey(paymentDate(item)) === key);
                 return { label: date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), value: revenue(items), period: key };
               });
-              const availableYears = Array.from(new Set(closedSubscriptions.map(item => yearKey(item.starts_at)))).sort();
+              const availableYears = Array.from(new Set(closedSubscriptions.map(item => yearKey(paymentDate(item))))).sort();
               const annualHistory = availableYears.map(year => ({
                 label: year,
-                value: revenue(closedSubscriptions.filter(item => yearKey(item.starts_at) === year)),
+                value: revenue(closedSubscriptions.filter(item => yearKey(paymentDate(item)) === year)),
               }));
               const selectedDateInput = dashboardView === "day" ? dashboardDate : dashboardView === "month" ? dashboardDate.slice(0, 7) : dashboardDate.slice(0, 4);
               const selectedInputType = dashboardView === "day" ? "date" : dashboardView === "month" ? "month" : "number";
@@ -505,7 +506,7 @@ function AdminPage() {
                   <section className="admin-finance-panel admin-finance-sales">
                     <div className="admin-finance-panel-head"><div><div className="admin-badge">FECHAMENTOS</div><h3>Vendas registradas no período</h3></div><span>{selectedClosed.length} total</span></div>
                     <div className="admin-finance-sales-list">
-                      {selectedClosed.length === 0 ? <div className="admin-empty">Nenhuma venda registrada neste período.</div> : selectedClosed.slice().sort((a,b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime()).map(item => <div className="admin-finance-sale" key={item.id}><div><strong>{item.plan?.name || "Plano"}</strong><span>{item.business?.business_name || "Fornecedor"} · {new Date(item.starts_at).toLocaleString("pt-BR")}</span></div><strong>{money(subscriptionValue(item))}</strong></div>)}
+                      {selectedClosed.length === 0 ? <div className="admin-empty">Nenhuma venda registrada neste período.</div> : selectedClosed.slice().sort((a,b) => new Date(paymentDate(b)).getTime() - new Date(paymentDate(a)).getTime()).map(item => <div className="admin-finance-sale" key={item.id}><div><strong>{item.plan?.name || "Plano"}</strong><span>{item.business?.business_name || "Fornecedor"} · {new Date(paymentDate(item)).toLocaleString("pt-BR")}</span></div><strong>{money(subscriptionValue(item))}</strong></div>)}
                     </div>
                   </section>
                 </div>
