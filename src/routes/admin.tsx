@@ -45,6 +45,48 @@ function FinanceLineChart({ data, valueLabel }: { data: Array<{ label: string; v
   );
 }
 
+function auditActionLabel(action: string) {
+  const labels: Record<string, string> = {
+    send_broadcast: "Envio de comunicação",
+    cancel_subscription: "Encerramento de plano",
+    update_plan: "Alteração de plano",
+    update_business: "Alteração de fornecedor",
+    delete_user: "Exclusão de usuário",
+    block_user: "Bloqueio de usuário",
+    unblock_user: "Desbloqueio de usuário",
+  };
+  return labels[action] || action.replaceAll("_", " ").replace(/\\b\\w/g, letter => letter.toUpperCase());
+}
+
+function auditEntityLabel(entityType: string) {
+  const labels: Record<string, string> = {
+    communication: "Comunicação",
+    subscription: "Plano",
+    plan: "Plano",
+    business: "Fornecedor",
+    user: "Usuário",
+  };
+  return labels[entityType] || entityType.replaceAll("_", " ");
+}
+
+function auditDetailLabel(key: string, value: unknown) {
+  const labels: Record<string, string> = {
+    target_type: "Público",
+    target_value: "Destino específico",
+    recipient_count: "Destinatários",
+    plan: "Plano",
+  };
+  const targetLabels: Record<string, string> = {
+    all_suppliers: "Todos os fornecedores ativos",
+    all_users: "Todos os usuários",
+    plan: "Usuários de um plano",
+    user: "Usuário específico",
+  };
+  if (key === "target_type" && typeof value === "string") return targetLabels[value] || value;
+  if (value === null || value === undefined || value === "") return "Não informado";
+  return String(value);
+}
+
 function AdminPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -932,7 +974,19 @@ function AdminPage() {
                 <div className="admin-admin-center">
                   <section className="admin-admin-center-hero"><div><div className="admin-badge">AUDITORIA</div><h2>Atividade administrativa</h2><p>Histórico das ações executadas dentro do painel administrativo.</p></div><strong>{auditLogs.length} registro(s)</strong></section>
                   <div className="admin-admin-toolbar"><input value={activitySearch} onChange={e=>setActivitySearch(e.target.value)} placeholder="Buscar ação, administrador ou item..." aria-label="Buscar atividade administrativa" /><select value={activityActionFilter} onChange={e=>setActivityActionFilter(e.target.value)} aria-label="Filtrar ação"><option value="all">Todas as ações</option>{Array.from(new Set(auditLogs.map(item=>item.action))).map(action=><option key={action} value={action}>{action.replaceAll("_"," ")}</option>)}</select></div>
-                  <div className="admin-admin-notification-list">{auditLogs.filter(item=>{const q=activitySearch.trim().toLocaleLowerCase("pt-BR");const hay=[item.action,item.entity_type,item.entity_name??"",item.admin?.full_name??""].join(" ").toLocaleLowerCase("pt-BR");return(!q||hay.includes(q))&&(activityActionFilter==="all"||item.action===activityActionFilter)}).map(item=><article className="admin-admin-notification read" key={item.id}><div><span>{item.action.replaceAll("_"," ").toUpperCase()}</span><h3>{item.entity_name||item.entity_type}</h3><p>Administrador: {item.admin?.full_name||"Administrador"} · {item.entity_type}</p><small>{new Date(item.created_at).toLocaleString("pt-BR")}</small></div><div className="admin-audit-details">{Object.entries(item.details??{}).map(([key,value])=><span key={key}>{key}: {typeof value==="string"?value:JSON.stringify(value)}</span>)}</div></article>)}</div>
+                  <div className="admin-admin-notification-list">{auditLogs.filter(item=>{const q=activitySearch.trim().toLocaleLowerCase("pt-BR");const hay=[item.action,item.entity_type,item.entity_name??"",item.admin?.full_name??""].join(" ").toLocaleLowerCase("pt-BR");return(!q||hay.includes(q))&&(activityActionFilter==="all"||item.action===activityActionFilter)}).map(item=><article className="admin-admin-notification read" key={item.id}>
+                    <div>
+                      <span>{auditActionLabel(item.action)}</span>
+                      <h3>{item.entity_name || auditEntityLabel(item.entity_type)}</h3>
+                      <p>Administrador: {item.admin?.full_name || "Administrador"}</p>
+                      <small>{new Date(item.created_at).toLocaleString("pt-BR")}</small>
+                    </div>
+                    <div className="admin-audit-details">
+                      {Object.entries(item.details ?? {}).map(([key,value]) => (
+                        <span key={key}><strong>{key === "recipient_count" ? "Destinatários" : key === "target_type" ? "Público" : key === "target_value" ? "Destino específico" : key === "plan" ? "Plano" : key}</strong>: {auditDetailLabel(key,value)}</span>
+                      ))}
+                    </div>
+                  </article>)}</div>
                   {auditLogs.length===0&&<div className="admin-empty">Nenhuma ação administrativa registrada ainda.</div>}
                 </div>
               ) : section === "commercial" ? <div className="admin-commercial-grid">
