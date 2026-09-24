@@ -12589,3 +12589,61 @@ button.availability-day {
   .admin-content .admin-finance-plan-row,
   .admin-content .admin-finance-sale{gap:10px;min-height:62px}
 }
+
+/* GRÁFICOS DE EVOLUÇÃO FINANCEIRA */
+
+.admin-content .admin-finance-growth-grid{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  align-items:stretch;
+}
+.admin-content .admin-finance-line-chart{
+  min-height:290px;
+  height:290px;
+  padding:16px 18px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.admin-content .admin-finance-line-chart svg{
+  width:100%;
+  height:100%;
+  display:block;
+  overflow:visible;
+}
+.admin-content .admin-finance-grid-line{
+  stroke:#eef2f7;
+  stroke-width:1;
+}
+.admin-content .admin-finance-axis-label{
+  fill:#94a3b8;
+  font-family:"Montserrat",Arial,sans-serif;
+  font-size:10px;
+}
+.admin-content .admin-finance-x-label{
+  font-size:9px;
+}
+.admin-content .admin-finance-area{
+  fill:rgba(214,180,106,.13);
+}
+.admin-content .admin-finance-line{
+  fill:none;
+  stroke:#b08b3e;
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.admin-content .admin-finance-line-point{
+  fill:#f0d99a;
+  stroke:#8a6d2f;
+  stroke-width:2;
+}
+@media(max-width:1100px){
+  .admin-content .admin-finance-growth-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .admin-content .admin-finance-line-chart{height:250px;min-height:250px;padding:10px 8px}
+}
