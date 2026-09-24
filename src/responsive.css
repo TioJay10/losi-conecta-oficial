@@ -13185,3 +13185,28 @@ button.availability-day {
 
 /* Impede texto escuro em superfícies navy criadas posteriormente */
 :where(.admin-page,.dashboard-main) :where([style*="background: #0b182a"],[style*="background: \"#0b182a\""],[style*="#121f32"],[style*="#07111f"]) :where(p,small,h1,h2,h3,h4,strong,span){color:#f0d99a !important;}
+
+
+/* Quantidade da Central de Alertas — contraste reforçado */
+.admin-page .admin-alerts-hero > strong{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:0 14px;
+  border:1px solid rgba(214,180,106,.55);
+  border-radius:999px;
+  background:rgba(214,180,106,.12);
+  color:#fff !important;
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.01em;
+  white-space:nowrap;
+  text-shadow:0 1px 2px rgba(0,0,0,.28);
+}
+@media(max-width:620px){
+  .admin-page .admin-alerts-hero > strong{
+    width:100%;
+    box-sizing:border-box;
+  }
+}
