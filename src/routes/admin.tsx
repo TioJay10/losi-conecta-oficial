@@ -54,7 +54,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected" }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "categories" | "services" | "reviews" | "commercial">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "categories" | "services" | "reviews" | "commercial">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -85,6 +85,8 @@ function AdminPage() {
   const [reviews, setReviews] = useState<Array<{ id:string; rating:number; comment:string|null; active:boolean; created_at:string; business:{business_name:string}|null; reviewer:{full_name:string|null}|null }>>([]);
   const [supplierReports, setSupplierReports] = useState<Array<{ id:string; business_id:string; reporter_id:string; reason:string; details:string|null; created_at:string; business:{business_name:string; owner_id:string}|null; reporter:{full_name:string|null}|null }>>([]);
   const [securitySearch, setSecuritySearch] = useState("");
+  const [subscriptionSearch, setSubscriptionSearch] = useState("");
+  const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState<"all" | "active" | "pending" | "cancelled">("all");
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -125,7 +127,7 @@ function AdminPage() {
     }
     load();
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","categories","services","reviews","commercial"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","categories","services","reviews","commercial"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -324,6 +326,7 @@ function AdminPage() {
     { id: "security" as const, label: "Central de segurança" },
     { id: "users" as const, label: "Usuários", count: stats.users },
     { id: "businesses" as const, label: "Empresas", count: stats.businesses },
+    { id: "subscriptions" as const, label: "Assinaturas", count: subscriptions.filter(item => item.status === "pending").length },
     { id: "services" as const, label: "Serviços", count: stats.services },
     { id: "categories" as const, label: "Categorias", count: stats.categories },
     { id: "reviews" as const, label: "Avaliações", count: stats.reviews },
@@ -340,7 +343,7 @@ function AdminPage() {
     return matchesSearch && (businessStatusFilter === "all" || item.approval_status === businessStatusFilter);
   });
   const selectedBusiness = selectedBusinessId ? businesses.find((item) => item.id === selectedBusinessId) ?? null : null;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : "Comercial";
 
   return (
     <main className="admin-page">
@@ -662,6 +665,78 @@ function AdminPage() {
                 )}
                 <div className="admin-list">{filteredBusinesses.length === 0 ? <div className="admin-empty">Nenhuma empresa encontrada com esses filtros.</div> : filteredBusinesses.map(item => <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.business_name}</strong><span>{item.city || "Localização não informada"}{item.state ? " - " + item.state : ""} · {item.verified ? "Verificada" : "Não verificada"} · {item.active ? "Ativa" : "Inativa"} · {item.approval_status === "approved" ? "Aprovada" : item.approval_status === "rejected" ? "Rejeitada" : "Pendente"}</span></div><div className="admin-item-actions"><button className="admin-action-button" onClick={() => setSelectedBusinessId(item.id)}>Analisar</button><button className="admin-action-button" onClick={() => updateBusiness(item.id,{verified:!item.verified})}>{item.verified ? "Retirar verificação" : "Verificar empresa"}</button>{item.approval_status !== "approved" && <button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"approved"})}>Aprovar</button>}{item.approval_status !== "rejected" && <button className="admin-action-button" onClick={() => updateBusiness(item.id,{approval_status:"rejected"})}>Rejeitar</button>}<button className="admin-action-button" onClick={() => updateBusiness(item.id,{active:!item.active})}>{item.active ? "Desativar" : "Ativar"}</button></div></div></article>)}</div>
               </div>
+              : section === "subscriptions" ? (() => {
+                const query = subscriptionSearch.trim().toLocaleLowerCase("pt-BR");
+                const filteredSubscriptions = subscriptions.filter(item => {
+                  const haystack = [
+                    item.business?.business_name ?? "",
+                    item.plan?.name ?? "",
+                    item.asaas_payment_id ?? "",
+                    item.status,
+                  ].join(" ").toLocaleLowerCase("pt-BR");
+                  return (!query || haystack.includes(query)) && (subscriptionStatusFilter === "all" || item.status === subscriptionStatusFilter);
+                });
+                const activeCount = subscriptions.filter(item => item.status === "active").length;
+                const pendingCount = subscriptions.filter(item => item.status === "pending").length;
+                const cancelledCount = subscriptions.filter(item => item.status === "cancelled").length;
+                const paidRevenue = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null).reduce((sum,item) => sum + Number(item.paid_amount ?? 0), 0);
+                const statusLabel = (status: string) => status === "active" ? "Ativa" : status === "pending" ? "Pendente" : status === "cancelled" ? "Cancelada" : status;
+                return (
+                  <div className="admin-subscriptions-page">
+                    <div className="admin-subscriptions-summary">
+                      <article><span>Ativas</span><strong>{activeCount}</strong><small>planos com acesso ativo</small></article>
+                      <article><span>Pendentes</span><strong>{pendingCount}</strong><small>aguardando pagamento</small></article>
+                      <article><span>Canceladas</span><strong>{cancelledCount}</strong><small>histórico registrado</small></article>
+                      <article><span>Receita registrada</span><strong>{paidRevenue.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong><small>pagamentos confirmados</small></article>
+                    </div>
+                    <div className="admin-subscriptions-toolbar">
+                      <input value={subscriptionSearch} onChange={e => setSubscriptionSearch(e.target.value)} placeholder="Buscar fornecedor, plano ou ID Asaas..." aria-label="Buscar assinaturas" />
+                      <select value={subscriptionStatusFilter} onChange={e => setSubscriptionStatusFilter(e.target.value as typeof subscriptionStatusFilter)} aria-label="Filtrar assinaturas">
+                        <option value="all">Todos os status</option>
+                        <option value="active">Ativas</option>
+                        <option value="pending">Pendentes</option>
+                        <option value="cancelled">Canceladas</option>
+                      </select>
+                      <span>{filteredSubscriptions.length} resultado(s)</span>
+                    </div>
+                    <div className="admin-subscriptions-list">
+                      {filteredSubscriptions.length === 0 ? <div className="admin-empty">Nenhuma assinatura encontrada com os filtros atuais.</div> : filteredSubscriptions.map(item => {
+                        const amount = item.paid_amount != null ? Number(item.paid_amount) : Number(item.plan?.price_cents ?? 0) / 100;
+                        return (
+                          <article className="admin-subscription-card" key={item.id}>
+                            <div className="admin-subscription-main">
+                              <div>
+                                <div className="admin-subscription-plan">{item.plan?.name || "Plano não identificado"}</div>
+                                <h3>{item.business?.business_name || "Fornecedor não identificado"}</h3>
+                                <p>{item.paid_at ? `Pagamento: ${new Date(item.paid_at).toLocaleString("pt-BR")}` : `Criada: ${new Date(item.created_at).toLocaleString("pt-BR")}`}{item.ends_at ? ` · término: ${new Date(item.ends_at).toLocaleDateString("pt-BR")}` : ""}</p>
+                              </div>
+                              <div className="admin-subscription-meta">
+                                <strong>{amount.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong>
+                                <span className={`admin-subscription-status admin-subscription-status-${item.status}`}>{statusLabel(item.status)}</span>
+                              </div>
+                            </div>
+                            <div className="admin-subscription-details">
+                              <span>Asaas: {item.asaas_payment_id ? item.asaas_payment_id : "Ainda não confirmado"}</span>
+                              <span>Plano: {item.plan?.slug || "—"}</span>
+                              <span>ID: {item.id.slice(0,8)}…</span>
+                            </div>
+                            {item.status === "active" && <div className="admin-item-actions">
+                              <button type="button" className="admin-security-danger" onClick={async () => {
+                                if (!window.confirm(`Encerrar o acesso de ${item.business?.business_name || "este fornecedor"} a este plano?`)) return;
+                                const now = new Date().toISOString();
+                                const { error } = await supabase.from("business_subscriptions").update({ status: "cancelled", ends_at: now }).eq("id", item.id);
+                                if (error) { setDataError(error.message); return; }
+                                setSubscriptions(current => current.map(x => x.id === item.id ? { ...x, status: "cancelled", ends_at: now } : x));
+                                setDataError("");
+                              }}>Encerrar acesso</button>
+                            </div>}
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()
               : section === "commercial" ? <div className="admin-commercial-grid">
                 {plans.map(plan => <article className="admin-commercial-card" key={plan.id}>
                   <div className="admin-commercial-card-head"><span>{plan.billing_period === "free" ? "PLANO GRATUITO" : "PLANO PAGO"}</span><button type="button" className="admin-action-button" onClick={() => setEditingPlanId(editingPlanId === plan.id ? null : plan.id)}>{editingPlanId === plan.id ? "Fechar" : "Editar plano"}</button></div>
