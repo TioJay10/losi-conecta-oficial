@@ -322,8 +322,21 @@ function DashboardPage() {
       if (!session) navigate({ to: "/entrar" });
     }) ?? { data: { subscription: { unsubscribe() {} } } };
 
+    // Recarrega assinatura e demais dados quando o usuário volta do Asaas
+    // ou retorna para esta aba depois que o pagamento foi confirmado.
+    const handleRefresh = () => {
+      if (document.visibilityState === "visible") {
+        void load();
+        void loadPendingSubscription();
+      }
+    };
+    window.addEventListener("focus", handleRefresh);
+    document.addEventListener("visibilitychange", handleRefresh);
+
     return () => {
       mounted = false;
+      window.removeEventListener("focus", handleRefresh);
+      document.removeEventListener("visibilitychange", handleRefresh);
       listener.subscription.unsubscribe();
     };
   }, [navigate]);
