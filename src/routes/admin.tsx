@@ -53,6 +53,8 @@ function auditActionLabel(action: string) {
     update_business: "Alteração de fornecedor",
     delete_user: "Exclusão de usuário",
     block_user: "Bloqueio de usuário",
+    admin_block_user: "Bloqueio administrativo",
+    admin_unblock_user: "Desbloqueio administrativo",
     unblock_user: "Desbloqueio de usuário",
     resolve_supplier_report: "Denúncia resolvida",
     dismiss_supplier_report: "Denúncia arquivada",
@@ -94,6 +96,8 @@ function auditDetailLabel(key: string, value: unknown) {
   if (key === "target_type" && typeof value === "string") return targetLabels[value] || value;
   if (key === "status" && typeof value === "string") return value === "resolved" ? "Resolvida" : value === "dismissed" ? "Arquivada" : value === "open" ? "Em análise" : value;
   if (key === "resolution_action" && typeof value === "string") return ({none:"Nenhuma medida",keep_active:"Fornecedor mantido ativo",suspend_supplier:"Fornecedor suspenso",block_supplier:"Responsável pela conta bloqueado"} as Record<string,string>)[value] || value;
+  if (key === "reason" && typeof value === "string") return ({inappropriate:"Conteúdo ou comportamento inadequado",fraud:"Suspeita de fraude",spam:"Spam ou abordagem indevida",other:"Outro motivo"} as Record<string,string>)[value] || value;
+  if (key === "entity_status" && typeof value === "string") return ({active:"Ativo",blocked:"Bloqueado",inactive:"Inativo",approved:"Aprovado",pending:"Pendente",rejected:"Rejeitado"} as Record<string,string>)[value] || value;
   if (value === null || value === undefined || value === "") return "Não informado";
   return String(value);
 }
@@ -1166,7 +1170,7 @@ function AdminPage() {
                     </div>
                     <div className="admin-audit-details">
                       {Object.entries(item.details ?? {}).map(([key,value]) => (
-                        <span key={key}><strong>{key === "recipient_count" ? "Destinatários" : key === "target_type" ? "Público" : key === "target_value" ? "Destino específico" : key === "plan" ? "Plano" : key === "status" ? "Resultado" : key === "resolution_action" ? "Medida aplicada" : key === "resolution_note" ? "Observação" : key === "business_id" ? "Fornecedor" : key === "reporter_id" ? "Denunciante" : key === "reason" ? "Motivo" : key}</strong>: {auditDetailLabel(key,value)}</span>
+                        <span key={key}><strong>{auditDetailLabel(key,null) === "Não informado" ? key.replaceAll("_"," ") : auditDetailLabel(key,null)}</strong>: {auditDetailLabel(key,value)}</span>
                       ))}
                     </div>
                   </article>)}</div>
