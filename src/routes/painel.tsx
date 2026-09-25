@@ -504,6 +504,14 @@ function DashboardPage() {
       }
     };
 
+    // Safari/iOS e alguns navegadores bloqueiam áudio iniciado fora de uma
+    // interação do usuário. A primeira interação libera o mesmo elemento de
+    // áudio que será usado pelas notificações futuras.
+    const unlockNotificationAudio = () => {
+      void prepareNotificationAudio();
+    };
+
+    window.addEventListener("pointerdown", unlockNotificationAudio);
     window.addEventListener("focus", refreshNotifications);
     document.addEventListener("visibilitychange", refreshNotifications);
 
@@ -514,6 +522,7 @@ function DashboardPage() {
     return () => {
       mounted = false;
       window.clearInterval(poll);
+      window.removeEventListener("pointerdown", unlockNotificationAudio);
       window.removeEventListener("focus", refreshNotifications);
       document.removeEventListener("visibilitychange", refreshNotifications);
       if (channel) void supabase.removeChannel(channel);
@@ -538,34 +547,86 @@ function DashboardPage() {
     }
   }, [user]);
 
-  async function playNotificationSound() {
-    if (!supabase) return;
+  async function prepareNotificationAudio() {
+    if (!supabase) return false;
 
-    // O banco é a fonte de verdade: cada nova notificação consulta o áudio
-    // atualmente ativo. Assim, trocar o áudio no administrador substitui
-    // imediatamente o toque para todos os usuários, sem depender de estado antigo.
     const { data, error } = await supabase
       .from("notification_sounds")
       .select("public_url")
       .eq("active", true)
       .maybeSingle();
 
-    if (error || !data?.public_url) {
-      // Sem áudio personalizado ativo, não toca nenhum som de teste/fallback.
-      return;
-    }
+    if (error || !data?.public_url) return false;
 
     let audio = notificationAudioRef.current;
     if (!audio) {
-      audio = new Audio(data.public_url);
+      audio = new Audio();
+      audio.preload = "auto";
       notificationAudioRef.current = audio;
-    } else if (audio.src !== data.public_url) {
-      audio.src = data.public_url;
     }
 
+    if (audio.src !== data.public_url) {
+      audio.src = data.public_url;
+      audio.load();
+    }
+
+    // O primeiro play acontece dentro de uma interação real do usuário,
+    // com o áudio mutado, para liberar a reprodução posterior no Safari/iOS.
+    audio.muted = true;
+    audio.volume = 0;
+    audio.currentTime = 0;
+
+    try {
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.muted = false;
+      audio.volume = 0.35;
+      return true;
+    } catch (error) {
+      audio.muted = false;
+      audio.volume = 0.35;
+      console.warn("Não foi possível liberar o áudio de notificações:", error);
+      return false;
+    }
+  }
+
+  async function playNotificationSound() {
+    if (!supabase) return;
+
+    // O banco continua sendo a fonte de verdade: cada notificação consulta
+    // o áudio atualmente ativo, inclusive depois de o administrador trocá-lo.
+    const { data, error } = await supabase
+      .from("notification_sounds")
+      .select("public_url")
+      .eq("active", true)
+      .maybeSingle();
+
+    if (error || !data?.public_url) return;
+
+    let audio = notificationAudioRef.current;
+    if (!audio) {
+      audio = new Audio();
+      audio.preload = "auto";
+      notificationAudioRef.current = audio;
+    }
+
+    if (audio.src !== data.public_url) {
+      audio.src = data.public_url;
+      audio.load();
+    }
+
+    audio.muted = false;
     audio.volume = 0.35;
     audio.currentTime = 0;
-    void audio.play().catch(() => undefined);
+
+    try {
+      await audio.play();
+    } catch (error) {
+      // Não existe mais fallback "plim". Se o navegador bloquear a reprodução,
+      // registramos o motivo para diagnóstico em vez de esconder o erro.
+      console.warn("O navegador bloqueou a reprodução do som de notificação:", error);
+    }
   }
 
   async function markNotificationAsRead(notificationId: string) {
