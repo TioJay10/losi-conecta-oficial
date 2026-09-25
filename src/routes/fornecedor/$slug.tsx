@@ -93,9 +93,10 @@ function ProviderPage() {
       if (mounted) setUserId(sessionData.session?.user.id ?? null);
       const { data, error: queryError } = await supabase
         .from("business_profiles")
-        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,created_at,reputation_report_count,reputation_service_count,show_availability,services(id,name,description,categories(name))")
+        .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,logo_url,cover_url,portfolio_urls,verified,owner_id,created_at,reputation_report_count,reputation_service_count,show_availability")
         .eq("slug", slug)
         .eq("active", true)
+        .eq("approval_status", "approved")
         .maybeSingle();
 
       if (!mounted) return;
@@ -104,9 +105,22 @@ function ProviderPage() {
         setError("Não foi possível carregar este fornecedor: " + queryError.message);
       } else {
         const loaded = (data ?? null) as unknown as Business;
-        setBusiness(loaded);
         if (loaded) {
-          if (loaded.show_availability) {
+          const { data: serviceData, error: serviceLoadError } = await supabase
+            .from("services")
+            .select("id,name,description,categories(name)")
+            .eq("business_id", loaded.id)
+            .eq("active", true)
+            .order("name");
+          if (serviceLoadError) {
+            console.error("Erro ao carregar serviços do fornecedor:", serviceLoadError);
+          }
+          const businessWithServices = {
+            ...loaded,
+            services: (serviceData ?? []) as unknown as Service[],
+          };
+          if (mounted) setBusiness(businessWithServices);
+          if (businessWithServices.show_availability) {
             const { data: availabilityData, error: availabilityError } = await supabase
               .from("provider_availability")
               .select("availability_date,status")
