@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { OnlineStatus, useOnlineStatus } from "./OnlinePresence";
 
 type Business = {
   id: string;
@@ -53,6 +54,10 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const isSupplier = Boolean(userId && userId === business.owner_id);
+  const activeParticipantId = activeConversation
+    ? (isSupplier ? activeConversation.requester_id : activeConversation.supplier_id)
+    : null;
+  const activeParticipantOnline = useOnlineStatus(activeParticipantId);
 
   function getSenderIdentity(senderId: string) {
     const supplier = supplierProfiles[senderId];
@@ -389,25 +394,30 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
 
   return (
     <>
-      <button
-        type="button"
-        className="provider-chat-trigger"
-        onClick={() => {
-          if (!userId) {
-            onRequireAuth();
-            return;
-          }
-          if (isSupplier) {
-            setOpen(true);
-          } else {
-            void openNewConversation();
-          }
-        }}
-        aria-label={isSupplier ? "Abrir mensagens" : "Conversar com este fornecedor"}
-      >
-        <span className="provider-chat-trigger-icon" aria-hidden="true">▰</span>
-        <span>{isSupplier ? "Mensagens" : "Chat"}</span>
-      </button>
+      <div className="provider-chat-trigger-group">
+        <button
+          type="button"
+          className="provider-chat-trigger"
+          onClick={() => {
+            if (!userId) {
+              onRequireAuth();
+              return;
+            }
+            if (isSupplier) {
+              setOpen(true);
+            } else {
+              void openNewConversation();
+            }
+          }}
+          aria-label={isSupplier ? "Abrir mensagens" : "Conversar com este fornecedor"}
+        >
+          <svg className="provider-chat-trigger-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-5.2 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z" />
+            <path d="M7.5 10h9M7.5 13h6" />
+          </svg>
+        </button>
+        <OnlineStatus userId={business.owner_id} />
+      </div>
 
       {open && (
         <div className="provider-chat-backdrop" role="presentation" onMouseDown={(event) => {
@@ -445,6 +455,7 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
                         <div className="provider-chat-participant-copy">
                           <strong>{name}</strong>
                           <span>{supplierProfiles[participantId] ? "Fornecedor" : "Perfil pessoal"}</span>
+                        <OnlineStatus userId={participantId} compact />
                         </div>
                       </>;
                     })()}
