@@ -214,13 +214,6 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       await loadActiveSound();
       if (!mounted) return;
 
-      const { data: existing } = await supabase
-        .from("notifications")
-        .select("id")
-        .eq("user_id", userData.user.id);
-
-      (existing ?? []).forEach((row) => knownNotificationIdsRef.current.add(row.id));
-
       channel = supabase
         .channel("global-notifications-" + userData.user.id)
         .on(
@@ -243,10 +236,17 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
             );
           },
         )
-        .subscribe();
+        .subscribe((status, error) => {
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            console.warn("Realtime de notificações indisponível:", status, error);
+          }
+        });
     }
 
-    void start();
+    void start().catch((error) => {
+      if (!mounted) return;
+      console.warn("Não foi possível iniciar o sistema global de notificações:", error);
+    });
 
     return () => {
       mounted = false;
