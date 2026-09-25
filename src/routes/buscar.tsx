@@ -64,10 +64,12 @@ function SearchPage() {
         }
       }
       if (mounted) setAuthLoading(false);
+      // Carregamos cada fonte de dados de forma independente. Um problema
+      // pontual no ranking/planos não pode impedir a exibição dos fornecedores.
       const [businessResult, categoryResult, planResult] = await Promise.all([
         supabase
           .from("business_profiles")
-          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count,services(id,name,category_id,categories(name)),reviews(rating)")
+          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count")
           .eq("active", true)
           .eq("approval_status", "approved")
           .order("business_name"),
@@ -75,32 +77,69 @@ function SearchPage() {
         supabase.from("supplier_plan_visibility").select("business_id,plan_slug,plan_name,plan_priority,ends_at"),
       ]);
       if (!mounted) return;
-      if (businessResult.error || categoryResult.error || planResult.error) {
-        console.error("Erro ao carregar catálogo de fornecedores:", businessResult.error ?? categoryResult.error ?? planResult.error);
-        setError(
-          "Não foi possível carregar os fornecedores: " +
-          (businessResult.error?.message ?? categoryResult.error?.message ?? planResult.error?.message ?? "erro desconhecido")
-        );
-      } else {
-        const planRows = (planResult.data ?? []) as Array<{ business_id: string; plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null }>;
-        const planByBusiness = new Map(planRows.map((row) => [row.business_id, row]));
-        const loadedBusinesses = ((businessResult.data ?? []) as unknown as Business[]).map((business) => ({
-          ...business,
-          services: Array.isArray(business.services) ? business.services : [],
-          reviews: Array.isArray(business.reviews) ? business.reviews : [],
-          reputation_service_count: Number.isFinite(Number(business.reputation_service_count))
-            ? Number(business.reputation_service_count)
-            : 0,
-          plan: planByBusiness.get(business.id) ?? {
-            plan_slug: "gratis",
-            plan_name: "Grátis",
-            plan_priority: 0,
-            ends_at: null,
-          },
-        }));
-        setBusinesses(loadedBusinesses);
-        setCategories(categoryResult.data ?? []);
+
+      if (businessResult.error) {
+        console.error("Erro ao carregar fornecedores:", businessResult.error);
+        setError("Não foi possível carregar os fornecedores: " + businessResult.error.message);
+        return;
       }
+
+      if (categoryResult.error) {
+        console.warn("Não foi possível carregar categorias:", categoryResult.error);
+      }
+
+      const baseBusinesses = (businessResult.data ?? []) as Business[];
+      const businessIds = baseBusinesses.map((business) => business.id);
+
+      const [serviceResult, reviewResult] = await Promise.all([
+        businessIds.length
+          ? supabase.from("services").select("id,name,category_id,business_id,categories(name)").in("business_id", businessIds).eq("active", true)
+          : Promise.resolve({ data: [], error: null }),
+        businessIds.length
+          ? supabase.from("reviews").select("business_id,rating").in("business_id", businessIds).eq("active", true)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+      if (!mounted) return;
+
+      if (serviceResult.error) console.warn("Não foi possível carregar serviços dos fornecedores:", serviceResult.error);
+      if (reviewResult.error) console.warn("Não foi possível carregar avaliações dos fornecedores:", reviewResult.error);
+      if (planResult.error) console.warn("Não foi possível carregar planos dos fornecedores:", planResult.error);
+
+      const servicesByBusiness = new Map<string, Service[]>();
+      for (const service of (serviceResult.data ?? []) as Array<Service & { business_id: string }>) {
+        const list = servicesByBusiness.get(service.business_id) ?? [];
+        list.push(service);
+        servicesByBusiness.set(service.business_id, list);
+      }
+
+      const reviewsByBusiness = new Map<string, ReviewSummary[]>();
+      for (const review of (reviewResult.data ?? []) as Array<ReviewSummary & { business_id: string }>) {
+        const list = reviewsByBusiness.get(review.business_id) ?? [];
+        list.push({ rating: Number(review.rating) });
+        reviewsByBusiness.set(review.business_id, list);
+      }
+
+      const planRows = (planResult.data ?? []) as Array<{ business_id: string; plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null }>;
+      const planByBusiness = new Map(planRows.map((row) => [row.business_id, row]));
+
+      const loadedBusinesses = baseBusinesses.map((business) => ({
+        ...business,
+        services: servicesByBusiness.get(business.id) ?? [],
+        reviews: reviewsByBusiness.get(business.id) ?? [],
+        reputation_service_count: Number.isFinite(Number(business.reputation_service_count))
+          ? Number(business.reputation_service_count)
+          : 0,
+        plan: planByBusiness.get(business.id) ?? {
+          plan_slug: "gratis",
+          plan_name: "Grátis",
+          plan_priority: 0,
+          ends_at: null,
+        },
+      }));
+
+      setBusinesses(loadedBusinesses);
+      setCategories(categoryResult.data ?? []);
     }
     loadCatalog().catch((loadError) => {
       console.error("Erro inesperado ao carregar catálogo:", loadError);
