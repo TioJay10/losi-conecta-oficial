@@ -954,8 +954,8 @@ function AdminPage() {
                 <strong>FASE 1</strong>
               </section>
 
-              <section className="admin-plan-editor" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(320px, .9fr)", gap: 24, alignItems: "start" }}>
-                <div>
+              <section className="admin-plan-editor home-customization-layout">
+                <div className="home-customization-editor">
                   <div>
                     <h3 style={{ margin: 0 }}>Conteúdo da página</h3>
                   <p className="admin-text">Edite os elementos da página inicial. Você pode restaurar um item, restaurar tudo ou definir a configuração atual como novo padrão.</p>
@@ -988,17 +988,17 @@ function AdminPage() {
                 <small className="admin-text">O padrão salvo é independente do valor atualmente aplicado. Restaurar só altera o formulário até você salvar.</small>
                 </div>
 
-                <div style={{ position: "sticky", top: 24 }}>
+                <div className="home-customization-preview">
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                     <h3 style={{ margin: 0 }}>Pré-visualização</h3>
                     <span className="admin-badge">AO VIVO</span>
                   </div>
-                  <div style={{ overflow: "hidden", border: "1px solid #dfe3ea", borderRadius: 18, background: "#f4f5f8", boxShadow: "0 16px 40px rgba(15,23,42,.12)" }}>
+                  <div className="home-customization-preview-frame">
                     <div style={{ height: 42, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", background: "#fff", borderBottom: "1px solid #e8eaf0" }}>
                       <strong style={{ color: "#0b182a", fontSize: 12, letterSpacing: ".06em" }}>LOSI <span style={{ color: "#c9a55d" }}>CONECTA</span></strong>
                       <span style={{ color: "#0b182a", background: "#0b182a", borderRadius: 7, padding: "5px 9px", fontSize: 9, fontWeight: 800 }}>Entrar</span>
                     </div>
-                    <div style={{ padding: "48px 24px 42px", textAlign: "center", background: "linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%)" }}>
+                    <div className="home-customization-preview-hero">
                       <div style={{ color: "#a4864d", fontSize: 8, fontWeight: 900, letterSpacing: ".12em", marginBottom: 12 }}>A REDE DE PROFISSIONAIS PARA EVENTOS</div>
                       <h4 style={{ margin: "0 auto 14px", maxWidth: 430, color: "#172033", fontSize: 25, lineHeight: 1.12, fontWeight: 900 }}>
                         {homeCustomization.hero_title || "Encontre quem você precisa para realizar seu evento."}
