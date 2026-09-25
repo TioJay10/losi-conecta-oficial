@@ -14424,3 +14424,124 @@ button.availability-day {
 .admin-inconsistency-composer{flex:0 0 auto;display:grid;grid-template-columns:minmax(0,1fr) 74px 72px;gap:6px;padding:8px;border-top:1px solid #e3e7ee;background:#fff}.admin-inconsistency-composer textarea{width:100%;min-width:0;min-height:40px;max-height:110px;box-sizing:border-box;resize:vertical;border:1px solid #d9dee8;border-radius:9px;padding:9px;font:500 9px/1.45 Montserrat,Arial,sans-serif}.admin-inconsistency-composer button{min-width:0;border:0;border-radius:9px;background:#122036;color:#f0d99a;font:800 8px/1 Montserrat,Arial,sans-serif;cursor:pointer}.admin-inconsistency-composer button:disabled{opacity:.45;cursor:not-allowed}.admin-inconsistency-composer .is-resolve{background:#eef1f5;color:#536073}.admin-inconsistency-resolved{flex:0 0 auto;padding:13px;text-align:center;background:#f3f8f4;color:#2f6845;font-size:9px;font-weight:800;border-top:1px solid #dcebe1}.admin-inconsistency-empty{display:flex;min-height:160px;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;color:#7b8493;font-size:10px;text-align:center}.admin-inconsistency-chat-empty{align-items:center;justify-content:center;gap:6px}.admin-inconsistency-chat-empty strong{color:#172033;font-size:12px}.admin-inconsistency-chat-empty span{color:#7b8493;font-size:9px}
 @media(max-width:900px){.admin-inconsistency-layout{grid-template-columns:1fr}.admin-inconsistency-list{max-height:270px}.admin-inconsistency-chat{height:560px;min-height:560px}}
 @media(max-width:560px){.admin-inconsistency-head{padding:18px;flex-direction:column}.admin-inconsistency-head h2{font-size:18px}.admin-inconsistency-layout{gap:10px}.admin-inconsistency-composer{grid-template-columns:minmax(0,1fr) 62px 60px}.admin-inconsistency-bubble{max-width:86%}}
+
+/* ADMIN INCONSISTENCY CENTER — GROUP ISOLATION
+   Parent > child > grandchild. Each visual group owns its own surface,
+   typography and spacing so admin-page styles cannot leak into the chat. */
+.admin-page .admin-inconsistency-center,
+.admin-page .admin-inconsistency-center * { box-sizing: border-box; }
+
+.admin-page .admin-inconsistency-center { color: #172033; }
+
+/* Parent group */
+.admin-page .admin-inconsistency-head {
+  background: linear-gradient(145deg,#122036,#07101e) !important;
+  color: #fff !important;
+}
+.admin-page .admin-inconsistency-head h2 { color: #fff !important; }
+.admin-page .admin-inconsistency-head p { color: #c4cbd7 !important; }
+
+/* Child groups / cards */
+.admin-page .admin-inconsistency-list-group,
+.admin-page .admin-inconsistency-chat {
+  background: #fff !important;
+  color: #172033 !important;
+  border-color: #e0e5ed !important;
+  box-shadow: 0 6px 20px rgba(25,32,55,.05);
+}
+.admin-page .admin-inconsistency-list-group *,
+.admin-page .admin-inconsistency-chat * { color: inherit; }
+
+/* List controls are their own groups */
+.admin-page .admin-inconsistency-filters {
+  background: #fafbfc !important;
+  color: #657084 !important;
+}
+.admin-page .admin-inconsistency-filters button {
+  background: #fff !important;
+  color: #657084 !important;
+}
+.admin-page .admin-inconsistency-filters button.is-active {
+  background: #122036 !important;
+  color: #f0d99a !important;
+}
+
+/* Supplier/user list item = independent group */
+.admin-page .admin-inconsistency-item,
+.admin-page .admin-inconsistency-item:hover,
+.admin-page .admin-inconsistency-item.is-selected {
+  background: #fff !important;
+  color: #172033 !important;
+}
+.admin-page .admin-inconsistency-item-copy strong { color: #172033 !important; }
+.admin-page .admin-inconsistency-item-copy small { color: #697487 !important; }
+.admin-page .admin-inconsistency-item-copy em { color: #9aa2af !important; }
+
+/* Chat header is a separate child group and remains navy */
+.admin-page .admin-inconsistency-chat-header {
+  background: linear-gradient(145deg,#122036,#07101e) !important;
+  color: #fff !important;
+}
+.admin-page .admin-inconsistency-chat-header strong { color: #fff !important; }
+.admin-page .admin-inconsistency-chat-header span { color: #f0d99a !important; }
+
+/* Summary = separate group; paragraph must not inherit navy */
+.admin-page .admin-inconsistency-summary {
+  background: #fafbfc !important;
+  color: #172033 !important;
+}
+.admin-page .admin-inconsistency-summary strong { color: #172033 !important; }
+.admin-page .admin-inconsistency-summary p {
+  color: #536073 !important;
+  background: transparent !important;
+}
+
+/* Message area = separate group */
+.admin-page .admin-inconsistency-messages {
+  background: #f7f8fb !important;
+}
+.admin-page .admin-inconsistency-bubble {
+  background: #fff !important;
+  color: #273247 !important;
+  border-color: #e1e5ec !important;
+  box-shadow: none;
+}
+.admin-page .admin-inconsistency-bubble p { color: #273247 !important; }
+.admin-page .admin-inconsistency-bubble span { color: #7d8797 !important; }
+.admin-page .admin-inconsistency-bubble small { color: #9aa2af !important; }
+/* Admin/user role is identified by the row, not by leaking a card surface. */
+.admin-page .is-admin-user .admin-inconsistency-bubble {
+  background: #f4f5f8 !important;
+  border-color: #dfe4ec !important;
+}
+.admin-page .is-admin-user .admin-inconsistency-bubble p { color: #273247 !important; }
+.admin-page .is-admin-user .admin-inconsistency-bubble span { color: #5f6b7d !important; }
+
+/* Composer = separate group; fields/buttons own their styles */
+.admin-page .admin-inconsistency-composer {
+  background: #fff !important;
+  color: #172033 !important;
+}
+.admin-page .admin-inconsistency-composer textarea {
+  background: #fff !important;
+  color: #172033 !important;
+  border-color: #d9dee8 !important;
+}
+.admin-page .admin-inconsistency-composer button {
+  background: #122036 !important;
+  color: #f0d99a !important;
+}
+.admin-page .admin-inconsistency-composer .is-resolve {
+  background: #eef1f5 !important;
+  color: #536073 !important;
+}
+
+/* Empty-state text groups */
+.admin-page .admin-inconsistency-empty,
+.admin-page .admin-inconsistency-chat-empty span { color: #7b8493 !important; }
+.admin-page .admin-inconsistency-chat-empty strong { color: #172033 !important; }
+.admin-page .admin-inconsistency-resolved { color: #2f6845 !important; }
+
+@media(max-width:560px){
+  .admin-page .admin-inconsistency-head p { color: #c4cbd7 !important; }
+}
