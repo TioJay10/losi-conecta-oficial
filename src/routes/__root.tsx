@@ -71,7 +71,10 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
   const activeSoundUrlRef = useRef<string | null>(null);
   const knownNotificationIdsRef = useRef<Set<string>>(new Set());
   const toastTimerRef = useRef<number | null>(null);
+  const toastDragRef = useRef({ active: false, startY: 0, currentY: 0 });
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastOffsetY, setToastOffsetY] = useState(-18);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -163,22 +166,91 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       }
     }
 
-    function showToast() {
+    function getNotificationMessage(notification: {
+      type?: string | null;
+      title?: string | null;
+      message?: string | null;
+    }) {
+      const type = (notification.type ?? "").toLowerCase();
+      if (type.includes("like")) {
+        return "Você recebeu um like no seu perfil.";
+      }
+      return (
+        notification.message?.trim() ||
+        notification.title?.trim() ||
+        "Você tem uma nova notificação."
+      );
+    }
+
+    function showToast(message: string) {
       if (currentPath === "/painel") return;
+      setToastMessage(message);
+      setToastOffsetY(-18);
       setToastVisible(true);
       if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
       toastTimerRef.current = window.setTimeout(() => {
-        if (mounted) setToastVisible(false);
+        if (!mounted) return;
+        setToastOffsetY(-18);
+        setToastVisible(false);
       }, 5000);
     }
 
-    async function processNewNotification(notification: { id: string; read_at: string | null }) {
+    function handleToastPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+      toastDragRef.current = {
+        active: true,
+        startY: event.clientY,
+        currentY: event.clientY,
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    function handleToastPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+      if (!toastDragRef.current.active) return;
+      toastDragRef.current.currentY = event.clientY;
+      const delta = event.clientY - toastDragRef.current.startY;
+      if (delta < 0) {
+        setToastOffsetY(Math.max(-90, delta));
+      }
+    }
+
+    function handleToastPointerUp(event: React.PointerEvent<HTMLDivElement>) {
+      if (!toastDragRef.current.active) return;
+      const delta = toastDragRef.current.currentY - toastDragRef.current.startY;
+      toastDragRef.current.active = false;
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // O navegador pode já ter liberado o pointer capture.
+      }
+
+      if (delta <= -28) {
+        setToastOffsetY(-90);
+        window.setTimeout(() => {
+          if (mounted) setToastVisible(false);
+        }, 180);
+        return;
+      }
+
+      setToastOffsetY(0);
+    }
+
+    async function processNewNotification(notification: {
+      id: string;
+      read_at: string | null;
+      type?: string | null;
+      title?: string | null;
+      message?: string | null;
+    }) {
       if (!mounted || knownNotificationIdsRef.current.has(notification.id)) return;
       knownNotificationIdsRef.current.add(notification.id);
       if (notification.read_at) return;
 
+      const message = getNotificationMessage(notification);
       // Dispara som e aviso no mesmo evento que recebe a notificação.
-      await Promise.all([playNotificationSound(), Promise.resolve(showToast())]);
+      await Promise.all([
+        playNotificationSound(),
+        Promise.resolve(showToast(message)),
+      ]);
     }
 
     async function start() {
@@ -207,7 +279,15 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
             filter: "user_id=eq." + userData.user.id,
           },
           (payload) => {
-            void processNewNotification(payload.new as { id: string; read_at: string | null });
+            void processNewNotification(
+              payload.new as {
+                id: string;
+                read_at: string | null;
+                type?: string | null;
+                title?: string | null;
+                message?: string | null;
+              },
+            );
           },
         )
         .subscribe();
@@ -232,7 +312,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
 
         const { data } = await supabase
           .from("notifications")
-          .select("id,read_at")
+          .select("id,read_at,type,title,message")
           .eq("user_id", userData.user.id)
           .order("created_at", { ascending: false })
           .limit(50);
@@ -274,28 +354,44 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
     <div
       role="status"
       aria-live="polite"
+      onPointerDown={handleToastPointerDown}
+      onPointerMove={handleToastPointerMove}
+      onPointerUp={handleToastPointerUp}
+      onPointerCancel={handleToastPointerUp}
       style={{
         position: "fixed",
-        top: 14,
+        top: 10,
         left: "50%",
-        transform: "translateX(-50%)",
+        transform: `translate3d(-50%, ${toastOffsetY}px, 0)`,
         zIndex: 99999,
-        width: "min(calc(100vw - 28px), 360px)",
+        width: "min(calc(100vw - 28px), 390px)",
+        minHeight: 36,
         boxSizing: "border-box",
-        padding: "11px 16px",
-        borderRadius: 12,
-        background: "#12233a",
-        border: "1px solid rgba(212,175,55,.55)",
-        boxShadow: "0 10px 30px rgba(0,0,0,.24)",
-        color: "#fff",
+        padding: "8px 15px",
+        borderRadius: 999,
+        background: "rgba(13, 20, 31, 0.66)",
+        border: "1px solid rgba(212, 175, 55, 0.34)",
+        boxShadow: "0 10px 28px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255,255,255,0.08)",
+        backdropFilter: "blur(14px) saturate(125%)",
+        WebkitBackdropFilter: "blur(14px) saturate(125%)",
+        color: "#D4AF37",
         fontFamily: "Montserrat, Arial, sans-serif",
-        fontSize: 13,
+        fontSize: 11,
+        lineHeight: 1.35,
         fontWeight: 600,
+        letterSpacing: "0.01em",
         textAlign: "center",
-        pointerEvents: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "grab",
+        userSelect: "none",
+        touchAction: "none",
+        transition: toastDragRef.current.active ? "none" : "transform 280ms cubic-bezier(.22,.8,.24,1), opacity 280ms ease",
+        opacity: toastOffsetY <= -80 ? 0 : 1,
       }}
     >
-      Você tem uma nova notificação.
+      {toastMessage}
     </div>
   );
 }
