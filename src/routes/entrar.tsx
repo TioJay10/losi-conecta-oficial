@@ -155,11 +155,25 @@ function AuthPage() {
       if (loginError) {
         setError(loginError.message || "E-mail ou senha inválidos.");
       } else if (data.session) {
-        const { data: profile, error: profileError } = await supabase
+        let profileResult = await supabase
           .from("profiles")
           .select("blocked")
           .eq("id", data.session.user.id)
           .maybeSingle();
+
+        // Uma leitura transitória do perfil não deve fazer um login válido
+        // parecer uma falha. Tenta novamente antes de encerrar a sessão.
+        if (profileResult.error) {
+          await new Promise((resolve) => window.setTimeout(resolve, 350));
+          profileResult = await supabase
+            .from("profiles")
+            .select("blocked")
+            .eq("id", data.session.user.id)
+            .maybeSingle();
+        }
+
+        const profile = profileResult.data;
+        const profileError = profileResult.error;
 
         if (profileError) {
           await supabase.auth.signOut();
