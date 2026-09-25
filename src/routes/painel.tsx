@@ -30,6 +30,8 @@ function DashboardPage() {
   const [notificationFilter, setNotificationFilter] = useState<"all" | "unread" | "read">("all");
   const [notificationPopup, setNotificationPopup] = useState<typeof notifications[number] | null>(null);
   const notificationAudioContextRef = useRef<AudioContext | null>(null);
+  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [notificationSoundUrl, setNotificationSoundUrl] = useState<string | null>(null);
   const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
   const [goldenHeartClaiming, setGoldenHeartClaiming] = useState(false);
   const [goldenHeartMessage, setGoldenHeartMessage] = useState("");
@@ -396,6 +398,12 @@ function DashboardPage() {
     window.addEventListener("pointerdown", unlockNotificationAudio, { once: true });
     window.addEventListener("keydown", unlockNotificationAudio, { once: true });
 
+    async function loadNotificationSound() {
+      const { data, error } = await supabase.from("notification_sounds").select("public_url").eq("active", true).maybeSingle();
+      if (error) { console.warn("Erro ao carregar som de notificação:", error); return; }
+      if (mounted) setNotificationSoundUrl(data?.public_url ?? null);
+    }
+
     async function loadNotificationsForUser(userId: string, playForNewUnread = false) {
       if (!mounted) return;
 
@@ -439,6 +447,7 @@ function DashboardPage() {
     async function startNotificationDelivery() {
       // Primeiro carrega o histórico. Isso cobre as notificações recebidas
       // durante qualquer período em que o usuário esteve deslogado.
+      await loadNotificationSound();
       await loadNotificationsForUser(user.id, false);
       if (!mounted) return;
 
@@ -490,6 +499,7 @@ function DashboardPage() {
 
     const refreshNotifications = () => {
       if (document.visibilityState === "visible") {
+        void loadNotificationSound();
         void loadNotifications();
       }
     };
@@ -533,6 +543,19 @@ function DashboardPage() {
   }, [user]);
 
   function playNotificationSound() {
+    if (notificationSoundUrl) {
+      let audio = notificationAudioRef.current;
+      if (!audio) {
+        audio = new Audio(notificationSoundUrl);
+        notificationAudioRef.current = audio;
+      } else if (audio.src !== notificationSoundUrl) {
+        audio.src = notificationSoundUrl;
+      }
+      audio.volume = 0.35;
+      audio.currentTime = 0;
+      void audio.play().catch(() => undefined);
+      return;
+    }
     if (typeof window === "undefined") return;
 
     try {
