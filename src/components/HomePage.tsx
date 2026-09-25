@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
-import { AppLogo } from "../components/AppLogo";
+import { AppLogo } from "./AppLogo";
 import { supabase } from "../lib/supabase";
 
 export function HomePage({ customizationOverride, preview = false }: { customizationOverride?: { hero_title: string; hero_subtitle: string; hero_button_text: string }; preview?: boolean }) {
