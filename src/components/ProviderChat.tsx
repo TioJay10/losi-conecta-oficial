@@ -9,7 +9,8 @@ type Business = {
   owner_id: string;
 };
 
-type UserProfile = { id: string; full_name: string | null; avatar_url: string | null };\ntype SupplierProfile = { owner_id: string; business_name: string; logo_url: string | null; slug: string; };
+type UserProfile = { id: string; full_name: string | null; avatar_url: string | null };
+type SupplierProfile = { owner_id: string; business_name: string; logo_url: string | null; slug: string; };
 
 type Conversation = {
   id: string;
@@ -47,7 +48,8 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [pendingChatId, setPendingChatId] = useState<string | null>(null);
-  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});\n  const [supplierProfiles, setSupplierProfiles] = useState<Record<string, SupplierProfile>>({});
+  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});
+  const [supplierProfiles, setSupplierProfiles] = useState<Record<string, SupplierProfile>>({});
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const isSupplier = Boolean(userId && userId === business.owner_id);
@@ -146,6 +148,45 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
     void loadActiveProfiles();
     return () => { mounted = false; };
   }, [activeConversation?.id, userId, profiles]);
+
+  useEffect(() => {
+    if (!activeConversation || messages.length === 0) return;
+    const senderIds = Array.from(new Set(messages.map((message) => message.sender_id)));
+
+    const missingProfiles = senderIds.filter((id) => !profiles[id]);
+    if (missingProfiles.length) {
+      let mounted = true;
+      void supabase.from("profiles").select("id,full_name,avatar_url").in("id", missingProfiles).then(({ data, error }) => {
+        if (!mounted || error) return;
+        setProfiles((current) => {
+          const next = { ...current };
+          for (const profile of (data ?? []) as UserProfile[]) next[profile.id] = profile;
+          return next;
+        });
+      });
+      setTimeout(() => { mounted = false; }, 0);
+    }
+
+    const missingSuppliers = senderIds.filter((id) => !supplierProfiles[id]);
+    if (missingSuppliers.length) {
+      let mounted = true;
+      void supabase
+        .from("business_profiles")
+        .select("owner_id,business_name,logo_url,slug")
+        .in("owner_id", missingSuppliers)
+        .eq("active", true)
+        .eq("approval_status", "approved")
+        .then(({ data, error }) => {
+          if (!mounted || error) return;
+          setSupplierProfiles((current) => {
+            const next = { ...current };
+            for (const supplier of (data ?? []) as SupplierProfile[]) next[supplier.owner_id] = supplier;
+            return next;
+          });
+        });
+      setTimeout(() => { mounted = false; }, 0);
+    }
+  }, [activeConversation?.id, messages, profiles, supplierProfiles]);
 
   useEffect(() => {
     if (!activeConversation || !userId) return;
