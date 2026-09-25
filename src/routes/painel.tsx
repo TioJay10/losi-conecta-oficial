@@ -582,7 +582,10 @@ function DashboardPage() {
       void audio.play().catch(() => undefined);
       return;
     }
-    if (typeof window === "undefined") return;
+
+    // O fallback só pode existir depois de uma consulta bem-sucedida ao banco
+    // confirmar que não há nenhum áudio customizado ativo.
+    if (!notificationSoundLoaded || typeof window === "undefined") return;
 
     try {
       const AudioContextClass =
