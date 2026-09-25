@@ -272,24 +272,57 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
     setLoading(true);
     setError("");
 
-    const selectExisting = await supabase
+    // Uma conversa pertence às duas pessoas, não ao caminho pelo qual o perfil foi aberto.
+    // Primeiro procuramos o histórico nos dois sentidos. Isso evita criar uma segunda
+    // conversa quando, por exemplo, o fornecedor recebeu uma mensagem do usuário e
+    // depois abre o perfil público desse mesmo usuário/fornecedor para responder.
+    const selectDirect = await supabase
       .from("chat_conversations")
       .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-      .eq("business_id", business.id)
       .eq("requester_id", userId)
+      .eq("supplier_id", business.owner_id)
       .maybeSingle();
 
-    if (selectExisting.error) {
-      console.error("Erro ao localizar conversa:", selectExisting.error);
+    let data = selectDirect.data;
+    let lookupError = selectDirect.error;
+
+    if (!data && !lookupError) {
+      const selectReverse = await supabase
+        .from("chat_conversations")
+        .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
+        .eq("requester_id", business.owner_id)
+        .eq("supplier_id", userId)
+        .maybeSingle();
+
+      data = selectReverse.data;
+      lookupError = selectReverse.error;
+    }
+
+    // Compatibilidade com conversas antigas: se não houver uma conversa pelo par,
+    // ainda verificamos a conversa vinculada ao fornecedor deste perfil.
+    if (!data && !lookupError) {
+      const selectByBusiness = await supabase
+        .from("chat_conversations")
+        .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
+        .eq("business_id", business.id)
+        .eq("requester_id", userId)
+        .maybeSingle();
+
+      data = selectByBusiness.data;
+      lookupError = selectByBusiness.error;
+    }
+
+    if (lookupError) {
+      console.error("Erro ao localizar conversa:", lookupError);
       setError("Não foi possível iniciar o chat.");
     } else {
-      let data = selectExisting.data;
       if (!data) {
         const created = await supabase
           .from("chat_conversations")
           .insert({ business_id: business.id, requester_id: userId, supplier_id: business.owner_id })
           .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
           .single();
+
         if (created.error) {
           console.error("Erro ao criar conversa:", created.error);
           setError("Não foi possível iniciar o chat.");
