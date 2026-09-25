@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import { AppLogo } from "../../components/AppLogo";
 import { AuthModal } from "../../components/AuthModal";
 import { calculateReputation, type ReputationSummary } from "../../lib/reputation";
+import { ProviderChat } from "../../components/ProviderChat";
 
 type Service = { id: string; name: string; description: string | null; categories: { name: string } | null };
 const OFFICIAL_BUSINESS_ID = "333ccf56-324f-4e4f-99e3-1ebc9ade0140";
@@ -44,7 +45,7 @@ function ProviderPage() {
   const [reporting, setReporting] = useState(false);
   const [quoteMessage, setQuoteMessage] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "like" | "whatsapp" | null>(null);
+  const [pendingAuthAction, setPendingAuthAction] = useState<"quote" | "favorite" | "like" | "whatsapp" | "chat" | null>(null);
   const [quoteMessageType, setQuoteMessageType] = useState<"success" | "error" | "sending" | "">("");
   const [availabilityDates, setAvailabilityDates] = useState<string[]>([]);
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
@@ -334,7 +335,7 @@ function ProviderPage() {
     window.location.href = whatsapp;
   }
 
-  async function handleAuthenticatedFromModal() {
+  function openChatAfterAuth() {\n    setPendingAuthAction("chat");\n    setAuthModalOpen(true);\n  }\n\n  async function handleAuthenticatedFromModal() {
     const { data } = await supabase.auth.getSession();
     const currentUserId = data.session?.user.id ?? null;
     setUserId(currentUserId);
@@ -547,7 +548,7 @@ function ProviderPage() {
             </div>
           </div>
 
-          <div className="provider-profile-actions">
+          <div className="provider-profile-actions">\n            <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
             <button type="button" className={"provider-profile-like " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser}>
               <span className="provider-profile-heart" aria-hidden="true">♥</span>
               <span className="provider-profile-like-count">{likeCount}</span>
