@@ -13645,3 +13645,21 @@ button.availability-day {
 .provider-chat-participant span { font-size:10px; opacity:.68; }
 .provider-chat-message-avatar { width:28px; height:28px; margin:0 5px 3px 0; border:1px solid rgba(212,175,55,.45); align-self:flex-end; font-size:11px; }
 .provider-chat-message-row.theirs { align-items:flex-end; }
+
+
+/* Identidade de cada mensagem — foto e nome independentes do balão */
+.provider-chat-message-row { display:flex; align-items:flex-end; gap:7px; }
+.provider-chat-message-row.mine { flex-direction:row-reverse; }
+.provider-chat-message-identity { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; flex:0 0 32px; width:32px; gap:3px; }
+.provider-chat-message-avatar { width:30px; height:30px; margin:0; border-radius:50%; overflow:hidden; border:1px solid rgba(212,175,55,.55); background:#d4af37; color:#0b182a; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
+.provider-chat-message-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.provider-chat-message-sender-name { max-width:78px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:9px; line-height:1.1; opacity:.75; text-align:center; }
+.provider-chat-active-participant { display:flex; align-items:center; gap:8px; min-width:0; }
+.provider-chat-participant-copy { display:flex; flex-direction:column; min-width:0; }
+.provider-chat-participant-copy strong { max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; }
+.provider-chat-participant-copy span { font-size:10px; opacity:.68; }
+@media (max-width: 640px) {
+  .provider-chat-message-sender-name { max-width:60px; }
+  .provider-chat-message-identity { flex-basis:29px; width:29px; }
+  .provider-chat-message-avatar { width:27px; height:27px; }
+}
