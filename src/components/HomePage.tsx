@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { AppLogo } from "./AppLogo";
 import { supabase } from "../lib/supabase";
 
-export function HomePage({ customizationOverride, preview = false }: { customizationOverride?: { hero_title: string; hero_subtitle: string; hero_button_text: string }; preview?: boolean }) {
-  const [customization, setCustomization] = useState({ hero_title: "", hero_subtitle: "", hero_button_text: "" });
+export type HomeCustomization = { hero_title: string; hero_subtitle: string; hero_button_text: string; color_background: string; color_primary: string; color_secondary: string; color_text: string; color_button: string; color_button_text: string };\n\nexport const DEFAULT_HOME_CUSTOMIZATION: HomeCustomization = { hero_title: "", hero_subtitle: "", hero_button_text: "", color_background: "#0B182A", color_primary: "var(--home-color-primary)", color_secondary: "var(--home-color-secondary)", color_text: "var(--home-color-text)", color_button: "#0B182A", color_button_text: "#FFFFFF" };\n\nexport function HomePage({ customizationOverride, preview = false }: { customizationOverride?: Partial<HomeCustomization>; preview?: boolean }) {
+  const [customization, setCustomization] = useState<HomeCustomization>(DEFAULT_HOME_CUSTOMIZATION);
 
   useEffect(() => {
     if (customizationOverride) return;
@@ -24,10 +24,10 @@ export function HomePage({ customizationOverride, preview = false }: { customiza
     return () => { mounted = false; };
   }, [customizationOverride]);
 
-  const activeCustomization = customizationOverride ?? customization;
+  const activeCustomization = { ...customization, ...customizationOverride };\n  const themeStyle = {\n    "--home-color-background": activeCustomization.color_background || DEFAULT_HOME_CUSTOMIZATION.color_background,\n    "--home-color-primary": activeCustomization.color_primary || DEFAULT_HOME_CUSTOMIZATION.color_primary,\n    "--home-color-secondary": activeCustomization.color_secondary || DEFAULT_HOME_CUSTOMIZATION.color_secondary,\n    "--home-color-text": activeCustomization.color_text || DEFAULT_HOME_CUSTOMIZATION.color_text,\n    "--home-color-button": activeCustomization.color_button || DEFAULT_HOME_CUSTOMIZATION.color_button,\n    "--home-color-button-text": activeCustomization.color_button_text || DEFAULT_HOME_CUSTOMIZATION.color_button_text,\n  } as CSSProperties;
 
   return (
-    <main className={`home-page${preview ? " home-page-preview" : ""}`} style={styles.page}>
+    <main className={`home-page${preview ? " home-page-preview" : ""}`} style={{ ...styles.page, ...themeStyle }}>
       <header className="home-header" style={styles.header}>
         <AppLogo className="mobile-centered-brand" style={styles.logo}>
           LOSI <span>CONECTA</span>
@@ -177,8 +177,8 @@ function Audience({ title, text, label }: { title: string; text: string; label: 
 const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: "100vh",
-    background: "#f4f5f8",
-    color: "#172033",
+    background: "var(--home-color-background)",
+    color: "var(--home-color-text)",
     fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   header: {
@@ -197,7 +197,7 @@ const styles: Record<string, CSSProperties> = {
   },
   logo: {
     textDecoration: "none",
-    color: "#0b182a",
+    color: "var(--home-color-button)",
     fontSize: 18,
     fontWeight: 900,
     letterSpacing: ".08em",
@@ -214,7 +214,7 @@ const styles: Record<string, CSSProperties> = {
   headerButton: {
     textDecoration: "none",
     color: "#fff",
-    background: "#0b182a",
+    background: "var(--home-color-button)",
     borderRadius: 9,
     padding: "10px 17px",
     fontSize: 14,
@@ -225,7 +225,7 @@ const styles: Record<string, CSSProperties> = {
     overflow: "hidden",
     textAlign: "center",
     padding: "78px 24px 68px",
-    background: "linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%)",
+    background: "linear-gradient(180deg, #ffffff 0%, var(--home-color-background) 100%)",
   },
   heroGlow: {
     position: "absolute",
@@ -276,7 +276,7 @@ const styles: Record<string, CSSProperties> = {
   },
   primaryButton: {
     textDecoration: "none",
-    background: "#0b182a",
+    background: "var(--home-color-button)",
     color: "#fff",
     padding: "14px 23px",
     borderRadius: 10,
@@ -366,7 +366,7 @@ const styles: Record<string, CSSProperties> = {
   cardTitle: { margin: 0, fontSize: 25, letterSpacing: "-.02em" },
   cardText: { margin: "12px 0 0", color: "#70798b", lineHeight: 1.6, fontSize: 15 },
   darkSection: {
-    background: "#0b182a",
+    background: "var(--home-color-button)",
     color: "#fff",
     padding: "72px 5vw",
   },
@@ -420,7 +420,7 @@ const styles: Record<string, CSSProperties> = {
     margin: "0 auto",
     borderRadius: 24,
     padding: "48px 52px",
-    background: "linear-gradient(125deg, #0b182a, #07111f)",
+    background: "linear-gradient(125deg, var(--home-color-button), #07111f)",
     color: "#fff",
     display: "flex",
     alignItems: "center",
@@ -435,7 +435,7 @@ const styles: Record<string, CSSProperties> = {
     flexShrink: 0,
     textDecoration: "none",
     background: "#fff",
-    color: "#0b182a",
+    color: "var(--home-color-button)",
     padding: "14px 20px",
     borderRadius: 10,
     fontWeight: 900,
@@ -451,7 +451,7 @@ const styles: Record<string, CSSProperties> = {
     color: "#7f8795",
     fontSize: 12,
   },
-  footerBrand: { fontWeight: 900, letterSpacing: ".12em", color: "#172033" },
+  footerBrand: { fontWeight: 900, letterSpacing: ".12em", color: "var(--home-color-text)" },
   footerText: { fontWeight: 600 },
 };
 
