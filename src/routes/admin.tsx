@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { AdminInconsistencyCenter } from "../components/AdminInconsistencyCenter";
 import { HomePage, type HomeCustomization } from "../components/HomePage";
 
 export const Route = createFileRoute("/admin")({
@@ -115,7 +116,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "sounds" | "communication" | "activity" | "customization">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "sounds" | "communication" | "activity" | "customization" | "inconsistencies">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -887,6 +888,7 @@ function AdminPage() {
     { id: "commercial" as const, label: "Comercial" },
     { id: "coupons" as const, label: "Cupons", count: coupons.filter(item => item.active && !item.used_at).length },
     { id: "notifications" as const, label: "Notificações", count: unreadAdminNotifications },
+    { id: "inconsistencies" as const, label: "Inconsistências" },
     { id: "sounds" as const, label: "Sons de notificação", count: notificationSounds.length },
     { id: "customization" as const, label: "Personalização" },
     { id: "communication" as const, label: "Central de comunicação" },
@@ -907,7 +909,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "sounds" ? "Sons de notificação" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "inconsistencies" ? "Notificações de Inconsistências" : section === "sounds" ? "Sons de notificação" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -943,7 +945,9 @@ function AdminPage() {
           <h1>{section === "overview" ? `Olá, ${name}.` : sectionTitle}</h1>
           <p className="admin-text">{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>
           {dataError && <div className="admin-data-error">Não foi possível carregar alguns dados: {dataError}</div>}
-          {section === "customization" ? (
+          {section === "inconsistencies" ? (
+            <AdminInconsistencyCenter />
+          ) : section === "customization" ? (
             <div className="admin-admin-center">
               <section className="admin-admin-center-hero">
                 <div>
