@@ -13325,3 +13325,38 @@ button.availability-day {
     box-sizing: border-box;
   }
 }
+
+
+/* ADMIN — contraste final dos cards com fundo azul-marinho */
+.admin-page .admin-finance-hero h2,
+.admin-page .admin-admin-center-hero h2,
+.admin-page .admin-alerts-hero h2,
+.admin-page .admin-operational-head h2 {
+  color: #fff !important;
+}
+
+.admin-page .admin-finance-hero p,
+.admin-page .admin-admin-center-hero p,
+.admin-page .admin-alerts-hero p,
+.admin-page .admin-operational-head p,
+.admin-page .admin-operational-head > span {
+  color: #f0d99a !important;
+}
+
+.admin-page .admin-security-hero h2,
+.admin-page .admin-security-section-head h3,
+.admin-page .admin-security-card-main strong {
+  color: #fff !important;
+}
+
+.admin-page .admin-security-hero p,
+.admin-page .admin-security-section-head > span,
+.admin-page .admin-security-card-main > span,
+.admin-page .admin-security-card-main p {
+  color: #f0d99a !important;
+}
+
+.admin-page .admin-audit-card,
+.admin-page .admin-audit-card * {
+  color: #f0d99a !important;
+}
