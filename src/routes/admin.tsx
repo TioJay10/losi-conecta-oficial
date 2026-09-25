@@ -440,6 +440,7 @@ function AdminPage() {
     setCoupons(current => id ? current.map(item => item.id === id ? saved : item) : [saved, ...current]);
     setEditingCouponId(null);
 
+    let notificationErrorMessage = "";
     if (!id) {
       const assignedUser = users.find(item => item.id === saved.assigned_user_id);
       const plan = plans.find(item => item.id === saved.plan_id);
@@ -453,12 +454,12 @@ function AdminPage() {
         message: `Olá${assignedUser?.full_name ? `, ${assignedUser.full_name.split(" ")[0]}` : ""}! O LOSI CONECTA liberou o cupom ${saved.code} para você: ${discountLabel}${plan ? ` no plano ${plan.name}` : " em um plano pago"}. Acesse seu painel para conferir e utilizar o benefício.`,
         link: "/painel#planos",
       });
-      if (notificationError) {
-        setCouponMessage(`Cupom criado, mas não foi possível enviar a notificação: ${notificationError.message}`);
-      }
+      if (notificationError) notificationErrorMessage = notificationError.message;
     }
 
-    setCouponMessage(id ? "Cupom atualizado com sucesso." : "Cupom criado com sucesso.");
+    setCouponMessage(notificationErrorMessage
+      ? `Cupom criado, mas não foi possível enviar a notificação: ${notificationErrorMessage}`
+      : id ? "Cupom atualizado com sucesso." : "Cupom criado com sucesso.");
     await recordAdminAction(id ? "update_coupon" : "create_coupon", "coupon", saved.id, saved.code, { assigned_user_id: saved.assigned_user_id, plan_id: saved.plan_id, discount_type: saved.discount_type, discount_value: saved.discount_value, active: saved.active });
     setCouponSaving(false);
   }
