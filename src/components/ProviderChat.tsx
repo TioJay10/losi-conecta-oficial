@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { OnlineStatus, useOnlineStatus } from "./OnlinePresence";
+import { OnlineStatus } from "./OnlinePresence";
 
 type Business = {
   id: string;
