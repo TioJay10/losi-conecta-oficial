@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AppLogo } from "./AppLogo";
 import { supabase } from "../lib/supabase";
 
-export type HomeCustomization = { hero_title: string; hero_subtitle: string; hero_button_text: string; color_background: string; color_primary: string; color_secondary: string; color_text: string; color_button: string; color_button_text: string };\n\nexport const DEFAULT_HOME_CUSTOMIZATION: HomeCustomization = { hero_title: "", hero_subtitle: "", hero_button_text: "", color_background: "#0B182A", color_primary: "var(--home-color-primary)", color_secondary: "var(--home-color-secondary)", color_text: "var(--home-color-text)", color_button: "#0B182A", color_button_text: "#FFFFFF" };\n\nexport function HomePage({ customizationOverride, preview = false }: { customizationOverride?: Partial<HomeCustomization>; preview?: boolean }) {
+export type HomeCustomization = { hero_title: string; hero_subtitle: string; hero_button_text: string; color_background: string; color_primary: string; color_secondary: string; color_text: string; color_button: string; color_button_text: string };\n\nexport const DEFAULT_HOME_CUSTOMIZATION: HomeCustomization = { hero_title: "", hero_subtitle: "", hero_button_text: "", color_background: "#0B182A", color_primary: "#D4AF37", color_secondary: "#A4864D", color_text: "#172033", color_button: "#0B182A", color_button_text: "#FFFFFF" };\n\nexport function HomePage({ customizationOverride, preview = false }: { customizationOverride?: Partial<HomeCustomization>; preview?: boolean }) {
   const [customization, setCustomization] = useState<HomeCustomization>(DEFAULT_HOME_CUSTOMIZATION);
 
   useEffect(() => {
