@@ -10,6 +10,7 @@ import type { ErrorInfo, PointerEvent as ReactPointerEvent, ReactNode } from "re
 import "../responsive.css";
 import "../montserrat.css";
 import "../panel-header-contrast.css";
+import { OnlinePresenceProvider } from "../components/OnlinePresence";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -390,6 +391,7 @@ function RootComponent() {
   const location = useLocation();
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -403,12 +405,15 @@ function RootComponent() {
     ])
       .then((result) => {
         if (!mounted) return;
-        setIsAuthenticated(Boolean(result && "data" in result ? result.data.session : null));
+        const session = result && "data" in result ? result.data.session : null;
+        setIsAuthenticated(Boolean(session));
+        setCurrentUserId(session?.user?.id ?? null);
         setAuthChecked(true);
       })
       .catch(() => {
         if (!mounted) return;
         setIsAuthenticated(false);
+        setCurrentUserId(null);
         setAuthChecked(true);
       });
 
@@ -418,6 +423,7 @@ function RootComponent() {
       const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
         if (!mounted) return;
         setIsAuthenticated(Boolean(session));
+        setCurrentUserId(session?.user?.id ?? null);
         setAuthChecked(true);
       });
       unsubscribe = () => listener.subscription.unsubscribe();
@@ -461,12 +467,12 @@ function RootComponent() {
   }
 
   return (
-    <>
+    <OnlinePresenceProvider userId={currentUserId}>
       <SafeGlobalNotificationAlerts isAuthenticated={isAuthenticated} currentPath={location.pathname} />
       <main>
         <Outlet />
       </main>
-    </>
+    </OnlinePresenceProvider>
   );
 }
 
