@@ -153,16 +153,21 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       const url = activeSoundUrlRef.current;
       if (!audio || !url || audio.src !== url) return;
 
-      audio.pause();
-      audio.currentTime = 0;
-      audio.muted = false;
-      audio.volume = 0.35;
-
       try {
-        // O áudio já está carregado/pré-carregado; aqui não há consulta ao banco.
+        // Toda a preparação também fica protegida: em alguns navegadores,
+        // currentTime/pause podem lançar enquanto o arquivo ainda está carregando.
+        audio.pause();
+        if (Number.isFinite(audio.duration) || audio.readyState >= 1) {
+          audio.currentTime = 0;
+        }
+        audio.muted = false;
+        audio.volume = 0.35;
+
+        // O áudio já está carregado/pré-carregado; não há consulta ao banco aqui.
         await audio.play();
       } catch (error) {
-        console.warn("O navegador bloqueou o som da notificação:", error);
+        // Falha de áudio nunca pode derrubar o componente raiz da aplicação.
+        console.warn("Não foi possível reproduzir o som da notificação:", error);
       }
     }
 
