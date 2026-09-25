@@ -954,9 +954,10 @@ function AdminPage() {
                 <strong>FASE 1</strong>
               </section>
 
-              <section className="admin-plan-editor">
+              <section className="admin-plan-editor" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(320px, .9fr)", gap: 24, alignItems: "start" }}>
                 <div>
-                  <h3 style={{ margin: 0 }}>Conteúdo da página</h3>
+                  <div>
+                    <h3 style={{ margin: 0 }}>Conteúdo da página</h3>
                   <p className="admin-text">Edite os elementos da página inicial. Você pode restaurar um item, restaurar tudo ou definir a configuração atual como novo padrão.</p>
                 </div>
 
@@ -985,6 +986,37 @@ function AdminPage() {
                 </div>
                 {homeCustomizationMessage && <div className="admin-category-message">{homeCustomizationMessage}</div>}
                 <small className="admin-text">O padrão salvo é independente do valor atualmente aplicado. Restaurar só altera o formulário até você salvar.</small>
+                </div>
+
+                <div style={{ position: "sticky", top: 24 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                    <h3 style={{ margin: 0 }}>Pré-visualização</h3>
+                    <span className="admin-badge">AO VIVO</span>
+                  </div>
+                  <div style={{ overflow: "hidden", border: "1px solid #dfe3ea", borderRadius: 18, background: "#f4f5f8", boxShadow: "0 16px 40px rgba(15,23,42,.12)" }}>
+                    <div style={{ height: 42, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", background: "#fff", borderBottom: "1px solid #e8eaf0" }}>
+                      <strong style={{ color: "#0b182a", fontSize: 12, letterSpacing: ".06em" }}>LOSI <span style={{ color: "#c9a55d" }}>CONECTA</span></strong>
+                      <span style={{ color: "#0b182a", background: "#0b182a", borderRadius: 7, padding: "5px 9px", fontSize: 9, fontWeight: 800 }}>Entrar</span>
+                    </div>
+                    <div style={{ padding: "48px 24px 42px", textAlign: "center", background: "linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%)" }}>
+                      <div style={{ color: "#a4864d", fontSize: 8, fontWeight: 900, letterSpacing: ".12em", marginBottom: 12 }}>A REDE DE PROFISSIONAIS PARA EVENTOS</div>
+                      <h4 style={{ margin: "0 auto 14px", maxWidth: 430, color: "#172033", fontSize: 25, lineHeight: 1.12, fontWeight: 900 }}>
+                        {homeCustomization.hero_title || "Encontre quem você precisa para realizar seu evento."}
+                      </h4>
+                      <p style={{ margin: "0 auto 22px", maxWidth: 470, color: "#697386", fontSize: 11, lineHeight: 1.65 }}>
+                        {homeCustomization.hero_subtitle || "O LOSI CONECTA aproxima quem organiza eventos de profissionais, empresas e fornecedores especializados — tudo em um só lugar."}
+                      </p>
+                      <span style={{ display: "inline-block", color: "#fff", background: "#0b182a", borderRadius: 8, padding: "10px 15px", fontSize: 10, fontWeight: 800 }}>
+                        {homeCustomization.hero_button_text || "Encontrar fornecedores"}
+                      </span>
+                    </div>
+                    <div style={{ padding: 18, background: "#fff", borderTop: "1px solid #e8eaf0" }}>
+                      <div style={{ height: 8, width: "42%", borderRadius: 8, background: "#e9edf3", marginBottom: 8 }} />
+                      <div style={{ height: 7, width: "72%", borderRadius: 8, background: "#eef1f5" }} />
+                    </div>
+                  </div>
+                  <small className="admin-text" style={{ display: "block", marginTop: 10 }}>Esta prévia acompanha as alterações do formulário em tempo real. O site público só muda depois de salvar.</small>
+                </div>
               </section>
             </div>
           ) : section === "dashboard" ? (
