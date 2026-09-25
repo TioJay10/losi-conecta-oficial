@@ -368,8 +368,9 @@ function DashboardPage() {
     if (!user || !supabase) return;
 
     let mounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    async function loadNotifications() {
+    async function loadNotifications(showPopup = false) {
       const { data, error } = await supabase
         .from("notifications")
         .select("id,type,title,message,link,read_at,created_at")
@@ -382,36 +383,55 @@ function DashboardPage() {
         return;
       }
 
-      if (mounted) setNotifications((data ?? []) as typeof notifications);
+      if (!mounted) return;
+
+      const rows = (data ?? []) as typeof notifications;
+      setNotifications(rows);
+
+      if (showPopup) {
+        const newest = rows[0];
+        if (newest && !newest.read_at) {
+          setNotificationPopup((current) => current?.id === newest.id ? current : newest);
+        }
+      }
     }
 
+    // Carrega imediatamente ao entrar no painel.
     void loadNotifications();
 
-    // A leitura no banco é a fonte de verdade. O polling garante a entrega
-    // mesmo quando o navegador, rede ou WebSocket do Realtime não entrega o evento.
-    const poll = window.setInterval(() => {
-      void loadNotifications();
-    }, 5000);
-
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-
+    // Realtime: mostra imediatamente uma nova notificação criada para este usuário.
     channel = supabase
-      .channel("panel-notifications-" + user.id)
+      .channel("panel-notifications-" + user.id + "-" + Date.now())
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: "user_id=eq." + user.id },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: "user_id=eq." + user.id,
+        },
         (payload) => {
+          if (!mounted) return;
           const notification = payload.new as typeof notifications[number];
+
           setNotifications((current) => [
             notification,
             ...current.filter((item) => item.id !== notification.id),
           ].slice(0, 30));
-          setNotificationPopup(notification);
+
+          if (!notification.read_at) {
+            setNotificationPopup(notification);
+          }
         },
       )
       .subscribe((status) => {
         console.info("Status das notificações em tempo real:", status);
       });
+
+    // Fallback: consulta o banco periodicamente para não depender do WebSocket.
+    const poll = window.setInterval(() => {
+      void loadNotifications();
+    }, 5000);
 
     return () => {
       mounted = false;
@@ -419,7 +439,6 @@ function DashboardPage() {
       if (channel) void supabase.removeChannel(channel);
     };
   }, [user]);
-
   useEffect(() => {
     if (!user) return;
 
