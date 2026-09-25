@@ -102,9 +102,8 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "inconsistency_messages", filter: "conversation_id=eq." + conversation.id }, (payload) => {
         const incoming = payload.new as InconsistencyMessage;
         setMessages((current) => current.some((item) => item.id === incoming.id) ? current : [...current, incoming]);
-        if (incoming.sender_role === "admin") {
-          void supabase.from("inconsistency_conversations").update({ user_viewed_at: new Date().toISOString() }).eq("id", conversation.id).eq("user_id", userId);
-        }
+        // A resposta do administrador chega em tempo real; o usuário não precisa
+        // alterar a conversa no banco para visualizá-la.
       })
       .subscribe();
 
@@ -142,10 +141,16 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
       sender_role: "user",
       message: description.trim(),
     });
-    if (first.error) console.error("Erro ao registrar mensagem inicial:", first.error);
+    if (first.error) {
+      console.error("Erro ao registrar mensagem inicial:", first.error);
+      await supabase.from("inconsistency_conversations").delete().eq("id", row.id).eq("user_id", userId);
+      setFeedback("Não foi possível concluir o envio. Tente novamente.");
+      setCreating(false);
+      return;
+    }
 
     setConversation(row);
-    setMessages([{ id: crypto.randomUUID(), conversation_id: row.id, sender_id: userId, sender_role: "user", message: description.trim(), created_at: new Date().toISOString() }]);
+    await loadMessages(row.id);
     setTitle("");
     setIssueType("");
     setDescription("");
