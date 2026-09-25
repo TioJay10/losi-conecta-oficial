@@ -463,7 +463,7 @@ function RootComponent() {
   return (
     <>
       <SafeGlobalNotificationAlerts isAuthenticated={isAuthenticated} currentPath={location.pathname} />
-      <main className="losi-page-transition">
+      <main>
         <Outlet />
       </main>
     </>
