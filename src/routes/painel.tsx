@@ -568,60 +568,34 @@ function DashboardPage() {
     }
   }, [user]);
 
-  function playNotificationSound() {
-    if (notificationSoundUrl) {
-      let audio = notificationAudioRef.current;
-      if (!audio) {
-        audio = new Audio(notificationSoundUrl);
-        notificationAudioRef.current = audio;
-      } else if (audio.src !== notificationSoundUrl) {
-        audio.src = notificationSoundUrl;
-      }
-      audio.volume = 0.35;
-      audio.currentTime = 0;
-      void audio.play().catch(() => undefined);
+  async function playNotificationSound() {
+    if (!supabase) return;
+
+    // O banco é a fonte de verdade: cada nova notificação consulta o áudio
+    // atualmente ativo. Assim, trocar o áudio no administrador substitui
+    // imediatamente o toque para todos os usuários, sem depender de estado antigo.
+    const { data, error } = await supabase
+      .from("notification_sounds")
+      .select("public_url")
+      .eq("active", true)
+      .maybeSingle();
+
+    if (error || !data?.public_url) {
+      // Sem áudio personalizado ativo, não toca nenhum som de teste/fallback.
       return;
     }
 
-    // O fallback só pode existir depois de uma consulta bem-sucedida ao banco
-    // confirmar que não há nenhum áudio customizado ativo.
-    if (!notificationSoundLoaded || typeof window === "undefined") return;
-
-    try {
-      const AudioContextClass =
-        window.AudioContext ||
-        (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!AudioContextClass) return;
-
-      let audioContext = notificationAudioContextRef.current;
-      if (!audioContext) {
-        audioContext = new AudioContextClass();
-        notificationAudioContextRef.current = audioContext;
-      }
-
-      if (audioContext.state === "suspended") {
-        void audioContext.resume().catch(() => undefined);
-      }
-
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      const now = audioContext.currentTime;
-
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(880, now);
-      oscillator.frequency.exponentialRampToValueAtTime(1320, now + 0.08);
-
-      gainNode.gain.setValueAtTime(0.0001, now);
-      gainNode.gain.exponentialRampToValueAtTime(0.045, now + 0.012);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      oscillator.start(now);
-      oscillator.stop(now + 0.17);
-    } catch (error) {
-      console.warn("Não foi possível reproduzir o som da notificação:", error);
+    let audio = notificationAudioRef.current;
+    if (!audio) {
+      audio = new Audio(data.public_url);
+      notificationAudioRef.current = audio;
+    } else if (audio.src !== data.public_url) {
+      audio.src = data.public_url;
     }
+
+    audio.volume = 0.35;
+    audio.currentTime = 0;
+    void audio.play().catch(() => undefined);
   }
 
   async function markNotificationAsRead(notificationId: string) {
