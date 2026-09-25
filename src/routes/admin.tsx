@@ -954,8 +954,8 @@ function AdminPage() {
                 <strong>FASE 1</strong>
               </section>
 
-              <section className="admin-plan-editor home-customization-layout">
-                <div className="home-customization-editor">
+              <section className="home-customization-layout">
+                <div className="home-customization-editor admin-plan-editor">
                   <div>
                     <h3 style={{ margin: 0 }}>Conteúdo da página</h3>
                   <p className="admin-text">Edite os elementos da página inicial. Você pode restaurar um item, restaurar tudo ou definir a configuração atual como novo padrão.</p>
