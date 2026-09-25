@@ -14,11 +14,16 @@ const OnlinePresenceContext = createContext<OnlinePresenceContextValue>({
 });
 
 function presenceChannel(userId: string) {
-  return supabase.channel(PRESENCE_PREFIX + userId, {
-    config: {
-      presence: { key: userId },
-    },
-  });
+  try {
+    return supabase.channel(PRESENCE_PREFIX + userId, {
+      config: {
+        presence: { key: userId },
+      },
+    });
+  } catch (error) {
+    console.warn("Presença online indisponível:", error);
+    return null;
+  }
 }
 
 export function OnlinePresenceTracker({ userId }: { userId: string | null }) {
@@ -26,6 +31,7 @@ export function OnlinePresenceTracker({ userId }: { userId: string | null }) {
     if (!userId) return;
 
     const channel = presenceChannel(userId);
+    if (!channel) return;
     let active = true;
 
     channel.subscribe(async (status) => {
@@ -60,6 +66,7 @@ function usePresenceSubscription(userId: string | null, skip = false) {
 
     let active = true;
     const channel = presenceChannel(userId);
+    if (!channel) return;
 
     const sync = () => {
       if (!active) return;
@@ -129,6 +136,7 @@ export function OnlinePresenceProvider({
     }
 
     const channel = presenceChannel(userId);
+    if (!channel) return;
     let active = true;
 
     const sync = () => {
