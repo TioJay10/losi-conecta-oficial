@@ -805,11 +805,13 @@ function AdminPage() {
                     </div>
                   </section>
 
-                  <section className="admin-finance-panel admin-dashboard-activity">
-                    <div className="admin-finance-panel-head">
-                      <div><div className="admin-badge">ATIVIDADE RECENTE</div><h3>O que aconteceu recentemente</h3></div>
-                      <span>Últimas movimentações</span>
-                    </div>
+                  <details className="admin-finance-panel admin-dashboard-activity" style={{ margin: 0 }}>
+                    <summary style={{ listStyle: "none", cursor: "pointer" }}>
+                      <div className="admin-finance-panel-head" style={{ margin: 0 }}>
+                        <div><div className="admin-badge">ATIVIDADE RECENTE</div><h3>O que aconteceu recentemente</h3></div>
+                        <span>Últimas movimentações · {Math.min(8, businesses.length + subscriptions.length + supplierReports.length)} registro(s) ▾</span>
+                      </div>
+                    </summary>
                     <div className="admin-dashboard-activity-list">
                       {[
                         ...businesses.map(item => ({ id:`business-${item.id}`, date:item.created_at, title:"Novo fornecedor cadastrado", detail:`${item.business_name} · ${item.city || "Localização não informada"}`, action:"Ver fornecedor", run:()=>{setSection("businesses");setSelectedBusinessId(item.id);window.history.replaceState(null,"","/admin?section=businesses");} })),
@@ -821,7 +823,7 @@ function AdminPage() {
                       </article>)}
                       {businesses.length===0 && subscriptions.length===0 && supplierReports.length===0 && <div className="admin-empty">Nenhuma movimentação recente encontrada.</div>}
                     </div>
-                  </section>
+                  </details>
 
                   <div className="admin-finance-kpis">
                     <article><span>Faturamento hoje</span><strong>{money(revenue(todayClosed))}</strong><small>{todayClosed.length} plano(s) fechado(s)</small></article>
