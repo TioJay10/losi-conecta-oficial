@@ -84,11 +84,22 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     async function loadConversations() {
       setLoading(true);
       setError("");
-      const { data, error: loadError } = await supabase
+      const conversationQuery = supabase
         .from("chat_conversations")
-        .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-        .or("requester_id.eq." + userId + ",supplier_id.eq." + userId)
-        .order("updated_at", { ascending: false });
+        .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview");
+
+      // No painel do fornecedor mostramos a caixa de entrada completa.
+      // Para quem está conversando com um fornecedor salvo, mostramos somente
+      // as conversas daquele fornecedor. Isso evita que uma instância de chat
+      // abra uma conversa pertencente a outro fornecedor.
+      const { data, error: loadError } = isSupplier
+        ? await conversationQuery
+            .or("requester_id.eq." + userId + ",supplier_id.eq." + userId)
+            .order("updated_at", { ascending: false })
+        : await conversationQuery
+            .eq("business_id", business.id)
+            .eq("requester_id", userId)
+            .order("updated_at", { ascending: false });
 
       if (!mounted) return;
       if (loadError) {
@@ -194,6 +205,8 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     if (!activeConversation || !userId) return;
 
     let mounted = true;
+    setMessages([]);
+    setError("");
     async function loadMessages() {
       setLoading(true);
       const { data, error: loadError } = await supabase
@@ -522,7 +535,11 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                     </div>
                   )}
                   {sortedConversations.map((conversation) => (
-                    <button type="button" className="provider-chat-conversation-item" key={conversation.id} onClick={() => setActiveConversation(conversation)}>
+                    <button type="button" className="provider-chat-conversation-item" key={conversation.id} onClick={() => {
+                        setError("");
+                        setMessages([]);
+                        setActiveConversation(conversation);
+                      }}>
                       <div className="provider-chat-conversation-avatar">
                         {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
                       </div>
