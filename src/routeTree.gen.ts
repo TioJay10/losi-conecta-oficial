@@ -19,7 +19,7 @@ import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
 
 const IndexRoute = IndexRouteImport.update({
-  id: '__root__' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
+  id: '__root__' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia' | '/notificar-inconsistencia'
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
