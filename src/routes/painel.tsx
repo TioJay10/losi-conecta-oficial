@@ -385,9 +385,15 @@ function DashboardPage() {
       if (mounted) setNotifications((data ?? []) as typeof notifications);
     }
 
-    void loadNotifications();
+    // A leitura no banco é a fonte de verdade. O polling garante a entrega
+    // mesmo quando o navegador, rede ou WebSocket do Realtime não entrega o evento.
+    const poll = window.setInterval(() => {
+      void loadNotifications();
+    }, 5000);
 
-    const channel = supabase
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    channel = supabase
       .channel("panel-notifications-" + user.id)
       .on(
         "postgres_changes",
@@ -401,11 +407,14 @@ function DashboardPage() {
           setNotificationPopup(notification);
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.info("Status das notificações em tempo real:", status);
+      });
 
     return () => {
       mounted = false;
-      void supabase.removeChannel(channel);
+      window.clearInterval(poll);
+      if (channel) void supabase.removeChannel(channel);
     };
   }, [user]);
 
