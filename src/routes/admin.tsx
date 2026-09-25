@@ -440,30 +440,49 @@ function AdminPage() {
     setCoupons(current => id ? current.map(item => item.id === id ? saved : item) : [saved, ...current]);
     setEditingCouponId(null);
 
-    let notificationErrorMessage = "";
-    if (!id) {
-      const assignedUser = users.find(item => item.id === saved.assigned_user_id);
-      const plan = plans.find(item => item.id === saved.plan_id);
-      const discountLabel = saved.discount_type === "percent"
-        ? `${saved.discount_value}% de desconto`
-        : `R$ ${(saved.discount_value / 100).toFixed(2).replace(".", ",")} de desconto`;
-      const { error: notificationError } = await supabase.from("notifications").insert({
-        user_id: saved.assigned_user_id,
-        type: "coupon_available",
-        title: "Você recebeu um cupom de desconto 🎁",
-        message: `Olá${assignedUser?.full_name ? `, ${assignedUser.full_name.split(" ")[0]}` : ""}! O LOSI CONECTA liberou o cupom ${saved.code} para você: ${discountLabel}${plan ? ` no plano ${plan.name}` : " em um plano pago"}. Acesse seu painel para conferir e utilizar o benefício.`,
-        link: "/painel#planos",
-      });
-      if (notificationError) notificationErrorMessage = notificationError.message;
-    }
-
-    setCouponMessage(notificationErrorMessage
-      ? `Cupom criado, mas não foi possível enviar a notificação: ${notificationErrorMessage}`
-      : id ? "Cupom atualizado com sucesso." : "Cupom criado com sucesso.");
+    setCouponMessage(id ? "Cupom atualizado com sucesso. Use “Enviar cupom” para notificar o usuário novamente." : "Cupom criado com sucesso. Agora use “Enviar cupom” para avisar o usuário.");
     await recordAdminAction(id ? "update_coupon" : "create_coupon", "coupon", saved.id, saved.code, { assigned_user_id: saved.assigned_user_id, plan_id: saved.plan_id, discount_type: saved.discount_type, discount_value: saved.discount_value, active: saved.active });
     setCouponSaving(false);
   }
 
+  async function sendCoupon(couponId: string) {
+    if (couponSaving) return;
+    const coupon = coupons.find(item => item.id === couponId);
+    if (!coupon) return;
+    if (!coupon.active || coupon.used_at) {
+      setCouponMessage("Este cupom não pode ser enviado porque está desativado ou já foi utilizado.");
+      return;
+    }
+
+    setCouponSaving(true);
+    setCouponMessage("");
+    const assignedUser = users.find(item => item.id === coupon.assigned_user_id);
+    const plan = plans.find(item => item.id === coupon.plan_id);
+    const discountLabel = coupon.discount_type === "percent"
+      ? `${coupon.discount_value}% de desconto`
+      : `R$ ${(coupon.discount_value / 100).toFixed(2).replace(".", ",")} de desconto`;
+
+    const { error } = await supabase.from("notifications").insert({
+      user_id: coupon.assigned_user_id,
+      type: "coupon_available",
+      title: "Você recebeu um cupom de desconto 🎁",
+      message: `Olá${assignedUser?.full_name ? `, ${assignedUser.full_name.split(" ")[0]}` : ""}! O LOSI CONECTA liberou o cupom ${coupon.code} para você: ${discountLabel}${plan ? ` no plano ${plan.name}` : " em um plano pago"}. Acesse seu painel para conferir e utilizar o benefício.`,
+      link: "/painel#planos",
+    });
+
+    if (error) {
+      setCouponMessage(`Não foi possível enviar o cupom: ${error.message}`);
+      setCouponSaving(false);
+      return;
+    }
+
+    setCouponMessage(`Cupom ${coupon.code} enviado com sucesso para ${assignedUser?.full_name || "o usuário"}.`);
+    await recordAdminAction("send_coupon", "coupon", coupon.id, coupon.code, {
+      assigned_user_id: coupon.assigned_user_id,
+      plan_id: coupon.plan_id,
+    });
+    setCouponSaving(false);
+  }
   async function removeCoupon(id: string) {
     const coupon = coupons.find(item => item.id === id);
     if (!coupon) return;
@@ -1204,7 +1223,7 @@ function AdminPage() {
                     <label>Desconto<input name="discount_value" type="number" min="0.01" step="0.01" defaultValue={editingCouponId ? (coupons.find(item => item.id === editingCouponId)?.discount_type === "fixed" ? ((coupons.find(item => item.id === editingCouponId)?.discount_value ?? 0) / 100).toFixed(2) : coupons.find(item => item.id === editingCouponId)?.discount_value ?? "") : ""} placeholder="Ex.: 20" required /></label>
                     <label>Validade<input name="expires_at" type="date" defaultValue={editingCouponId && coupons.find(item => item.id === editingCouponId)?.expires_at ? new Date(coupons.find(item => item.id === editingCouponId)!.expires_at!).toISOString().slice(0,10) : ""} /></label>
                     <div className="admin-plan-checks"><label><input name="active" type="checkbox" defaultChecked={editingCouponId ? Boolean(coupons.find(item => item.id === editingCouponId)?.active) : true} /> Cupom ativo</label></div>
-                    <div className="admin-item-actions"><button type="submit" className="admin-action-button" disabled={couponSaving}>{couponSaving ? "Salvando..." : editingCouponId ? "Salvar cupom" : "Criar cupom"}</button>{editingCouponId && <button type="button" className="admin-action-button" onClick={() => setEditingCouponId(null)}>Cancelar edição</button>}</div>
+                    <div className="admin-item-actions"><button type="submit" className="admin-action-button" disabled={couponSaving}>{couponSaving ? "Salvando..." : editingCouponId ? "Salvar cupom" : "Criar cupom"}</button>{editingCouponId && <button type="button" className="admin-action-button" onClick={() => setEditingCouponId(null)}>Cancelar edição</button>}</div>{!editingCouponId && <p className="admin-text" style={{ margin: "8px 0 0" }}>Depois de criar o cupom, envie-o manualmente pelo botão “Enviar cupom”.</p>}
                   </form>
 
                   {couponMessage && <div className="admin-category-message">{couponMessage}</div>}
@@ -1214,7 +1233,7 @@ function AdminPage() {
                       const assigned = users.find(u => u.id === item.assigned_user_id);
                       const plan = plans.find(p => p.id === item.plan_id);
                       const status = item.used_at ? "Utilizado" : !item.active ? "Desativado" : item.expires_at && new Date(item.expires_at).getTime() < Date.now() ? "Expirado" : item.claimed_at ? "Resgatado — aguardando pagamento" : "Disponível";
-                      return <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.code}</strong><span>{assigned?.full_name || "Usuário"} · {item.discount_type === "percent" ? item.discount_value + "%" : "R$ " + (item.discount_value/100).toFixed(2).replace(".",",")} de desconto{plan ? " · " + plan.name : " · qualquer plano pago"}</span><span>Status: {status}{item.claimed_at ? " · resgatado em " + new Date(item.claimed_at).toLocaleString("pt-BR") : ""}{item.used_at ? " · usado em " + new Date(item.used_at).toLocaleString("pt-BR") : ""}</span></div><div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => setEditingCouponId(item.id)} disabled={Boolean(item.used_at)}>Editar</button><button type="button" className="admin-category-delete" onClick={() => void removeCoupon(item.id)}>Remover</button></div></div></article>;
+                      return <article className="admin-list-item" key={item.id}><div className="admin-item-main"><div><strong>{item.code}</strong><span>{assigned?.full_name || "Usuário"} · {item.discount_type === "percent" ? item.discount_value + "%" : "R$ " + (item.discount_value/100).toFixed(2).replace(".",",")} de desconto{plan ? " · " + plan.name : " · qualquer plano pago"}</span><span>Status: {status}{item.claimed_at ? " · resgatado em " + new Date(item.claimed_at).toLocaleString("pt-BR") : ""}{item.used_at ? " · usado em " + new Date(item.used_at).toLocaleString("pt-BR") : ""}</span></div><div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void sendCoupon(item.id)} disabled={Boolean(item.used_at) || !item.active || couponSaving}>Enviar cupom</button><button type="button" className="admin-action-button" onClick={() => setEditingCouponId(item.id)} disabled={Boolean(item.used_at) || couponSaving}>Editar</button><button type="button" className="admin-category-delete" onClick={() => void removeCoupon(item.id)} disabled={couponSaving}>Remover</button></div></div></article>;
                     })}
                     {coupons.length === 0 && <div className="admin-empty">Nenhum cupom cadastrado.</div>}
                   </div>
