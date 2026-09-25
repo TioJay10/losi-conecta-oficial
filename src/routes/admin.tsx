@@ -321,14 +321,52 @@ function AdminPage() {
 
   async function activateNotificationSound(soundId: string) {
     if (notificationSoundSaving) return;
+    const selectedSound = notificationSounds.find(item => item.id === soundId);
+    if (!selectedSound) return;
+    if (selectedSound.active) {
+      setNotificationSoundMessage("Este já é o som ativo das notificações.");
+      return;
+    }
+
     setNotificationSoundSaving(true);
     setNotificationSoundMessage("");
+    const previousActive = notificationSounds.find(item => item.active);
     try {
-      const { error: clearError } = await supabase.from("notification_sounds").update({ active: false }).eq("active", true);
+      // Primeiro removemos a ativação anterior. O índice único no banco garante
+      // que nunca existam dois sons ativos ao mesmo tempo.
+      const { error: clearError } = await supabase
+        .from("notification_sounds")
+        .update({ active: false })
+        .eq("active", true);
       if (clearError) throw new Error(clearError.message);
-      const { error } = await supabase.from("notification_sounds").update({ active: true }).eq("id", soundId);
-      if (error) throw new Error(error.message);
-      setNotificationSounds(current => current.map(item => ({ ...item, active: item.id === soundId })));
+
+      const { error: activateError } = await supabase
+        .from("notification_sounds")
+        .update({ active: true })
+        .eq("id", soundId);
+      if (activateError) {
+        // Se a nova ativação falhar, tenta restaurar o som anterior para não
+        // deixar o sistema sem um som ativo.
+        if (previousActive) {
+          await supabase
+            .from("notification_sounds")
+            .update({ active: true })
+            .eq("id", previousActive.id);
+        }
+        throw new Error(activateError.message);
+      }
+
+      const { data: activeSound, error: verifyError } = await supabase
+        .from("notification_sounds")
+        .select("id,name,file_path,public_url,active,created_at")
+        .eq("id", soundId)
+        .eq("active", true)
+        .maybeSingle();
+      if (verifyError || !activeSound) throw new Error(verifyError?.message || "Não foi possível confirmar o novo som ativo.");
+
+      setNotificationSounds(current =>
+        current.map(item => ({ ...item, active: item.id === soundId })),
+      );
       setNotificationSoundMessage("Som de notificação atualizado. As próximas notificações usarão este som.");
     } catch (error) {
       setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível definir o som.");
