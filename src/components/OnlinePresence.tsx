@@ -47,11 +47,11 @@ export function OnlinePresenceTracker({ userId }: { userId: string | null }) {
   return null;
 }
 
-function usePresenceSubscription(userId: string | null) {
+function usePresenceSubscription(userId: string | null, skip = false) {
   const [online, setOnline] = useState(false);
 
   useEffect(() => {
-    if (!userId) {
+    if (!userId || skip) {
       setOnline(false);
       return;
     }
@@ -95,7 +95,7 @@ export function OnlineStatus({
 }) {
   const { onlineUsers } = useContext(OnlinePresenceContext);
   const ownPresence = userId ? onlineUsers.has(userId) : false;
-  const subscribedPresence = usePresenceSubscription(userId);
+  const subscribedPresence = usePresenceSubscription(userId, ownPresence);
   const online = ownPresence || subscribedPresence;
 
   return (
@@ -135,11 +135,11 @@ export function OnlinePresenceProvider({
 
     channel.subscribe(async (status) => {
       if (status !== "SUBSCRIBED" || !active) return;
-      await channel.track({
+      const result = await channel.track({
         userId,
         online_at: new Date().toISOString(),
       });
-      sync();
+      if (result === "ok") sync();
     });
 
     return () => {
@@ -161,6 +161,7 @@ export function OnlinePresenceProvider({
 
 export function useOnlineStatus(userId: string | null) {
   const { onlineUsers } = useContext(OnlinePresenceContext);
-  const subscribedPresence = usePresenceSubscription(userId);
-  return Boolean((userId && onlineUsers.has(userId)) || subscribedPresence);
+  const ownPresence = Boolean(userId && onlineUsers.has(userId));
+  const subscribedPresence = usePresenceSubscription(userId, ownPresence);
+  return Boolean(ownPresence || subscribedPresence);
 }
