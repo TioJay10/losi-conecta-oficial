@@ -114,7 +114,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "communication" | "activity">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "sounds" | "communication" | "activity" | "customization">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -816,6 +816,7 @@ function AdminPage() {
     { id: "coupons" as const, label: "Cupons", count: coupons.filter(item => item.active && !item.used_at).length },
     { id: "notifications" as const, label: "Notificações", count: unreadAdminNotifications },
     { id: "sounds" as const, label: "Sons de notificação", count: notificationSounds.length },
+    { id: "customization" as const, label: "Personalização" },
     { id: "communication" as const, label: "Central de comunicação" },
     { id: "activity" as const, label: "Auditoria" },
   ];
@@ -834,7 +835,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "sounds" ? "Sons de notificação" : section === "communication" ? "Central de comunicação" : "Auditoria administrativa";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "sounds" ? "Sons de notificação" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -870,7 +871,51 @@ function AdminPage() {
           <h1>{section === "overview" ? `Olá, ${name}.` : sectionTitle}</h1>
           <p className="admin-text">{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>
           {dataError && <div className="admin-data-error">Não foi possível carregar alguns dados: {dataError}</div>}
-          {section === "dashboard" ? (
+          {section === "customization" ? (
+            <div className="admin-admin-center">
+              <section className="admin-admin-center-hero">
+                <div>
+                  <div className="admin-badge">PERSONALIZAÇÃO</div>
+                  <h2>Personalização da página inicial</h2>
+                  <p>Configure os principais textos e elementos visuais da página inicial sem precisar editar o código.</p>
+                </div>
+                <strong>FASE 1</strong>
+              </section>
+
+              <section className="admin-plan-editor">
+                <div>
+                  <h3 style={{ margin: 0 }}>Conteúdo da página</h3>
+                  <p className="admin-text">Nesta primeira etapa, estamos preparando a estrutura de configuração. As alterações serão conectadas à página inicial na próxima etapa.</p>
+                </div>
+
+                <label>
+                  Título principal
+                  <input type="text" placeholder="Ex.: Encontre profissionais para seu evento" disabled />
+                </label>
+
+                <label>
+                  Subtítulo
+                  <textarea rows={3} placeholder="Ex.: Conecte-se aos melhores profissionais..." disabled />
+                </label>
+
+                <label>
+                  Texto do botão principal
+                  <input type="text" placeholder="Ex.: Encontrar profissionais" disabled />
+                </label>
+
+                <div className="admin-plan-checks">
+                  <label><input type="checkbox" disabled /> Exibir botão principal</label>
+                  <label><input type="checkbox" disabled /> Exibir seção de apresentação</label>
+                </div>
+
+                <div className="admin-item-actions">
+                  <button type="button" className="admin-action-button" disabled>Salvar alterações</button>
+                </div>
+
+                <small className="admin-text">Estrutura inicial criada. Na próxima etapa, estes campos serão salvos e aplicados à página inicial.</small>
+              </section>
+            </div>
+          ) : section === "dashboard" ? (
             (() => {
               const money = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
               const localKey = (value: string | Date) => {
