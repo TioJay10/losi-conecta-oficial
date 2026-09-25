@@ -371,7 +371,6 @@ function DashboardPage() {
 
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
-    let soundChannel: ReturnType<typeof supabase.channel> | null = null;
     const knownNotificationIdsRef = new Set<string>();
     let initialLoadCompleted = false;
 
@@ -497,29 +496,14 @@ function DashboardPage() {
       }
     };
 
-    // Safari/iOS e alguns navegadores bloqueiam áudio iniciado fora de uma
-    // interação do usuário. A primeira interação libera o mesmo elemento de
-    // áudio que será usado pelas notificações futuras.
-    const unlockNotificationAudio = () => {
-      void prepareNotificationAudio();
-    };
-
-    window.addEventListener("pointerdown", unlockNotificationAudio);
     window.addEventListener("focus", refreshNotifications);
     document.addEventListener("visibilitychange", refreshNotifications);
 
-    const poll = window.setInterval(() => {
-      void loadNotifications();
-    }, 5000);
-
     return () => {
       mounted = false;
-      window.clearInterval(poll);
-      window.removeEventListener("pointerdown", unlockNotificationAudio);
       window.removeEventListener("focus", refreshNotifications);
       document.removeEventListener("visibilitychange", refreshNotifications);
       if (channel) void supabase.removeChannel(channel);
-      if (soundChannel) void supabase.removeChannel(soundChannel);
       authListener.subscription.unsubscribe();
     };
   }, [user]);
