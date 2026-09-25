@@ -26,6 +26,7 @@ type Message = {
   content: string;
   created_at: string;
   read_at: string | null;
+  delivered_at: string | null;
 };
 
 type Props = {
@@ -106,7 +107,7 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
       setLoading(true);
       const { data, error: loadError } = await supabase
         .from("chat_messages")
-        .select("id,conversation_id,sender_id,content,created_at,read_at")
+        .select("id,conversation_id,sender_id,content,created_at,delivered_at,read_at")
         .eq("conversation_id", activeConversation.id)
         .order("created_at", { ascending: true });
 
@@ -214,7 +215,7 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
         sender_id: userId,
         content: content.slice(0, 2000),
       })
-      .select("id,conversation_id,sender_id,content,created_at,read_at")
+      .select("id,conversation_id,sender_id,content,created_at,delivered_at,read_at")
       .single();
 
     if (sendError || !data) {
@@ -304,7 +305,12 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
                       <div key={message.id} className={"provider-chat-message-row " + (mine ? "mine" : "theirs")}>
                         <div className="provider-chat-message-bubble">
                           <p>{message.content}</p>
-                          <time>{new Date(message.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</time>
+                          <div className="provider-chat-message-meta">
+                            <time>{new Date(message.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</time>
+                            <span className="provider-chat-message-checks" aria-label={message.read_at ? "Mensagem lida" : message.delivered_at ? "Mensagem recebida" : "Mensagem não recebida"}>
+                              <span className={message.delivered_at ? "is-active" : ""}>✓</span><span className={message.read_at ? "is-active" : ""}>✓</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     );
