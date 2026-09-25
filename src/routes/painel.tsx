@@ -381,7 +381,7 @@ function DashboardPage() {
       return data.user.id;
     }
 
-    async function loadNotifications(showPopup = false) {
+    async function loadNotifications() {
       const authenticatedUserId = await resolveAuthenticatedUser();
       if (!authenticatedUserId || !mounted) return;
 
@@ -399,26 +399,16 @@ function DashboardPage() {
 
       if (!mounted) return;
 
-      const rows = (data ?? []) as typeof notifications;
-      setNotifications(rows);
-
-      // Ao entrar no painel, qualquer notificação não lida mais recente
-      // também é entregue como aviso visual.
-      if (showPopup || rows.some((notification) => !notification.read_at)) {
-        const newestUnread = rows.find((notification) => !notification.read_at);
-        if (newestUnread) {
-          setNotificationPopup((current) =>
-            current?.id === newestUnread.id ? current : newestUnread,
-          );
-        }
-      }
+      setNotifications((data ?? []) as typeof notifications);
     }
 
     async function startNotificationDelivery() {
       const authenticatedUserId = await resolveAuthenticatedUser();
       if (!authenticatedUserId || !mounted) return;
 
-      await loadNotifications(true);
+      // As notificações que chegaram enquanto o usuário estava deslogado
+      // permanecem armazenadas no banco e aparecem no sino ao entrar.
+      await loadNotifications();
       if (!mounted) return;
 
       channel = supabase
@@ -436,14 +426,11 @@ function DashboardPage() {
 
             const notification = payload.new as typeof notifications[number];
 
+            // Nova notificação entra no sino, mas nunca abre pop-up automaticamente.
             setNotifications((current) => [
               notification,
               ...current.filter((item) => item.id !== notification.id),
             ].slice(0, 30));
-
-            if (!notification.read_at) {
-              setNotificationPopup(notification);
-            }
           },
         )
         .subscribe();
@@ -518,12 +505,21 @@ function DashboardPage() {
       await markNotificationAsRead(notification.id);
     }
     setNotificationsOpen(false);
+    setNotificationPopup(notification);
+  }
+
+  function handleNotificationAction(notification: typeof notifications[number]) {
+    setNotificationPopup(null);
+
     if (notification.type === "golden_heart") {
       setGoldenHeartMessage("");
       setGoldenHeartOpen(true);
       return;
     }
-    if (notification.link) window.location.href = notification.link;
+
+    if (notification.link) {
+      window.location.href = notification.link;
+    }
   }
 
   function openPaymentModal(plan: { slug: string; name: string; price: string }) {
@@ -981,7 +977,7 @@ function DashboardPage() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <button
                     type="button"
-                    onClick={() => void openNotification(notificationPopup)}
+                    onClick={() => handleNotificationAction(notificationPopup)}
                     style={{
                       flex: "1 1 190px",
                       border: "1px solid #d6b46a",
