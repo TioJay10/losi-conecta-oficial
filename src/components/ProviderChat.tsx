@@ -54,10 +54,6 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const isSupplier = Boolean(userId && userId === business.owner_id);
-  const activeParticipantId = activeConversation
-    ? (isSupplier ? activeConversation.requester_id : activeConversation.supplier_id)
-    : null;
-  const activeParticipantOnline = useOnlineStatus(activeParticipantId);
 
   function getSenderIdentity(senderId: string) {
     const supplier = supplierProfiles[senderId];
