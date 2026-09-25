@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
@@ -28,6 +28,7 @@ function DashboardPage() {
   const [notifications, setNotifications] = useState<Array<{ id: string; type: string; title: string; message: string; link: string | null; read_at: string | null; created_at: string }>>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationPopup, setNotificationPopup] = useState<typeof notifications[number] | null>(null);
+  const notificationAudioContextRef = useRef<AudioContext | null>(null);
   const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
   const [goldenHeartClaiming, setGoldenHeartClaiming] = useState(false);
   const [goldenHeartMessage, setGoldenHeartMessage] = useState("");
@@ -348,6 +349,8 @@ function DashboardPage() {
 
     return () => {
       mounted = false;
+      window.removeEventListener("pointerdown", unlockNotificationAudio);
+      window.removeEventListener("keydown", unlockNotificationAudio);
       window.removeEventListener("focus", handleRefresh);
       document.removeEventListener("visibilitychange", handleRefresh);
       listener.subscription.unsubscribe();
@@ -368,6 +371,26 @@ function DashboardPage() {
     if (!user || !supabase) return;
 
     let mounted = true;
+    // O navegador precisa de uma interação do usuário para liberar áudio.
+    const unlockNotificationAudio = () => {
+      try {
+        const AudioContextClass =
+          window.AudioContext ||
+          (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        if (!notificationAudioContextRef.current) {
+          notificationAudioContextRef.current = new AudioContextClass();
+        }
+        void notificationAudioContextRef.current.resume().catch(() => undefined);
+      } catch {
+        // O som é opcional; a notificação continua funcionando mesmo sem áudio.
+      }
+    };
+
+    window.addEventListener("pointerdown", unlockNotificationAudio, { once: true });
+    window.addEventListener("keydown", unlockNotificationAudio, { once: true });
+
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let currentUserId = user.id;
 
@@ -443,6 +466,16 @@ function DashboardPage() {
 
     void startNotificationDelivery();
 
+    // Se a sessão for criada/recuperada depois que esta tela já estiver montada,
+    // recarrega as notificações que foram armazenadas enquanto o usuário estava deslogado.
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        window.setTimeout(() => {
+          if (mounted) void loadNotifications();
+        }, 0);
+      }
+    });
+
     const refreshNotifications = () => {
       if (document.visibilityState === "visible") {
         void loadNotifications();
@@ -462,6 +495,7 @@ function DashboardPage() {
       window.removeEventListener("focus", refreshNotifications);
       document.removeEventListener("visibilitychange", refreshNotifications);
       if (channel) void supabase.removeChannel(channel);
+      authListener.subscription.unsubscribe();
     };
   }, [user]);
   useEffect(() => {
@@ -490,26 +524,32 @@ function DashboardPage() {
         (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioContextClass) return;
 
-      const audioContext = new AudioContextClass();
+      let audioContext = notificationAudioContextRef.current;
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+        notificationAudioContextRef.current = audioContext;
+      }
+
+      if (audioContext.state === "suspended") {
+        void audioContext.resume().catch(() => undefined);
+      }
+
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
+      const now = audioContext.currentTime;
 
       oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(1320, audioContext.currentTime + 0.09);
+      oscillator.frequency.setValueAtTime(880, now);
+      oscillator.frequency.exponentialRampToValueAtTime(1320, now + 0.08);
 
-      gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.045, audioContext.currentTime + 0.012);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.16);
+      gainNode.gain.setValueAtTime(0.0001, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.045, now + 0.012);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
 
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-
-      oscillator.start();
-      oscillator.stop(audioContext.currentTime + 0.17);
-      oscillator.addEventListener("ended", () => {
-        void audioContext.close();
-      });
+      oscillator.start(now);
+      oscillator.stop(now + 0.17);
     } catch (error) {
       console.warn("Não foi possível reproduzir o som da notificação:", error);
     }
