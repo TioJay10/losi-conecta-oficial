@@ -19,7 +19,7 @@ import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
+  id: '/', | '/notificar-inconsistencia'
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -105,6 +105,7 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/notificar-inconsistencia': typeof NotificarInconsistenciaRoute
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
   '/buscar': typeof BuscarRoute
@@ -119,6 +120,7 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/notificar-inconsistencia': typeof NotificarInconsistenciaRoute
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
   '/buscar': typeof BuscarRoute
@@ -127,9 +129,9 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
+  fullPaths: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
+  to: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
   id: '__root__' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -145,6 +147,7 @@ export interface RootRouteChildren {
   OrcamentosRoute: typeof OrcamentosRoute
   BuscarRoute: typeof BuscarRoute
   FornecedorSlugRoute: typeof FornecedorSlugRoute
+  NotificarInconsistenciaRoute: typeof NotificarInconsistenciaRoute
 }
 
 declare module '@tanstack/react-router' {
