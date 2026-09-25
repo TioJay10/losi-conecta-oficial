@@ -901,7 +901,7 @@ function AdminPage() {
                     <summary style={{ listStyle: "none", cursor: "pointer" }}>
                       <div className="admin-finance-panel-head" style={{ margin: 0 }}>
                         <div><div className="admin-badge">ATIVIDADE RECENTE</div><h3>O que aconteceu recentemente</h3></div>
-                        <span>Últimas movimentações · {Math.min(8, businesses.length + subscriptions.length + supplierReports.length)} registro(s) ▾</span>
+                        <span className="admin-filter-count">Últimas movimentações · {Math.min(8, businesses.length + subscriptions.length + supplierReports.length)} registro(s) ▾</span>
                       </div>
                     </summary>
                     <div className="admin-dashboard-activity-list">
@@ -1207,7 +1207,7 @@ function AdminPage() {
                         <option value="pending">Pendentes</option>
                         <option value="cancelled">Canceladas</option>
                       </select>
-                      <span>{filteredSubscriptions.length} resultado(s)</span>
+                      <span className="admin-filter-count">{filteredSubscriptions.length} resultado(s)</span>
                     </div>
                     <div className="admin-subscriptions-list">
                       {filteredSubscriptions.length === 0 ? <div className="admin-empty">Nenhuma assinatura encontrada com os filtros atuais.</div> : filteredSubscriptions.map(item => {
@@ -1364,7 +1364,7 @@ function AdminPage() {
                 </div>
               ) : section === "activity" ? (
                 <div className="admin-admin-center">
-                  <section className="admin-admin-center-hero"><div><div className="admin-badge">AUDITORIA</div><h2>Atividade administrativa</h2><p>Histórico das ações executadas dentro do painel administrativo.</p></div><strong>{auditLogs.length} registro(s)</strong></section>
+                  <section className="admin-admin-center-hero"><div><div className="admin-badge">AUDITORIA</div><h2>Atividade administrativa</h2><p>Histórico das ações executadas dentro do painel administrativo.</p></div><strong className="admin-filter-count">{auditLogs.length} registro(s)</strong></section>
                   <div className="admin-admin-toolbar"><input value={activitySearch} onChange={e=>setActivitySearch(e.target.value)} placeholder="Buscar ação, administrador ou item..." aria-label="Buscar atividade administrativa" /><select value={activityActionFilter} onChange={e=>setActivityActionFilter(e.target.value)} aria-label="Filtrar ação"><option value="all">Todas as ações</option>{Array.from(new Set(auditLogs.map(item=>item.action))).map(action=><option key={action} value={action}>{auditActionLabel(action)}</option>)}</select></div>
                   <div className="admin-admin-notification-list">{auditLogs.filter(item=>{const q=activitySearch.trim().toLocaleLowerCase("pt-BR");const hay=[item.action,auditActionLabel(item.action),item.entity_type,auditEntityLabel(item.entity_type),item.entity_name??"",item.admin_name??"",...Object.entries(item.details??{}).map(([key,value])=>key+" "+auditDetailLabel(key,value))].join(" ").toLocaleLowerCase("pt-BR");return(!q||hay.includes(q))&&(activityActionFilter==="all"||item.action===activityActionFilter)}).map(item=><article className="admin-admin-notification read" key={item.id}>
                     <div>
