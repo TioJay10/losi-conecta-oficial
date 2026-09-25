@@ -385,6 +385,8 @@ function DashboardPage() {
       if (mounted) setNotifications((data ?? []) as typeof notifications);
     }
 
+    void loadNotifications();
+
     // A leitura no banco é a fonte de verdade. O polling garante a entrega
     // mesmo quando o navegador, rede ou WebSocket do Realtime não entrega o evento.
     const poll = window.setInterval(() => {
