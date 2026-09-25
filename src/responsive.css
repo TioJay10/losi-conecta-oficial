@@ -13360,3 +13360,9 @@ button.availability-day {
 .admin-page .admin-audit-card * {
   color: #f0d99a !important;
 }
+
+
+/* ADMIN — contador da atividade recente em fundo azul-marinho */
+.admin-page .admin-dashboard-activity summary .admin-finance-panel-head > span {
+  color: #f0d99a !important;
+}
