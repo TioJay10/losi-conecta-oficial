@@ -377,19 +377,32 @@ function AdminPage() {
 
   async function deleteNotificationSound(sound: typeof notificationSounds[number]) {
     if (notificationSoundSaving) return;
-    if (sound.active) { setNotificationSoundMessage("Defina outro som como ativo antes de remover este."); return; }
-    if (!window.confirm("Remover este som?")) return;
+    if (!window.confirm(`Remover o áudio "${sound.name}"? Essa ação não pode ser desfeita.`)) return;
+
     setNotificationSoundSaving(true);
     setNotificationSoundMessage("");
     try {
-      const { error: storageError } = await supabase.storage.from("notification-sounds").remove([sound.file_path]);
-      if (storageError) throw new Error(storageError.message);
-      const { error } = await supabase.from("notification_sounds").delete().eq("id", sound.id);
-      if (error) throw new Error(error.message);
+      // O áudio ativo também pode ser removido. Ao apagar o registro, ele
+      // deixa imediatamente de ser o som oficial das notificações.
+      const { error: dbError } = await supabase
+        .from("notification_sounds")
+        .delete()
+        .eq("id", sound.id);
+      if (dbError) throw new Error(dbError.message);
+
+      const { error: storageError } = await supabase.storage
+        .from("notification-sounds")
+        .remove([sound.file_path]);
+      if (storageError) {
+        console.warn("Registro removido, mas não foi possível remover o arquivo do Storage:", storageError.message);
+      }
+
       setNotificationSounds(current => current.filter(item => item.id !== sound.id));
-      setNotificationSoundMessage("Som removido.");
+      setNotificationSoundMessage(sound.active
+        ? "Áudio removido. Não há mais áudio personalizado ativo."
+        : "Áudio removido.");
     } catch (error) {
-      setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível remover o som.");
+      setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível remover o áudio.");
     } finally {
       setNotificationSoundSaving(false);
     }
@@ -1316,7 +1329,7 @@ function AdminPage() {
                       <article className="admin-list-item" key={sound.id}>
                         <div className="admin-item-main">
                           <div><strong>{sound.name}</strong><span>{sound.active ? "Som atual das notificações" : "Disponível para seleção"} · {new Date(sound.created_at).toLocaleString("pt-BR")}</span><audio controls preload="none" src={sound.public_url} style={{ width: "min(100%, 360px)", marginTop: 10 }} /></div>
-                          <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void activateNotificationSound(sound.id)} disabled={sound.active || notificationSoundSaving}>{sound.active ? "Em uso" : "Usar como notificação"}</button><button type="button" className="admin-category-delete" onClick={() => void deleteNotificationSound(sound)} disabled={sound.active || notificationSoundSaving}>Remover</button></div>
+                          <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void activateNotificationSound(sound.id)} disabled={sound.active || notificationSoundSaving}>{sound.active ? "Em uso" : "Usar como notificação"}</button><button type="button" className="admin-category-delete" onClick={() => void deleteNotificationSound(sound)} disabled={notificationSoundSaving}>Remover</button></div>
                         </div>
                       </article>
                     ))}
