@@ -9,7 +9,7 @@ type Business = {
   owner_id: string;
 };
 
-type UserProfile = { id: string; full_name: string | null; avatar_url: string | null };
+type UserProfile = { id: string; full_name: string | null; avatar_url: string | null };\ntype SupplierProfile = { owner_id: string; business_name: string; logo_url: string | null; slug: string; };
 
 type Conversation = {
   id: string;
@@ -47,10 +47,19 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [pendingChatId, setPendingChatId] = useState<string | null>(null);
-  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});
+  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});\n  const [supplierProfiles, setSupplierProfiles] = useState<Record<string, SupplierProfile>>({});
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const isSupplier = Boolean(userId && userId === business.owner_id);
+
+  function getSenderIdentity(senderId: string) {
+    const supplier = supplierProfiles[senderId];
+    if (supplier) {
+      return { name: supplier.business_name, avatar: supplier.logo_url || profiles[senderId]?.avatar_url || null };
+    }
+    const profile = profiles[senderId];
+    return { name: profile?.full_name || "Usuário", avatar: profile?.avatar_url || null };
+  }
 
   const sortedConversations = useMemo(
     () => [...conversations].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
@@ -350,14 +359,16 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
                     {(() => {
                       const participantId = isSupplier ? activeConversation.requester_id : activeConversation.supplier_id;
                       const participant = profiles[participantId];
-                      const name = participant?.full_name || (isSupplier ? "Cliente" : business.business_name);
+                      const supplier = supplierProfiles[participantId];
+                      const name = supplier?.business_name || participant?.full_name || business.business_name;
+                      const avatar = supplier?.logo_url || participant?.avatar_url || null;
                       return <>
                         <div className="provider-chat-participant-avatar">
-                          {participant?.avatar_url ? <img src={participant.avatar_url} alt={name} /> : name.slice(0, 1).toUpperCase()}
+                          {avatar ? <img src={avatar} alt={name} /> : name.slice(0, 1).toUpperCase()}
                         </div>
                         <div className="provider-chat-participant-copy">
                           <strong>{name}</strong>
-                          <span>{isSupplier ? "Cliente" : "Fornecedor"}</span>
+                          <span>{supplierProfiles[participantId] ? "Fornecedor" : "Perfil pessoal"}</span>
                         </div>
                       </>;
                     })()}
@@ -371,16 +382,15 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
                     return (
                       <div key={message.id} className={"provider-chat-message-row " + (mine ? "mine" : "theirs")}>
                         <div className="provider-chat-message-identity">
-                          <div className="provider-chat-message-avatar">
-                            {message.sender_id === business.owner_id && business.logo_url
-                              ? <img src={business.logo_url} alt={business.business_name} />
-                              : profiles[message.sender_id]?.avatar_url
-                                ? <img src={profiles[message.sender_id].avatar_url} alt={profiles[message.sender_id]?.full_name || "Usuário"} />
-                                : (profiles[message.sender_id]?.full_name || (message.sender_id === business.owner_id ? business.business_name : "Usuário")).slice(0, 1).toUpperCase()}
-                          </div>
-                          <span className="provider-chat-message-sender-name">
-                            {message.sender_id === business.owner_id ? business.business_name : profiles[message.sender_id]?.full_name || "Cliente"}
-                          </span>
+                          {(() => {
+                            const sender = getSenderIdentity(message.sender_id);
+                            return <>
+                              <div className="provider-chat-message-avatar">
+                                {sender.avatar ? <img src={sender.avatar} alt={sender.name} /> : sender.name.slice(0, 1).toUpperCase()}
+                              </div>
+                              <span className="provider-chat-message-sender-name">{sender.name}</span>
+                            </>;
+                          })()}
                         </div>
                         <div className="provider-chat-message-bubble">
                           <p>{message.content}</p>
