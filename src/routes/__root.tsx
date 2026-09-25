@@ -185,8 +185,11 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
     function showToast(message: string) {
       if (currentPath === "/painel") return;
       setToastMessage(message);
-      setToastOffsetY(-18);
+      setToastOffsetY(-24);
       setToastVisible(true);
+      window.requestAnimationFrame(() => {
+        if (mounted) setToastOffsetY(0);
+      });
       if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
       toastTimerRef.current = window.setTimeout(() => {
         if (!mounted) return;
