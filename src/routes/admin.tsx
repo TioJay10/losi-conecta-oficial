@@ -292,7 +292,17 @@ function AdminPage() {
     try {
       const extension = file.name.split(".").pop()?.toLowerCase() || "mp3";
       const filePath = "sounds/" + crypto.randomUUID() + "." + extension;
-      const { error: uploadError } = await supabase.storage.from("notification-sounds").upload(filePath, file, { contentType: file.type || "audio/mpeg", upsert: false });
+      // Alguns navegadores enviam WAV como audio/x-wav. O bucket aceita audio/wav,
+      // então normalizamos o MIME antes do upload para evitar rejeição do Storage.
+      const normalizedMimeType =
+        file.type === "audio/x-wav" || file.type === "audio/vnd.wave"
+          ? "audio/wav"
+          : file.type === "audio/x-m4a"
+            ? "audio/mp4"
+            : file.type || "audio/mpeg";
+      const { error: uploadError } = await supabase.storage
+        .from("notification-sounds")
+        .upload(filePath, file, { contentType: normalizedMimeType, upsert: false });
       if (uploadError) throw new Error(uploadError.message);
       const { data: publicData } = supabase.storage.from("notification-sounds").getPublicUrl(filePath);
       const name = notificationSoundName.trim() || file.name;
