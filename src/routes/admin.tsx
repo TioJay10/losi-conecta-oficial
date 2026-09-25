@@ -59,7 +59,7 @@ function auditActionLabel(action: string) {
     resolve_supplier_report: "Denúncia resolvida",
     dismiss_supplier_report: "Denúncia arquivada",
   };
-  return labels[action] || action.replaceAll("_", " ").replace(/\\b\\w/g, letter => letter.toUpperCase());
+  return labels[action] || action.replaceAll("_", " ").replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
 function auditEntityLabel(entityType: string) {
