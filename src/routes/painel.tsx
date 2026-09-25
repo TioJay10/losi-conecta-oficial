@@ -427,10 +427,15 @@ function DashboardPage() {
             const notification = payload.new as typeof notifications[number];
 
             // Nova notificação entra no sino, mas nunca abre pop-up automaticamente.
+            // O som é apenas um aviso discreto de que algo novo chegou.
             setNotifications((current) => [
               notification,
               ...current.filter((item) => item.id !== notification.id),
             ].slice(0, 30));
+
+            if (!notification.read_at) {
+              playNotificationSound();
+            }
           },
         )
         .subscribe();
@@ -475,6 +480,40 @@ function DashboardPage() {
       }, 150);
     }
   }, [user]);
+
+  function playNotificationSound() {
+    if (typeof window === "undefined") return;
+
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      const audioContext = new AudioContextClass();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(1320, audioContext.currentTime + 0.09);
+
+      gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.045, audioContext.currentTime + 0.012);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.16);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.17);
+      oscillator.addEventListener("ended", () => {
+        void audioContext.close();
+      });
+    } catch (error) {
+      console.warn("Não foi possível reproduzir o som da notificação:", error);
+    }
+  }
 
   async function markNotificationAsRead(notificationId: string) {
     if (!supabase || !user) return;
