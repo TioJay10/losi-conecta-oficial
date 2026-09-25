@@ -167,19 +167,33 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
     setLoading(true);
     setError("");
 
-    const { data, error: createError } = await supabase
+    const selectExisting = await supabase
       .from("chat_conversations")
-      .upsert(
-        { business_id: business.id, requester_id: userId, supplier_id: business.owner_id },
-        { onConflict: "business_id,requester_id" },
-      )
       .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-      .single();
+      .eq("business_id", business.id)
+      .eq("requester_id", userId)
+      .maybeSingle();
 
-    if (createError || !data) {
-      console.error("Erro ao iniciar conversa:", createError);
+    if (selectExisting.error) {
+      console.error("Erro ao localizar conversa:", selectExisting.error);
       setError("Não foi possível iniciar o chat.");
     } else {
+      let data = selectExisting.data;
+      if (!data) {
+        const created = await supabase
+          .from("chat_conversations")
+          .insert({ business_id: business.id, requester_id: userId, supplier_id: business.owner_id })
+          .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
+          .single();
+        if (created.error) {
+          console.error("Erro ao criar conversa:", created.error);
+          setError("Não foi possível iniciar o chat.");
+          setLoading(false);
+          return;
+        }
+        data = created.data;
+      }
+
       const conversation = data as Conversation;
       setConversations((current) => [conversation, ...current.filter((item) => item.id !== conversation.id)]);
       setActiveConversation(conversation);
