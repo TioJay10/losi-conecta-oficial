@@ -5,7 +5,7 @@ import {
   createRootRoute,
   useLocation,
 } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { Component, useEffect, useRef, useState } from "react";
 import type { ErrorInfo, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import "../responsive.css";
 import "../montserrat.css";
@@ -404,7 +404,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
   );
 }
 
-class GlobalNotificationErrorBoundary extends React.Component<
+class GlobalNotificationErrorBoundary extends Component<
   { children: ReactNode },
   { hasError: boolean }
 > {
