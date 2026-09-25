@@ -369,12 +369,26 @@ function DashboardPage() {
 
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let currentUserId = user.id;
+
+    async function resolveAuthenticatedUser() {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        console.error("Não foi possível identificar o usuário autenticado para as notificações:", error);
+        return null;
+      }
+      currentUserId = data.user.id;
+      return data.user.id;
+    }
 
     async function loadNotifications(showPopup = false) {
+      const authenticatedUserId = await resolveAuthenticatedUser();
+      if (!authenticatedUserId || !mounted) return;
+
       const { data, error } = await supabase
         .from("notifications")
         .select("id,type,title,message,link,read_at,created_at")
-        .eq("user_id", user.id)
+        .eq("user_id", authenticatedUserId)
         .order("created_at", { ascending: false })
         .limit(30);
 
@@ -388,30 +402,33 @@ function DashboardPage() {
       const rows = (data ?? []) as typeof notifications;
       setNotifications(rows);
 
-      if (showPopup) {
-        const newest = rows[0];
-        if (newest && !newest.read_at) {
-          setNotificationPopup((current) => current?.id === newest.id ? current : newest);
+      // Ao entrar no painel, qualquer notificação não lida mais recente
+      // também é entregue como aviso visual.
+      if (showPopup || rows.some((notification) => !notification.read_at)) {
+        const newestUnread = rows.find((notification) => !notification.read_at);
+        if (newestUnread) {
+          setNotificationPopup((current) =>
+            current?.id === newestUnread.id ? current : newestUnread,
+          );
         }
       }
     }
 
-    // Carrega imediatamente ao entrar no painel.
-    void loadNotifications();
+    void loadNotifications(true);
 
-    // Realtime: mostra imediatamente uma nova notificação criada para este usuário.
     channel = supabase
-      .channel("panel-notifications-" + user.id + "-" + Date.now())
+      .channel("panel-notifications-" + currentUserId + "-" + Date.now())
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "notifications",
-          filter: "user_id=eq." + user.id,
+          filter: "user_id=eq." + currentUserId,
         },
         (payload) => {
           if (!mounted) return;
+
           const notification = payload.new as typeof notifications[number];
 
           setNotifications((current) => [
@@ -424,11 +441,17 @@ function DashboardPage() {
           }
         },
       )
-      .subscribe((status) => {
-        console.info("Status das notificações em tempo real:", status);
-      });
+      .subscribe();
 
-    // Fallback: consulta o banco periodicamente para não depender do WebSocket.
+    const refreshNotifications = () => {
+      if (document.visibilityState === "visible") {
+        void loadNotifications();
+      }
+    };
+
+    window.addEventListener("focus", refreshNotifications);
+    document.addEventListener("visibilitychange", refreshNotifications);
+
     const poll = window.setInterval(() => {
       void loadNotifications();
     }, 5000);
@@ -436,6 +459,8 @@ function DashboardPage() {
     return () => {
       mounted = false;
       window.clearInterval(poll);
+      window.removeEventListener("focus", refreshNotifications);
+      document.removeEventListener("visibilitychange", refreshNotifications);
       if (channel) void supabase.removeChannel(channel);
     };
   }, [user]);
