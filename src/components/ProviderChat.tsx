@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Component, useEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 import { OnlineStatus } from "./OnlinePresence";
 
@@ -39,7 +39,7 @@ type Props = {
   onRequireAuth: () => void;
 };
 
-export function ProviderChat({ business, userId, onRequireAuth }: Props) {
+function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
   const [open, setOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
@@ -262,6 +262,10 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
   }
 
   async function openNewConversation() {
+    if (!business.id || !business.owner_id) {
+      setError("Não foi possível identificar este fornecedor.");
+      return;
+    }
     if (!userId) {
       onRequireAuth();
       return;
@@ -276,7 +280,7 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
     // Primeiro procuramos o histórico nos dois sentidos. Isso evita criar uma segunda
     // conversa quando, por exemplo, o fornecedor recebeu uma mensagem do usuário e
     // depois abre o perfil público desse mesmo usuário/fornecedor para responder.
-    const selectDirect = await supabase
+    try {\n      const selectDirect = await supabase
       .from("chat_conversations")
       .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
       .eq("requester_id", userId)
@@ -541,4 +545,37 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
       )}
     </>
   );
+}
+
+
+type ProviderChatBoundaryProps = Props;
+
+class ProviderChatBoundary extends Component<
+  ProviderChatBoundaryProps,
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("Erro ao renderizar o chat do fornecedor:", error, info);
+  }
+
+  render(): ReactNode {
+    if (this.state.hasError) {
+      return (
+        <div className="provider-chat-trigger-group" role="status">
+          <span className="provider-chat-error-inline">Chat indisponível</span>
+        </div>
+      );
+    }
+    return <ProviderChatContent {...this.props} />;
+  }
+}
+
+export function ProviderChat(props: Props) {
+  return <ProviderChatBoundary {...props} />;
 }
