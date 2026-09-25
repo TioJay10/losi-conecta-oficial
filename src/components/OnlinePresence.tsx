@@ -5,10 +5,12 @@ const PRESENCE_PREFIX = "losi-user-presence-";
 
 type OnlinePresenceContextValue = {
   onlineUsers: Set<string>;
+  currentUserId: string | null;
 };
 
 const OnlinePresenceContext = createContext<OnlinePresenceContextValue>({
   onlineUsers: new Set<string>(),
+  currentUserId: null,
 });
 
 function presenceChannel(userId: string) {
@@ -81,7 +83,7 @@ function usePresenceSubscription(userId: string | null, skip = false) {
       setOnline(false);
       void supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, skip]);
 
   return online;
 }
@@ -93,9 +95,10 @@ export function OnlineStatus({
   userId: string | null;
   compact?: boolean;
 }) {
-  const { onlineUsers } = useContext(OnlinePresenceContext);
-  const ownPresence = userId ? onlineUsers.has(userId) : false;
-  const subscribedPresence = usePresenceSubscription(userId, ownPresence);
+  const { onlineUsers, currentUserId } = useContext(OnlinePresenceContext);
+  const isCurrentUser = Boolean(userId && currentUserId === userId);
+  const ownPresence = isCurrentUser && onlineUsers.has(userId as string);
+  const subscribedPresence = usePresenceSubscription(userId, isCurrentUser);
   const online = ownPresence || subscribedPresence;
 
   return (
@@ -150,7 +153,7 @@ export function OnlinePresenceProvider({
     };
   }, [userId]);
 
-  const value = useMemo(() => ({ onlineUsers }), [onlineUsers]);
+  const value = useMemo(() => ({ onlineUsers, currentUserId: userId }), [onlineUsers, userId]);
 
   return (
     <OnlinePresenceContext.Provider value={value}>
@@ -160,8 +163,9 @@ export function OnlinePresenceProvider({
 }
 
 export function useOnlineStatus(userId: string | null) {
-  const { onlineUsers } = useContext(OnlinePresenceContext);
-  const ownPresence = Boolean(userId && onlineUsers.has(userId));
-  const subscribedPresence = usePresenceSubscription(userId, ownPresence);
+  const { onlineUsers, currentUserId } = useContext(OnlinePresenceContext);
+  const isCurrentUser = Boolean(userId && currentUserId === userId);
+  const ownPresence = isCurrentUser && onlineUsers.has(userId as string);
+  const subscribedPresence = usePresenceSubscription(userId, isCurrentUser);
   return Boolean(ownPresence || subscribedPresence);
 }
