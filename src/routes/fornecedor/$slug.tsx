@@ -486,8 +486,7 @@ function ProviderPage() {
       "Endereço completo: " + requesterAddress,
       requesterCompany ? "Nome da empresa: " + requesterCompany : "",
       requesterProfileUrl ? "Link do perfil público: " + requesterProfileUrl : "",
-    ].filter(Boolean).join("
-");
+    ].filter(Boolean).join("\n");
 
     formElement.reset();
 
