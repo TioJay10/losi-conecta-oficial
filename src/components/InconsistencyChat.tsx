@@ -135,20 +135,6 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
     }
 
     const row = data as InconsistencyConversation;
-    const first = await supabase.from("inconsistency_messages").insert({
-      conversation_id: row.id,
-      sender_id: userId,
-      sender_role: "user",
-      message: description.trim(),
-    });
-    if (first.error) {
-      console.error("Erro ao registrar mensagem inicial:", first.error);
-      await supabase.from("inconsistency_conversations").delete().eq("id", row.id).eq("user_id", userId);
-      setFeedback("Não foi possível concluir o envio. Tente novamente.");
-      setCreating(false);
-      return;
-    }
-
     setConversation(row);
     await loadMessages(row.id);
     setTitle("");
