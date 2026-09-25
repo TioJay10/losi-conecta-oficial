@@ -91,7 +91,6 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
 
     let mounted = true;
     let channel: any = null;
-    let soundChannel: any = null;
 
     async function loadActiveSound() {
       const { supabase } = await import("../lib/supabase");
