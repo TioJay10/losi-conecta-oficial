@@ -419,10 +419,6 @@ function DashboardPage() {
       rows.forEach((notification) => knownNotificationIdsRef.add(notification.id));
       setNotifications(rows);
 
-      if (newUnreadRows.length > 0) {
-        playNotificationSound();
-      }
-
       initialLoadCompleted = true;
     }
 
@@ -460,11 +456,8 @@ function DashboardPage() {
               ...current.filter((item) => item.id !== notification.id),
             ]);
 
-            // Nova notificação: entra no sino + contador e emite apenas
-            // um aviso sonoro. Nunca abre popup.
-            if (!notification.read_at) {
-              playNotificationSound();
-            }
+            // O alerta global em __root.tsx cuida do som e do aviso fora do painel.
+            // Aqui mantemos apenas a lista/sino das notificações.
           },
         )
         .subscribe();
