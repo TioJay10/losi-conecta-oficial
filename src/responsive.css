@@ -14425,6 +14425,7 @@ button.availability-day {
 @media(max-width:900px){.admin-inconsistency-layout{grid-template-columns:1fr}.admin-inconsistency-list{max-height:270px}.admin-inconsistency-chat{height:560px;min-height:560px}}
 @media(max-width:560px){.admin-inconsistency-head{padding:18px;flex-direction:column}.admin-inconsistency-head h2{font-size:18px}.admin-inconsistency-layout{gap:10px}.admin-inconsistency-composer{grid-template-columns:minmax(0,1fr) 62px 60px}.admin-inconsistency-bubble{max-width:86%}}
 
+.admin-page .admin-inconsistency-avatar-image{width:34px;height:34px;min-width:34px;min-height:34px;flex:0 0 34px;display:block;border-radius:50%;object-fit:cover;object-position:center;background:#eef1f5;border:1px solid #e0e5ed;}
 /* ADMIN INCONSISTENCY CENTER — GROUP ISOLATION
    Parent > child > grandchild. Each visual group owns its own surface,
    typography and spacing so admin-page styles cannot leak into the chat. */
