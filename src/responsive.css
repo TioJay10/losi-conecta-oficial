@@ -13663,3 +13663,118 @@ button.availability-day {
   .provider-chat-message-identity { flex-basis:29px; width:29px; }
   .provider-chat-message-avatar { width:27px; height:27px; }
 }
+
+
+/* LOSI CONECTA — presença online/offline do participante */
+.provider-chat-trigger-group{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+}
+
+.provider-chat-trigger{
+  width:38px;
+  height:38px;
+  min-width:38px;
+  min-height:38px;
+  padding:4px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  box-shadow:none;
+  color:#d4af37;
+  cursor:pointer;
+  transition:transform .18s ease,color .18s ease,opacity .18s ease;
+}
+
+.provider-chat-trigger:hover{
+  transform:translateY(-1px);
+  background:transparent;
+  box-shadow:none;
+  color:#f0d99a;
+}
+
+.provider-chat-trigger:focus-visible{
+  outline:2px solid rgba(212,175,55,.7);
+  outline-offset:3px;
+}
+
+.provider-chat-trigger-icon{
+  width:25px;
+  height:25px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.provider-online-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-width:0;
+  white-space:nowrap;
+  color:#687386;
+  font:700 10px/1 Montserrat,Arial,sans-serif;
+}
+
+.provider-online-dot{
+  width:8px;
+  height:8px;
+  flex:0 0 8px;
+  border-radius:50%;
+  display:inline-block;
+  box-shadow:0 0 0 2px rgba(23,32,51,.06);
+}
+
+.provider-online-dot.is-online{
+  background:#22c55e;
+  box-shadow:0 0 0 2px rgba(34,197,94,.13),0 0 7px rgba(34,197,94,.34);
+}
+
+.provider-online-dot.is-offline{
+  background:#ef4444;
+  box-shadow:0 0 0 2px rgba(239,68,68,.10);
+}
+
+.provider-online-status-compact{
+  margin-top:2px;
+  font-size:9px;
+  justify-content:flex-start;
+}
+
+.provider-chat-active-participant .provider-online-status{
+  flex:0 0 auto;
+}
+
+@media(max-width:700px){
+  .provider-chat-trigger-group{
+    gap:6px;
+  }
+  .provider-chat-trigger{
+    width:36px;
+    height:36px;
+    min-width:36px;
+    min-height:36px;
+  }
+  .provider-chat-trigger-icon{
+    width:23px;
+    height:23px;
+  }
+  .provider-online-status{
+    font-size:9px;
+  }
+  .provider-online-dot{
+    width:7px;
+    height:7px;
+    flex-basis:7px;
+  }
+}
