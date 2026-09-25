@@ -1,4 +1,5 @@
 import { Component, useEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "../lib/supabase";
 import { OnlineStatus } from "./OnlinePresence";
 
@@ -436,19 +437,21 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
         <OnlineStatus userId={business.owner_id} />
       </div>
 
-      {open && (
+      {open && typeof document !== "undefined" && createPortal((
         <div className="provider-chat-backdrop" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget) closeChat();
         }}>
           <section className="provider-chat-window" role="dialog" aria-modal="true" aria-labelledby="provider-chat-title">
             <header className="provider-chat-header">
               <div className="provider-chat-header-profile">
-                <div className="provider-chat-avatar">
+                <div className="provider-chat-header-identity">
+                  <div className="provider-chat-avatar">
                   {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
-                </div>
-                <div>
-                  <strong id="provider-chat-title">{business.business_name}</strong>
-                  <span>{isSupplier ? "Caixa de mensagens" : "Chat interno LOSI CONECTA"}</span>
+                  </div>
+                  <div className="provider-chat-header-copy">
+                    <strong id="provider-chat-title">{business.business_name}</strong>
+                    <span>{isSupplier ? "Caixa de mensagens" : "Chat interno LOSI CONECTA"}</span>
+                  </div>
                 </div>
               </div>
               <button type="button" className="provider-chat-close" onClick={closeChat} aria-label="Fechar chat">×</button>
@@ -561,7 +564,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
             </div>
           </section>
         </div>
-      )}
+      ), document.body)}
     </>
   );
 }
