@@ -404,6 +404,8 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
   function closeChat() {
     setOpen(false);
     setActiveConversation(null);
+    setMessages([]);
+    setDraft("");
     setError("");
   }
 
