@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { ProviderChat } from "../components/ProviderChat";
 
 export const Route = createFileRoute("/painel")({
   component: DashboardPage,
@@ -20,7 +21,7 @@ function DashboardPage() {
   const [clientQuotesReceived, setClientQuotesReceived] = useState(0);
   const [clientRequestsPending, setClientRequestsPending] = useState(0);
   const [activeDashboardMetric, setActiveDashboardMetric] = useState<"received" | "pending" | "sent" | "client-received" | "client-pending" | null>(null);
-  const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null }[]>([]);
+  const [savedBusinesses, setSavedBusinesses] = useState<{ id: string; business_name: string; slug: string; city: string | null; state: string | null; logo_url: string | null; owner_id: string }[]>([]);
   const [businessStatus, setBusinessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -308,7 +309,7 @@ function DashboardPage() {
       if (ids.length) {
         const { data: saved, error: savedBusinessesError } = await supabase
           .from("business_profiles")
-          .select("id,business_name,slug,city,state")
+          .select("id,business_name,slug,city,state,logo_url,owner_id")
           .in("id", ids)
           .eq("active", true)
           .eq("approval_status", "approved")
@@ -1340,10 +1341,23 @@ function DashboardPage() {
             <p className="dashboard-text dashboard-status-text">Seus fornecedores favoritos ficam reunidos aqui.</p>
             <div className="dashboard-saved-list">
               {savedBusinesses.map((business) => (
-                <Link key={business.id} to={"/fornecedor/" + business.slug} className="dashboard-saved-card">
-                  <strong>{business.business_name}</strong>
-                  <span>{business.city}{business.city && business.state ? " — " : ""}{business.state}</span>
-                </Link>
+                <article key={business.id} className="dashboard-saved-card dashboard-saved-provider-card">
+                  <Link to={"/fornecedor/" + business.slug} className="dashboard-saved-provider-info">
+                    <strong>{business.business_name}</strong>
+                    <span>{business.city}{business.city && business.state ? " — " : ""}{business.state}</span>
+                  </Link>
+                  <ProviderChat
+                    business={{
+                      id: business.id,
+                      business_name: business.business_name,
+                      slug: business.slug,
+                      logo_url: business.logo_url,
+                      owner_id: business.owner_id,
+                    }}
+                    userId={user?.id ?? null}
+                    onRequireAuth={() => navigate({ to: "/entrar" })}
+                  />
+                </article>
               ))}
             </div>
           </section>
