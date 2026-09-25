@@ -72,6 +72,8 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
   const knownNotificationIdsRef = useRef<Set<string>>(new Set());
   const toastTimerRef = useRef<number | null>(null);
   const toastDragRef = useRef({ active: false, startY: 0, currentY: 0 });
+  const currentPathRef = useRef(currentPath);
+  currentPathRef.current = currentPath;
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastOffsetY, setToastOffsetY] = useState(-18);
@@ -190,7 +192,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
     }
 
     function showToast(message: string) {
-      if (currentPath === "/painel") return;
+      if (currentPathRef.current === "/painel") return;
       setToastMessage(message);
       setToastOffsetY(-24);
       setToastVisible(true);
@@ -310,7 +312,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       audioRef.current?.pause();
       audioRef.current = null;
     };
-  }, [isAuthenticated, currentPath]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (currentPath === "/painel") {
