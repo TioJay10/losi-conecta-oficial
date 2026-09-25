@@ -6,7 +6,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { ErrorInfo, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import "../responsive.css";
 import "../montserrat.css";
 import "../panel-header-contrast.css";
@@ -176,15 +176,17 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       title?: string | null;
       message?: string | null;
     }) {
-      const type = (notification.type ?? "").toLowerCase();
+      const type = typeof notification.type === "string" ? notification.type.toLowerCase() : "";
       if (type.includes("like")) {
         return "Você recebeu um like no seu perfil.";
       }
-      return (
-        notification.message?.trim() ||
-        notification.title?.trim() ||
-        "Você tem uma nova notificação."
-      );
+
+      const message =
+        typeof notification.message === "string" ? notification.message.trim() : "";
+      const title =
+        typeof notification.title === "string" ? notification.title.trim() : "";
+
+      return message || title || "Você tem uma nova notificação.";
     }
 
     function showToast(message: string) {
@@ -402,6 +404,43 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
   );
 }
 
+class GlobalNotificationErrorBoundary extends React.Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown, info: ErrorInfo) {
+    console.error("Erro isolado no alerta global de notificações:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
+
+function SafeGlobalNotificationAlerts({
+  isAuthenticated,
+  currentPath,
+}: {
+  isAuthenticated: boolean;
+  currentPath: string;
+}) {
+  return (
+    <GlobalNotificationErrorBoundary>
+      <GlobalNotificationAlerts
+        isAuthenticated={isAuthenticated}
+        currentPath={currentPath}
+      />
+    </GlobalNotificationErrorBoundary>
+  );
+}
+
 function RootComponent() {
   const location = useLocation();
   const [authChecked, setAuthChecked] = useState(false);
@@ -478,7 +517,7 @@ function RootComponent() {
 
   return (
     <>
-      <GlobalNotificationAlerts isAuthenticated={isAuthenticated} currentPath={location.pathname} />
+      <SafeGlobalNotificationAlerts isAuthenticated={isAuthenticated} currentPath={location.pathname} />
       <main className="losi-page-transition">
         <Outlet />
       </main>
