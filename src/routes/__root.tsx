@@ -6,7 +6,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import "../responsive.css";
 import "../montserrat.css";
 import "../panel-header-contrast.css";
@@ -195,45 +195,6 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       }, 5000);
     }
 
-    function handleToastPointerDown(event: React.PointerEvent<HTMLDivElement>) {
-      toastDragRef.current = {
-        active: true,
-        startY: event.clientY,
-        currentY: event.clientY,
-      };
-      event.currentTarget.setPointerCapture(event.pointerId);
-    }
-
-    function handleToastPointerMove(event: React.PointerEvent<HTMLDivElement>) {
-      if (!toastDragRef.current.active) return;
-      toastDragRef.current.currentY = event.clientY;
-      const delta = event.clientY - toastDragRef.current.startY;
-      if (delta < 0) {
-        setToastOffsetY(Math.max(-90, delta));
-      }
-    }
-
-    function handleToastPointerUp(event: React.PointerEvent<HTMLDivElement>) {
-      if (!toastDragRef.current.active) return;
-      const delta = toastDragRef.current.currentY - toastDragRef.current.startY;
-      toastDragRef.current.active = false;
-      try {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      } catch {
-        // O navegador pode já ter liberado o pointer capture.
-      }
-
-      if (delta <= -28) {
-        setToastOffsetY(-90);
-        window.setTimeout(() => {
-          if (mounted) setToastVisible(false);
-        }, 180);
-        return;
-      }
-
-      setToastOffsetY(0);
-    }
-
     async function processNewNotification(notification: {
       id: string;
       read_at: string | null;
@@ -347,6 +308,43 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
     }
   }, [currentPath]);
+
+  function handleToastPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    toastDragRef.current = {
+      active: true,
+      startY: event.clientY,
+      currentY: event.clientY,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handleToastPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!toastDragRef.current.active) return;
+    toastDragRef.current.currentY = event.clientY;
+    const delta = event.clientY - toastDragRef.current.startY;
+    if (delta < 0) {
+      setToastOffsetY(Math.max(-90, delta));
+    }
+  }
+
+  function handleToastPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!toastDragRef.current.active) return;
+    const delta = toastDragRef.current.currentY - toastDragRef.current.startY;
+    toastDragRef.current.active = false;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // O navegador pode já ter liberado o pointer capture.
+    }
+
+    if (delta <= -28) {
+      setToastOffsetY(-90);
+      window.setTimeout(() => setToastVisible(false), 180);
+      return;
+    }
+
+    setToastOffsetY(0);
+  }
 
   if (!toastVisible || currentPath === "/painel") return null;
 
