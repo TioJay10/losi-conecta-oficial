@@ -5,7 +5,7 @@ import {
   createRootRoute,
   useLocation,
 } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import "../responsive.css";
 import "../montserrat.css";
@@ -62,6 +62,241 @@ function RootShell({ children }: { children: ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+
+function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenticated: boolean; currentPath: string }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeSoundUrlRef = useRef<string | null>(null);
+  const knownNotificationIdsRef = useRef<Set<string>>(new Set());
+  const toastTimerRef = useRef<number | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      knownNotificationIdsRef.current.clear();
+      activeSoundUrlRef.current = null;
+      audioRef.current?.pause();
+      audioRef.current = null;
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+      setToastVisible(false);
+      return;
+    }
+
+    let mounted = true;
+    let channel: any = null;
+    let soundChannel: any = null;
+    let pollTimer: number | null = null;
+
+    async function loadActiveSound() {
+      const { supabase } = await import("../lib/supabase");
+      const { data, error } = await supabase
+        .from("notification_sounds")
+        .select("public_url")
+        .eq("active", true)
+        .maybeSingle();
+
+      if (!mounted) return;
+
+      const url = error || !data?.public_url ? null : data.public_url;
+      activeSoundUrlRef.current = url;
+
+      if (!url) {
+        audioRef.current?.pause();
+        return;
+      }
+
+      let audio = audioRef.current;
+      if (!audio) {
+        audio = new Audio();
+        audio.preload = "auto";
+        audioRef.current = audio;
+      }
+
+      if (audio.src !== url) {
+        audio.src = url;
+        audio.preload = "auto";
+        audio.load();
+      }
+      audio.volume = 0.35;
+    }
+
+    async function unlockAudio() {
+      if (!audioRef.current || !activeSoundUrlRef.current) {
+        await loadActiveSound();
+      }
+
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      try {
+        audio.muted = true;
+        audio.volume = 0;
+        audio.currentTime = 0;
+        await audio.play();
+        audio.pause();
+        audio.currentTime = 0;
+        audio.muted = false;
+        audio.volume = 0.35;
+      } catch {
+        audio.muted = false;
+        audio.volume = 0.35;
+      }
+    }
+
+    async function playNotificationSound() {
+      const audio = audioRef.current;
+      const url = activeSoundUrlRef.current;
+      if (!audio || !url || audio.src !== url) return;
+
+      audio.pause();
+      audio.currentTime = 0;
+      audio.muted = false;
+      audio.volume = 0.35;
+
+      try {
+        // O áudio já está carregado/pré-carregado; aqui não há consulta ao banco.
+        await audio.play();
+      } catch (error) {
+        console.warn("O navegador bloqueou o som da notificação:", error);
+      }
+    }
+
+    function showToast() {
+      if (currentPath === "/painel") return;
+      setToastVisible(true);
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = window.setTimeout(() => {
+        if (mounted) setToastVisible(false);
+      }, 5000);
+    }
+
+    async function processNewNotification(notification: { id: string; read_at: string | null }) {
+      if (!mounted || knownNotificationIdsRef.current.has(notification.id)) return;
+      knownNotificationIdsRef.current.add(notification.id);
+      if (notification.read_at) return;
+
+      // Dispara som e aviso no mesmo evento que recebe a notificação.
+      await Promise.all([playNotificationSound(), Promise.resolve(showToast())]);
+    }
+
+    async function start() {
+      const { supabase } = await import("../lib/supabase");
+      const { data: userData } = await supabase.auth.getUser();
+      if (!mounted || !userData.user) return;
+
+      await loadActiveSound();
+      if (!mounted) return;
+
+      const { data: existing } = await supabase
+        .from("notifications")
+        .select("id")
+        .eq("user_id", userData.user.id);
+
+      (existing ?? []).forEach((row) => knownNotificationIdsRef.current.add(row.id));
+
+      channel = supabase
+        .channel("global-notifications-" + userData.user.id + "-" + Date.now())
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: "user_id=eq." + userData.user.id,
+          },
+          (payload) => {
+            void processNewNotification(payload.new as { id: string; read_at: string | null });
+          },
+        )
+        .subscribe();
+
+      soundChannel = supabase
+        .channel("global-notification-sound-" + userData.user.id + "-" + Date.now())
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notification_sounds",
+          },
+          () => {
+            void loadActiveSound();
+          },
+        )
+        .subscribe();
+
+      pollTimer = window.setInterval(async () => {
+        if (document.visibilityState !== "visible") return;
+
+        const { data } = await supabase
+          .from("notifications")
+          .select("id,read_at")
+          .eq("user_id", userData.user.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        for (const notification of data ?? []) {
+          if (!knownNotificationIdsRef.current.has(notification.id)) {
+            await processNewNotification(notification);
+          }
+        }
+      }, 5000);
+    }
+
+    const handlePointerDown = () => void unlockAudio();
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    void start();
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("pointerdown", handlePointerDown);
+      if (pollTimer) window.clearInterval(pollTimer);
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+      if (channel) void import("../lib/supabase").then(({ supabase }) => supabase.removeChannel(channel));
+      if (soundChannel) void import("../lib/supabase").then(({ supabase }) => supabase.removeChannel(soundChannel));
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, [isAuthenticated, currentPath]);
+
+  useEffect(() => {
+    if (currentPath === "/painel") {
+      setToastVisible(false);
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+    }
+  }, [currentPath]);
+
+  if (!toastVisible || currentPath === "/painel") return null;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: "fixed",
+        top: 14,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 99999,
+        width: "min(calc(100vw - 28px), 360px)",
+        boxSizing: "border-box",
+        padding: "11px 16px",
+        borderRadius: 12,
+        background: "#12233a",
+        border: "1px solid rgba(212,175,55,.55)",
+        boxShadow: "0 10px 30px rgba(0,0,0,.24)",
+        color: "#fff",
+        fontFamily: "Montserrat, Arial, sans-serif",
+        fontSize: 13,
+        fontWeight: 600,
+        textAlign: "center",
+        pointerEvents: "none",
+      }}
+    >
+      Você tem uma nova notificação.
+    </div>
   );
 }
 
@@ -140,9 +375,12 @@ function RootComponent() {
   }
 
   return (
-    <main className="losi-page-transition">
-      <Outlet />
-    </main>
+    <>
+      <GlobalNotificationAlerts isAuthenticated={isAuthenticated} currentPath={location.pathname} />
+      <main className="losi-page-transition">
+        <Outlet />
+      </main>
+    </>
   );
 }
 
