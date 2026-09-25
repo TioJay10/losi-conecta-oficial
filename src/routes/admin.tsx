@@ -175,6 +175,7 @@ function AdminPage() {
   const [activitySearch, setActivitySearch] = useState("");
   const [activityActionFilter, setActivityActionFilter] = useState("all");
   const [homeCustomization, setHomeCustomization] = useState({ hero_title: "", hero_subtitle: "", hero_button_text: "" });
+  const [homeCustomizationDefaults, setHomeCustomizationDefaults] = useState({ hero_title: "", hero_subtitle: "", hero_button_text: "" });
   const [homeCustomizationSaving, setHomeCustomizationSaving] = useState(false);
   const [homeCustomizationMessage, setHomeCustomizationMessage] = useState("");
   useEffect(() => {
@@ -204,7 +205,7 @@ function AdminPage() {
         supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
         supabase.from("admin_audit_logs_safe").select("id,action,entity_type,entity_name,details,created_at,admin_name").order("created_at",{ascending:false}).limit(200),
         supabase.from("admin_broadcasts").select("id,title,message,target_type,target_value,recipient_count,created_at").order("created_at",{ascending:false}).limit(100),
-        supabase.from("home_customization_settings").select("key,value"),
+        supabase.from("home_customization_settings").select("key,value,default_value"),
       ]);
       if (!mounted) return;
       const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, couponsResult, reportsResult, notificationsResult, auditResult, broadcastsResult, customizationResult].find((result) => result.error)?.error;
@@ -266,7 +267,70 @@ function AdminPage() {
     };
   }, [navigate]);
 
-  async function saveHomeCustomization() { if (!user || homeCustomizationSaving) return; setHomeCustomizationSaving(true); setHomeCustomizationMessage(""); try { const rows = Object.entries(homeCustomization).map(([key,value]) => ({ key, value: value.trim(), updated_at: new Date().toISOString(), updated_by: user.id })); const { error } = await supabase.from("home_customization_settings").upsert(rows, { onConflict: "key" }); if (error) throw new Error(error.message); setHomeCustomizationMessage("Alterações salvas com sucesso."); } catch (error) { setHomeCustomizationMessage(error instanceof Error ? error.message : "Não foi possível salvar as alterações."); } finally { setHomeCustomizationSaving(false); } }
+  async function saveHomeCustomization() {
+    if (!user || homeCustomizationSaving) return;
+    setHomeCustomizationSaving(true);
+    setHomeCustomizationMessage("");
+    try {
+      const rows = Object.entries(homeCustomization).map(([key, value]) => ({
+        key,
+        value: value.trim(),
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+      }));
+      const { error } = await supabase.from("home_customization_settings").upsert(rows, { onConflict: "key" });
+      if (error) throw new Error(error.message);
+      setHomeCustomizationMessage("Alterações salvas com sucesso.");
+    } catch (error) {
+      setHomeCustomizationMessage(error instanceof Error ? error.message : "Não foi possível salvar as alterações.");
+    } finally {
+      setHomeCustomizationSaving(false);
+    }
+  }
+
+  async function restoreHomeCustomizationItem(key: keyof typeof homeCustomization) {
+    if (!user || homeCustomizationSaving) return;
+    const label = key === "hero_title" ? "título principal" : key === "hero_subtitle" ? "subtítulo" : "texto do botão principal";
+    if (!window.confirm(`Restaurar o ${label} para o padrão salvo? A alteração será aplicada à página inicial após salvar.`)) return;
+    const defaultValue = homeCustomizationDefaults[key];
+    setHomeCustomization(current => ({ ...current, [key]: defaultValue }));
+    setHomeCustomizationMessage(`${label.charAt(0).toUpperCase() + label.slice(1)} restaurado para o padrão salvo. Clique em "Salvar alterações" para aplicar.`);
+  }
+
+  async function restoreAllHomeCustomization() {
+    if (!user || homeCustomizationSaving) return;
+    if (!window.confirm("Restaurar todos os itens da página inicial para os padrões salvos? Essa ação substituirá as personalizações atuais.")) return;
+    setHomeCustomization({ ...homeCustomizationDefaults });
+    setHomeCustomizationMessage("Todos os itens foram restaurados para os padrões salvos. Clique em " + '"Salvar alterações"' + " para aplicar.");
+  }
+
+  async function saveCurrentHomeCustomizationAsDefaults() {
+    if (!user || homeCustomizationSaving) return;
+    if (!window.confirm("Definir a configuração atual como o novo padrão? Os padrões anteriores serão substituídos.")) return;
+    setHomeCustomizationSaving(true);
+    setHomeCustomizationMessage("");
+    try {
+      const rows = Object.entries(homeCustomization).map(([key, value]) => ({
+        key,
+        value: value.trim(),
+        default_value: value.trim(),
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+      }));
+      const { error } = await supabase.from("home_customization_settings").upsert(rows, { onConflict: "key" });
+      if (error) throw new Error(error.message);
+      setHomeCustomizationDefaults({
+        hero_title: homeCustomization.hero_title.trim(),
+        hero_subtitle: homeCustomization.hero_subtitle.trim(),
+        hero_button_text: homeCustomization.hero_button_text.trim(),
+      });
+      setHomeCustomizationMessage("A configuração atual agora é o novo padrão.");
+    } catch (error) {
+      setHomeCustomizationMessage(error instanceof Error ? error.message : "Não foi possível definir o novo padrão.");
+    } finally {
+      setHomeCustomizationSaving(false);
+    }
+  }
 
   async function recordAdminAction(action:string, entityType:string, entityId:string|null, entityName:string|null, details:Record<string, unknown> = {}) {
     if (!user) return;
@@ -893,27 +957,34 @@ function AdminPage() {
               <section className="admin-plan-editor">
                 <div>
                   <h3 style={{ margin: 0 }}>Conteúdo da página</h3>
-                  <p className="admin-text">Nesta primeira etapa, estamos preparando a estrutura de configuração. As alterações serão conectadas à página inicial na próxima etapa.</p>
+                  <p className="admin-text">Edite os elementos da página inicial. Você pode restaurar um item, restaurar tudo ou definir a configuração atual como novo padrão.</p>
                 </div>
 
                 <label>
                   Título principal
                   <input type="text" value={homeCustomization.hero_title} onChange={event => setHomeCustomization(current => ({ ...current, hero_title: event.target.value }))} maxLength={120} />
+                  <button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("hero_title")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button>
                 </label>
 
                 <label>
                   Subtítulo
                   <textarea rows={3} value={homeCustomization.hero_subtitle} onChange={event => setHomeCustomization(current => ({ ...current, hero_subtitle: event.target.value }))} maxLength={300} />
+                  <button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("hero_subtitle")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button>
                 </label>
 
                 <label>
                   Texto do botão principal
                   <input type="text" value={homeCustomization.hero_button_text} onChange={event => setHomeCustomization(current => ({ ...current, hero_button_text: event.target.value }))} maxLength={60} />
+                  <button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("hero_button_text")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button>
                 </label>
 
-                <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void saveHomeCustomization()} disabled={homeCustomizationSaving}>{homeCustomizationSaving ? "Salvando..." : "Salvar alterações"}</button></div>
+                <div className="admin-item-actions">
+                  <button type="button" className="admin-action-button" onClick={() => void saveHomeCustomization()} disabled={homeCustomizationSaving}>{homeCustomizationSaving ? "Salvando..." : "Salvar alterações"}</button>
+                  <button type="button" className="admin-action-button" onClick={() => void restoreAllHomeCustomization()} disabled={homeCustomizationSaving}>🔄 Restaurar padrões</button>
+                  <button type="button" className="admin-action-button" onClick={() => void saveCurrentHomeCustomizationAsDefaults()} disabled={homeCustomizationSaving}>⭐ Definir atual como padrão</button>
+                </div>
                 {homeCustomizationMessage && <div className="admin-category-message">{homeCustomizationMessage}</div>}
-                <small className="admin-text">As alterações ficam salvas no banco e não exigem novo deploy.</small>
+                <small className="admin-text">O padrão salvo é independente do valor atualmente aplicado. Restaurar só altera o formulário até você salvar.</small>
               </section>
             </div>
           ) : section === "dashboard" ? (
