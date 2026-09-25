@@ -850,6 +850,9 @@ function DashboardPage() {
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/meus-servicos" }); }}>
             <span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span>
           </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/notificar-inconsistencia" }); }}>
+            <span className="dashboard-nav-mark">05</span><span><strong>Notificar Inconsistência</strong><small>Falar com o administrador</small></span>
+          </button>
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/orcamentos" }); }}>
             <span className="dashboard-nav-mark">05</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
           </button>
