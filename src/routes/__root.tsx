@@ -244,8 +244,8 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
           },
         )
         .subscribe();
+    }
 
-  
     void start();
 
     return () => {
