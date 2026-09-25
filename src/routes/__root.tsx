@@ -92,7 +92,6 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
     let mounted = true;
     let channel: any = null;
     let soundChannel: any = null;
-    let pollTimer: number | null = null;
 
     async function loadActiveSound() {
       const { supabase } = await import("../lib/supabase");
@@ -127,49 +126,27 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       audio.volume = 0.35;
     }
 
-    async function unlockAudio() {
-      if (!audioRef.current || !activeSoundUrlRef.current) {
-        await loadActiveSound();
-      }
-
-      const audio = audioRef.current;
-      if (!audio) return;
-
-      try {
-        audio.muted = true;
-        audio.volume = 0;
-        audio.currentTime = 0;
-        await audio.play();
-        audio.pause();
-        audio.currentTime = 0;
-        audio.muted = false;
-        audio.volume = 0.35;
-      } catch {
-        audio.muted = false;
-        audio.volume = 0.35;
-      }
-    }
-
-    async function playNotificationSound() {
+    function playNotificationSound() {
       const audio = audioRef.current;
       const url = activeSoundUrlRef.current;
       if (!audio || !url || audio.src !== url) return;
 
       try {
-        // Toda a preparação também fica protegida: em alguns navegadores,
-        // currentTime/pause podem lançar enquanto o arquivo ainda está carregando.
         audio.pause();
-        if (Number.isFinite(audio.duration) || audio.readyState >= 1) {
-          audio.currentTime = 0;
-        }
+        if (audio.readyState >= 1) audio.currentTime = 0;
         audio.muted = false;
         audio.volume = 0.35;
 
-        // O áudio já está carregado/pré-carregado; não há consulta ao banco aqui.
-        await audio.play();
+        // Somente este caminho reproduz áudio: ele é chamado exclusivamente
+        // depois de um INSERT real em public.notifications.
+        const playPromise = audio.play();
+        if (playPromise) {
+          void playPromise.catch((error) => {
+            console.warn("O navegador bloqueou o som da notificação:", error);
+          });
+        }
       } catch (error) {
-        // Falha de áudio nunca pode derrubar o componente raiz da aplicação.
-        console.warn("Não foi possível reproduzir o som da notificação:", error);
+        console.warn("Não foi possível preparar o som da notificação:", error);
       }
     }
 
@@ -218,12 +195,16 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       knownNotificationIdsRef.current.add(notification.id);
       if (notification.read_at) return;
 
-      const message = getNotificationMessage(notification);
-      // Dispara som e aviso no mesmo evento que recebe a notificação.
-      await Promise.all([
-        playNotificationSound(),
-        Promise.resolve(showToast(message)),
-      ]);
+      try {
+        const message = getNotificationMessage(notification);
+        // Som e aviso só são disparados após um INSERT de notificação
+        // realmente novo e não lido.
+        playNotificationSound();
+        showToast(message);
+      } catch (error) {
+        // Uma falha no alerta nunca pode derrubar a navegação principal.
+        console.warn("Erro isolado ao processar nova notificação:", error);
+      }
     }
 
     async function start() {
@@ -242,7 +223,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       (existing ?? []).forEach((row) => knownNotificationIdsRef.current.add(row.id));
 
       channel = supabase
-        .channel("global-notifications-" + userData.user.id + "-" + Date.now())
+        .channel("global-notifications-" + userData.user.id)
         .on(
           "postgres_changes",
           {
@@ -265,50 +246,13 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
         )
         .subscribe();
 
-      soundChannel = supabase
-        .channel("global-notification-sound-" + userData.user.id + "-" + Date.now())
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "notification_sounds",
-          },
-          () => {
-            void loadActiveSound();
-          },
-        )
-        .subscribe();
-
-      pollTimer = window.setInterval(async () => {
-        if (document.visibilityState !== "visible") return;
-
-        const { data } = await supabase
-          .from("notifications")
-          .select("id,read_at,type,title,message")
-          .eq("user_id", userData.user.id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-
-        for (const notification of data ?? []) {
-          if (!knownNotificationIdsRef.current.has(notification.id)) {
-            await processNewNotification(notification);
-          }
-        }
-      }, 5000);
-    }
-
-    const handlePointerDown = () => void unlockAudio();
-    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+  
     void start();
 
     return () => {
       mounted = false;
-      window.removeEventListener("pointerdown", handlePointerDown);
-      if (pollTimer) window.clearInterval(pollTimer);
       if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
       if (channel) void import("../lib/supabase").then(({ supabase }) => supabase.removeChannel(channel));
-      if (soundChannel) void import("../lib/supabase").then(({ supabase }) => supabase.removeChannel(soundChannel));
       audioRef.current?.pause();
       audioRef.current = null;
     };
