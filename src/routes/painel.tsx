@@ -27,6 +27,7 @@ function DashboardPage() {
   const [specificationsPlan, setSpecificationsPlan] = useState<{ name: string; description: string | null; price: string } | null>(null);
   const [notifications, setNotifications] = useState<Array<{ id: string; type: string; title: string; message: string; link: string | null; read_at: string | null; created_at: string }>>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationFilter, setNotificationFilter] = useState<"all" | "unread" | "read">("all");
   const [notificationPopup, setNotificationPopup] = useState<typeof notifications[number] | null>(null);
   const notificationAudioContextRef = useRef<AudioContext | null>(null);
   const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
@@ -595,6 +596,31 @@ function DashboardPage() {
     );
   }
 
+  async function markAllNotificationsAsRead() {
+    if (!supabase || !user) return;
+
+    const unreadIds = notifications.filter((notification) => !notification.read_at).map((notification) => notification.id);
+    if (unreadIds.length === 0) return;
+
+    const readAt = new Date().toISOString();
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read_at: readAt })
+      .eq("user_id", user.id)
+      .is("read_at", null);
+
+    if (error) {
+      console.error("Erro ao marcar todas as notificações como lidas:", error);
+      return;
+    }
+
+    setNotifications((current) =>
+      current.map((notification) =>
+        unreadIds.includes(notification.id) ? { ...notification, read_at: readAt } : notification,
+      ),
+    );
+  }
+
   async function openNotification(notification: typeof notifications[number]) {
     if (!notification.read_at) {
       await markNotificationAsRead(notification.id);
@@ -830,11 +856,71 @@ function DashboardPage() {
                     </div>
                     <button type="button" onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificações">×</button>
                   </div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "10px 12px", borderBottom: "1px solid #e8edf3", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }} role="group" aria-label="Filtrar notificações">
+                      {([
+                        ["all", "Todas"],
+                        ["unread", "Não lidas"],
+                        ["read", "Lidas"],
+                      ] as const).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setNotificationFilter(value)}
+                          style={{
+                            border: "1px solid " + (notificationFilter === value ? "#0b182a" : "#dbe2ea"),
+                            background: notificationFilter === value ? "#0b182a" : "#fff",
+                            color: notificationFilter === value ? "#fff" : "#475569",
+                            borderRadius: 8,
+                            padding: "6px 9px",
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: "pointer",
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void markAllNotificationsAsRead()}
+                      disabled={!notifications.some((notification) => !notification.read_at)}
+                      style={{
+                        border: 0,
+                        background: "transparent",
+                        color: notifications.some((notification) => !notification.read_at) ? "#0b182a" : "#94a3b8",
+                        fontSize: 11,
+                        fontWeight: 800,
+                        cursor: notifications.some((notification) => !notification.read_at) ? "pointer" : "default",
+                        padding: "6px 2px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Marcar todas como lidas
+                    </button>
+                  </div>
                   <div className="dashboard-notification-list">
-                    {notifications.length === 0 ? (
-                      <div className="dashboard-notification-empty">Você ainda não tem notificações.</div>
-                    ) : (
-                      notifications.map((notification) => (
+                    {(() => {
+                      const filteredNotifications = notifications.filter((notification) =>
+                        notificationFilter === "all" ||
+                        (notificationFilter === "unread" && !notification.read_at) ||
+                        (notificationFilter === "read" && Boolean(notification.read_at)),
+                      );
+
+                      if (filteredNotifications.length === 0) {
+                        return (
+                          <div className="dashboard-notification-empty">
+                            {notificationFilter === "unread"
+                              ? "Você não tem notificações não lidas."
+                              : notificationFilter === "read"
+                                ? "Você ainda não tem notificações lidas."
+                                : "Você ainda não tem notificações."}
+                          </div>
+                        );
+                      }
+
+                      return filteredNotifications.map((notification) => (
                         <button
                           key={notification.id}
                           type="button"
@@ -848,8 +934,8 @@ function DashboardPage() {
                             <em>{new Date(notification.created_at).toLocaleString("pt-BR")}</em>
                           </span>
                         </button>
-                      ))
-                    )}
+                      ));
+                    })()}
                   </div>
                 </div>
               )}
