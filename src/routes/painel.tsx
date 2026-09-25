@@ -414,34 +414,42 @@ function DashboardPage() {
       }
     }
 
-    void loadNotifications(true);
+    async function startNotificationDelivery() {
+      const authenticatedUserId = await resolveAuthenticatedUser();
+      if (!authenticatedUserId || !mounted) return;
 
-    channel = supabase
-      .channel("panel-notifications-" + currentUserId + "-" + Date.now())
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: "user_id=eq." + currentUserId,
-        },
-        (payload) => {
-          if (!mounted) return;
+      await loadNotifications(true);
+      if (!mounted) return;
 
-          const notification = payload.new as typeof notifications[number];
+      channel = supabase
+        .channel("panel-notifications-" + authenticatedUserId + "-" + Date.now())
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: "user_id=eq." + authenticatedUserId,
+          },
+          (payload) => {
+            if (!mounted) return;
 
-          setNotifications((current) => [
-            notification,
-            ...current.filter((item) => item.id !== notification.id),
-          ].slice(0, 30));
+            const notification = payload.new as typeof notifications[number];
 
-          if (!notification.read_at) {
-            setNotificationPopup(notification);
-          }
-        },
-      )
-      .subscribe();
+            setNotifications((current) => [
+              notification,
+              ...current.filter((item) => item.id !== notification.id),
+            ].slice(0, 30));
+
+            if (!notification.read_at) {
+              setNotificationPopup(notification);
+            }
+          },
+        )
+        .subscribe();
+    }
+
+    void startNotificationDelivery();
 
     const refreshNotifications = () => {
       if (document.visibilityState === "visible") {
