@@ -32,6 +32,7 @@ function DashboardPage() {
   const notificationAudioContextRef = useRef<AudioContext | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   const [notificationSoundUrl, setNotificationSoundUrl] = useState<string | null>(null);
+  const [notificationSoundLoaded, setNotificationSoundLoaded] = useState(false);
   const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
   const [goldenHeartClaiming, setGoldenHeartClaiming] = useState(false);
   const [goldenHeartMessage, setGoldenHeartMessage] = useState("");
@@ -373,11 +374,11 @@ function DashboardPage() {
 
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let soundChannel: ReturnType<typeof supabase.channel> | null = null;
     const knownNotificationIdsRef = new Set<string>();
     let initialLoadCompleted = false;
 
     // O navegador exige uma interação do usuário para liberar áudio.
-    // Depois disso, as notificações recebidas em tempo real podem emitir o "plin".
     const unlockNotificationAudio = () => {
       try {
         const AudioContextClass =
@@ -399,9 +400,24 @@ function DashboardPage() {
     window.addEventListener("keydown", unlockNotificationAudio, { once: true });
 
     async function loadNotificationSound() {
-      const { data, error } = await supabase.from("notification_sounds").select("public_url").eq("active", true).maybeSingle();
-      if (error) { console.warn("Erro ao carregar som de notificação:", error); return; }
-      if (mounted) setNotificationSoundUrl(data?.public_url ?? null);
+      const { data, error } = await supabase
+        .from("notification_sounds")
+        .select("public_url")
+        .eq("active", true)
+        .maybeSingle();
+
+      if (error) {
+        console.warn("Erro ao carregar som de notificação:", error);
+        // Se não conseguimos consultar o banco, não usamos o som de fallback:
+        // assim um erro momentâneo nunca faz o "plim" substituir um som customizado.
+        return false;
+      }
+
+      if (mounted) {
+        setNotificationSoundUrl(data?.public_url ?? null);
+        setNotificationSoundLoaded(true);
+      }
+      return true;
     }
 
     async function loadNotificationsForUser(userId: string, playForNewUnread = false) {
@@ -439,14 +455,12 @@ function DashboardPage() {
     }
 
     async function loadNotifications() {
-      // Usa o usuário já autenticado pelo painel, sem depender de uma sessão
-      // anterior ou de estado salvo no navegador.
       await loadNotificationsForUser(user.id, initialLoadCompleted);
     }
 
     async function startNotificationDelivery() {
-      // Primeiro carrega o histórico. Isso cobre as notificações recebidas
-      // durante qualquer período em que o usuário esteve deslogado.
+      // Primeiro carrega o som e o histórico. Isso cobre notificações
+      // recebidas enquanto o usuário estava deslogado.
       await loadNotificationSound();
       await loadNotificationsForUser(user.id, false);
       if (!mounted) return;
@@ -466,7 +480,6 @@ function DashboardPage() {
 
             const notification = payload.new as typeof notifications[number];
 
-            // Evita duplicação entre Realtime e polling.
             if (knownNotificationIdsRef.has(notification.id)) return;
             knownNotificationIdsRef.add(notification.id);
 
@@ -475,11 +488,28 @@ function DashboardPage() {
               ...current.filter((item) => item.id !== notification.id),
             ]);
 
-            // Nova notificação em tempo real: entra no sino + contador e
-            // emite apenas um aviso sonoro discreto. Nunca abre popup.
+            // Nova notificação: entra no sino + contador e emite apenas
+            // um aviso sonoro. Nunca abre popup.
             if (!notification.read_at) {
               playNotificationSound();
             }
+          },
+        )
+        .subscribe();
+
+      // Quando o administrador troca o áudio, o painel atualiza o URL
+      // imediatamente. Assim a próxima notificação já usa o novo som.
+      soundChannel = supabase
+        .channel("panel-notification-sound-" + user.id + "-" + Date.now())
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notification_sounds",
+          },
+          () => {
+            if (mounted) void loadNotificationSound();
           },
         )
         .subscribe();
@@ -487,8 +517,6 @@ function DashboardPage() {
 
     void startNotificationDelivery();
 
-    // Se a sessão for criada/recuperada enquanto o painel ainda estiver montado,
-    // o histórico é consultado novamente usando o usuário da própria sessão.
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
         window.setTimeout(() => {
@@ -507,9 +535,6 @@ function DashboardPage() {
     window.addEventListener("focus", refreshNotifications);
     document.addEventListener("visibilitychange", refreshNotifications);
 
-    // Polling é uma segunda camada de segurança: se o Realtime atrasar ou
-    // falhar, a notificação ainda aparece no sino e o "plin" é reproduzido
-    // uma única vez para uma nova notificação não lida.
     const poll = window.setInterval(() => {
       void loadNotifications();
     }, 5000);
@@ -522,6 +547,7 @@ function DashboardPage() {
       window.removeEventListener("focus", refreshNotifications);
       document.removeEventListener("visibilitychange", refreshNotifications);
       if (channel) void supabase.removeChannel(channel);
+      if (soundChannel) void supabase.removeChannel(soundChannel);
       authListener.subscription.unsubscribe();
     };
   }, [user]);
