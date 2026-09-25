@@ -349,8 +349,6 @@ function DashboardPage() {
 
     return () => {
       mounted = false;
-      window.removeEventListener("pointerdown", unlockNotificationAudio);
-      window.removeEventListener("keydown", unlockNotificationAudio);
       window.removeEventListener("focus", handleRefresh);
       document.removeEventListener("visibilitychange", handleRefresh);
       listener.subscription.unsubscribe();
@@ -371,7 +369,12 @@ function DashboardPage() {
     if (!user || !supabase) return;
 
     let mounted = true;
-    // O navegador precisa de uma interação do usuário para liberar áudio.
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    const knownNotificationIdsRef = new Set<string>();
+    let initialLoadCompleted = false;
+
+    // O navegador exige uma interação do usuário para liberar áudio.
+    // Depois disso, as notificações recebidas em tempo real podem emitir o "plin".
     const unlockNotificationAudio = () => {
       try {
         const AudioContextClass =
@@ -382,38 +385,27 @@ function DashboardPage() {
         if (!notificationAudioContextRef.current) {
           notificationAudioContextRef.current = new AudioContextClass();
         }
+
         void notificationAudioContextRef.current.resume().catch(() => undefined);
       } catch {
-        // O som é opcional; a notificação continua funcionando mesmo sem áudio.
+        // O áudio é complementar; a notificação continua funcionando mesmo sem som.
       }
     };
 
     window.addEventListener("pointerdown", unlockNotificationAudio, { once: true });
     window.addEventListener("keydown", unlockNotificationAudio, { once: true });
 
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    let currentUserId = user.id;
+    async function loadNotificationsForUser(userId: string, playForNewUnread = false) {
+      if (!mounted) return;
 
-    async function resolveAuthenticatedUser() {
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data.user) {
-        console.error("Não foi possível identificar o usuário autenticado para as notificações:", error);
-        return null;
-      }
-      currentUserId = data.user.id;
-      return data.user.id;
-    }
-
-    async function loadNotifications() {
-      const authenticatedUserId = await resolveAuthenticatedUser();
-      if (!authenticatedUserId || !mounted) return;
-
+      // A consulta histórica é feita diretamente no banco. Portanto, uma
+      // notificação criada enquanto o usuário estava deslogado continua
+      // disponível assim que ele entra novamente.
       const { data, error } = await supabase
         .from("notifications")
         .select("id,type,title,message,link,read_at,created_at")
-        .eq("user_id", authenticatedUserId)
-        .order("created_at", { ascending: false })
-        .limit(30);
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Erro ao carregar notificações:", error);
@@ -422,40 +414,59 @@ function DashboardPage() {
 
       if (!mounted) return;
 
-      setNotifications((data ?? []) as typeof notifications);
+      const rows = (data ?? []) as typeof notifications[number][];
+      const newUnreadRows = playForNewUnread
+        ? rows.filter((notification) => !notification.read_at && !knownNotificationIdsRef.has(notification.id))
+        : [];
+
+      rows.forEach((notification) => knownNotificationIdsRef.add(notification.id));
+      setNotifications(rows);
+
+      if (newUnreadRows.length > 0) {
+        playNotificationSound();
+      }
+
+      initialLoadCompleted = true;
+    }
+
+    async function loadNotifications() {
+      // Usa o usuário já autenticado pelo painel, sem depender de uma sessão
+      // anterior ou de estado salvo no navegador.
+      await loadNotificationsForUser(user.id, initialLoadCompleted);
     }
 
     async function startNotificationDelivery() {
-      const authenticatedUserId = await resolveAuthenticatedUser();
-      if (!authenticatedUserId || !mounted) return;
-
-      // As notificações que chegaram enquanto o usuário estava deslogado
-      // permanecem armazenadas no banco e aparecem no sino ao entrar.
-      await loadNotifications();
+      // Primeiro carrega o histórico. Isso cobre as notificações recebidas
+      // durante qualquer período em que o usuário esteve deslogado.
+      await loadNotificationsForUser(user.id, false);
       if (!mounted) return;
 
       channel = supabase
-        .channel("panel-notifications-" + authenticatedUserId + "-" + Date.now())
+        .channel("panel-notifications-" + user.id + "-" + Date.now())
         .on(
           "postgres_changes",
           {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: "user_id=eq." + authenticatedUserId,
+            filter: "user_id=eq." + user.id,
           },
           (payload) => {
             if (!mounted) return;
 
             const notification = payload.new as typeof notifications[number];
 
-            // Nova notificação entra no sino, mas nunca abre pop-up automaticamente.
-            // O som é apenas um aviso discreto de que algo novo chegou.
+            // Evita duplicação entre Realtime e polling.
+            if (knownNotificationIdsRef.has(notification.id)) return;
+            knownNotificationIdsRef.add(notification.id);
+
             setNotifications((current) => [
               notification,
               ...current.filter((item) => item.id !== notification.id),
-            ].slice(0, 30));
+            ]);
 
+            // Nova notificação em tempo real: entra no sino + contador e
+            // emite apenas um aviso sonoro discreto. Nunca abre popup.
             if (!notification.read_at) {
               playNotificationSound();
             }
@@ -466,12 +477,12 @@ function DashboardPage() {
 
     void startNotificationDelivery();
 
-    // Se a sessão for criada/recuperada depois que esta tela já estiver montada,
-    // recarrega as notificações que foram armazenadas enquanto o usuário estava deslogado.
+    // Se a sessão for criada/recuperada enquanto o painel ainda estiver montado,
+    // o histórico é consultado novamente usando o usuário da própria sessão.
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
         window.setTimeout(() => {
-          if (mounted) void loadNotifications();
+          if (mounted) void loadNotificationsForUser(session.user.id, true);
         }, 0);
       }
     });
@@ -485,6 +496,9 @@ function DashboardPage() {
     window.addEventListener("focus", refreshNotifications);
     document.addEventListener("visibilitychange", refreshNotifications);
 
+    // Polling é uma segunda camada de segurança: se o Realtime atrasar ou
+    // falhar, a notificação ainda aparece no sino e o "plin" é reproduzido
+    // uma única vez para uma nova notificação não lida.
     const poll = window.setInterval(() => {
       void loadNotifications();
     }, 5000);
@@ -492,6 +506,8 @@ function DashboardPage() {
     return () => {
       mounted = false;
       window.clearInterval(poll);
+      window.removeEventListener("pointerdown", unlockNotificationAudio);
+      window.removeEventListener("keydown", unlockNotificationAudio);
       window.removeEventListener("focus", refreshNotifications);
       document.removeEventListener("visibilitychange", refreshNotifications);
       if (channel) void supabase.removeChannel(channel);
