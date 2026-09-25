@@ -174,6 +174,9 @@ function AdminPage() {
   const [auditLogs, setAuditLogs] = useState<Array<{id:string;action:string;entity_type:string;entity_name:string|null;details:Record<string, unknown>;created_at:string;admin_name:string|null}>>([]);
   const [activitySearch, setActivitySearch] = useState("");
   const [activityActionFilter, setActivityActionFilter] = useState("all");
+  const [homeCustomization, setHomeCustomization] = useState({ hero_title: "", hero_subtitle: "", hero_button_text: "" });
+  const [homeCustomizationSaving, setHomeCustomizationSaving] = useState(false);
+  const [homeCustomizationMessage, setHomeCustomizationMessage] = useState("");
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -188,7 +191,7 @@ function AdminPage() {
       setUser(currentUser);
       setName(data.full_name || currentUser.email?.split("@")[0] || "administrador");
       setAvatarUrl(data.avatar_url ?? null);
-      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,couponsResult,reportsResult,notificationsResult,auditResult,broadcastsResult] = await Promise.all([
+      const [usersResult,businessesResult,categoriesResult,servicesResult,reviewsResult,plansResult,subscriptionsResult,couponsResult,reportsResult,notificationsResult,auditResult,broadcastsResult,customizationResult] = await Promise.all([
         supabase.from("profiles").select("id,full_name,user_type,city,state,blocked,phone,created_at").order("created_at",{ascending:false}),
         supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,address,logo_url,cover_url,portfolio_urls,city,state,owner_id,verified,active,approval_status,created_at").order("created_at",{ascending:false}),
         supabase.from("categories").select("id,name,slug,active").order("name"),
@@ -201,9 +204,10 @@ function AdminPage() {
         supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
         supabase.from("admin_audit_logs_safe").select("id,action,entity_type,entity_name,details,created_at,admin_name").order("created_at",{ascending:false}).limit(200),
         supabase.from("admin_broadcasts").select("id,title,message,target_type,target_value,recipient_count,created_at").order("created_at",{ascending:false}).limit(100),
+        supabase.from("home_customization_settings").select("key,value"),
       ]);
       if (!mounted) return;
-      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, couponsResult, reportsResult, notificationsResult, auditResult, broadcastsResult].find((result) => result.error)?.error;
+      const firstError = [usersResult, businessesResult, categoriesResult, servicesResult, reviewsResult, plansResult, subscriptionsResult, couponsResult, reportsResult, notificationsResult, auditResult, broadcastsResult, customizationResult].find((result) => result.error)?.error;
       if (firstError) setDataError(firstError.message);
       setUsers((usersResult.data ?? []) as typeof users);
       setBusinesses((businessesResult.data ?? []) as typeof businesses);
@@ -231,6 +235,8 @@ function AdminPage() {
       setAdminNotifications((notificationsResult.data ?? []) as typeof adminNotifications);
       setAuditLogs((auditResult.data ?? []) as unknown as typeof auditLogs);
       setBroadcasts((broadcastsResult.data ?? []) as typeof broadcasts);
+      const customizationMap = Object.fromEntries((customizationResult.data ?? []).map(item => [item.key, item.value]));
+      setHomeCustomization({ hero_title: customizationMap.hero_title ?? "", hero_subtitle: customizationMap.hero_subtitle ?? "", hero_button_text: customizationMap.hero_button_text ?? "" });
       const { data: soundsData, error: soundsError } = await supabase.from("notification_sounds").select("id,name,file_path,public_url,active,created_at").order("created_at", { ascending: false });
       if (soundsError) setDataError(soundsError.message);
       setNotificationSounds((soundsData ?? []) as typeof notificationSounds);
@@ -248,7 +254,7 @@ function AdminPage() {
     document.addEventListener("visibilitychange", handleRefresh);
 
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","sounds","communication","activity"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","sounds","communication","activity","customization"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -259,6 +265,8 @@ function AdminPage() {
       listener.subscription.unsubscribe();
     };
   }, [navigate]);
+
+  async function saveHomeCustomization() { if (!user || homeCustomizationSaving) return; setHomeCustomizationSaving(true); setHomeCustomizationMessage(""); try { const rows = Object.entries(homeCustomization).map(([key,value]) => ({ key, value: value.trim(), updated_at: new Date().toISOString(), updated_by: user.id })); const { error } = await supabase.from("home_customization_settings").upsert(rows, { onConflict: "key" }); if (error) throw new Error(error.message); setHomeCustomizationMessage("Alterações salvas com sucesso."); } catch (error) { setHomeCustomizationMessage(error instanceof Error ? error.message : "Não foi possível salvar as alterações."); } finally { setHomeCustomizationSaving(false); } }
 
   async function recordAdminAction(action:string, entityType:string, entityId:string|null, entityName:string|null, details:Record<string, unknown> = {}) {
     if (!user) return;
@@ -890,29 +898,22 @@ function AdminPage() {
 
                 <label>
                   Título principal
-                  <input type="text" placeholder="Ex.: Encontre profissionais para seu evento" disabled />
+                  <input type="text" value={homeCustomization.hero_title} onChange={event => setHomeCustomization(current => ({ ...current, hero_title: event.target.value }))} maxLength={120} />
                 </label>
 
                 <label>
                   Subtítulo
-                  <textarea rows={3} placeholder="Ex.: Conecte-se aos melhores profissionais..." disabled />
+                  <textarea rows={3} value={homeCustomization.hero_subtitle} onChange={event => setHomeCustomization(current => ({ ...current, hero_subtitle: event.target.value }))} maxLength={300} />
                 </label>
 
                 <label>
                   Texto do botão principal
-                  <input type="text" placeholder="Ex.: Encontrar profissionais" disabled />
+                  <input type="text" value={homeCustomization.hero_button_text} onChange={event => setHomeCustomization(current => ({ ...current, hero_button_text: event.target.value }))} maxLength={60} />
                 </label>
 
-                <div className="admin-plan-checks">
-                  <label><input type="checkbox" disabled /> Exibir botão principal</label>
-                  <label><input type="checkbox" disabled /> Exibir seção de apresentação</label>
-                </div>
-
-                <div className="admin-item-actions">
-                  <button type="button" className="admin-action-button" disabled>Salvar alterações</button>
-                </div>
-
-                <small className="admin-text">Estrutura inicial criada. Na próxima etapa, estes campos serão salvos e aplicados à página inicial.</small>
+                <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void saveHomeCustomization()} disabled={homeCustomizationSaving}>{homeCustomizationSaving ? "Salvando..." : "Salvar alterações"}</button></div>
+                {homeCustomizationMessage && <div className="admin-category-message">{homeCustomizationMessage}</div>}
+                <small className="admin-text">As alterações ficam salvas no banco e não exigem novo deploy.</small>
               </section>
             </div>
           ) : section === "dashboard" ? (
