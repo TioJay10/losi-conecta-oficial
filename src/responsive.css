@@ -6953,6 +6953,81 @@ a {
     font-size:9px !important;
   }
 }
+.dashboard-page .dashboard-saved-provider-info{
+  align-items:center !important;
+  flex-direction:row !important;
+  gap:10px !important;
+  min-width:0 !important;
+  text-decoration:none !important;
+  color:inherit !important;
+}
+.dashboard-page .dashboard-saved-provider-avatar{
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  border-radius:50% !important;
+  overflow:hidden !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:#0b182a !important;
+  color:#d4af37 !important;
+  border:1px solid rgba(212,175,55,.45) !important;
+  font-weight:800 !important;
+  font-size:14px !important;
+}
+.dashboard-page .dashboard-saved-provider-avatar img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  display:block !important;
+}
+.dashboard-page .dashboard-saved-provider-copy{
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+  gap:3px !important;
+  min-width:0 !important;
+  flex:1 1 auto !important;
+}
+.dashboard-page .dashboard-saved-provider-copy strong{
+  display:block !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  font-size:13px !important;
+  line-height:1.2 !important;
+}
+.dashboard-page .dashboard-saved-provider-copy span{
+  display:block !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  font-size:11px !important;
+  line-height:1.2 !important;
+}
+.dashboard-page .dashboard-saved-provider-card .provider-chat-trigger-group{
+  margin-left:auto !important;
+  flex:0 0 auto !important;
+}
+@media only screen and (max-width:600px){
+  .dashboard-page .dashboard-saved-provider-card{
+    align-items:center !important;
+    gap:8px !important;
+    padding:10px 11px !important;
+  }
+  .dashboard-page .dashboard-saved-provider-avatar{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+    font-size:13px !important;
+  }
+  .dashboard-page .dashboard-saved-provider-copy strong{font-size:12px !important;}
+  .dashboard-page .dashboard-saved-provider-copy span{font-size:10px !important;}
+  .dashboard-page .dashboard-saved-provider-card .provider-chat-trigger-group{gap:4px !important;}
+}
 @media only screen and (max-width: 900px) {
   .provider-page .provider-hero-content {
     grid-template-columns: 1fr !important;
