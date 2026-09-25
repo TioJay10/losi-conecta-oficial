@@ -27,6 +27,7 @@ function DashboardPage() {
   const [specificationsPlan, setSpecificationsPlan] = useState<{ name: string; description: string | null; price: string } | null>(null);
   const [notifications, setNotifications] = useState<Array<{ id: string; type: string; title: string; message: string; link: string | null; read_at: string | null; created_at: string }>>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationPopup, setNotificationPopup] = useState<typeof notifications[number] | null>(null);
   const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
   const [goldenHeartClaiming, setGoldenHeartClaiming] = useState(false);
   const [goldenHeartMessage, setGoldenHeartMessage] = useState("");
@@ -397,6 +398,7 @@ function DashboardPage() {
             notification,
             ...current.filter((item) => item.id !== notification.id),
           ].slice(0, 30));
+          setNotificationPopup(notification);
         },
       )
       .subscribe();
@@ -843,6 +845,116 @@ function DashboardPage() {
                 </button>
                 {goldenHeartMessage && <p className="dashboard-golden-heart-message">{goldenHeartMessage}</p>}
                 <button type="button" className="auth-modal-close dashboard-golden-heart-close" onClick={() => setGoldenHeartOpen(false)} aria-label="Fechar conquista">×</button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {notificationPopup && (
+          <div
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setNotificationPopup(null);
+            }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 1000,
+              display: "grid",
+              placeItems: "center",
+              padding: 20,
+              background: "rgba(7,17,31,.58)",
+              backdropFilter: "blur(5px)",
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="notification-popup-title"
+              style={{
+                width: "100%",
+                maxWidth: 470,
+                background: "#fff",
+                border: "1px solid rgba(214,180,106,.48)",
+                borderRadius: 20,
+                overflow: "hidden",
+                boxSizing: "border-box",
+                boxShadow: "0 24px 60px rgba(7,17,31,.28)",
+              }}
+            >
+              <div style={{
+                position: "relative",
+                padding: "30px 34px 28px",
+                background: "linear-gradient(145deg, rgba(18,31,50,.99), rgba(5,13,24,.99))",
+                borderBottom: "1px solid rgba(214,180,106,.30)",
+                boxSizing: "border-box",
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setNotificationPopup(null)}
+                  aria-label="Fechar notificação"
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    right: 16,
+                    width: 34,
+                    height: 34,
+                    border: "1px solid rgba(214,180,106,.35)",
+                    borderRadius: 9,
+                    background: "rgba(255,255,255,.06)",
+                    color: "#f0d99a",
+                    fontSize: 24,
+                    lineHeight: 1,
+                    cursor: "pointer",
+                  }}
+                >×</button>
+                <div style={{ fontSize: 21, fontWeight: 800, letterSpacing: ".08em", color: "#fff" }}>LOSI <span>CONECTA</span></div>
+                <div style={{ marginTop: 24, fontSize: 11, fontWeight: 800, letterSpacing: ".16em", color: "#f0d99a" }}>NOVA NOTIFICAÇÃO</div>
+                <h2 id="notification-popup-title" style={{ fontSize: 28, lineHeight: 1.15, margin: "14px 0 8px", color: "#fff" }}>{notificationPopup.title}</h2>
+                <p style={{ color: "#c4cbd7", lineHeight: 1.5, margin: 0, fontSize: 14 }}>Você recebeu uma nova mensagem no LOSI CONECTA.</p>
+              </div>
+              <div style={{ padding: "30px 34px 32px", background: "#fff", boxSizing: "border-box" }}>
+                <p style={{ margin: "0 0 22px", color: "#172033", fontSize: 15, lineHeight: 1.6, whiteSpace: "pre-line" }}>{notificationPopup.message}</p>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={() => void openNotification(notificationPopup)}
+                    style={{
+                      flex: "1 1 190px",
+                      border: "1px solid #d6b46a",
+                      borderRadius: 9,
+                      padding: "13px 16px",
+                      background: "linear-gradient(145deg, #0b182a, #07111f)",
+                      color: "#f0d99a",
+                      fontSize: 15,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      boxShadow: "0 8px 18px rgba(7,17,31,.16)",
+                    }}
+                  >
+                    {notificationPopup.link ? "Ver benefício" : "Ver notificação"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNotificationPopup(null)}
+                    style={{
+                      flex: "0 1 120px",
+                      border: 0,
+                      borderRadius: 9,
+                      padding: "13px 16px",
+                      background: "transparent",
+                      color: "#8a6d2f",
+                      fontSize: 14,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <div style={{ marginTop: 18, color: "#687386", fontSize: 12 }}>
+                  {new Date(notificationPopup.created_at).toLocaleString("pt-BR")}
+                </div>
               </div>
             </section>
           </div>
