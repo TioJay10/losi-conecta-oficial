@@ -12,6 +12,7 @@ import { Route as AdminPerfilRouteImport } from './routes/admin-perfil'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as NotificarInconsistenciaRouteImport } from './routes/notificar-inconsistencia'
 import { Route as MeusServicosRouteImport } from './routes/meus-servicos'
 import { Route as OrcamentosRouteImport } from './routes/orcamentos'
 import { Route as BuscarRouteImport } from './routes/buscar'
@@ -77,6 +78,12 @@ const PainelRoute = PainelRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const NotificarInconsistenciaRoute = NotificarInconsistenciaRouteImport.update({
+  id: '/notificar-inconsistencia',
+  path: '/notificar-inconsistencia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/meu-perfil': typeof MeuPerfilRoute
   '/painel': typeof PainelRoute
+  '/notificar-inconsistencia': typeof NotificarInconsistenciaRoute
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
   '/buscar': typeof BuscarRoute
@@ -197,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notificar-inconsistencia': {
+      id: '/notificar-inconsistencia'
+      path: '/notificar-inconsistencia'
+      fullPath: '/notificar-inconsistencia'
+      preLoaderRoute: typeof NotificarInconsistenciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/meus-servicos': {
       id: '/meus-servicos'
       path: '/meus-servicos'
@@ -221,6 +236,7 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute,
   MeuPerfilRoute,
   PainelRoute,
+  NotificarInconsistenciaRoute,
   MeusServicosRoute,
   OrcamentosRoute,
   BuscarRoute,
