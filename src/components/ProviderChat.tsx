@@ -135,6 +135,14 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
           if (incoming.sender_id !== userId) void markIncomingAsRead([incoming]);
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "chat_messages", filter: "conversation_id=eq." + activeConversation.id },
+        (payload) => {
+          const updated = payload.new as Message;
+          setMessages((current) => current.map((message) => message.id === updated.id ? { ...message, ...updated } : message));
+        },
+      )
       .subscribe();
 
     return () => {
@@ -151,10 +159,15 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
     if (!userId) return;
     const unread = rows.filter((message) => message.sender_id !== userId && !message.read_at);
     if (!unread.length) return;
-    await supabase
+    const readAt = new Date().toISOString();
+    const { error } = await supabase
       .from("chat_messages")
-      .update({ read_at: new Date().toISOString() })
+      .update({ read_at: readAt })
       .in("id", unread.map((message) => message.id));
+    if (!error) {
+      const unreadIds = new Set(unread.map((message) => message.id));
+      setMessages((current) => current.map((message) => unreadIds.has(message.id) ? { ...message, read_at: readAt } : message));
+    }
   }
 
   async function openNewConversation() {
