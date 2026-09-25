@@ -132,7 +132,7 @@ export interface FileRouteTypes {
   fullPaths: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
-  id: '__root__' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug'
+  id: '__root__' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
   fileRoutesById: FileRoutesById
 }
 
