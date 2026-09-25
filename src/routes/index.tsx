@@ -1,12 +1,32 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { AppLogo } from "../components/AppLogo";
+import { supabase } from "../lib/supabase";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
 function HomePage() {
+  const [customization, setCustomization] = useState({ hero_title: "", hero_subtitle: "", hero_button_text: "" });
+
+  useEffect(() => {
+    let mounted = true;
+    const loadCustomization = async () => {
+      const { data } = await supabase.from("home_customization_settings").select("key,value");
+      if (!mounted) return;
+      const values = Object.fromEntries((data ?? []).map(item => [item.key, item.value]));
+      setCustomization({
+        hero_title: values.hero_title ?? "",
+        hero_subtitle: values.hero_subtitle ?? "",
+        hero_button_text: values.hero_button_text ?? "",
+      });
+    };
+    void loadCustomization();
+    return () => { mounted = false; };
+  }, []);
+
   return (
     <main className="home-page" style={styles.page}>
       <header className="home-header" style={styles.header}>
@@ -27,16 +47,14 @@ function HomePage() {
         <div style={styles.heroGlow} />
         <div style={styles.eyebrow}>A REDE DE PROFISSIONAIS PARA EVENTOS</div>
         <h1 style={styles.heroTitle}>
-          Encontre quem você precisa para
-          <span style={styles.gradientText}> realizar seu evento.</span>
+          {customization.hero_title || "Encontre quem você precisa para realizar seu evento."}
         </h1>
         <p style={styles.heroText}>
-          O LOSI CONECTA aproxima quem organiza eventos de profissionais,
-          empresas e fornecedores especializados — tudo em um só lugar.
+          {customization.hero_subtitle || "O LOSI CONECTA aproxima quem organiza eventos de profissionais, empresas e fornecedores especializados — tudo em um só lugar."}
         </p>
 
         <div style={styles.heroActions}>
-          <Link to="/buscar" style={styles.primaryButton}>Encontrar fornecedores</Link>
+          <Link to="/buscar" style={styles.primaryButton}>{customization.hero_button_text || "Encontrar fornecedores"}</Link>
           <a href="#como-funciona" style={styles.secondaryButton}>Entender como funciona</a>
         </div>
 
