@@ -375,6 +375,43 @@ function AdminPage() {
     }
   }
 
+  async function stopNotificationSound(soundId: string) {
+    if (notificationSoundSaving) return;
+    const selectedSound = notificationSounds.find(item => item.id === soundId);
+    if (!selectedSound || !selectedSound.active) return;
+
+    setNotificationSoundSaving(true);
+    setNotificationSoundMessage("");
+    try {
+      // Apenas interrompe o áudio das próximas notificações. O registro e o
+      // arquivo continuam cadastrados e podem ser ativados novamente a qualquer momento.
+      const { error } = await supabase
+        .from("notification_sounds")
+        .update({ active: false })
+        .eq("id", soundId)
+        .eq("active", true);
+      if (error) throw new Error(error.message);
+
+      const { data: stoppedSound, error: verifyError } = await supabase
+        .from("notification_sounds")
+        .select("id,active")
+        .eq("id", soundId)
+        .maybeSingle();
+      if (verifyError || !stoppedSound || stoppedSound.active) {
+        throw new Error(verifyError?.message || "Não foi possível confirmar a parada do áudio.");
+      }
+
+      setNotificationSounds(current =>
+        current.map(item => ({ ...item, active: false })),
+      );
+      setNotificationSoundMessage("Áudio das notificações parado. O arquivo continua disponível para ser usado novamente.");
+    } catch (error) {
+      setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível parar o áudio.");
+    } finally {
+      setNotificationSoundSaving(false);
+    }
+  }
+
   async function deleteNotificationSound(sound: typeof notificationSounds[number]) {
     if (notificationSoundSaving) return;
     if (!window.confirm(`Remover o áudio "${sound.name}"? Essa ação não pode ser desfeita.`)) return;
@@ -1329,7 +1366,7 @@ function AdminPage() {
                       <article className="admin-list-item" key={sound.id}>
                         <div className="admin-item-main">
                           <div><strong>{sound.name}</strong><span>{sound.active ? "Som atual das notificações" : "Disponível para seleção"} · {new Date(sound.created_at).toLocaleString("pt-BR")}</span><audio controls preload="none" src={sound.public_url} style={{ width: "min(100%, 360px)", marginTop: 10 }} /></div>
-                          <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void activateNotificationSound(sound.id)} disabled={sound.active || notificationSoundSaving}>{sound.active ? "Em uso" : "Usar como notificação"}</button><button type="button" className="admin-category-delete" onClick={() => void deleteNotificationSound(sound)} disabled={notificationSoundSaving}>Remover</button></div>
+                          <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void activateNotificationSound(sound.id)} disabled={sound.active || notificationSoundSaving}>{sound.active ? "Em uso" : "Usar como notificação"}</button>{sound.active && <button type="button" className="admin-action-button" onClick={() => void stopNotificationSound(sound.id)} disabled={notificationSoundSaving}>Parar áudio</button>}<button type="button" className="admin-category-delete" onClick={() => void deleteNotificationSound(sound)} disabled={notificationSoundSaving}>Remover</button></div>
                         </div>
                       </article>
                     ))}
