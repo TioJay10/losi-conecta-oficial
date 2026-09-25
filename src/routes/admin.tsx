@@ -187,7 +187,7 @@ function AdminPage() {
         supabase.from("services").select("id,name,description,active,business:business_profiles(business_name),category:categories(name)").order("created_at",{ascending:false}),
         supabase.from("reviews").select("id,rating,comment,active,created_at,business:business_profiles(business_name),reviewer:profiles(full_name)").order("created_at",{ascending:false}),
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
-        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").order("created_at",{ascending:false}),
+        supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at").order("created_at",{ascending:false}),
         supabase.from("coupons").select("id,code,assigned_user_id,plan_id,discount_type,discount_value,active,expires_at,claimed_at,used_at").order("created_at",{ascending:false}),
         supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,status,resolved_by,resolved_at,resolution_note,resolution_action,created_at,business:business_profiles(business_name,owner_id),reporter:profiles!supplier_reports_reporter_id_fkey(full_name)").order("created_at",{ascending:false}),
         supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
@@ -203,7 +203,21 @@ function AdminPage() {
       setServices((servicesResult.data ?? []) as unknown as typeof services);
       setReviews((reviewsResult.data ?? []) as unknown as typeof reviews);
       setPlans((plansResult.data ?? []) as typeof plans);
-      setSubscriptions((subscriptionsResult.data ?? []) as unknown as typeof subscriptions);
+      const subscriptionRows = (subscriptionsResult.data ?? []) as Array<{
+        id:string;business_id:string;plan_id:string;status:string;starts_at:string;created_at:string;ends_at:string|null;activated_by:string|null;asaas_payment_id:string|null;paid_amount:number|null;paid_at:string|null;
+      }>;
+      setSubscriptions(subscriptionRows.map(item => ({
+        ...item,
+        business: businessesResult.data?.find((business) => business.id === item.business_id)
+          ? { business_name: (businessesResult.data.find((business) => business.id === item.business_id) as { business_name: string }).business_name }
+          : null,
+        plan: plansResult.data?.find((plan) => plan.id === item.plan_id)
+          ? (() => {
+              const plan = plansResult.data.find((candidate) => candidate.id === item.plan_id) as { name:string; price_cents:number; slug:string };
+              return { name: plan.name, price_cents: plan.price_cents, slug: plan.slug };
+            })()
+          : null,
+      })) as typeof subscriptions);
       setCoupons((couponsResult.data ?? []) as typeof coupons);
       setSupplierReports((reportsResult.data ?? []) as unknown as typeof supplierReports);
       setAdminNotifications((notificationsResult.data ?? []) as typeof adminNotifications);
