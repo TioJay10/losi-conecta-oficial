@@ -1343,8 +1343,17 @@ function DashboardPage() {
               {savedBusinesses.map((business) => (
                 <article key={business.id} className="dashboard-saved-card dashboard-saved-provider-card">
                   <Link to={"/fornecedor/" + business.slug} className="dashboard-saved-provider-info">
-                    <strong>{business.business_name}</strong>
-                    <span>{business.city}{business.city && business.state ? " — " : ""}{business.state}</span>
+                    <div className="dashboard-saved-provider-avatar">
+                      {business.logo_url ? (
+                        <img src={business.logo_url} alt="" />
+                      ) : (
+                        <span>{business.business_name.slice(0, 1).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div className="dashboard-saved-provider-copy">
+                      <strong>{business.business_name}</strong>
+                      <span>{business.city}{business.city && business.state ? " — " : ""}{business.state}</span>
+                    </div>
                   </Link>
                   <ProviderChat
                     business={{
