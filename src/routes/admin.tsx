@@ -163,6 +163,11 @@ function AdminPage() {
   const [broadcastTargetValue, setBroadcastTargetValue] = useState("");
   const [broadcastSending, setBroadcastSending] = useState(false);
   const [broadcastMessageStatus, setBroadcastMessageStatus] = useState("");
+  const [notificationSounds, setNotificationSounds] = useState<Array<{id:string;name:string;file_path:string;public_url:string;active:boolean;created_at:string}>>([]);
+  const [notificationSoundFile, setNotificationSoundFile] = useState<File | null>(null);
+  const [notificationSoundName, setNotificationSoundName] = useState("");
+  const [notificationSoundMessage, setNotificationSoundMessage] = useState("");
+  const [notificationSoundSaving, setNotificationSoundSaving] = useState(false);
   const [auditLogs, setAuditLogs] = useState<Array<{id:string;admin_user_id:string;action:string;entity_type:string;entity_id:string|null;entity_name:string|null;details:Record<string, unknown>;created_at:string;admin:{full_name:string|null}|null}>>([]);
   const [activitySearch, setActivitySearch] = useState("");
   const [activityActionFilter, setActivityActionFilter] = useState("all");
@@ -223,6 +228,9 @@ function AdminPage() {
       setAdminNotifications((notificationsResult.data ?? []) as typeof adminNotifications);
       setAuditLogs((auditResult.data ?? []) as unknown as typeof auditLogs);
       setBroadcasts((broadcastsResult.data ?? []) as typeof broadcasts);
+      const { data: soundsData, error: soundsError } = await supabase.from("notification_sounds").select("id,name,file_path,public_url,active,created_at").order("created_at", { ascending: false });
+      if (soundsError) setDataError(soundsError.message);
+      setNotificationSounds((soundsData ?? []) as typeof notificationSounds);
       setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
       setLoading(false);
     }
@@ -237,7 +245,7 @@ function AdminPage() {
     document.addEventListener("visibilitychange", handleRefresh);
 
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","communication","activity"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","sounds","communication","activity"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
@@ -269,6 +277,72 @@ function AdminPage() {
     if (!error) setAdminNotifications(current => current.map(item => ({...item,read_at:item.read_at ?? stamp})));
   }
 
+  async function uploadNotificationSound() {
+    if (!user || !notificationSoundFile || notificationSoundSaving) return;
+    const file = notificationSoundFile;
+    if (!file.type.startsWith("audio/") || file.size > 5 * 1024 * 1024) {
+      setNotificationSoundMessage(file.size > 5 * 1024 * 1024 ? "O arquivo deve ter no máximo 5 MB." : "Selecione um arquivo de áudio válido.");
+      return;
+    }
+    setNotificationSoundSaving(true);
+    setNotificationSoundMessage("");
+    try {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "mp3";
+      const filePath = "sounds/" + crypto.randomUUID() + "." + extension;
+      const { error: uploadError } = await supabase.storage.from("notification-sounds").upload(filePath, file, { contentType: file.type || "audio/mpeg", upsert: false });
+      if (uploadError) throw new Error(uploadError.message);
+      const { data: publicData } = supabase.storage.from("notification-sounds").getPublicUrl(filePath);
+      const name = notificationSoundName.trim() || file.name;
+      const { data, error } = await supabase.from("notification_sounds").insert({ name, file_path: filePath, public_url: publicData.publicUrl }).select("id,name,file_path,public_url,active,created_at").single();
+      if (error) { await supabase.storage.from("notification-sounds").remove([filePath]); throw new Error(error.message); }
+      setNotificationSounds(current => [data as typeof notificationSounds[number], ...current]);
+      setNotificationSoundFile(null);
+      setNotificationSoundName("");
+      setNotificationSoundMessage("Som enviado com sucesso. Agora você pode testá-lo ou defini-lo como som das notificações.");
+    } catch (error) {
+      setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível enviar o som.");
+    } finally {
+      setNotificationSoundSaving(false);
+    }
+  }
+
+  async function activateNotificationSound(soundId: string) {
+    if (notificationSoundSaving) return;
+    setNotificationSoundSaving(true);
+    setNotificationSoundMessage("");
+    try {
+      const { error: clearError } = await supabase.from("notification_sounds").update({ active: false }).eq("active", true);
+      if (clearError) throw new Error(clearError.message);
+      const { error } = await supabase.from("notification_sounds").update({ active: true }).eq("id", soundId);
+      if (error) throw new Error(error.message);
+      setNotificationSounds(current => current.map(item => ({ ...item, active: item.id === soundId })));
+      setNotificationSoundMessage("Som de notificação atualizado. As próximas notificações usarão este som.");
+    } catch (error) {
+      setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível definir o som.");
+    } finally {
+      setNotificationSoundSaving(false);
+    }
+  }
+
+  async function deleteNotificationSound(sound: typeof notificationSounds[number]) {
+    if (notificationSoundSaving) return;
+    if (sound.active) { setNotificationSoundMessage("Defina outro som como ativo antes de remover este."); return; }
+    if (!window.confirm("Remover este som?")) return;
+    setNotificationSoundSaving(true);
+    setNotificationSoundMessage("");
+    try {
+      const { error: storageError } = await supabase.storage.from("notification-sounds").remove([sound.file_path]);
+      if (storageError) throw new Error(storageError.message);
+      const { error } = await supabase.from("notification_sounds").delete().eq("id", sound.id);
+      if (error) throw new Error(error.message);
+      setNotificationSounds(current => current.filter(item => item.id !== sound.id));
+      setNotificationSoundMessage("Som removido.");
+    } catch (error) {
+      setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível remover o som.");
+    } finally {
+      setNotificationSoundSaving(false);
+    }
+  }
   async function manageUser(userId: string, action: "block" | "unblock" | "delete") {
     const target = users.find((item) => item.id === userId);
     if (!target) return;
@@ -640,6 +714,7 @@ function AdminPage() {
     { id: "commercial" as const, label: "Comercial" },
     { id: "coupons" as const, label: "Cupons", count: coupons.filter(item => item.active && !item.used_at).length },
     { id: "notifications" as const, label: "Notificações", count: unreadAdminNotifications },
+    { id: "sounds" as const, label: "Sons de notificação", count: notificationSounds.length },
     { id: "communication" as const, label: "Central de comunicação" },
     { id: "activity" as const, label: "Auditoria" },
   ];
@@ -658,7 +733,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "communication" ? "Central de comunicação" : "Auditoria administrativa";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "sounds" ? "Sons de notificação" : section === "communication" ? "Central de comunicação" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -1172,7 +1247,31 @@ function AdminPage() {
                   </div>
                 );
               })()
-              : section === "communication" ? (
+                            : section === "sounds" ? (
+                <div className="admin-admin-center">
+                  <section className="admin-admin-center-hero">
+                    <div><div className="admin-badge">NOTIFICAÇÕES</div><h2>Sons de notificação</h2><p>Envie sons personalizados e escolha qual deles será reproduzido quando qualquer usuário receber uma nova notificação.</p></div>
+                    <strong>{notificationSounds.length} som(ns)</strong>
+                  </section>
+                  <form className="admin-plan-editor" onSubmit={(event) => { event.preventDefault(); void uploadNotificationSound(); }}>
+                    <label>Nome do som<input value={notificationSoundName} onChange={event => setNotificationSoundName(event.target.value)} maxLength={80} placeholder="Ex.: Plin LOSI" /></label>
+                    <label>Arquivo de áudio<input type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/x-m4a,audio/webm,.mp3,.wav,.ogg,.m4a,.webm" onChange={event => setNotificationSoundFile(event.target.files?.[0] ?? null)} /></label>
+                    <div className="admin-item-actions"><button type="submit" className="admin-action-button" disabled={!notificationSoundFile || notificationSoundSaving}>{notificationSoundSaving ? "Enviando..." : "Enviar som"}</button></div>
+                    <small className="admin-text">Formatos de áudio · máximo de 5 MB.</small>
+                  </form>
+                  {notificationSoundMessage && <div className="admin-category-message">{notificationSoundMessage}</div>}
+                  <div className="admin-list">
+                    {notificationSounds.length === 0 ? <div className="admin-empty">Nenhum som cadastrado ainda.</div> : notificationSounds.map(sound => (
+                      <article className="admin-list-item" key={sound.id}>
+                        <div className="admin-item-main">
+                          <div><strong>{sound.name}</strong><span>{sound.active ? "Som atual das notificações" : "Disponível para seleção"} · {new Date(sound.created_at).toLocaleString("pt-BR")}</span><audio controls preload="none" src={sound.public_url} style={{ width: "min(100%, 360px)", marginTop: 10 }} /></div>
+                          <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void activateNotificationSound(sound.id)} disabled={sound.active || notificationSoundSaving}>{sound.active ? "Em uso" : "Usar como notificação"}</button><button type="button" className="admin-category-delete" onClick={() => void deleteNotificationSound(sound)} disabled={sound.active || notificationSoundSaving}>Remover</button></div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+: section === "communication" ? (
                 <div className="admin-admin-center admin-communication-center">
                   <section className="admin-admin-center-hero">
                     <div><div className="admin-badge">COMUNICAÇÃO</div><h2>Central de comunicação</h2><p>Envie avisos personalizados para usuários, fornecedores ou assinantes de um plano.</p></div>
