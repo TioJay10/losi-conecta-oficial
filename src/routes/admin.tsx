@@ -189,7 +189,7 @@ function AdminPage() {
         supabase.from("plans").select("id,name,slug,description,price_cents,billing_period,highlighted,active").order("price_cents"),
         supabase.from("business_subscriptions").select("id,business_id,plan_id,status,starts_at,created_at,ends_at,activated_by,asaas_payment_id,paid_amount,paid_at,business:business_profiles(business_name),plan:plans(name,price_cents,slug)").order("created_at",{ascending:false}),
         supabase.from("coupons").select("id,code,assigned_user_id,plan_id,discount_type,discount_value,active,expires_at,claimed_at,used_at").order("created_at",{ascending:false}),
-        supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,status,resolved_by,resolved_at,resolution_note,resolution_action,created_at,business:business_profiles(business_name,owner_id),reporter:profiles(full_name)").order("created_at",{ascending:false}),
+        supabase.from("supplier_reports").select("id,business_id,reporter_id,reason,details,status,resolved_by,resolved_at,resolution_note,resolution_action,created_at,business:business_profiles(business_name,owner_id),reporter:profiles!supplier_reports_reporter_id_fkey(full_name)").order("created_at",{ascending:false}),
         supabase.from("admin_notifications").select("id,type,title,message,link,entity_id,read_at,created_at").order("created_at",{ascending:false}).limit(100),
         supabase.from("admin_audit_logs").select("id,admin_user_id,action,entity_type,entity_id,entity_name,details,created_at,admin:profiles(full_name)").order("created_at",{ascending:false}).limit(200),
         supabase.from("admin_broadcasts").select("id,title,message,target_type,target_value,recipient_count,created_at").order("created_at",{ascending:false}).limit(100),
