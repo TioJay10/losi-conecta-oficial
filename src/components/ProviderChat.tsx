@@ -276,53 +276,50 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     setLoading(true);
     setError("");
 
-    // Uma conversa pertence às duas pessoas, não ao caminho pelo qual o perfil foi aberto.
-    // Primeiro procuramos o histórico nos dois sentidos. Isso evita criar uma segunda
-    // conversa quando, por exemplo, o fornecedor recebeu uma mensagem do usuário e
-    // depois abre o perfil público desse mesmo usuário/fornecedor para responder.
-    try {\n      const selectDirect = await supabase
-      .from("chat_conversations")
-      .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-      .eq("requester_id", userId)
-      .eq("supplier_id", business.owner_id)
-      .order("updated_at", { ascending: false })
-      .limit(1);
-
-    let data = selectDirect.data?.[0] ?? null;
-    let lookupError = selectDirect.error;
-
-    if (!data && !lookupError) {
-      const selectReverse = await supabase
+    try {
+      const selectDirect = await supabase
         .from("chat_conversations")
         .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-        .eq("requester_id", business.owner_id)
-        .eq("supplier_id", userId)
-        .order("updated_at", { ascending: false })
-        .limit(1);
-
-      data = selectReverse.data?.[0] ?? null;
-      lookupError = selectReverse.error;
-    }
-
-    // Compatibilidade com conversas antigas: se não houver uma conversa pelo par,
-    // ainda verificamos a conversa vinculada ao fornecedor deste perfil.
-    if (!data && !lookupError) {
-      const selectByBusiness = await supabase
-        .from("chat_conversations")
-        .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-        .eq("business_id", business.id)
         .eq("requester_id", userId)
+        .eq("supplier_id", business.owner_id)
         .order("updated_at", { ascending: false })
         .limit(1);
 
-      data = selectByBusiness.data?.[0] ?? null;
-      lookupError = selectByBusiness.error;
-    }
+      let data = selectDirect.data?.[0] ?? null;
+      let lookupError = selectDirect.error;
 
-    if (lookupError) {
-      console.error("Erro ao localizar conversa:", lookupError);
-      setError("Não foi possível iniciar o chat.");
-    } else {
+      if (!data && !lookupError) {
+        const selectReverse = await supabase
+          .from("chat_conversations")
+          .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
+          .eq("requester_id", business.owner_id)
+          .eq("supplier_id", userId)
+          .order("updated_at", { ascending: false })
+          .limit(1);
+
+        data = selectReverse.data?.[0] ?? null;
+        lookupError = selectReverse.error;
+      }
+
+      if (!data && !lookupError) {
+        const selectByBusiness = await supabase
+          .from("chat_conversations")
+          .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
+          .eq("business_id", business.id)
+          .eq("requester_id", userId)
+          .order("updated_at", { ascending: false })
+          .limit(1);
+
+        data = selectByBusiness.data?.[0] ?? null;
+        lookupError = selectByBusiness.error;
+      }
+
+      if (lookupError) {
+        console.error("Erro ao localizar conversa:", lookupError);
+        setError("Não foi possível iniciar o chat.");
+        return;
+      }
+
       if (!data) {
         const created = await supabase
           .from("chat_conversations")
@@ -333,7 +330,6 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
         if (created.error) {
           console.error("Erro ao criar conversa:", created.error);
           setError("Não foi possível iniciar o chat.");
-          setLoading(false);
           return;
         }
         data = created.data;
@@ -342,8 +338,12 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
       const conversation = data as Conversation;
       setConversations((current) => [conversation, ...current.filter((item) => item.id !== conversation.id)]);
       setActiveConversation(conversation);
+    } catch (chatError) {
+      console.error("Erro inesperado ao abrir o chat:", chatError);
+      setError("Não foi possível abrir o chat. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function sendMessage() {
