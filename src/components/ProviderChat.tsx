@@ -9,6 +9,8 @@ type Business = {
   owner_id: string;
 };
 
+type UserProfile = { id: string; full_name: string | null; avatar_url: string | null };
+
 type Conversation = {
   id: string;
   business_id: string;
@@ -45,6 +47,7 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [pendingChatId, setPendingChatId] = useState<string | null>(null);
+  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const isSupplier = Boolean(userId && userId === business.owner_id);
@@ -89,6 +92,23 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
     void loadConversations();
     return () => { mounted = false; };
   }, [open, userId, business.id]);
+
+  useEffect(() => {
+    if (!open || !userId || conversations.length === 0) return;
+    const ids = Array.from(new Set(conversations.map((conversation) => isSupplier ? conversation.requester_id : conversation.supplier_id)));
+    const missing = ids.filter((id) => !profiles[id]);
+    if (!missing.length) return;
+    let mounted = true;
+    async function loadProfiles() {
+      const { data, error } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", missing);
+      if (!mounted || error) return;
+      const next = { ...profiles };
+      for (const profile of (data ?? []) as UserProfile[]) next[profile.id] = profile;
+      setProfiles(next);
+    }
+    void loadProfiles();
+    return () => { mounted = false; };
+  }, [open, userId, conversations, isSupplier]);
 
   useEffect(() => {
     if (!pendingChatId || conversations.length === 0) return;
