@@ -121,6 +121,25 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
 
   useEffect(() => {
     if (!activeConversation || !userId) return;
+    const participantIds = [activeConversation.requester_id, activeConversation.supplier_id];
+    const missing = participantIds.filter((id) => !profiles[id]);
+    if (!missing.length) return;
+    let mounted = true;
+    async function loadActiveProfiles() {
+      const { data, error } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", missing);
+      if (!mounted || error) return;
+      setProfiles((current) => {
+        const next = { ...current };
+        for (const profile of (data ?? []) as UserProfile[]) next[profile.id] = profile;
+        return next;
+      });
+    }
+    void loadActiveProfiles();
+    return () => { mounted = false; };
+  }, [activeConversation?.id, userId, profiles]);
+
+  useEffect(() => {
+    if (!activeConversation || !userId) return;
 
     let mounted = true;
     async function loadMessages() {
@@ -327,7 +346,22 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
               <>
                 <div className="provider-chat-conversation-bar">
                   <button type="button" onClick={() => setActiveConversation(null)} aria-label="Voltar para conversas">‹</button>
-                  <span>{isSupplier ? "Conversa com cliente" : "Conversa com fornecedor"}</span>
+                  <div className="provider-chat-active-participant">
+                    {(() => {
+                      const participantId = isSupplier ? activeConversation.requester_id : activeConversation.supplier_id;
+                      const participant = profiles[participantId];
+                      const name = participant?.full_name || (isSupplier ? "Cliente" : business.business_name);
+                      return <>
+                        <div className="provider-chat-participant-avatar">
+                          {participant?.avatar_url ? <img src={participant.avatar_url} alt={name} /> : name.slice(0, 1).toUpperCase()}
+                        </div>
+                        <div className="provider-chat-participant-copy">
+                          <strong>{name}</strong>
+                          <span>{isSupplier ? "Cliente" : "Fornecedor"}</span>
+                        </div>
+                      </>;
+                    })()}
+                  </div>
                 </div>
                 <div className="provider-chat-messages" aria-live="polite">
                   {loading && messages.length === 0 && <div className="provider-chat-empty">Carregando mensagens...</div>}
@@ -336,6 +370,18 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
                     const mine = message.sender_id === userId;
                     return (
                       <div key={message.id} className={"provider-chat-message-row " + (mine ? "mine" : "theirs")}>
+                        <div className="provider-chat-message-identity">
+                          <div className="provider-chat-message-avatar">
+                            {message.sender_id === business.owner_id && business.logo_url
+                              ? <img src={business.logo_url} alt={business.business_name} />
+                              : profiles[message.sender_id]?.avatar_url
+                                ? <img src={profiles[message.sender_id].avatar_url} alt={profiles[message.sender_id]?.full_name || "Usuário"} />
+                                : (profiles[message.sender_id]?.full_name || (message.sender_id === business.owner_id ? business.business_name : "Usuário")).slice(0, 1).toUpperCase()}
+                          </div>
+                          <span className="provider-chat-message-sender-name">
+                            {message.sender_id === business.owner_id ? business.business_name : profiles[message.sender_id]?.full_name || "Cliente"}
+                          </span>
+                        </div>
                         <div className="provider-chat-message-bubble">
                           <p>{message.content}</p>
                           <div className="provider-chat-message-meta">
