@@ -77,6 +77,13 @@ export function AdminInconsistencyCenter() {
       setMessages((current) => [...current, data as InconsistencyMessage]);
       setDraft("");
       await supabase.from("inconsistency_conversations").update({ status: "in_progress", user_viewed_at: null }).eq("id", selected.id);
+      await supabase.from("notifications").insert({
+        user_id: selected.user_id,
+        type: "inconsistency_reply",
+        title: "Resposta do administrador",
+        message: "O administrador respondeu à sua notificação de inconsistência.",
+        link: "/notificar-inconsistencia",
+      });
     }
     setSending(false);
   }
