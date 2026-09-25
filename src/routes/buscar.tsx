@@ -16,7 +16,27 @@ type Business = {
   verified: boolean; latitude: number | null; longitude: number | null; reputation_service_count: number; services: Service[]; reviews: ReviewSummary[]; plan?: { plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null } | null;
 };
 
-export const Route = createFileRoute("/buscar")({ component: SearchPage });
+function SearchPageError() {
+  return (
+    <main className="marketplace-page">
+      <section className="marketplace-search-panel" style={{ minHeight: "60vh", display: "grid", placeItems: "center", textAlign: "center" }}>
+        <div>
+          <AppLogo aria-label="LOSI CONECTA">LOSI <span>CONECTA</span></AppLogo>
+          <h1>Não foi possível carregar a busca.</h1>
+          <p>O catálogo encontrou um erro temporário. Tente novamente.</p>
+          <button type="button" className="marketplace-search-button" onClick={() => window.location.reload()}>
+            Tentar novamente
+          </button>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export const Route = createFileRoute("/buscar")({
+  component: SearchPage,
+  errorComponent: SearchPageError,
+});
 
 const OFFICIAL_BUSINESS_ID = "333ccf56-324f-4e4f-99e3-1ebc9ade0140";
 
@@ -80,7 +100,11 @@ function SearchPage() {
 
       if (businessResult.error) {
         console.error("Erro ao carregar fornecedores:", businessResult.error);
-        setError("Não foi possível carregar os fornecedores: " + businessResult.error.message);
+        if (mounted) {
+          setBusinesses([]);
+          setCategories((categoryResult.data ?? []) as Category[]);
+          setError("Não foi possível carregar os fornecedores neste momento.");
+        }
         return;
       }
 
@@ -88,7 +112,12 @@ function SearchPage() {
         console.warn("Não foi possível carregar categorias:", categoryResult.error);
       }
 
-      const baseBusinesses = (businessResult.data ?? []) as Business[];
+      const baseBusinesses = (businessResult.data ?? []).map((business) => ({
+        ...business,
+        services: [] as Service[],
+        reviews: [] as ReviewSummary[],
+        plan: null,
+      })) as Business[];
       const businessIds = baseBusinesses.map((business) => business.id);
 
       const [serviceResult, reviewResult] = await Promise.all([
