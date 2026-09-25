@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
-import { HomePage } from "../components/HomePage";
+import { HomePage, type HomeCustomization } from "../components/HomePage";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -175,8 +175,8 @@ function AdminPage() {
   const [auditLogs, setAuditLogs] = useState<Array<{id:string;action:string;entity_type:string;entity_name:string|null;details:Record<string, unknown>;created_at:string;admin_name:string|null}>>([]);
   const [activitySearch, setActivitySearch] = useState("");
   const [activityActionFilter, setActivityActionFilter] = useState("all");
-  const [homeCustomization, setHomeCustomization] = useState({ hero_title: "", hero_subtitle: "", hero_button_text: "" });
-  const [homeCustomizationDefaults, setHomeCustomizationDefaults] = useState({ hero_title: "", hero_subtitle: "", hero_button_text: "" });
+  const [homeCustomization, setHomeCustomization] = useState<HomeCustomization>({ hero_title: "", hero_subtitle: "", hero_button_text: "", color_background: "#0B182A", color_primary: "#D4AF37", color_secondary: "#A4864D", color_text: "#172033", color_button: "#0B182A", color_button_text: "#FFFFFF" });
+  const [homeCustomizationDefaults, setHomeCustomizationDefaults] = useState<HomeCustomization>({ hero_title: "", hero_subtitle: "", hero_button_text: "", color_background: "#0B182A", color_primary: "#D4AF37", color_secondary: "#A4864D", color_text: "#172033", color_button: "#0B182A", color_button_text: "#FFFFFF" });
   const [homeCustomizationSaving, setHomeCustomizationSaving] = useState(false);
   const [homeCustomizationMessage, setHomeCustomizationMessage] = useState("");
   useEffect(() => {
@@ -238,7 +238,9 @@ function AdminPage() {
       setAuditLogs((auditResult.data ?? []) as unknown as typeof auditLogs);
       setBroadcasts((broadcastsResult.data ?? []) as typeof broadcasts);
       const customizationMap = Object.fromEntries((customizationResult.data ?? []).map(item => [item.key, item.value]));
-      setHomeCustomization({ hero_title: customizationMap.hero_title ?? "", hero_subtitle: customizationMap.hero_subtitle ?? "", hero_button_text: customizationMap.hero_button_text ?? "" });
+      const customizationDefaultsMap = Object.fromEntries((customizationResult.data ?? []).map(item => [item.key, item.default_value ?? ""]));
+      setHomeCustomization({ hero_title: customizationMap.hero_title ?? "", hero_subtitle: customizationMap.hero_subtitle ?? "", hero_button_text: customizationMap.hero_button_text ?? "", color_background: customizationMap.color_background ?? "#0B182A", color_primary: customizationMap.color_primary ?? "#D4AF37", color_secondary: customizationMap.color_secondary ?? "#A4864D", color_text: customizationMap.color_text ?? "#172033", color_button: customizationMap.color_button ?? "#0B182A", color_button_text: customizationMap.color_button_text ?? "#FFFFFF" });
+      setHomeCustomizationDefaults({ hero_title: customizationDefaultsMap.hero_title ?? "", hero_subtitle: customizationDefaultsMap.hero_subtitle ?? "", hero_button_text: customizationDefaultsMap.hero_button_text ?? "", color_background: customizationDefaultsMap.color_background ?? "#0B182A", color_primary: customizationDefaultsMap.color_primary ?? "#D4AF37", color_secondary: customizationDefaultsMap.color_secondary ?? "#A4864D", color_text: customizationDefaultsMap.color_text ?? "#172033", color_button: customizationDefaultsMap.color_button ?? "#0B182A", color_button_text: customizationDefaultsMap.color_button_text ?? "#FFFFFF" });
       const { data: soundsData, error: soundsError } = await supabase.from("notification_sounds").select("id,name,file_path,public_url,active,created_at").order("created_at", { ascending: false });
       if (soundsError) setDataError(soundsError.message);
       setNotificationSounds((soundsData ?? []) as typeof notificationSounds);
@@ -291,7 +293,8 @@ function AdminPage() {
 
   async function restoreHomeCustomizationItem(key: keyof typeof homeCustomization) {
     if (!user || homeCustomizationSaving) return;
-    const label = key === "hero_title" ? "título principal" : key === "hero_subtitle" ? "subtítulo" : "texto do botão principal";
+    const labelMap: Record<keyof HomeCustomization, string> = { hero_title: "título principal", hero_subtitle: "subtítulo", hero_button_text: "texto do botão principal", color_background: "cor de fundo", color_primary: "cor principal", color_secondary: "cor secundária", color_text: "cor dos textos", color_button: "cor do botão", color_button_text: "cor do texto do botão" };
+    const label = labelMap[key];
     if (!window.confirm(`Restaurar o ${label} para o padrão salvo? A alteração será aplicada à página inicial após salvar.`)) return;
     const defaultValue = homeCustomizationDefaults[key];
     setHomeCustomization(current => ({ ...current, [key]: defaultValue }));
@@ -320,11 +323,7 @@ function AdminPage() {
       }));
       const { error } = await supabase.from("home_customization_settings").upsert(rows, { onConflict: "key" });
       if (error) throw new Error(error.message);
-      setHomeCustomizationDefaults({
-        hero_title: homeCustomization.hero_title.trim(),
-        hero_subtitle: homeCustomization.hero_subtitle.trim(),
-        hero_button_text: homeCustomization.hero_button_text.trim(),
-      });
+      setHomeCustomizationDefaults({ ...homeCustomization, hero_title: homeCustomization.hero_title.trim(), hero_subtitle: homeCustomization.hero_subtitle.trim(), hero_button_text: homeCustomization.hero_button_text.trim(), color_background: homeCustomization.color_background.trim(), color_primary: homeCustomization.color_primary.trim(), color_secondary: homeCustomization.color_secondary.trim(), color_text: homeCustomization.color_text.trim(), color_button: homeCustomization.color_button.trim(), color_button_text: homeCustomization.color_button_text.trim() });
       setHomeCustomizationMessage("A configuração atual agora é o novo padrão.");
     } catch (error) {
       setHomeCustomizationMessage(error instanceof Error ? error.message : "Não foi possível definir o novo padrão.");
@@ -979,6 +978,14 @@ function AdminPage() {
                   <input type="text" value={homeCustomization.hero_button_text} onChange={event => setHomeCustomization(current => ({ ...current, hero_button_text: event.target.value }))} maxLength={60} />
                   <button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("hero_button_text")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button>
                 </label>
+                <div className="home-customization-color-grid">
+                  <label className="home-customization-color-field">Fundo da página<div className="home-customization-color-control"><input type="color" value={homeCustomization.color_background} onChange={event => setHomeCustomization(current => ({ ...current, color_background: event.target.value }))} /><input type="text" value={homeCustomization.color_background} onChange={event => setHomeCustomization(current => ({ ...current, color_background: event.target.value }))} maxLength={7} /></div><button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("color_background")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button></label>
+                  <label className="home-customization-color-field">Cor principal<div className="home-customization-color-control"><input type="color" value={homeCustomization.color_primary} onChange={event => setHomeCustomization(current => ({ ...current, color_primary: event.target.value }))} /><input type="text" value={homeCustomization.color_primary} onChange={event => setHomeCustomization(current => ({ ...current, color_primary: event.target.value }))} maxLength={7} /></div><button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("color_primary")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button></label>
+                  <label className="home-customization-color-field">Cor secundária<div className="home-customization-color-control"><input type="color" value={homeCustomization.color_secondary} onChange={event => setHomeCustomization(current => ({ ...current, color_secondary: event.target.value }))} /><input type="text" value={homeCustomization.color_secondary} onChange={event => setHomeCustomization(current => ({ ...current, color_secondary: event.target.value }))} maxLength={7} /></div><button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("color_secondary")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button></label>
+                  <label className="home-customization-color-field">Cor dos textos<div className="home-customization-color-control"><input type="color" value={homeCustomization.color_text} onChange={event => setHomeCustomization(current => ({ ...current, color_text: event.target.value }))} /><input type="text" value={homeCustomization.color_text} onChange={event => setHomeCustomization(current => ({ ...current, color_text: event.target.value }))} maxLength={7} /></div><button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("color_text")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button></label>
+                  <label className="home-customization-color-field">Cor dos botões<div className="home-customization-color-control"><input type="color" value={homeCustomization.color_button} onChange={event => setHomeCustomization(current => ({ ...current, color_button: event.target.value }))} /><input type="text" value={homeCustomization.color_button} onChange={event => setHomeCustomization(current => ({ ...current, color_button: event.target.value }))} maxLength={7} /></div><button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("color_button")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button></label>
+                  <label className="home-customization-color-field">Texto dos botões<div className="home-customization-color-control"><input type="color" value={homeCustomization.color_button_text} onChange={event => setHomeCustomization(current => ({ ...current, color_button_text: event.target.value }))} /><input type="text" value={homeCustomization.color_button_text} onChange={event => setHomeCustomization(current => ({ ...current, color_button_text: event.target.value }))} maxLength={7} /></div><button type="button" className="admin-action-button" onClick={() => void restoreHomeCustomizationItem("color_button_text")} disabled={homeCustomizationSaving}>↩ Restaurar padrão</button></label>
+                </div>
 
                 <div className="admin-item-actions">
                   <button type="button" className="admin-action-button" onClick={() => void saveHomeCustomization()} disabled={homeCustomizationSaving}>{homeCustomizationSaving ? "Salvando..." : "Salvar alterações"}</button>
