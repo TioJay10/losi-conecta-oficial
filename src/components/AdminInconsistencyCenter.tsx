@@ -146,7 +146,7 @@ export function AdminInconsistencyCenter() {
           <div className="admin-inconsistency-list">
             {filtered.length === 0 ? <div className="admin-inconsistency-empty">Nenhuma ocorrência nesta categoria.</div> : filtered.map((item) => (
               <button key={item.id} type="button" className={"admin-inconsistency-item " + (selected?.id === item.id ? "is-selected" : "")} onClick={() => void openConversation(item)}>
-                <span className="admin-inconsistency-item-avatar">{(item.user?.full_name || "U").slice(0,1).toUpperCase()}</span>
+                {item.user?.avatar_url ? <img className="admin-inconsistency-item-avatar admin-inconsistency-avatar-image" src={item.user.avatar_url} alt={item.user.full_name ? `Foto de perfil de ${item.user.full_name}` : "Foto de perfil"} /> : <span className="admin-inconsistency-item-avatar">{(item.user?.full_name || "U").slice(0,1).toUpperCase()}</span>}
                 <span className="admin-inconsistency-item-copy">
                   <strong>{item.title}</strong>
                   <small>{item.user?.full_name || "Usuário"} · {item.issue_type}</small>
@@ -162,7 +162,7 @@ export function AdminInconsistencyCenter() {
           <div className="admin-inconsistency-chat">
             <header className="admin-inconsistency-chat-header">
               <div className="admin-inconsistency-chat-user">
-                <span className="admin-inconsistency-item-avatar">{(selected.user?.full_name || "U").slice(0,1).toUpperCase()}</span>
+                {selected.user?.avatar_url ? <img className="admin-inconsistency-item-avatar admin-inconsistency-avatar-image" src={selected.user.avatar_url} alt={selected.user.full_name ? `Foto de perfil de ${selected.user.full_name}` : "Foto de perfil"} /> : <span className="admin-inconsistency-item-avatar">{(selected.user?.full_name || "U").slice(0,1).toUpperCase()}</span>}
                 <div><strong>{selected.user?.full_name || "Usuário"}</strong><span>{selected.issue_type} · {selected.title}</span></div>
               </div>
               <button type="button" className="admin-inconsistency-close" onClick={() => setSelected(null)} aria-label="Fechar conversa">×</button>
