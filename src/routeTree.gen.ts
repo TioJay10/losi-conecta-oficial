@@ -19,7 +19,7 @@ import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/'
+  id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
