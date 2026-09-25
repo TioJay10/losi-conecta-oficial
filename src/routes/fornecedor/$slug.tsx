@@ -335,7 +335,12 @@ function ProviderPage() {
     window.location.href = whatsapp;
   }
 
-  function openChatAfterAuth() {\n    setPendingAuthAction("chat");\n    setAuthModalOpen(true);\n  }\n\n  async function handleAuthenticatedFromModal() {
+  function openChatAfterAuth() {
+    setPendingAuthAction("chat");
+    setAuthModalOpen(true);
+  }
+
+  async function handleAuthenticatedFromModal() {
     const { data } = await supabase.auth.getSession();
     const currentUserId = data.session?.user.id ?? null;
     setUserId(currentUserId);
@@ -481,7 +486,8 @@ function ProviderPage() {
       "Endereço completo: " + requesterAddress,
       requesterCompany ? "Nome da empresa: " + requesterCompany : "",
       requesterProfileUrl ? "Link do perfil público: " + requesterProfileUrl : "",
-    ].filter(Boolean).join("\n");
+    ].filter(Boolean).join("
+");
 
     formElement.reset();
 
@@ -548,7 +554,8 @@ function ProviderPage() {
             </div>
           </div>
 
-          <div className="provider-profile-actions">\n            <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
+          <div className="provider-profile-actions">
+            <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
             <button type="button" className={"provider-profile-like " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser}>
               <span className="provider-profile-heart" aria-hidden="true">♥</span>
               <span className="provider-profile-like-count">{likeCount}</span>
