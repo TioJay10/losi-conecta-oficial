@@ -87,7 +87,6 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
       const { data, error: loadError } = await supabase
         .from("chat_conversations")
         .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-        .eq("business_id", business.id)
         .or("requester_id.eq." + userId + ",supplier_id.eq." + userId)
         .order("updated_at", { ascending: false });
 
@@ -282,9 +281,10 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
       .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
       .eq("requester_id", userId)
       .eq("supplier_id", business.owner_id)
-      .maybeSingle();
+      .order("updated_at", { ascending: false })
+      .limit(1);
 
-    let data = selectDirect.data;
+    let data = selectDirect.data?.[0] ?? null;
     let lookupError = selectDirect.error;
 
     if (!data && !lookupError) {
@@ -293,9 +293,10 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
         .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
         .eq("requester_id", business.owner_id)
         .eq("supplier_id", userId)
-        .maybeSingle();
+        .order("updated_at", { ascending: false })
+        .limit(1);
 
-      data = selectReverse.data;
+      data = selectReverse.data?.[0] ?? null;
       lookupError = selectReverse.error;
     }
 
@@ -307,9 +308,10 @@ export function ProviderChat({ business, userId, onRequireAuth }: Props) {
         .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
         .eq("business_id", business.id)
         .eq("requester_id", userId)
-        .maybeSingle();
+        .order("updated_at", { ascending: false })
+        .limit(1);
 
-      data = selectByBusiness.data;
+      data = selectByBusiness.data?.[0] ?? null;
       lookupError = selectByBusiness.error;
     }
 
