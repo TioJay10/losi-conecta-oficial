@@ -53,6 +53,7 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
   const [description, setDescription] = useState("");
   const [draft, setDraft] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [creatingNew, setCreatingNew] = useState(false);
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
   async function loadConversation() {
@@ -116,6 +117,23 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
 
   const canCreate = useMemo(() => title.trim() && issueType && description.trim(), [title, issueType, description]);
 
+  function startNewInconsistency() {
+    setTitle("");
+    setIssueType("");
+    setDescription("");
+    setDraft("");
+    setFeedback("");
+    setCreatingNew(true);
+  }
+
+  function cancelNewInconsistency() {
+    setTitle("");
+    setIssueType("");
+    setDescription("");
+    setFeedback("");
+    setCreatingNew(false);
+  }
+
   async function createConversation(event: React.FormEvent) {
     event.preventDefault();
     if (!supabase || !canCreate || creating) return;
@@ -137,6 +155,7 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
     const row = data as InconsistencyConversation;
     setConversation(row);
     await loadMessages(row.id);
+    setCreatingNew(false);
     setTitle("");
     setIssueType("");
     setDescription("");
@@ -168,10 +187,15 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
 
   if (loading) return <div className="inconsistency-loading">Carregando canal de atendimento...</div>;
 
-  if (!conversation || conversation.status === "resolved") {
+  if (!conversation || conversation.status === "resolved" || creatingNew) {
     return (
       <div className="inconsistency-page-shell">
-        {conversation?.status === "resolved" && <div className="inconsistency-resolved-note">Esta ocorrência foi encerrada. Se o problema continuar, você pode abrir uma nova notificação.</div>}
+        {conversation && creatingNew && (
+          <button type="button" className="inconsistency-new-button" onClick={cancelNewInconsistency}>
+            ← Voltar para a ocorrência atual
+          </button>
+        )}
+        {conversation?.status === "resolved" && !creatingNew && <div className="inconsistency-resolved-note">Esta ocorrência foi encerrada. Se o problema continuar, você pode abrir uma nova notificação.</div>}
         <form className="inconsistency-card" onSubmit={createConversation}>
           <div className="inconsistency-card-header">
             <span className="inconsistency-eyebrow">SUPORTE LOSI CONECTA</span>
@@ -205,6 +229,9 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
 
   return (
     <div className="inconsistency-page-shell">
+      <button type="button" className="inconsistency-new-button" onClick={startNewInconsistency}>
+        + Notificar nova inconsistência
+      </button>
       <section className="inconsistency-chat">
         <header className="inconsistency-chat-header">
           <div className="inconsistency-chat-identity">
