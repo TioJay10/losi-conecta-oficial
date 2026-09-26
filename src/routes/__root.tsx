@@ -392,6 +392,7 @@ function RootComponent() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const routePersistenceInitializedRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -440,6 +441,30 @@ function RootComponent() {
     location.pathname === "/entrar" ||
     location.pathname === "/buscar" ||
     location.pathname.startsWith("/fornecedor/");
+
+  // Mantém a última rota autenticada durante um reload. Isso evita perder
+  // uma página interna quando o servidor inicia a aplicação em /painel.
+  useEffect(() => {
+    if (!authChecked || !isAuthenticated) return;
+    const currentPath = location.pathname + location.search;
+    const savedPath = window.sessionStorage.getItem("losi:last-authenticated-route");
+
+    if (!routePersistenceInitializedRef.current) {
+      routePersistenceInitializedRef.current = true;
+      if (
+        location.pathname === "/painel" &&
+        savedPath &&
+        savedPath !== "/painel" &&
+        !savedPath.startsWith("/admin")
+      ) {
+        window.history.replaceState(null, "", savedPath);
+        window.dispatchEvent(new PopStateEvent("popstate"));
+        return;
+      }
+    }
+
+    window.sessionStorage.setItem("losi:last-authenticated-route", currentPath);
+  }, [authChecked, isAuthenticated, location.pathname, location.search]);
 
   if (!authChecked && !publicRoute) {
     return (
