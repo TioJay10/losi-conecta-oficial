@@ -110,7 +110,8 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
         : await conversationQuery
             .eq("business_id", business.id)
             .eq("requester_id", userId)
-            .order("updated_at", { ascending: false });
+            .order("updated_at", { ascending: false })
+            .limit(100);
 
       if (!mounted) return;
       if (loadError) {
@@ -169,7 +170,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     }
     void loadActiveProfiles();
     return () => { mounted = false; };
-  }, [activeConversation?.id, userId, profiles]);
+  }, [activeConversation?.id, userId]);
 
   useEffect(() => {
     if (!activeConversation || messages.length === 0) return;
@@ -210,7 +211,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
 
     void loadSenderIdentities();
     return () => { mounted = false; };
-  }, [activeConversation?.id, messages, profiles, supplierProfiles]);
+  }, [activeConversation?.id, messages]);
 
   useEffect(() => {
     if (!activeConversation || !userId) return;
@@ -313,8 +314,12 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
   }, [activeConversation?.id, userId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (!open || !messages.length) return;
+    const frame = window.requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [messages, open]);
 
   async function markIncomingAsRead(rows: Message[]) {
     if (!userId) return;
