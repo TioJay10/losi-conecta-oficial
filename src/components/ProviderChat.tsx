@@ -1,4 +1,4 @@
-import { Component, useEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../lib/supabase";
 import { OnlineStatus } from "./OnlinePresence";
@@ -11,8 +11,11 @@ type Business = {
   owner_id: string;
 };
 
-type UserProfile = { id: string; full_name: string | null; avatar_url: string | null };
-type SupplierProfile = { owner_id: string; business_name: string; logo_url: string | null; slug: string };
+type UserProfile = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+};
 
 type Conversation = {
   id: string;
@@ -40,299 +43,225 @@ type Props = {
   onRequireAuth: () => void;
 };
 
+const conversationColumns = "id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview";
+const messageColumns = "id,conversation_id,sender_id,content,created_at,delivered_at,read_at";
+
 function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
   const [open, setOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});
+  const [supplierNames, setSupplierNames] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
-  const [pendingChatId, setPendingChatId] = useState<string | null>(null);
-  const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});
-  const [supplierProfiles, setSupplierProfiles] = useState<Record<string, SupplierProfile>>({});
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const isSupplier = Boolean(userId && userId === business.owner_id);
-
-  function getSenderIdentity(senderId: string) {
-    const supplier = supplierProfiles[senderId];
-    if (supplier) {
-      return { name: supplier.business_name, avatar: supplier.logo_url || profiles[senderId]?.avatar_url || null };
-    }
-    const profile = profiles[senderId];
-    return { name: profile?.full_name || "Usuário", avatar: profile?.avatar_url || null };
-  }
 
   const sortedConversations = useMemo(
     () => [...conversations].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
     [conversations],
   );
 
-  useEffect(() => {
-    const chatId = new URLSearchParams(window.location.search).get("chat");
-    if (chatId) {
-      setPendingChatId(chatId);
-      setOpen(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!open || !userId) return;
-
-    let mounted = true;
-    async function loadConversations() {
-      setLoading(true);
-      setError("");
-      const conversationQuery = supabase
-        .from("chat_conversations")
-        .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview");
-
-      const { data, error: loadError } = isSupplier
-        ? await conversationQuery
-            .or("requester_id.eq." + userId + ",supplier_id.eq." + userId)
-            .order("updated_at", { ascending: false })
-        : await conversationQuery
-            .eq("business_id", business.id)
-            .eq("requester_id", userId)
-            .order("updated_at", { ascending: false });
-
-      if (!mounted) return;
-      if (loadError) {
-        console.error("Erro ao carregar conversas:", loadError);
-        setError("Não foi possível carregar as conversas.");
-      } else {
-        setConversations((data ?? []) as Conversation[]);
-      }
-      setLoading(false);
-    }
-
-    void loadConversations();
-    return () => { mounted = false; };
-  }, [open, userId, business.id]);
-
-  useEffect(() => {
-    if (!open || !userId || conversations.length === 0) return;
-    const ids = Array.from(new Set(conversations.map((conversation) => isSupplier ? conversation.requester_id : conversation.supplier_id)));
-    const missing = ids.filter((id) => !profiles[id]);
-    if (!missing.length) return;
-    let mounted = true;
-    async function loadProfiles() {
-      const { data, error } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", missing);
-      if (!mounted || error) return;
-      const next = { ...profiles };
-      for (const profile of (data ?? []) as UserProfile[]) next[profile.id] = profile;
-      setProfiles(next);
-    }
-    void loadProfiles();
-    return () => { mounted = false; };
-  }, [open, userId, conversations, isSupplier]);
-
-  useEffect(() => {
-    if (!pendingChatId || conversations.length === 0) return;
-    const found = conversations.find((conversation) => conversation.id === pendingChatId);
-    if (found) {
-      setActiveConversation(found);
-      setPendingChatId(null);
-    }
-  }, [pendingChatId, conversations]);
-
-  useEffect(() => {
-    if (!activeConversation || !userId) return;
-    const participantIds = [activeConversation.requester_id, activeConversation.supplier_id];
-    const missing = participantIds.filter((id) => !profiles[id]);
-    if (!missing.length) return;
-    let mounted = true;
-    async function loadActiveProfiles() {
-      const { data, error } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", missing);
-      if (!mounted || error) return;
-      setProfiles((current) => {
-        const next = { ...current };
-        for (const profile of (data ?? []) as UserProfile[]) next[profile.id] = profile;
-        return next;
-      });
-    }
-    void loadActiveProfiles();
-    return () => { mounted = false; };
-  }, [activeConversation?.id, userId, profiles]);
-
-  useEffect(() => {
-    if (!activeConversation || messages.length === 0) return;
-    let mounted = true;
-
-    async function loadSenderIdentities() {
-      const senderIds = Array.from(new Set(messages.map((message) => message.sender_id)));
-      const missingProfiles = senderIds.filter((id) => !profiles[id]);
-      const missingSuppliers = senderIds.filter((id) => !supplierProfiles[id]);
-
-      const [profileResult, supplierResult] = await Promise.all([
-        missingProfiles.length
-          ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", missingProfiles)
-          : Promise.resolve({ data: [], error: null }),
-        missingSuppliers.length
-          ? supabase.from("business_profiles").select("owner_id,business_name,logo_url,slug").in("owner_id", missingSuppliers).eq("active", true).eq("approval_status", "approved")
-          : Promise.resolve({ data: [], error: null }),
-      ]);
-
-      if (!mounted) return;
-
-      if (!profileResult.error) {
-        setProfiles((current) => {
-          const next = { ...current };
-          for (const profile of (profileResult.data ?? []) as UserProfile[]) next[profile.id] = profile;
-          return next;
-        });
-      }
-
-      if (!supplierResult.error) {
-        setSupplierProfiles((current) => {
-          const next = { ...current };
-          for (const supplier of (supplierResult.data ?? []) as SupplierProfile[]) next[supplier.owner_id] = supplier;
-          return next;
-        });
-      }
-    }
-
-    void loadSenderIdentities();
-    return () => { mounted = false; };
-  }, [activeConversation?.id, messages, profiles, supplierProfiles]);
-
-  useEffect(() => {
-    if (!activeConversation || !userId) return;
-
-    let mounted = true;
-    setMessages([]);
-    setError("");
-    async function loadMessages() {
-      setLoading(true);
-      const { data, error: loadError } = await supabase
-        .from("chat_messages")
-        .select("id,conversation_id,sender_id,content,created_at,delivered_at,read_at")
-        .eq("conversation_id", activeConversation.id)
-        .order("created_at", { ascending: true });
-
-      if (!mounted) return;
-      if (loadError) {
-        console.error("Erro ao carregar mensagens:", loadError);
-        setError("Não foi possível carregar as mensagens.");
-      } else {
-        setMessages((data ?? []) as Message[]);
-        await markIncomingAsRead((data ?? []) as Message[]);
-      }
-      setLoading(false);
-    }
-
-    void loadMessages();
-
-    const channel = supabase
-      .channel("chat-messages-" + activeConversation.id)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chat_messages", filter: "conversation_id=eq." + activeConversation.id },
-        (payload) => {
-          const incoming = payload.new as Message;
-          setMessages((current) => current.some((message) => message.id === incoming.id) ? current : [...current, incoming]);
-          if (incoming.sender_id !== userId) void markIncomingAsRead([incoming]);
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "chat_messages", filter: "conversation_id=eq." + activeConversation.id },
-        (payload) => {
-          const updated = payload.new as Message;
-          setMessages((current) => current.map((message) => message.id === updated.id ? { ...message, ...updated } : message));
-        },
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      void supabase.removeChannel(channel);
-    };
-  }, [activeConversation?.id, userId]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  async function markIncomingAsRead(rows: Message[]) {
-    if (!userId) return;
-    const unread = rows.filter((message) => message.sender_id !== userId && !message.read_at);
-    if (!unread.length) return;
-    const readAt = new Date().toISOString();
-    const { error } = await supabase
-      .from("chat_messages")
-      .update({ read_at: readAt })
-      .in("id", unread.map((message) => message.id));
-    if (!error) {
-      const unreadIds = new Set(unread.map((message) => message.id));
-      setMessages((current) => current.map((message) => unreadIds.has(message.id) ? { ...message, read_at: readAt } : message));
-    }
+  function setConversationList(rows: Conversation[]) {
+    const unique = new Map<string, Conversation>();
+    for (const row of rows) unique.set(row.id, row);
+    setConversations([...unique.values()].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
   }
 
-  async function openNewConversation() {
-    if (!business.id || !business.owner_id) {
-      setError("Não foi possível identificar este fornecedor.");
-      return;
-    }
+  async function ensureConversation(): Promise<Conversation | null> {
     if (!userId) {
       onRequireAuth();
-      return;
+      return null;
     }
-    if (userId === business.owner_id) return;
 
-    setOpen(true);
+    if (!business.id || !business.owner_id) {
+      setError("Este perfil não está preparado para receber mensagens.");
+      return null;
+    }
+
+    if (userId === business.owner_id) {
+      setError("Este é o seu próprio perfil.");
+      return null;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      const conversationSelect = await supabase
+      const existing = await supabase
         .from("chat_conversations")
-        .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
+        .select(conversationColumns)
         .eq("business_id", business.id)
         .eq("requester_id", userId)
         .eq("supplier_id", business.owner_id)
-        .order("updated_at", { ascending: false })
-        .limit(1);
+        .maybeSingle();
 
-      let data = conversationSelect.data?.[0] ?? null;
-
-      if (conversationSelect.error) {
-        console.error("Erro ao localizar conversa do fornecedor salvo:", conversationSelect.error);
-        setError("Não foi possível abrir o chat deste fornecedor.");
-        return;
+      if (existing.error) {
+        console.error("Erro ao localizar conversa:", existing.error);
+        setError("Não foi possível localizar a conversa. Tente novamente.");
+        return null;
       }
 
-      if (!data) {
-        const created = await supabase
-          .from("chat_conversations")
-          .insert({
-            business_id: business.id,
-            requester_id: userId,
-            supplier_id: business.owner_id,
-          })
-          .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-          .single();
-
-        if (created.error || !created.data) {
-          console.error("Erro ao criar conversa do fornecedor salvo:", created.error);
-          setError("Não foi possível abrir o chat deste fornecedor.");
-          return;
-        }
-
-        data = created.data;
+      if (existing.data) {
+        const row = existing.data as Conversation;
+        setConversationList([row, ...conversations]);
+        return row;
       }
 
-      const conversation = data as Conversation;
-      setConversations((current) => [conversation, ...current.filter((item) => item.id !== conversation.id)]);
-      setActiveConversation(conversation);
-    } catch (chatError) {
-      console.error("Erro inesperado ao abrir o chat:", chatError);
-      setError("Não foi possível abrir o chat. Tente novamente.");
+      const created = await supabase
+        .from("chat_conversations")
+        .insert({
+          business_id: business.id,
+          requester_id: userId,
+          supplier_id: business.owner_id,
+        })
+        .select(conversationColumns)
+        .single();
+
+      if (created.error || !created.data) {
+        console.error("Erro ao criar conversa:", created.error);
+        setError("Não foi possível iniciar a conversa. Tente novamente.");
+        return null;
+      }
+
+      const row = created.data as Conversation;
+      setConversationList([row, ...conversations]);
+      return row;
+    } catch (caught) {
+      console.error("Erro inesperado ao preparar conversa:", caught);
+      setError("Não foi possível iniciar o chat. Tente novamente.");
+      return null;
     } finally {
       setLoading(false);
     }
+  }
+
+  async function openTargetChat() {
+    if (!userId) {
+      onRequireAuth();
+      return;
+    }
+
+    if (isSupplier) {
+      setOpen(true);
+      return;
+    }
+
+    setOpen(true);
+    const row = await ensureConversation();
+    if (row) {
+      setActiveConversation(row);
+    }
+  }
+
+  async function loadSupplierInbox() {
+    if (!userId || !isSupplier) return;
+
+    setLoading(true);
+    setError("");
+
+    const result = await supabase
+      .from("chat_conversations")
+      .select(conversationColumns)
+      .or("requester_id.eq." + userId + ",supplier_id.eq." + userId)
+      .order("updated_at", { ascending: false });
+
+    if (result.error) {
+      console.error("Erro ao carregar caixa de mensagens:", result.error);
+      setError("Não foi possível carregar suas conversas.");
+      setConversationList([]);
+    } else {
+      setConversationList((result.data ?? []) as Conversation[]);
+    }
+
+    setLoading(false);
+  }
+
+  async function loadConversationMessages(conversation: Conversation) {
+    if (!userId) return;
+
+    setMessages([]);
+    setError("");
+    setLoading(true);
+
+    const result = await supabase
+      .from("chat_messages")
+      .select(messageColumns)
+      .eq("conversation_id", conversation.id)
+      .order("created_at", { ascending: true });
+
+    if (result.error) {
+      console.error("Erro ao carregar mensagens:", result.error);
+      setError("Não foi possível carregar as mensagens desta conversa.");
+      setLoading(false);
+      return;
+    }
+
+    const rows = (result.data ?? []) as Message[];
+    setMessages(rows);
+    setLoading(false);
+    await markIncomingAsRead(rows);
+    await loadIdentities(rows, conversation);
+  }
+
+  async function loadIdentities(rows: Message[], conversation: Conversation) {
+    const ids = Array.from(new Set([
+      conversation.requester_id,
+      conversation.supplier_id,
+      ...rows.map((row) => row.sender_id),
+    ])).filter(Boolean);
+
+    if (!ids.length) return;
+
+    const [profileResult, businessResult] = await Promise.all([
+      supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids),
+      supabase.from("business_profiles").select("owner_id,business_name").in("owner_id", ids),
+    ]);
+
+    if (!profileResult.error) {
+      setProfiles((current) => {
+        const next = { ...current };
+        for (const row of (profileResult.data ?? []) as UserProfile[]) next[row.id] = row;
+        return next;
+      });
+    }
+
+    if (!businessResult.error) {
+      setSupplierNames((current) => {
+        const next = { ...current };
+        for (const row of (businessResult.data ?? []) as { owner_id: string; business_name: string }[]) {
+          next[row.owner_id] = row.business_name;
+        }
+        return next;
+      });
+    }
+  }
+
+  async function markIncomingAsRead(rows: Message[]) {
+    if (!userId) return;
+
+    const unread = rows.filter((row) => row.sender_id !== userId && !row.read_at);
+    if (!unread.length) return;
+
+    const readAt = new Date().toISOString();
+    const result = await supabase
+      .from("chat_messages")
+      .update({ read_at: readAt })
+      .in("id", unread.map((row) => row.id));
+
+    if (!result.error) {
+      const ids = new Set(unread.map((row) => row.id));
+      setMessages((current) => current.map((row) => ids.has(row.id) ? { ...row, read_at: readAt } : row));
+    }
+  }
+
+  async function selectConversation(row: Conversation) {
+    setActiveConversation(row);
+    await loadConversationMessages(row);
   }
 
   async function sendMessage() {
@@ -341,36 +270,41 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
 
     setSending(true);
     setError("");
-    const { data, error: sendError } = await supabase
+
+    const result = await supabase
       .from("chat_messages")
       .insert({
         conversation_id: activeConversation.id,
         sender_id: userId,
         content: content.slice(0, 2000),
       })
-      .select("id,conversation_id,sender_id,content,created_at,delivered_at,read_at")
+      .select(messageColumns)
       .single();
 
-    if (sendError || !data) {
-      console.error("Erro ao enviar mensagem:", sendError);
+    if (result.error || !result.data) {
+      console.error("Erro ao enviar mensagem:", result.error);
       setError("Não foi possível enviar a mensagem.");
-    } else {
-      const message = data as Message;
-      setMessages((current) => current.some((item) => item.id === message.id) ? current : [...current, message]);
-      setDraft("");
-      const updated = {
-        ...activeConversation,
-        updated_at: message.created_at,
-        last_message_at: message.created_at,
-        last_message_preview: message.content.slice(0, 160),
-      };
-      setActiveConversation(updated);
-      setConversations((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setSending(false);
+      return;
     }
+
+    const message = result.data as Message;
+    setMessages((current) => current.some((row) => row.id === message.id) ? current : [...current, message]);
+    setDraft("");
+
+    const updated: Conversation = {
+      ...activeConversation,
+      updated_at: message.created_at,
+      last_message_at: message.created_at,
+      last_message_preview: message.content.slice(0, 160),
+    };
+
+    setActiveConversation(updated);
+    setConversations((current) => current.map((row) => row.id === updated.id ? updated : row));
     setSending(false);
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       void sendMessage();
@@ -385,24 +319,81 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     setError("");
   }
 
+  function participantIdFor(conversation: Conversation) {
+    return isSupplier ? conversation.requester_id : conversation.supplier_id;
+  }
+
+  function participantNameFor(conversation: Conversation) {
+    const id = participantIdFor(conversation);
+    return supplierNames[id] || profiles[id]?.full_name || business.business_name;
+  }
+
+  function participantAvatarFor(conversation: Conversation) {
+    const id = participantIdFor(conversation);
+    return profiles[id]?.avatar_url || null;
+  }
+
+  useEffect(() => {
+    if (!open || !userId) return;
+
+    if (isSupplier) {
+      void loadSupplierInbox();
+    }
+  }, [open, userId, business.id, isSupplier]);
+
+  useEffect(() => {
+    if (!activeConversation || !userId) return;
+
+    const channel = supabase
+      .channel("provider-chat-" + activeConversation.id)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: "conversation_id=eq." + activeConversation.id,
+        },
+        (payload) => {
+          const incoming = payload.new as Message;
+          setMessages((current) => current.some((row) => row.id === incoming.id) ? current : [...current, incoming]);
+          if (incoming.sender_id !== userId) void markIncomingAsRead([incoming]);
+          void loadIdentities([incoming], activeConversation);
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "chat_messages",
+          filter: "conversation_id=eq." + activeConversation.id,
+        },
+        (payload) => {
+          const updated = payload.new as Message;
+          setMessages((current) => current.map((row) => row.id === updated.id ? { ...row, ...updated } : row));
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [activeConversation?.id, userId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <>
       <div className="provider-chat-trigger-group">
         <button
           type="button"
           className="provider-chat-trigger"
-          onClick={() => {
-            if (!userId) {
-              onRequireAuth();
-              return;
-            }
-            if (isSupplier) {
-              setOpen(true);
-            } else {
-              void openNewConversation();
-            }
-          }}
+          onClick={() => void openTargetChat()}
           aria-label={isSupplier ? "Abrir mensagens" : "Conversar com este fornecedor"}
+          disabled={loading && !open}
         >
           <svg className="provider-chat-trigger-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-5.2 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z" />
@@ -412,10 +403,14 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
         <OnlineStatus userId={business.owner_id} />
       </div>
 
-      {open && typeof document !== "undefined" && createPortal((
-        <div className="provider-chat-backdrop" role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) closeChat();
-        }}>
+      {open && typeof document !== "undefined" && createPortal(
+        <div
+          className="provider-chat-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeChat();
+          }}
+        >
           <section className="provider-chat-window" role="dialog" aria-modal="true" aria-labelledby="provider-chat-title">
             <header className="provider-chat-header">
               <div className="provider-chat-header-profile">
@@ -432,54 +427,48 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
               <button type="button" className="provider-chat-close" onClick={closeChat} aria-label="Fechar chat">×</button>
             </header>
 
+            {error && <div className="provider-chat-error" role="alert">{error}</div>}
+
             {activeConversation ? (
               <>
                 <div className="provider-chat-conversation-bar">
-                  <button type="button" onClick={() => setActiveConversation(null)} aria-label="Voltar para conversas">‹</button>
+                  <button type="button" onClick={() => { setActiveConversation(null); setMessages([]); setError(""); }} aria-label="Voltar para conversas">‹</button>
                   <div className="provider-chat-active-participant">
-                    {(() => {
-                      const participantId = isSupplier ? activeConversation.requester_id : activeConversation.supplier_id;
-                      const participant = profiles[participantId];
-                      const supplier = supplierProfiles[participantId];
-                      const name = supplier?.business_name || participant?.full_name || business.business_name;
-                      const avatar = supplier?.logo_url || participant?.avatar_url || null;
-                      return <>
-                        <div className="provider-chat-participant-avatar">
-                          {avatar ? <img src={avatar} alt={name} /> : name.slice(0, 1).toUpperCase()}
-                        </div>
-                        <div className="provider-chat-participant-copy">
-                          <strong>{name}</strong>
-                          <span>{supplierProfiles[participantId] ? "Fornecedor" : "Perfil pessoal"}</span>
-                          <OnlineStatus userId={participantId} compact />
-                        </div>
-                      </>;
-                    })()}
+                    <div className="provider-chat-participant-avatar">
+                      {participantAvatarFor(activeConversation)
+                        ? <img src={participantAvatarFor(activeConversation) as string} alt={participantNameFor(activeConversation)} />
+                        : participantNameFor(activeConversation).slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="provider-chat-participant-copy">
+                      <strong>{participantNameFor(activeConversation)}</strong>
+                      <span>{isSupplier ? "Cliente" : "Fornecedor"}</span>
+                      <OnlineStatus userId={participantIdFor(activeConversation)} compact />
+                    </div>
                   </div>
                 </div>
+
                 <div className="provider-chat-messages" aria-live="polite">
                   {loading && messages.length === 0 && <div className="provider-chat-empty">Carregando mensagens...</div>}
                   {!loading && messages.length === 0 && <div className="provider-chat-empty">Ainda não há mensagens. Envie a primeira.</div>}
                   {messages.map((message) => {
                     const mine = message.sender_id === userId;
+                    const senderName = supplierNames[message.sender_id] || profiles[message.sender_id]?.full_name || (mine ? "Você" : "Usuário");
+                    const senderAvatar = profiles[message.sender_id]?.avatar_url || null;
                     return (
                       <div key={message.id} className={"provider-chat-message-row " + (mine ? "mine" : "theirs")}>
                         <div className="provider-chat-message-identity">
-                          {(() => {
-                            const sender = getSenderIdentity(message.sender_id);
-                            return <>
-                              <div className="provider-chat-message-avatar">
-                                {sender.avatar ? <img src={sender.avatar} alt={sender.name} /> : sender.name.slice(0, 1).toUpperCase()}
-                              </div>
-                              <span className="provider-chat-message-sender-name">{sender.name}</span>
-                            </>;
-                          })()}
+                          <div className="provider-chat-message-avatar">
+                            {senderAvatar ? <img src={senderAvatar} alt={senderName} /> : senderName.slice(0, 1).toUpperCase()}
+                          </div>
+                          <span className="provider-chat-message-sender-name">{senderName}</span>
                         </div>
                         <div className="provider-chat-message-bubble">
                           <p>{message.content}</p>
                           <div className="provider-chat-message-meta">
                             <time>{new Date(message.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</time>
                             <span className="provider-chat-message-checks" aria-label={message.read_at ? "Mensagem lida" : message.delivered_at ? "Mensagem recebida" : "Mensagem não recebida"}>
-                              <span className={message.delivered_at ? "is-active" : ""}>✓</span><span className={message.read_at ? "is-active" : ""}>✓</span>
+                              <span className={message.delivered_at ? "is-active" : ""}>✓</span>
+                              <span className={message.read_at ? "is-active" : ""}>✓</span>
                             </span>
                           </div>
                         </div>
@@ -488,7 +477,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                   })}
                   <div ref={messagesEndRef} />
                 </div>
-                {error && <div className="provider-chat-error">{error}</div>}
+
                 <div className="provider-chat-composer">
                   <textarea
                     value={draft}
@@ -505,106 +494,60 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                 </div>
               </>
             ) : (
-              <>
-                <div className="provider-chat-list">
-                  {loading && <div className="provider-chat-empty">Carregando conversas...</div>}
-                  {!loading && sortedConversations.length === 0 && (
-                    <div className="provider-chat-empty">
-                      <strong>{isSupplier ? "Nenhuma conversa ainda" : "Inicie uma nova conversa"}</strong>
-                      <span>
-                        {isSupplier
-                          ? "Quando alguém falar com você, a conversa aparecerá aqui."
-                          : "Você ainda não iniciou uma conversa com este fornecedor."}
-                      </span>
-                      {!isSupplier && (
-                        <button
-                          type="button"
-                          className="provider-chat-start-button"
-                          onClick={() => void openNewConversation()}
-                          disabled={loading}
-                        >
-                          Iniciar conversa
-                        </button>
-                      )}
-                    </div>
-                  )}
+              <div className="provider-chat-list">
+                {loading && <div className="provider-chat-empty">Carregando conversas...</div>}
 
-                  {!loading && !isSupplier && sortedConversations.length > 0 && (
-                    <div className="provider-chat-new-conversation-row">
-                      <button
-                        type="button"
-                        className="provider-chat-start-button"
-                        onClick={() => void openNewConversation()}
-                        disabled={loading}
-                      >
-                        + Nova conversa
+                {!loading && sortedConversations.length === 0 && (
+                  <div className="provider-chat-empty">
+                    <strong>{isSupplier ? "Nenhuma conversa ainda" : "Inicie uma nova conversa"}</strong>
+                    <span>{isSupplier ? "Quando alguém falar com você, a conversa aparecerá aqui." : "A conversa será criada automaticamente para você."}</span>
+                    {!isSupplier && (
+                      <button type="button" className="provider-chat-start-button" onClick={() => void openTargetChat()}>
+                        Iniciar conversa
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )}
 
-                  {sortedConversations.map((conversation) => (
-                    <button
-                      type="button"
-                      className="provider-chat-conversation-item"
-                      key={conversation.id}
-                      onClick={() => {
-                        setError("");
-                        setMessages([]);
-                        setActiveConversation(conversation);
-                      }}
-                    >
-                      <div className="provider-chat-conversation-avatar">
-                        {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
-                      </div>
-                      <div className="provider-chat-conversation-copy">
-                        <strong>{isSupplier ? "Cliente" : business.business_name}</strong>
-                        <span>{conversation.last_message_preview || "Nova conversa"}</span>
-                      </div>
-                      <time>{new Date(conversation.updated_at).toLocaleDateString("pt-BR")}</time>
+                {!loading && !isSupplier && sortedConversations.length > 0 && (
+                  <div className="provider-chat-new-conversation-row">
+                    <button type="button" className="provider-chat-start-button" onClick={() => void openTargetChat()}>
+                      + Abrir conversa
                     </button>
-                  ))}
-                </div>
-              </>
+                  </div>
+                )}
+
+                {sortedConversations.map((conversation) => (
+                  <button
+                    type="button"
+                    className="provider-chat-conversation-item"
+                    key={conversation.id}
+                    onClick={() => void selectConversation(conversation)}
+                  >
+                    <div className="provider-chat-conversation-avatar">
+                      {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="provider-chat-conversation-copy">
+                      <strong>{isSupplier ? participantNameFor(conversation) : business.business_name}</strong>
+                      <span>{conversation.last_message_preview || "Nova conversa"}</span>
+                    </div>
+                    <time>{new Date(conversation.updated_at).toLocaleDateString("pt-BR")}</time>
+                  </button>
+                ))}
+              </div>
             )}
 
             <div className="provider-chat-footer-note">
               O chat é interno ao LOSI CONECTA. Para continuar a negociação, você também pode usar o WhatsApp do fornecedor.
             </div>
           </section>
-        </div>
-      ), document.body)}
+        </div>,
+        document.body,
+      )}
     </>
   );
 }
 
-type ProviderChatBoundaryProps = Props;
-
-class ProviderChatBoundary extends Component<
-  ProviderChatBoundaryProps,
-  { hasError: boolean }
-> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError(): { hasError: boolean } {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Erro ao renderizar o chat do fornecedor:", error, info);
-  }
-
-  render(): ReactNode {
-    if (this.state.hasError) {
-      return (
-        <div className="provider-chat-trigger-group" role="status">
-          <span className="provider-chat-error-inline">Chat indisponível</span>
-        </div>
-      );
-    }
-    return <ProviderChatContent {...this.props} />;
-  }
-}
-
 export function ProviderChat(props: Props) {
-  return <ProviderChatBoundary {...props} />;
+  return <ProviderChatContent {...props} />;
 }
