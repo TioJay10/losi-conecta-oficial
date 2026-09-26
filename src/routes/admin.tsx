@@ -180,6 +180,12 @@ function AdminPage() {
   const [referenceImageNotes, setReferenceImageNotes] = useState("");
   const [referenceImageSaving, setReferenceImageSaving] = useState(false);
   const [referenceImageMessage, setReferenceImageMessage] = useState("");
+  const [presentationBlocks, setPresentationBlocks] = useState<Array<{ id:string; parent_id:string|null; block_type:string; title:string|null; content:string|null; media_url:string|null; media_path:string|null; sort_order:number; style:Record<string,unknown>; active:boolean; created_at:string }>>([]);
+  const [presentationFile, setPresentationFile] = useState<File | null>(null);
+  const [presentationTitle, setPresentationTitle] = useState("");
+  const [presentationDescription, setPresentationDescription] = useState("");
+  const [presentationSaving, setPresentationSaving] = useState(false);
+  const [presentationMessage, setPresentationMessage] = useState("");
   const [auditLogs, setAuditLogs] = useState<Array<{id:string;action:string;entity_type:string;entity_name:string|null;details:Record<string, unknown>;created_at:string;admin_name:string|null}>>([]);
   const [activitySearch, setActivitySearch] = useState("");
   const [activityActionFilter, setActivityActionFilter] = useState("all");
@@ -187,6 +193,26 @@ function AdminPage() {
   const [homeCustomizationDefaults, setHomeCustomizationDefaults] = useState<HomeCustomization>({ hero_title: "", hero_subtitle: "", hero_button_text: "", color_background: "#0B182A", color_primary: "#D4AF37", color_secondary: "#A4864D", color_text: "#172033", color_button: "#0B182A", color_button_text: "#FFFFFF" });
   const [homeCustomizationSaving, setHomeCustomizationSaving] = useState(false);
   const [homeCustomizationMessage, setHomeCustomizationMessage] = useState("");
+  useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+    async function loadPresentationBlocks() {
+      const { data, error } = await supabase
+        .from("presentation_blocks")
+        .select("id,parent_id,block_type,title,content,media_url,media_path,sort_order,style,active,created_at")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (!mounted) return;
+      if (error) {
+        setDataError(error.message);
+        return;
+      }
+      setPresentationBlocks((data ?? []) as typeof presentationBlocks);
+    }
+    void loadPresentationBlocks();
+    return () => { mounted = false; };
+  }, [user]);
+
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -585,6 +611,76 @@ function AdminPage() {
       setNotificationSoundSaving(false);
     }
   }
+  async function uploadPresentationVideo() {
+    if (!user || !presentationFile || presentationSaving) return;
+    const file = presentationFile;
+    if (!file.type.startsWith("video/") || file.size > 50 * 1024 * 1024) {
+      setPresentationMessage(file.size > 50 * 1024 * 1024 ? "O vídeo deve ter no máximo 50 MB." : "Selecione um vídeo válido.");
+      return;
+    }
+    setPresentationSaving(true);
+    setPresentationMessage("");
+    try {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "mp4";
+      const filePath = "videos/" + crypto.randomUUID() + "." + extension;
+      const normalizedMimeType = file.type === "video/quicktime" ? "video/quicktime" : file.type || "video/mp4";
+      const { error: uploadError } = await supabase.storage
+        .from("presentation-media")
+        .upload(filePath, file, { contentType: normalizedMimeType, upsert: false });
+      if (uploadError) throw new Error(uploadError.message);
+      const { data: publicData } = supabase.storage.from("presentation-media").getPublicUrl(filePath);
+      const nextSort = presentationBlocks.reduce((max, item) => Math.max(max, Number(item.sort_order) || 0), -1) + 1;
+      const { data, error } = await supabase
+        .from("presentation_blocks")
+        .insert({
+          block_type: "video",
+          title: presentationTitle.trim() || file.name,
+          content: presentationDescription.trim() || null,
+          media_url: publicData.publicUrl,
+          media_path: filePath,
+          sort_order: nextSort,
+          created_by: user.id,
+          active: true,
+        })
+        .select("id,parent_id,block_type,title,content,media_url,media_path,sort_order,style,active,created_at")
+        .single();
+      if (error) {
+        await supabase.storage.from("presentation-media").remove([filePath]);
+        throw new Error(error.message);
+      }
+      setPresentationBlocks(current => [...current, data as typeof presentationBlocks[number]]);
+      setPresentationFile(null);
+      setPresentationTitle("");
+      setPresentationDescription("");
+      setPresentationMessage("Vídeo de apresentação publicado com sucesso.");
+    } catch (error) {
+      setPresentationMessage(error instanceof Error ? error.message : "Não foi possível publicar o vídeo.");
+    } finally {
+      setPresentationSaving(false);
+    }
+  }
+
+  async function deletePresentationBlock(block: typeof presentationBlocks[number]) {
+    if (presentationSaving) return;
+    if (!window.confirm("Excluir este bloco da apresentação? O vídeo também será removido do armazenamento.")) return;
+    setPresentationSaving(true);
+    setPresentationMessage("");
+    try {
+      if (block.media_path) {
+        const { error: storageError } = await supabase.storage.from("presentation-media").remove([block.media_path]);
+        if (storageError) throw new Error(storageError.message);
+      }
+      const { error } = await supabase.from("presentation_blocks").delete().eq("id", block.id);
+      if (error) throw new Error(error.message);
+      setPresentationBlocks(current => current.filter(item => item.id !== block.id));
+      setPresentationMessage("Bloco excluído e vídeo removido do armazenamento.");
+    } catch (error) {
+      setPresentationMessage(error instanceof Error ? error.message : "Não foi possível excluir o bloco.");
+    } finally {
+      setPresentationSaving(false);
+    }
+  }
+
   async function manageUser(userId: string, action: "block" | "unblock" | "delete") {
     const target = users.find((item) => item.id === userId);
     if (!target) return;
@@ -959,6 +1055,7 @@ function AdminPage() {
     { id: "inconsistencies" as const, label: "Inconsistências" },
     { id: "sounds" as const, label: "Sons de notificação", count: notificationSounds.length },
     { id: "referenceImages" as const, label: "Imagens de referência", count: referenceImages.length },
+    { id: "presentation" as const, label: "Apresentação", count: presentationBlocks.filter(item => item.active).length },
     { id: "customization" as const, label: "Personalização" },
     { id: "communication" as const, label: "Central de comunicação" },
     { id: "activity" as const, label: "Auditoria" },
@@ -978,7 +1075,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "inconsistencies" ? "Notificações de Inconsistências" : section === "sounds" ? "Sons de notificação" : section === "referenceImages" ? "Imagens de referência" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "inconsistencies" ? "Notificações de Inconsistências" : section === "sounds" ? "Sons de notificação" : section === "referenceImages" ? "Imagens de referência" : section === "presentation" ? "Apresentação" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -1705,7 +1802,49 @@ function AdminPage() {
                   <div className="admin-admin-center-actions"><button type="button" className="admin-action-button" onClick={markAllAdminNotificationsRead} disabled={!unreadAdminNotifications}>Marcar todas como lidas</button></div>
                   <div className="admin-admin-notification-list">{adminNotifications.length===0 ? <div className="admin-empty">Nenhuma notificação administrativa registrada.</div> : adminNotifications.map(item=><article className={`admin-admin-notification ${item.read_at ? "read" : "unread"}`} key={item.id}><div><span>{item.type.replaceAll("_"," ").toUpperCase()}</span><h3>{item.title}</h3><p>{item.message}</p><small>{new Date(item.created_at).toLocaleString("pt-BR")}</small></div><div className="admin-item-actions">{!item.read_at&&<button type="button" className="admin-action-button" onClick={()=>markAdminNotificationRead(item.id)}>Marcar como lida</button>}{item.link&&<button type="button" className="admin-action-button" onClick={()=>{const target=item.link!;const url=new URL(target,window.location.origin);setSection((url.searchParams.get("section") as typeof section)||"dashboard");window.history.replaceState(null,"",target);void markAdminNotificationRead(item.id);}}>Abrir</button>}</div></article>)}</div>
                 </div>
-              ) : section === "activity" ? (
+              ) : section === "presentation" ? (
+            <div className="admin-presentation-center">
+              <section className="admin-presentation-hero">
+                <div>
+                  <div className="admin-badge">APRESENTAÇÃO</div>
+                  <h2>Apresentação do LOSI CONECTA</h2>
+                  <p>Gerencie os vídeos e mantenha cada elemento da página organizado em blocos independentes.</p>
+                </div>
+                <strong className="admin-filter-count">{presentationBlocks.filter(item => item.active).length} bloco(s) ativo(s)</strong>
+              </section>
+              <form className="admin-plan-editor" onSubmit={event => { event.preventDefault(); void uploadPresentationVideo(); }}>
+                <div className="admin-form-heading">
+                  <div>
+                    <span className="admin-form-kicker">NOVO BLOCO</span>
+                    <h2>Adicionar vídeo de apresentação</h2>
+                    <p>O vídeo será criado como um grupo independente, sem alterar a cor ou o estilo dos demais grupos.</p>
+                  </div>
+                </div>
+                <div className="admin-form-grid">
+                  <label className="admin-form-field admin-form-field-wide"><span>Vídeo</span><input type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" onChange={event => setPresentationFile(event.target.files?.[0] ?? null)} required /></label>
+                  <label className="admin-form-field"><span>Título do bloco</span><input value={presentationTitle} onChange={event => setPresentationTitle(event.target.value)} maxLength={160} placeholder="Ex.: Conheça o LOSI CONECTA" /></label>
+                  <label className="admin-form-field"><span>Descrição</span><textarea value={presentationDescription} onChange={event => setPresentationDescription(event.target.value)} maxLength={500} placeholder="Texto exibido junto ao vídeo." /></label>
+                </div>
+                <div className="admin-modal-actions"><button type="submit" className="admin-primary-button" disabled={presentationSaving || !presentationFile}>{presentationSaving ? "Publicando..." : "Publicar vídeo"}</button></div>
+                {presentationMessage && <p className="admin-form-message">{presentationMessage}</p>}
+              </form>
+              <div className="admin-list">
+                {presentationBlocks.length === 0 ? <div className="admin-empty">Nenhum bloco de apresentação cadastrado ainda.</div> : presentationBlocks.map((block, index) => (
+                  <article className="admin-list-item admin-presentation-item" key={block.id}>
+                    <div className="admin-presentation-preview">
+                      {block.media_url ? <video src={block.media_url} controls preload="metadata" /> : <div className="admin-empty">Sem mídia</div>}
+                    </div>
+                    <div className="admin-list-item-main">
+                      <strong>Grupo {index + 1} · {block.title || "Vídeo"}</strong>
+                      <span>{block.content || "Bloco de vídeo da apresentação."}</span>
+                      <small>{block.active ? "Publicado" : "Inativo"} · estrutura: {block.block_type}</small>
+                    </div>
+                    <div className="admin-item-actions"><button type="button" className="admin-security-danger" disabled={presentationSaving} onClick={() => void deletePresentationBlock(block)}>Excluir</button></div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : section === "activity" ? (
                 <div className="admin-admin-center">
                   <section className="admin-admin-center-hero"><div><div className="admin-badge">AUDITORIA</div><h2>Atividade administrativa</h2><p>Histórico das ações executadas dentro do painel administrativo.</p></div><strong className="admin-filter-count">{auditLogs.length} registro(s)</strong></section>
                   <div className="admin-admin-toolbar"><input value={activitySearch} onChange={e=>setActivitySearch(e.target.value)} placeholder="Buscar ação, administrador ou item..." aria-label="Buscar atividade administrativa" /><select value={activityActionFilter} onChange={e=>setActivityActionFilter(e.target.value)} aria-label="Filtrar ação"><option value="all">Todas as ações</option>{Array.from(new Set(auditLogs.map(item=>item.action))).map(action=><option key={action} value={action}>{auditActionLabel(action)}</option>)}</select></div>
