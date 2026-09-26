@@ -212,12 +212,12 @@ function FeedPage() {
         mediaUrl = supabase.storage.from("feed-media").getPublicUrl(path).data.publicUrl;
       }
 
-      const { error } = await supabase.from("feed_posts").insert({
-        author_user_id: currentUserId,
-        business_id: profile.id,
-        content: text || null,
-        media_url: mediaUrl,
-        media_type: mediaType,
+      const { error } = await supabase.rpc("create_feed_post", {
+        p_business_id: currentBusiness.id,
+        p_content: text || null,
+        p_media_url: mediaUrl,
+        p_media_type: mediaType,
+        p_original_post_id: null,
       });
 
       if (error) throw error;
