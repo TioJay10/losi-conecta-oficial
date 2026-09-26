@@ -4,3 +4,9 @@
 .admin-page .admin-mobile-subtitle {
   color: #fff !important;
 }
+
+/* Identificação do fornecedor no cabeçalho: nome em dourado para
+   manter a leitura sobre o fundo escuro do painel. */
+.dashboard-page .dashboard-header-user > div > strong {
+  color: #D4AF37 !important;
+}
