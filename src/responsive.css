@@ -14548,3 +14548,87 @@ button.availability-day {
 @media(max-width:560px){
   .admin-page .admin-inconsistency-head p { color: #c4cbd7 !important; }
 }
+
+
+/* PATCH 2026-09-25 — FORNECEDORES SALVOS + CHAT NO PADRÃO WHATSAPP
+   Grupos independentes: identidade do fornecedor à esquerda e mensagens
+   recebidas/enviadas alinhadas conforme o participante ativo. */
+.dashboard-page .dashboard-saved-provider-card .dashboard-saved-provider-info{
+  flex:1 1 auto !important;
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  text-align:left !important;
+  gap:10px !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+
+.dashboard-page .dashboard-saved-provider-card .dashboard-saved-provider-avatar{
+  flex:0 0 42px !important;
+  margin:0 !important;
+  align-self:center !important;
+}
+
+.dashboard-page .dashboard-saved-provider-card .dashboard-saved-provider-copy{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  align-items:flex-start !important;
+  text-align:left !important;
+}
+
+.dashboard-page .dashboard-saved-provider-card .dashboard-saved-provider-copy strong,
+.dashboard-page .dashboard-saved-provider-card .dashboard-saved-provider-copy span{
+  text-align:left !important;
+}
+
+.provider-chat-messages .provider-chat-message-row{
+  width:100% !important;
+  display:flex !important;
+  align-items:flex-end !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+.provider-chat-messages .provider-chat-message-row.theirs{
+  justify-content:flex-start !important;
+  flex-direction:row !important;
+}
+
+.provider-chat-messages .provider-chat-message-row.mine{
+  justify-content:flex-end !important;
+  flex-direction:row-reverse !important;
+}
+
+.provider-chat-messages .provider-chat-message-row.theirs .provider-chat-message-bubble{
+  margin-left:0 !important;
+  margin-right:auto !important;
+  border-radius:13px 13px 13px 4px !important;
+}
+
+.provider-chat-messages .provider-chat-message-row.mine .provider-chat-message-bubble{
+  margin-left:auto !important;
+  margin-right:0 !important;
+  border-radius:13px 13px 4px 13px !important;
+}
+
+.provider-chat-messages .provider-chat-message-row.theirs .provider-chat-message-identity{
+  order:0 !important;
+}
+
+.provider-chat-messages .provider-chat-message-row.mine .provider-chat-message-identity{
+  order:0 !important;
+}
+
+@media only screen and (max-width: 480px){
+  .dashboard-page .dashboard-saved-provider-card .dashboard-saved-provider-info{
+    gap:8px !important;
+  }
+
+  .dashboard-page .dashboard-saved-provider-card .dashboard-saved-provider-avatar{
+    flex-basis:36px !important;
+    width:36px !important;
+    height:36px !important;
+  }
+}
