@@ -4,6 +4,7 @@ import type { ChangeEvent } from "react";
 import { supabase } from "../lib/supabase";
 
 type FeedProfile = {
+  id: string;
   business_name: string;
   city: string | null;
   state: string | null;
@@ -12,14 +13,26 @@ type FeedProfile = {
   main_category: string | null;
 };
 
-type LocalPost = {
+type FeedPost = {
   id: string;
-  text: string;
-  mediaUrl: string | null;
-  mediaType: "image" | "video" | null;
-  createdAt: string;
-  originalPostId?: string | null;
-  repostedBy?: string | null;
+  author_user_id: string;
+  business_id: string;
+  content: string | null;
+  media_url: string | null;
+  media_type: "image" | "video" | null;
+  original_post_id: string | null;
+  created_at: string;
+  business_name: string;
+  slug: string;
+  city: string | null;
+  state: string | null;
+  logo_url: string | null;
+  main_category: string | null;
+  like_count: number;
+  comment_count: number;
+  repost_count: number;
+  send_count: number;
+  ranking_score: number;
 };
 
 export const Route = createFileRoute("/feed")({
@@ -37,60 +50,103 @@ function FeedIcon({ size = 20 }: { size?: number }) {
 
 function FeedPage() {
   const [profile, setProfile] = useState<FeedProfile | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [likedIds, setLikedIds] = useState<string[]>([]);
   const [postText, setPostText] = useState("");
-  const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: "image" | "video"; name: string } | null>(null);
-  const [localPosts, setLocalPosts] = useState<LocalPost[]>([]);
+  const [selectedMedia, setSelectedMedia] = useState<{ file: File; url: string; type: "image" | "video" } | null>(null);
   const [mediaMenuOpen, setMediaMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [publishing, setPublishing] = useState(false);
+  const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [sendPostId, setSendPostId] = useState<string | null>(null);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
-  const [likedIds, setLikedIds] = useState<string[]>([]);
+  const [comments, setComments] = useState<Record<string, { id: string; content: string; full_name: string | null; created_at: string }[]>>({});
+  const [commentDraft, setCommentDraft] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
+
+  async function loadFeed(currentUserId: string | null) {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("feed_post_rankings")
+      .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,created_at,business_name,slug,city,state,logo_url,main_category,like_count,comment_count,repost_count,send_count,ranking_score")
+      .order("ranking_score", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(30);
+
+    if (error) {
+      console.error("Erro ao carregar Feed:", error);
+      setStatusMessage("Não foi possível carregar o Feed agora.");
+      setPosts([]);
+      setLoading(false);
+      return;
+    }
+
+    const loaded = (data ?? []) as FeedPost[];
+    setPosts(loaded);
+
+    if (currentUserId && loaded.length) {
+      const { data: likes } = await supabase
+        .from("feed_likes")
+        .select("post_id")
+        .eq("user_id", currentUserId)
+        .in("post_id", loaded.map((post) => post.id));
+      setLikedIds((likes ?? []).map((item) => item.post_id));
+    } else {
+      setLikedIds([]);
+    }
+
+    setLoading(false);
+  }
 
   useEffect(() => {
     let mounted = true;
 
-    async function loadProfile() {
+    async function initialize() {
       const { data } = await supabase.auth.getSession();
-      const userId = data.session?.user.id ?? null;
+      const currentUserId = data.session?.user.id ?? null;
 
       if (!mounted) return;
+      setUserId(currentUserId);
 
-      if (!userId) {
-        setAuthChecked(true);
-        return;
-      }
-
-      const { data: business } = await supabase
-        .from("business_profiles")
-        .select("id,business_name,city,state,logo_url,slug")
-        .eq("owner_id", userId)
-        .maybeSingle();
-
-      let mainCategory: string | null = null;
-      if (business?.id) {
-        const { data: service } = await supabase
-          .from("services")
-          .select("categories(name)")
-          .eq("business_id", business.id)
-          .eq("active", true)
-          .order("created_at", { ascending: false })
-          .limit(1)
+      if (currentUserId) {
+        const { data: business } = await supabase
+          .from("business_profiles")
+          .select("id,business_name,city,state,logo_url,slug,active,approval_status")
+          .eq("owner_id", currentUserId)
           .maybeSingle();
 
-        mainCategory = service?.categories?.name ?? null;
+        if (business?.id && business.active && business.approval_status === "approved") {
+          const { data: service } = await supabase
+            .from("services")
+            .select("categories(name)")
+            .eq("business_id", business.id)
+            .eq("active", true)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (mounted) {
+            setProfile({
+              ...business,
+              main_category: service?.categories?.name ?? null,
+            } as FeedProfile);
+          }
+        }
       }
 
-      if (mounted) {
-        setProfile(business ? ({ ...business, main_category: mainCategory } as FeedProfile) : null);
-        setAuthChecked(true);
-      }
+      await loadFeed(currentUserId);
+      if (mounted) setAuthChecked(true);
     }
 
-    void loadProfile();
+    void initialize();
     return () => {
       mounted = false;
+      if (selectedMedia?.url) URL.revokeObjectURL(selectedMedia.url);
     };
   }, []);
 
@@ -98,50 +154,192 @@ function FeedPage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    setSelectedMedia({ url, type, name: file.name });
+    const maxBytes = type === "video" ? 50 * 1024 * 1024 : 15 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setStatusMessage(type === "video" ? "O vídeo deve ter no máximo 50 MB." : "A imagem deve ter no máximo 15 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    if (selectedMedia?.url) URL.revokeObjectURL(selectedMedia.url);
+    setSelectedMedia({ file, type, url: URL.createObjectURL(file) });
     setMediaMenuOpen(false);
+    setStatusMessage("");
     event.target.value = "";
   }
 
-  function publishLocalPost() {
+  async function publishPost() {
+    if (!profile || publishing) return;
     const text = postText.trim();
     if (!text && !selectedMedia) return;
 
-    const post: LocalPost = {
-      id: crypto.randomUUID(),
-      text,
-      mediaUrl: selectedMedia?.url ?? null,
-      mediaType: selectedMedia?.type ?? null,
-      createdAt: new Date().toISOString(),
-    };
+    setPublishing(true);
+    setStatusMessage("");
 
-    setLocalPosts((current) => [post, ...current]);
-    setPostText("");
-    setSelectedMedia(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const currentUserId = sessionData.session?.user.id;
+      if (!currentUserId) {
+        setStatusMessage("Entre na sua conta para publicar.");
+        return;
+      }
+
+      let mediaUrl: string | null = null;
+      let mediaType: "image" | "video" | null = selectedMedia?.type ?? null;
+
+      if (selectedMedia) {
+        const extension = selectedMedia.file.name.split(".").pop()?.toLowerCase() || (selectedMedia.type === "video" ? "mp4" : "jpg");
+        const path = currentUserId + "/" + selectedMedia.type + "-" + crypto.randomUUID() + "." + extension;
+        const { error: uploadError } = await supabase.storage.from("feed-media").upload(path, selectedMedia.file, {
+          contentType: selectedMedia.file.type || undefined,
+          upsert: false,
+        });
+        if (uploadError) throw uploadError;
+        mediaUrl = supabase.storage.from("feed-media").getPublicUrl(path).data.publicUrl;
+      }
+
+      const { error } = await supabase.from("feed_posts").insert({
+        author_user_id: currentUserId,
+        business_id: profile.id,
+        content: text || null,
+        media_url: mediaUrl,
+        media_type: mediaType,
+      });
+
+      if (error) throw error;
+
+      if (selectedMedia?.url) URL.revokeObjectURL(selectedMedia.url);
+      setSelectedMedia(null);
+      setPostText("");
+      await loadFeed(currentUserId);
+      setStatusMessage("Publicação realizada com sucesso.");
+    } catch (error) {
+      console.error("Erro ao publicar no Feed:", error);
+      setStatusMessage("Não foi possível publicar agora.");
+    } finally {
+      setPublishing(false);
+    }
   }
 
-  function toggleLike(id: string) {
-    setLikedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  async function toggleLike(post: FeedPost) {
+    if (!userId || actionBusy) {
+      if (!userId) setStatusMessage("Entre na sua conta para curtir e participar do ranking.");
+      return;
+    }
+
+    setActionBusy("like-" + post.id);
+    const alreadyLiked = likedIds.includes(post.id);
+
+    try {
+      if (alreadyLiked) {
+        const { error } = await supabase.from("feed_likes").delete().eq("post_id", post.id).eq("user_id", userId);
+        if (error) throw error;
+        setLikedIds((current) => current.filter((id) => id !== post.id));
+        setPosts((current) => current.map((item) => item.id === post.id ? { ...item, like_count: Math.max(0, item.like_count - 1) } : item));
+      } else {
+        const { error } = await supabase.from("feed_likes").insert({ post_id: post.id, user_id: userId });
+        if (error) throw error;
+        setLikedIds((current) => [...current, post.id]);
+        setPosts((current) => current.map((item) => item.id === post.id ? { ...item, like_count: item.like_count + 1 } : item));
+      }
+    } catch (error) {
+      console.error("Erro ao curtir publicação:", error);
+    } finally {
+      setActionBusy(null);
+    }
   }
 
-  function repostPost(post: LocalPost) {
-    setLocalPosts((current) => [
-      {
-        ...post,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-        originalPostId: post.originalPostId ?? post.id,
-        repostedBy: profile?.business_name ?? "Seu negócio",
-      },
-      ...current,
-    ]);
-    setSendPostId(null);
+  async function loadComments(postId: string) {
+    setCommentLoading(true);
+    const { data, error } = await supabase
+      .from("feed_comments")
+      .select("id,content,created_at,user_id,profiles(full_name)")
+      .eq("post_id", postId)
+      .eq("active", true)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Erro ao carregar comentários:", error);
+    } else {
+      setComments((current) => ({
+        ...current,
+        [postId]: (data ?? []).map((item: any) => ({
+          id: item.id,
+          content: item.content,
+          created_at: item.created_at,
+          full_name: item.profiles?.full_name ?? "Usuário LOSI",
+        })),
+      }));
+    }
+    setCommentLoading(false);
   }
 
-  async function sendPost(post: LocalPost, channel: "whatsapp" | "facebook" | "instagram" | "copy") {
-    const url = window.location.origin + "/feed#" + encodeURIComponent(post.originalPostId ?? post.id);
-    const text = [profile?.business_name, post.text].filter(Boolean).join(" — ");
+  async function toggleComments(postId: string) {
+    const opening = commentPostId !== postId;
+    setCommentPostId(opening ? postId : null);
+    if (opening) await loadComments(postId);
+  }
+
+  async function submitComment(post: FeedPost) {
+    if (!userId) {
+      setStatusMessage("Entre na sua conta para comentar.");
+      return;
+    }
+    const content = commentDraft.trim();
+    if (!content || actionBusy) return;
+
+    setActionBusy("comment-" + post.id);
+    try {
+      const { error } = await supabase.from("feed_comments").insert({
+        post_id: post.id,
+        user_id: userId,
+        content: content.slice(0, 1000),
+      });
+      if (error) throw error;
+      setCommentDraft("");
+      setPosts((current) => current.map((item) => item.id === post.id ? { ...item, comment_count: item.comment_count + 1 } : item));
+      await loadComments(post.id);
+    } catch (error) {
+      console.error("Erro ao comentar:", error);
+      setStatusMessage("Não foi possível publicar o comentário.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
+  async function repostPost(post: FeedPost) {
+    if (!profile || !userId) {
+      setStatusMessage("Entre com um perfil de fornecedor aprovado para compartilhar no seu Feed.");
+      return;
+    }
+    if (actionBusy) return;
+
+    setActionBusy("repost-" + post.id);
+    try {
+      const originalId = post.original_post_id ?? post.id;
+      const { error } = await supabase.from("feed_posts").insert({
+        author_user_id: userId,
+        business_id: profile.id,
+        content: post.content,
+        media_url: post.media_url,
+        media_type: post.media_type,
+        original_post_id: originalId,
+      });
+
+      if (error && error.code !== "23505") throw error;
+      await loadFeed(userId);
+      setStatusMessage(error?.code === "23505" ? "Você já compartilhou esta publicação." : "Publicação compartilhada no seu Feed.");
+    } catch (error) {
+      console.error("Erro ao compartilhar publicação:", error);
+      setStatusMessage("Não foi possível compartilhar esta publicação.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
+  async function sendPost(post: FeedPost, channel: "whatsapp" | "facebook" | "instagram" | "copy") {
+    const url = window.location.origin + "/feed#feed-post-" + encodeURIComponent(post.id);
+    const text = [post.business_name, post.content].filter(Boolean).join(" — ");
     const encodedUrl = encodeURIComponent(url);
     const encodedText = encodeURIComponent(text + " " + url);
 
@@ -151,7 +349,7 @@ function FeedPage() {
       window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl, "_blank", "noopener,noreferrer");
     } else if (channel === "instagram") {
       if (navigator.share) {
-        await navigator.share({ title: profile?.business_name ?? "LOSI CONECTA", text, url }).catch(() => undefined);
+        await navigator.share({ title: post.business_name, text, url }).catch(() => undefined);
       } else {
         await navigator.clipboard?.writeText(url);
       }
@@ -159,7 +357,27 @@ function FeedPage() {
       await navigator.clipboard?.writeText(url);
     }
 
+    if (userId) {
+      const { error } = await supabase.from("feed_sends").upsert(
+        { post_id: post.id, user_id: userId, channel },
+        { onConflict: "post_id,user_id", ignoreDuplicates: true },
+      );
+      if (error) console.error("Erro ao registrar envio:", error);
+      else {
+        setPosts((current) => current.map((item) => item.id === post.id ? { ...item, send_count: item.send_count + (error ? 0 : 1) } : item));
+      }
+    }
+
     setSendPostId(null);
+  }
+
+  function formatDate(value: string) {
+    const date = new Date(value);
+    const diff = Date.now() - date.getTime();
+    if (diff < 60_000) return "agora";
+    if (diff < 3_600_000) return Math.floor(diff / 60_000) + " min";
+    if (diff < 86_400_000) return Math.floor(diff / 3_600_000) + " h";
+    return date.toLocaleDateString("pt-BR");
   }
 
   const location = [profile?.city, profile?.state].filter(Boolean).join(" — ");
@@ -171,12 +389,10 @@ function FeedPage() {
           <Link to="/buscar" className="feed-brand" aria-label="Voltar para o LOSI CONECTA">
             LOSI <span>CONECTA</span>
           </Link>
-
           <div className="feed-header-title">
             <FeedIcon size={18} />
             <strong>Feed</strong>
           </div>
-
           <Link to="/buscar" className="feed-header-back">Buscar fornecedores</Link>
         </div>
       </header>
@@ -186,7 +402,7 @@ function FeedPage() {
           <div className="feed-intro">
             <span className="feed-kicker">LOSI CONECTA</span>
             <h1>Feed profissional</h1>
-            <p>Compartilhe experiências, trabalhos e novidades do seu negócio.</p>
+            <p>Publicações de fornecedores, trabalhos, eventos e novidades.</p>
           </div>
 
           {authChecked && profile ? (
@@ -217,7 +433,7 @@ function FeedPage() {
                   ) : (
                     <video src={selectedMedia.url} controls aria-label="Pré-visualização do vídeo" />
                   )}
-                  <button type="button" onClick={() => setSelectedMedia(null)} aria-label="Remover mídia">×</button>
+                  <button type="button" onClick={() => { URL.revokeObjectURL(selectedMedia.url); setSelectedMedia(null); }} aria-label="Remover mídia">×</button>
                 </div>
               )}
 
@@ -235,77 +451,114 @@ function FeedPage() {
                   <input ref={imageInputRef} hidden type="file" accept="image/*" onChange={(event) => handleMediaChange(event, "image")} />
                   <input ref={videoInputRef} hidden type="file" accept="video/*" onChange={(event) => handleMediaChange(event, "video")} />
                 </div>
-                <button type="button" className="feed-publish-button" onClick={publishLocalPost} disabled={!postText.trim() && !selectedMedia}>
-                  Publicar
+                <button type="button" className="feed-publish-button" onClick={() => void publishPost()} disabled={publishing || (!postText.trim() && !selectedMedia)}>
+                  {publishing ? "Publicando..." : "Publicar"}
                 </button>
               </div>
             </section>
           ) : (
             <section className="feed-login-card">
               <strong>Quer publicar no Feed?</strong>
-              <p>Entre na sua conta para apresentar o seu negócio e compartilhar seus trabalhos.</p>
+              <p>Entre na sua conta de fornecedor aprovada para apresentar seu negócio e compartilhar seus trabalhos.</p>
               <Link to="/entrar">Entrar</Link>
             </section>
           )}
 
+          {statusMessage && <div className="feed-status-message" role="status">{statusMessage}</div>}
+
           <div className="feed-list">
-            {localPosts.length === 0 ? (
+            {loading ? (
+              <section className="feed-empty"><h2>Carregando publicações...</h2></section>
+            ) : posts.length === 0 ? (
               <section className="feed-empty">
                 <div className="feed-empty-icon"><FeedIcon size={28} /></div>
                 <h2>Seu feed começa aqui</h2>
-                <p>As publicações dos fornecedores aparecerão nesta timeline. Publique textos, imagens e vídeos sobre o seu negócio.</p>
+                <p>As publicações dos fornecedores aparecerão nesta timeline. Seja o primeiro a publicar.</p>
               </section>
             ) : (
-              localPosts.map((post) => (
-                <article className="feed-post" key={post.id} id={"feed-post-" + post.id}>
-                  <div className="feed-post-head">
-                    <div className="feed-avatar">
-                      {profile?.logo_url ? <img src={profile.logo_url} alt="" /> : <span>{profile?.business_name?.slice(0, 1).toUpperCase() || "L"}</span>}
+              posts.map((post) => {
+                const liked = likedIds.includes(post.id);
+                const isRepost = Boolean(post.original_post_id);
+                return (
+                  <article className="feed-post" key={post.id} id={"feed-post-" + post.id}>
+                    <div className="feed-post-head">
+                      <div className="feed-avatar">
+                        {post.logo_url ? <img src={post.logo_url} alt="" /> : <span>{post.business_name.slice(0, 1).toUpperCase()}</span>}
+                      </div>
+                      <div className="feed-post-identity">
+                        {isRepost && <small className="feed-repost-label">Compartilhado por {post.business_name}</small>}
+                        <strong>{post.business_name}</strong>
+                        <span>{[post.city, post.state].filter(Boolean).join(" — ") || "LOSI CONECTA"} · {formatDate(post.created_at)}</span>
+                        {post.main_category && <span className="feed-category">{post.main_category}</span>}
+                      </div>
+                      <Link to="/fornecedor/$slug" params={{ slug: post.slug }} className="feed-profile-link">Ver perfil público</Link>
                     </div>
-                    <div className="feed-post-identity">
-                      {post.repostedBy && <small className="feed-repost-label">Compartilhado por {post.repostedBy}</small>}
-                      <strong>{profile?.business_name || "Fornecedor LOSI CONECTA"}</strong>
-                      <span>{location || "LOSI CONECTA"} · agora</span>
-                      {profile?.main_category && <span className="feed-category">{profile.main_category}</span>}
-                    </div>
-                    {profile?.slug && <Link to="/fornecedor/$slug" params={{ slug: profile.slug }} className="feed-profile-link">Ver perfil público</Link>}
-                  </div>
 
-                  {post.text && <p className="feed-post-text">{post.text}</p>}
+                    {post.content && <p className="feed-post-text">{post.content}</p>}
+                    {post.media_url && post.media_type === "image" && <img className="feed-post-media" src={post.media_url} alt="Imagem da publicação" />}
+                    {post.media_url && post.media_type === "video" && <video className="feed-post-media" src={post.media_url} controls />}
 
-                  {post.mediaUrl && post.mediaType === "image" && <img className="feed-post-media" src={post.mediaUrl} alt="Imagem da publicação" />}
-                  {post.mediaUrl && post.mediaType === "video" && <video className="feed-post-media" src={post.mediaUrl} controls />}
+                    <div className="feed-post-actions">
+                      <div className="feed-action-group">
+                        <button type="button" className={liked ? "is-liked" : ""} onClick={() => void toggleLike(post)} disabled={actionBusy === "like-" + post.id}>
+                          <span aria-hidden="true">♡</span> Curtir
+                        </button>
+                        <small>{post.like_count}</small>
+                      </div>
+                      <div className="feed-action-group">
+                        <button type="button" onClick={() => void toggleComments(post)}>
+                          <span aria-hidden="true">◯</span> Comentar
+                        </button>
+                        <small>{post.comment_count}</small>
+                      </div>
+                      <div className="feed-action-group">
+                        <button type="button" onClick={() => void repostPost(post)} disabled={!profile || actionBusy === "repost-" + post.id}>
+                          <span aria-hidden="true">↻</span> Compartilhar
+                        </button>
+                        <small>{post.repost_count}</small>
+                      </div>
+                      <div className="feed-action-group">
+                        <button type="button" onClick={() => setSendPostId(sendPostId === post.id ? null : post.id)}>
+                          <span aria-hidden="true">➤</span> Enviar
+                        </button>
+                        <small>{post.send_count}</small>
+                      </div>
+                    </div>
 
-                  <div className="feed-post-actions">
-                    <button type="button" className={likedIds.includes(post.id) ? "is-liked" : ""} onClick={() => toggleLike(post.id)}>
-                      <span aria-hidden="true">♡</span> Curtir
-                    </button>
-                    <button type="button" onClick={() => setCommentPostId(commentPostId === post.id ? null : post.id)}>
-                      <span aria-hidden="true">◯</span> Comentar
-                    </button>
-                    <button type="button" onClick={() => repostPost(post)}>
-                      <span aria-hidden="true">↻</span> Compartilhar
-                    </button>
-                    <button type="button" onClick={() => setSendPostId(sendPostId === post.id ? null : post.id)}>
-                      <span aria-hidden="true">➤</span> Enviar
-                    </button>
-                    {profile?.slug && <Link to="/fornecedor/$slug" params={{ slug: profile.slug }}>Ver perfil público</Link>}
-                  </div>
-                  {commentPostId === post.id && (
-                    <div className="feed-comment-panel">
-                      <span>Os comentários entrarão aqui quando o módulo de comentários for conectado ao banco.</span>
-                    </div>
-                  )}
-                  {sendPostId === post.id && (
-                    <div className="feed-send-panel" aria-label="Enviar publicação">
-                      <button type="button" onClick={() => void sendPost(post, "whatsapp")}>WhatsApp</button>
-                      <button type="button" onClick={() => void sendPost(post, "instagram")}>Instagram</button>
-                      <button type="button" onClick={() => void sendPost(post, "facebook")}>Facebook</button>
-                      <button type="button" onClick={() => void sendPost(post, "copy")}>Copiar link</button>
-                    </div>
-                  )}
-                </article>
-              ))
+                    {commentPostId === post.id && (
+                      <div className="feed-comment-panel">
+                        {commentLoading ? <span>Carregando comentários...</span> : (
+                          <>
+                            {(comments[post.id] ?? []).map((comment) => (
+                              <div key={comment.id} className="feed-comment-item">
+                                <strong>{comment.full_name || "Usuário LOSI"}</strong>
+                                <p>{comment.content}</p>
+                              </div>
+                            ))}
+                            {userId ? (
+                              <div className="feed-comment-form">
+                                <input value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} maxLength={1000} placeholder="Escreva um comentário..." />
+                                <button type="button" onClick={() => void submitComment(post)} disabled={!commentDraft.trim() || actionBusy === "comment-" + post.id}>Comentar</button>
+                              </div>
+                            ) : (
+                              <span>Entre na sua conta para comentar.</span>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {sendPostId === post.id && (
+                      <div className="feed-send-panel" aria-label="Enviar publicação">
+                        <button type="button" onClick={() => void sendPost(post, "whatsapp")}>WhatsApp</button>
+                        <button type="button" onClick={() => void sendPost(post, "instagram")}>Instagram</button>
+                        <button type="button" onClick={() => void sendPost(post, "facebook")}>Facebook</button>
+                        <button type="button" onClick={() => void sendPost(post, "copy")}>Copiar link</button>
+                      </div>
+                    )}
+                  </article>
+                );
+              })
             )}
           </div>
         </div>
@@ -314,7 +567,7 @@ function FeedPage() {
           <section className="feed-side-card">
             <span className="feed-kicker">FEED LOSI</span>
             <h2>Uma vitrine profissional para o seu negócio.</h2>
-            <p>Mostre trabalhos, eventos e novidades e permita que outras pessoas encontrem seu perfil público.</p>
+            <p>O Feed usa as interações reais para definir a relevância das publicações, separado do ranqueamento da Busca.</p>
           </section>
         </aside>
       </section>
