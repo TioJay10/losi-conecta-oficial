@@ -274,7 +274,6 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
       {historyPanel}
 
       <section className="inconsistency-chat">
-      <section className="inconsistency-chat">
         <header className="inconsistency-chat-header">
           <div className="inconsistency-chat-identity">
             <div className="inconsistency-chat-avatar">LC</div>
