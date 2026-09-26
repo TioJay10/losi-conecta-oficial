@@ -574,7 +574,7 @@ function ProviderPage() {
           <div className="provider-profile-actions">
             <Link
               to="/feed"
-              search={{ fornecedor: business.slug }}
+              href={"/feed?fornecedor=" + encodeURIComponent(business.slug)}
               className="provider-profile-feed-button"
               aria-label={"Abrir Feed de " + business.business_name}
               title={"Feed de " + business.business_name}
