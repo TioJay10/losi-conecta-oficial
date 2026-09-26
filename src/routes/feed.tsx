@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import { supabase } from "../lib/supabase";
 
 type FeedProfile = {
@@ -74,7 +75,7 @@ function FeedPage() {
     };
   }, []);
 
-  function handleMediaChange(event: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") {
+  function handleMediaChange(event: ChangeEvent<HTMLInputElement>, type: "image" | "video") {
     const file = event.target.files?.[0];
     if (!file) return;
 
