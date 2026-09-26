@@ -428,6 +428,12 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
             <button type="button" onClick={handleSearch} aria-label="Buscar">⌕</button>
           </div>
           <div className="marketplace-header-actions">
+            <Link to="/feed" className="marketplace-feed-icon" aria-label="Abrir Feed" title="Feed">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 5h14M5 12h10M5 19h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M17 12.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Zm0 0V15l2 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
             {userId && userBusinessSlug && <Link to="/painel" className="marketplace-account">Minha conta</Link>}
             {userId ? (
               <button type="button" className="marketplace-account" disabled={authLoading} onClick={async () => { await supabase.auth.signOut(); window.location.href = "/entrar"; }}>Sair</button>
@@ -448,6 +454,11 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
       </header>
 
       <nav className={"marketplace-category-bar" + (mobileMenuOpen ? " mobile-open" : "")} aria-label="Navegação principal">
+          <Link to="/feed" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
+            <span className="marketplace-menu-mark">06</span>
+            <span><strong>Feed</strong><small>Conteúdo profissional</small></span>
+          </Link>
+
         <div className="marketplace-category-inner">
           <Link to="/painel" onClick={(event) => handleProtectedMenu("/painel", event)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">01</span>
