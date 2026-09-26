@@ -207,10 +207,11 @@ function FeedPage() {
 
   async function loadFeed(currentUserId: string | null, filterBusinessId: string | null = null) {
     setLoading(true);
-    const { data, error } = await supabase
+    let feedQuery = supabase
       .from("feed_post_rankings")
-      .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,created_at,business_name,slug,city,state,logo_url,main_category,like_count,comment_count,repost_count,send_count,ranking_score")
-      .eq(filterBusinessId ? "business_id" : "id", filterBusinessId ?? "00000000-0000-0000-0000-000000000000")
+      .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,created_at,business_name,slug,city,state,logo_url,main_category,like_count,comment_count,repost_count,send_count,ranking_score");
+    if (filterBusinessId) feedQuery = feedQuery.eq("business_id", filterBusinessId);
+    const { data, error } = await feedQuery
       .order("ranking_score", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(30);
