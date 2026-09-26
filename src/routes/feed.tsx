@@ -93,6 +93,7 @@ function FeedPage() {
   const [comments, setComments] = useState<Record<string, { id: string; content: string; full_name: string | null; created_at: string }[]>>({});
   const [commentDraft, setCommentDraft] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
@@ -319,6 +320,7 @@ function FeedPage() {
   async function toggleComments(postId: string) {
     const opening = commentPostId !== postId;
     setCommentPostId(opening ? postId : null);
+    setShowAllComments(false);
     if (opening) await loadComments(postId);
   }
 
@@ -564,24 +566,51 @@ function FeedPage() {
                     </div>
 
                     {commentPostId === post.id && (
-                      <div className="feed-comment-panel">
-                        {commentLoading ? <span>Carregando comentários...</span> : (
-                          <>
-                            {(comments[post.id] ?? []).map((comment) => (
+                      <div className="feed-comment-panel" aria-label="Comentários da publicação">
+                        <div className="feed-comment-list">
+                          {commentLoading && <span>Carregando comentários...</span>}
+                          {!commentLoading && (comments[post.id] ?? []).length === 0 && (
+                            <span>Seja o primeiro a comentar.</span>
+                          )}
+                          {!commentLoading && (comments[post.id] ?? [])
+                            .slice(showAllComments ? undefined : 0, showAllComments ? undefined : 3)
+                            .map((comment) => (
                               <div key={comment.id} className="feed-comment-item">
                                 <strong>{comment.full_name || "Usuário LOSI"}</strong>
                                 <p>{comment.content}</p>
                               </div>
                             ))}
-                            {userId ? (
-                              <div className="feed-comment-form">
-                                <input value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} maxLength={1000} placeholder="Escreva um comentário..." />
-                                <button type="button" onClick={() => void submitComment(post)} disabled={!commentDraft.trim() || actionBusy === "comment-" + post.id}>Comentar</button>
-                              </div>
-                            ) : (
-                              <span>Entre na sua conta para comentar.</span>
-                            )}
-                          </>
+                        </div>
+
+                        {!commentLoading && (comments[post.id] ?? []).length > 3 && (
+                          <button
+                            type="button"
+                            className="feed-comments-toggle"
+                            onClick={() => setShowAllComments((value) => !value)}
+                          >
+                            {showAllComments ? "Ocultar comentários" : `Ver todos os comentários (${(comments[post.id] ?? []).length})`}
+                          </button>
+                        )}
+
+                        {userId ? (
+                          <div className="feed-comment-form">
+                            <input
+                              value={commentDraft}
+                              onChange={(event) => setCommentDraft(event.target.value)}
+                              maxLength={1000}
+                              placeholder="Escreva um comentário..."
+                              aria-label="Escreva um comentário"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => void submitComment(post)}
+                              disabled={!commentDraft.trim() || actionBusy === "comment-" + post.id}
+                            >
+                              {actionBusy === "comment-" + post.id ? "Enviando..." : "Comentar"}
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="feed-comment-login">Entre na sua conta para comentar.</span>
                         )}
                       </div>
                     )}
