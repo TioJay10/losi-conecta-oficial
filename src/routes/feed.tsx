@@ -116,26 +116,26 @@ function buildFeedSequence(posts: FeedPost[]) {
   }
 
   const sequence: FeedPost[] = [];
-  const usedExtraIds = new Set<string>();
   let cursor = 0;
 
   for (const post of initial) {
     sequence.push(post);
 
     // A cada bloco de 4 publicações, insere uma oportunidade de
-    // reaparecimento. Nunca repete a mesma publicação em sequência.
+    // reaparecimento. Só pode reaparecer quem já apareceu antes,
+    // evitando que uma publicação seja duplicada antes da primeira exibição.
     if (sequence.length % 4 === 0 && extras.size > 0) {
+      const displayedIds = new Set(sequence.map((item) => item.id));
       const candidates = initial
         .filter((candidate) => {
           const remaining = extras.get(candidate.id) ?? 0;
-          return remaining > 0 && candidate.id !== post.id && !usedExtraIds.has(candidate.id);
+          return remaining > 0 && candidate.id !== post.id && displayedIds.has(candidate.id);
         })
         .sort((a, b) => engagement(b) - engagement(a));
 
       const candidate = candidates[cursor % Math.max(1, candidates.length)];
       if (candidate) {
         sequence.push(candidate);
-        usedExtraIds.add(candidate.id);
         extras.set(candidate.id, (extras.get(candidate.id) ?? 1) - 1);
         if ((extras.get(candidate.id) ?? 0) <= 0) extras.delete(candidate.id);
         cursor += 1;
