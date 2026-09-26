@@ -169,7 +169,7 @@ function FeedPage() {
   }
 
   async function publishPost() {
-    if (!profile || publishing) return;
+    if (publishing) return;
     const text = postText.trim();
     if (!text && !selectedMedia) return;
 
@@ -181,6 +181,20 @@ function FeedPage() {
       const currentUserId = sessionData.session?.user.id;
       if (!currentUserId) {
         setStatusMessage("Entre na sua conta para publicar.");
+        return;
+      }
+
+      const { data: currentBusiness, error: businessError } = await supabase
+        .from("business_profiles")
+        .select("id,business_name,active,approval_status")
+        .eq("owner_id", currentUserId)
+        .eq("active", true)
+        .eq("approval_status", "approved")
+        .maybeSingle();
+
+      if (businessError) throw businessError;
+      if (!currentBusiness?.id) {
+        setStatusMessage("Seu perfil de fornecedor ainda não está aprovado para publicar.");
         return;
       }
 
