@@ -84,6 +84,7 @@ function FeedActionIcon({ type }: { type: "like" | "comment" | "share" | "send" 
 function renderPostContent(
   content: string,
   mentions: Array<{ business_id: string; business_name: string; slug: string }>,
+  onMentionClick: () => void,
 ) {
   if (!mentions.length) return content;
 
@@ -114,14 +115,14 @@ function renderPostContent(
     if (matchIndex > 0) nodes.push(remaining.slice(0, matchIndex));
 
     nodes.push(
-      <Link
+      <button
         key={matched.business_id + "-" + matchIndex + "-" + remaining.length}
-        to="/fornecedor/$slug"
-        params={{ slug: matched.slug }}
+        type="button"
         className="feed-mention-link"
+        onClick={onMentionClick}
       >
         {matched.token}
-      </Link>,
+      </button>,
     );
 
     remaining = remaining.slice(matchIndex + matched.token.length);
@@ -234,6 +235,7 @@ function FeedPage() {
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [sendPostId, setSendPostId] = useState<string | null>(null);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
+  const [commentPostData, setCommentPostData] = useState<FeedPost | null>(null);
   const [comments, setComments] = useState<Record<string, { id: string; content: string; full_name: string | null; logo_url: string | null; created_at: string; user_id: string; parent_comment_id: string | null; like_count: number }[]>>({});
   const [commentLikedIds, setCommentLikedIds] = useState<string[]>([]);
   const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
@@ -242,6 +244,8 @@ function FeedPage() {
   const [showAllComments, setShowAllComments] = useState(false);
   const [commentError, setCommentError] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState("");
+  const [modalPost, setModalPost] = useState<FeedPost | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -630,11 +634,13 @@ function FeedPage() {
         if (error) throw error;
         setLikedIds((current) => current.filter((id) => id !== post.id));
         setPosts((current) => current.map((item) => item.id === post.id ? { ...item, like_count: Math.max(0, item.like_count - 1) } : item));
+        setModalPost((current) => current?.id === post.id ? { ...current, like_count: Math.max(0, current.like_count - 1) } : current);
       } else {
         const { error } = await supabase.from("feed_likes").insert({ post_id: post.id, user_id: userId });
         if (error) throw error;
         setLikedIds((current) => [...current, post.id]);
         setPosts((current) => current.map((item) => item.id === post.id ? { ...item, like_count: item.like_count + 1 } : item));
+        setModalPost((current) => current?.id === post.id ? { ...current, like_count: current.like_count + 1 } : current);
       }
     } catch (error) {
       console.error("Erro ao curtir publicação:", error);
@@ -785,6 +791,7 @@ function FeedPage() {
       setCommentDraft("");
       setReplyToCommentId(null);
       setPosts((current) => current.map((item) => item.id === post.id ? { ...item, comment_count: item.comment_count + 1 } : item));
+      setModalPost((current) => current?.id === post.id ? { ...current, comment_count: current.comment_count + 1 } : current);
       await loadComments(post.id);
     } catch (error) {
       console.error("Erro ao comentar:", error);
@@ -888,7 +895,9 @@ function FeedPage() {
   }
 
   function openComments(postId: string) {
+    const postForComments = posts.find((item) => item.id === postId) ?? modalPost;
     setCommentPostId(postId);
+    if (postForComments) setCommentPostData(postForComments);
     setShowAllComments(true);
     setReplyToCommentId(null);
     setCommentDraft("");
@@ -898,6 +907,7 @@ function FeedPage() {
 
   function closeComments() {
     setCommentPostId(null);
+    setCommentPostData(null);
     setReplyToCommentId(null);
     setCommentDraft("");
   }
@@ -910,6 +920,79 @@ function FeedPage() {
     if (diff < 86_400_000) return Math.floor(diff / 3_600_000) + " h";
     return date.toLocaleDateString("pt-BR");
   }
+
+  async function openPostModal(postId: string) {
+    const existing = posts.find((item) => item.id === postId);
+    if (existing) {
+      setModalPost(existing);
+      return;
+    }
+
+    setModalLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("feed_post_rankings")
+        .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,created_at,business_name,slug,city,state,logo_url,main_category,like_count,comment_count,repost_count,send_count,ranking_score")
+        .eq("id", postId)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) {
+        setStatusMessage("Não foi possível localizar esta publicação.");
+        return;
+      }
+
+      let post = { ...(data as FeedPost), mentions: [] };
+
+      const { data: mentionRows, error: mentionError } = await supabase
+        .from("feed_post_mentions")
+        .select("post_id,business_id")
+        .eq("post_id", postId);
+
+      if (!mentionError && mentionRows?.length) {
+        const ids = [...new Set(mentionRows.map((row) => row.business_id).filter(Boolean))];
+        const { data: businesses } = await supabase
+          .from("business_profiles")
+          .select("id,business_name,slug")
+          .in("id", ids)
+          .eq("active", true)
+          .eq("approval_status", "approved");
+
+        const businessMap = new Map((businesses ?? []).map((business) => [business.id, business]));
+        post = {
+          ...post,
+          mentions: mentionRows
+            .map((row) => {
+              const business = businessMap.get(row.business_id);
+              return business?.business_name && business.slug
+                ? { business_id: business.id, business_name: business.business_name, slug: business.slug }
+                : null;
+            })
+            .filter((item): item is { business_id: string; business_name: string; slug: string } => Boolean(item)),
+        };
+      }
+
+      setModalPost(post);
+    } catch (error) {
+      console.error("Erro ao abrir publicação no modal:", error);
+      setStatusMessage("Não foi possível abrir esta publicação.");
+    } finally {
+      setModalLoading(false);
+    }
+  }
+
+  function closePostModal() {
+    setModalPost(null);
+  }
+
+  useEffect(() => {
+    if (!modalPost) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setModalPost(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [modalPost]);
 
   const location = [profile?.city, profile?.state].filter(Boolean).join(" — ");
   const feedSequence = useMemo(() => buildFeedSequence(posts), [posts]);
@@ -1100,27 +1183,43 @@ function FeedPage() {
                           <small className="feed-repost-label" style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
                             <span>Compartilhado de</span>
                             {post.original_business_slug && post.original_business_name ? (
-                              <Link
-                                to="/fornecedor/$slug"
-                                params={{ slug: post.original_business_slug }}
-                                style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 700 }}
-                              >
+                              <span className="feed-original-source">
                                 {post.original_business_logo_url ? (
-                                  <img
-                                    src={post.original_business_logo_url}
-                                    alt=""
-                                    style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }}
-                                  />
-                                ) : (
-                                  <span
-                                    aria-hidden="true"
-                                    style={{ width: 24, height: 24, borderRadius: "50%", display: "inline-grid", placeItems: "center", background: "#142744", color: "#d6ad4b", fontWeight: 800 }}
+                                  <Link
+                                    to="/fornecedor/$slug"
+                                    params={{ slug: post.original_business_slug }}
+                                    className="feed-repost-avatar-link"
+                                    aria-label={"Abrir perfil público de " + post.original_business_name}
                                   >
-                                    {post.original_business_name.slice(0, 1).toUpperCase()}
-                                  </span>
+                                    <img
+                                      src={post.original_business_logo_url}
+                                      alt=""
+                                      style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }}
+                                    />
+                                  </Link>
+                                ) : (
+                                  <Link
+                                    to="/fornecedor/$slug"
+                                    params={{ slug: post.original_business_slug }}
+                                    className="feed-repost-avatar-link"
+                                    aria-label={"Abrir perfil público de " + post.original_business_name}
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      style={{ width: 24, height: 24, borderRadius: "50%", display: "inline-grid", placeItems: "center", background: "#142744", color: "#d6ad4b", fontWeight: 800 }}
+                                    >
+                                      {post.original_business_name.slice(0, 1).toUpperCase()}
+                                    </span>
+                                  </Link>
                                 )}
-                                <span>{post.original_business_name}</span>
-                              </Link>
+                                <button
+                                  type="button"
+                                  className="feed-original-post-link"
+                                  onClick={() => void openPostModal(post.original_post_id ?? post.id)}
+                                >
+                                  {post.original_business_name}
+                                </button>
+                              </span>
                             ) : (
                               <span>{post.original_business_name ?? "publicação original"}</span>
                             )}
@@ -1151,7 +1250,7 @@ function FeedPage() {
                       <Link to="/fornecedor/$slug" params={{ slug: post.slug }} className="feed-profile-link">Ver perfil público</Link>
                     </div>
 
-                    {post.content && <p className="feed-post-text">{renderPostContent(post.content, post.mentions)}</p>}
+                    {post.content && <p className="feed-post-text">{renderPostContent(post.content, post.mentions, () => void openPostModal(post.id))}</p>}
                     {post.media_url && post.media_type === "image" && <img className="feed-post-media" src={post.media_url} alt="Imagem da publicação" />}
                     {post.media_url && post.media_type === "video" && <video className="feed-post-media" src={post.media_url} controls />}
 
@@ -1209,8 +1308,94 @@ function FeedPage() {
           </div>
         </div>
 
+          {modalPost && (
+            <div
+              className="feed-post-modal-overlay"
+              role="presentation"
+              onMouseDown={(event) => { if (event.target === event.currentTarget) closePostModal(); }}
+            >
+              <section className="feed-post-modal" role="dialog" aria-modal="true" aria-label="Publicação do Feed">
+                <header className="feed-post-modal-head">
+                  <strong>Publicação</strong>
+                  <button type="button" className="feed-post-modal-close" onClick={closePostModal} aria-label="Fechar publicação">×</button>
+                </header>
+
+                {modalLoading ? (
+                  <div className="feed-post-modal-loading">Carregando publicação...</div>
+                ) : (
+                  <article className="feed-post feed-post-modal-card">
+                    <div className="feed-post-head">
+                      <Link
+                        to="/fornecedor/$slug"
+                        params={{ slug: modalPost.slug }}
+                        className="feed-avatar"
+                        aria-label={"Abrir perfil público de " + modalPost.business_name}
+                      >
+                        {modalPost.logo_url ? <img src={modalPost.logo_url} alt="" /> : <span>{modalPost.business_name.slice(0, 1).toUpperCase()}</span>}
+                      </Link>
+                      <div className="feed-post-identity">
+                        <Link to="/fornecedor/$slug" params={{ slug: modalPost.slug }} className="feed-modal-author-link">
+                          <strong>{modalPost.business_name}</strong>
+                        </Link>
+                        <span>{[modalPost.city, modalPost.state].filter(Boolean).join(" — ") || "LOSI CONECTA"} · {formatDate(modalPost.created_at)}</span>
+                        {modalPost.main_category && <span className="feed-category">{modalPost.main_category}</span>}
+                      </div>
+                      <Link to="/fornecedor/$slug" params={{ slug: modalPost.slug }} className="feed-profile-link">Ver perfil público</Link>
+                    </div>
+
+                    {modalPost.content && (
+                      <p className="feed-post-text">
+                        {renderPostContent(modalPost.content, modalPost.mentions, () => void openPostModal(modalPost.id))}
+                      </p>
+                    )}
+                    {modalPost.media_url && modalPost.media_type === "image" && <img className="feed-post-media" src={modalPost.media_url} alt="Imagem da publicação" />}
+                    {modalPost.media_url && modalPost.media_type === "video" && <video className="feed-post-media" src={modalPost.media_url} controls />}
+
+                    <div className="feed-post-actions">
+                      <div className="feed-action-group">
+                        <button type="button" className={likedIds.includes(modalPost.id) ? "is-liked" : ""} onClick={() => void toggleLike(modalPost)} disabled={actionBusy === "like-" + modalPost.id}>
+                          <span className="feed-action-icon"><FeedActionIcon type="like" /></span>
+                          <span className="feed-action-label">Curtir</span>
+                        </button>
+                        <small>{modalPost.like_count}</small>
+                      </div>
+                      <div className="feed-action-group">
+                        <button type="button" aria-expanded={commentPostId === modalPost.id} onClick={() => openComments(modalPost.id)}>
+                          <span className="feed-action-icon"><FeedActionIcon type="comment" /></span>
+                          <span className="feed-action-label">Comentar</span>
+                        </button>
+                        <small>{modalPost.comment_count}</small>
+                      </div>
+                      <div className="feed-action-group">
+                        <button type="button" aria-label="Compartilhar publicação no meu Feed" onClick={() => void repostPost(modalPost)} disabled={actionBusy === "repost-" + modalPost.id}>
+                          <span className="feed-action-icon"><FeedActionIcon type="share" /></span>
+                          <span className="feed-action-label">Compartilhar</span>
+                        </button>
+                        <small>{modalPost.repost_count}</small>
+                      </div>
+                      <div className="feed-action-group">
+                        <button type="button" onClick={() => setSendPostId(sendPostId === modalPost.id ? null : modalPost.id)}>
+                          <span className="feed-action-icon"><FeedActionIcon type="send" /></span>
+                          <span className="feed-action-label">Enviar</span>
+                        </button>
+                        <small>{modalPost.send_count}</small>
+                      </div>
+                    </div>
+
+                    {sendPostId === modalPost.id && (
+                      <div className="feed-send-panel" aria-label="Enviar publicação">
+                        <button type="button" onClick={() => void sendPost(modalPost, "whatsapp")}>WhatsApp</button>
+                        <button type="button" onClick={() => void sendPost(modalPost, "copy")}>Copiar link</button>
+                      </div>
+                    )}
+                  </article>
+                )}
+              </section>
+            </div>
+          )}
+
           {commentPostId && (() => {
-            const activePost = posts.find((item) => item.id === commentPostId);
+            const activePost = posts.find((item) => item.id === commentPostId) ?? commentPostData;
             if (!activePost) return null;
             const activeComments = comments[activePost.id] ?? [];
             const replyTarget = activeComments.find((item) => item.id === replyToCommentId);
