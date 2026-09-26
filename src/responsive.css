@@ -15180,3 +15180,8 @@ button.availability-day {
   .feed-comment-form{flex-direction:column}
   .feed-comment-form button{min-height:42px}
 }
+
+.feed-comment-list{display:block}
+.feed-comments-toggle{display:inline-flex;align-items:center;margin-top:8px;border:0;background:transparent;color:#8f6a2c;font:800 11px "Montserrat",Arial,sans-serif;padding:5px 0;cursor:pointer}
+.feed-comments-toggle:hover{text-decoration:underline}
+.feed-comment-login{display:block;margin-top:10px}
