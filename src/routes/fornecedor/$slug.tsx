@@ -370,6 +370,10 @@ function ProviderPage() {
       window.setTimeout(() => document.getElementById("provider-quote-request")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } else if (action === "whatsapp") {
       await openWhatsApp();
+    } else if (action === "chat") {
+      window.setTimeout(() => {
+        document.querySelector<HTMLButtonElement>(".provider-chat-trigger")?.click();
+      }, 80);
     }
   }
 
