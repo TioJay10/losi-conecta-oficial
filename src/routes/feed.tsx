@@ -358,13 +358,14 @@ function FeedPage() {
     }
 
     if (userId) {
-      const { error } = await supabase.from("feed_sends").upsert(
+      const { data: sendData, error } = await supabase.from("feed_sends").upsert(
         { post_id: post.id, user_id: userId, channel },
-        { onConflict: "post_id,user_id", ignoreDuplicates: true },
+        { onConflict: "post_id,user_id", ignoreDuplicates: true, select: "post_id" },
       );
-      if (error) console.error("Erro ao registrar envio:", error);
-      else {
-        setPosts((current) => current.map((item) => item.id === post.id ? { ...item, send_count: item.send_count + (error ? 0 : 1) } : item));
+      if (error) {
+        console.error("Erro ao registrar envio:", error);
+      } else if ((sendData ?? []).length > 0) {
+        setPosts((current) => current.map((item) => item.id === post.id ? { ...item, send_count: item.send_count + 1 } : item));
       }
     }
 
