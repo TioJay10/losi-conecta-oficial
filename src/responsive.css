@@ -14759,3 +14759,69 @@ button.availability-day {
   min-width:7px !important;
   border-radius:50% !important;
 }
+
+
+/* PATCH 2026-09-26 — RESTAURAÇÃO DO CAMPO DE MENSAGEM DO CHAT
+   O compositor é um grupo independente e deve permanecer sempre visível
+   abaixo das mensagens, sem ser comprimido ou coberto pelo rodapé. */
+.provider-chat-window .provider-chat-header{
+  order:1 !important;
+}
+.provider-chat-window .provider-chat-conversation-bar{
+  order:2 !important;
+}
+.provider-chat-window .provider-chat-messages,
+.provider-chat-window .provider-chat-list{
+  order:3 !important;
+  flex:1 1 auto !important;
+  min-height:0 !important;
+}
+.provider-chat-window .provider-chat-error{
+  order:4 !important;
+  flex:0 0 auto !important;
+}
+.provider-chat-window .provider-chat-composer{
+  order:5 !important;
+  position:relative !important;
+  z-index:20 !important;
+  display:flex !important;
+  flex:0 0 auto !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:62px !important;
+  height:auto !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  overflow:visible !important;
+  background:#fff !important;
+  box-sizing:border-box !important;
+}
+.provider-chat-window .provider-chat-composer textarea{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  min-height:42px !important;
+  width:auto !important;
+  height:auto !important;
+  box-sizing:border-box !important;
+}
+.provider-chat-window .provider-chat-composer button{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  flex:0 0 42px !important;
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  min-height:42px !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.provider-chat-window .provider-chat-footer-note{
+  order:6 !important;
+  position:relative !important;
+  z-index:10 !important;
+  flex:0 0 auto !important;
+}
