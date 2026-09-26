@@ -334,8 +334,10 @@ function DashboardPage() {
 
     load();
 
-    const { data: listener } = supabase?.auth.onAuthStateChange((_event, session) => {
-      if (!session) navigate({ to: "/entrar" });
+    const { data: listener } = supabase?.auth.onAuthStateChange((event, session) => {
+      // Não redirecionar durante a restauração da sessão no refresh.
+      // Apenas um SIGNED_OUT real deve levar o usuário ao login.
+      if (event === "SIGNED_OUT" && !session) navigate({ to: "/entrar" });
     }) ?? { data: { subscription: { unsubscribe() {} } } };
 
     // Recarrega assinatura e demais dados quando o usuário volta do Asaas
