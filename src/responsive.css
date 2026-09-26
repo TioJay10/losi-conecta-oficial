@@ -15323,6 +15323,13 @@ button.availability-day {
   justify-content:flex-start;
   flex-direction:row;
 }
+.feed-comment-row-other{
+  justify-content:flex-end;
+}
+.feed-comment-row-other .feed-comment-body{
+  flex:0 1 auto;
+  max-width:82%;
+}
 .feed-comment-avatar{
   width:38px;height:38px;flex:0 0 38px;
   display:grid;place-items:center;
