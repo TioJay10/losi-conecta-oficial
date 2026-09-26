@@ -11,6 +11,7 @@ import "../responsive.css";
 import "../montserrat.css";
 import "../panel-header-contrast.css";
 import "../feed-modal-comments.css";
+import "../presentation.css";
 import { OnlinePresenceProvider } from "../components/OnlinePresence";
 
 export const Route = createRootRoute({
