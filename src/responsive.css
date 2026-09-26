@@ -14865,3 +14865,85 @@ button.availability-day {
 .inconsistency-history-status.status-new{background:#fff7df;color:#7b5a08}
 .inconsistency-history-status.status-in_progress{background:#eef3ff;color:#38538a}
 @media(max-width:700px){.inconsistency-history{padding:12px;margin-bottom:10px}.inconsistency-history-header{align-items:flex-start;flex-direction:column;gap:10px}.inconsistency-history-header .inconsistency-new-button{width:100%}.inconsistency-history-item{align-items:flex-start}.inconsistency-history-status{margin-top:1px}.inconsistency-history-item-main strong{white-space:normal;overflow-wrap:anywhere}}
+
+
+/* PATCH 2026-09-26 — CAMPO DE MENSAGEM: FIXAÇÃO DEFINITIVA
+   O campo de escrita é um grupo independente do histórico, do erro e do rodapé.
+   A área de mensagens ocupa somente o espaço disponível acima dele. */
+.provider-chat-window{
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+  height:min(700px,calc(100dvh - 48px)) !important;
+  overflow:hidden !important;
+}
+.provider-chat-window .provider-chat-header{
+  flex:0 0 auto !important;
+}
+.provider-chat-window .provider-chat-conversation-bar{
+  flex:0 0 auto !important;
+}
+.provider-chat-window .provider-chat-messages{
+  flex:1 1 0 !important;
+  min-height:0 !important;
+  height:auto !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+}
+.provider-chat-window .provider-chat-composer{
+  flex:0 0 auto !important;
+  display:flex !important;
+  position:relative !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:62px !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:10px !important;
+  box-sizing:border-box !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  z-index:30 !important;
+  background:#fff !important;
+  border-top:1px solid #dfe3e9 !important;
+}
+.provider-chat-window .provider-chat-composer textarea{
+  display:block !important;
+  flex:1 1 auto !important;
+  width:auto !important;
+  min-width:0 !important;
+  min-height:42px !important;
+  max-height:110px !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+.provider-chat-window .provider-chat-composer button{
+  display:flex !important;
+  flex:0 0 42px !important;
+  width:42px !important;
+  min-width:42px !important;
+  height:42px !important;
+  min-height:42px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+.provider-chat-window .provider-chat-footer-note{
+  flex:0 0 auto !important;
+  position:relative !important;
+  z-index:20 !important;
+  width:100% !important;
+  min-height:0 !important;
+}
+@media(max-width:700px){
+  .provider-chat-window{
+    height:100dvh !important;
+    max-height:100dvh !important;
+  }
+  .provider-chat-window .provider-chat-composer{
+    min-height:58px !important;
+    padding:8px !important;
+    padding-bottom:max(8px,env(safe-area-inset-bottom)) !important;
+  }
+}
