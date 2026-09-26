@@ -362,10 +362,9 @@ function FeedPage() {
 
     setActionBusy("comment-" + post.id);
     try {
-      const { error } = await supabase.from("feed_comments").insert({
-        post_id: post.id,
-        user_id: userId,
-        content: content.slice(0, 1000),
+      const { error } = await supabase.rpc("create_feed_comment", {
+        p_post_id: post.id,
+        p_content: content.slice(0, 1000),
       });
       if (error) throw error;
       setCommentDraft("");
@@ -393,13 +392,12 @@ function FeedPage() {
     setActionBusy("repost-" + post.id);
     try {
       const originalId = post.original_post_id ?? post.id;
-      const { error } = await supabase.from("feed_posts").insert({
-        author_user_id: userId,
-        business_id: profile.id,
-        content: post.content,
-        media_url: post.media_url,
-        media_type: post.media_type,
-        original_post_id: originalId,
+      const { error } = await supabase.rpc("create_feed_post", {
+        p_business_id: profile.id,
+        p_content: post.content,
+        p_media_url: post.media_url,
+        p_media_type: post.media_type,
+        p_original_post_id: originalId,
       });
 
       if (error) {
