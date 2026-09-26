@@ -90,7 +90,9 @@ function FeedPage() {
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [sendPostId, setSendPostId] = useState<string | null>(null);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
-  const [comments, setComments] = useState<Record<string, { id: string; content: string; full_name: string | null; created_at: string }[]>>({});
+  const [comments, setComments] = useState<Record<string, { id: string; content: string; full_name: string | null; created_at: string; user_id: string; parent_comment_id: string | null; like_count: number }[]>>({});
+  const [commentLikedIds, setCommentLikedIds] = useState<string[]>([]);
+  const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
   const [commentDraft, setCommentDraft] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
@@ -303,7 +305,7 @@ function FeedPage() {
       // de um relacionamento inexistente no Supabase.
       const { data, error } = await supabase
         .from("feed_comments")
-        .select("id,content,created_at,user_id")
+        .select("id,content,created_at,user_id,parent_comment_id")
         .eq("post_id", postId)
         .eq("active", true)
         .order("created_at", { ascending: true });
@@ -311,6 +313,22 @@ function FeedPage() {
       if (error) throw error;
 
       const commentRows = data ?? [];
+      const commentIds = commentRows.map((item) => item.id);
+      let commentLikeCounts: Record<string, number> = {};
+      if (commentIds.length) {
+        const { data: likeRows, error: likeError } = await supabase
+          .from("feed_comment_likes")
+          .select("comment_id,user_id")
+          .in("comment_id", commentIds);
+        if (likeError) console.error("Erro ao carregar curtidas dos comentários:", likeError);
+        else {
+          commentLikeCounts = (likeRows ?? []).reduce<Record<string, number>>((acc, row) => {
+            acc[row.comment_id] = (acc[row.comment_id] ?? 0) + 1;
+            return acc;
+          }, {});
+          if (userId) setCommentLikedIds((likeRows ?? []).filter((row) => row.user_id === userId).map((row) => row.comment_id));
+        }
+      }
       const userIds = [...new Set(commentRows.map((item) => item.user_id).filter(Boolean))];
       let profileNames: Record<string, string | null> = {};
 
@@ -335,6 +353,9 @@ function FeedPage() {
           id: item.id,
           content: item.content,
           created_at: item.created_at,
+          user_id: item.user_id,
+          parent_comment_id: item.parent_comment_id ?? null,
+          like_count: commentLikeCounts[item.id] ?? 0,
           full_name: profileNames[item.user_id] ?? "Usuário LOSI",
         })),
       }));
@@ -355,6 +376,26 @@ function FeedPage() {
     if (opening) void loadComments(postId);
   }
 
+  async function toggleCommentLike(commentId: string) {
+    if (!userId) { setStatusMessage("Entre na sua conta para curtir comentários."); return; }
+    if (actionBusy) return;
+    setActionBusy("comment-like-" + commentId);
+    const liked = commentLikedIds.includes(commentId);
+    try {
+      if (liked) {
+        const { error } = await supabase.from("feed_comment_likes").delete().eq("comment_id", commentId).eq("user_id", userId);
+        if (error) throw error;
+        setCommentLikedIds((current) => current.filter((id) => id !== commentId));
+      } else {
+        const { error } = await supabase.from("feed_comment_likes").insert({ comment_id: commentId, user_id: userId });
+        if (error) throw error;
+        setCommentLikedIds((current) => [...current, commentId]);
+      }
+      if (commentPostId) await loadComments(commentPostId);
+    } catch (error) { console.error("Erro ao curtir comentário:", error); }
+    finally { setActionBusy(null); }
+  }
+
   async function submitComment(post: FeedPost) {
     if (!userId) {
       setStatusMessage("Entre na sua conta para comentar.");
@@ -368,9 +409,11 @@ function FeedPage() {
       const { error } = await supabase.rpc("create_feed_comment", {
         p_post_id: post.id,
         p_content: content.slice(0, 1000),
+        p_parent_comment_id: replyToCommentId,
       });
       if (error) throw error;
       setCommentDraft("");
+      setReplyToCommentId(null);
       setPosts((current) => current.map((item) => item.id === post.id ? { ...item, comment_count: item.comment_count + 1 } : item));
       await loadComments(post.id);
     } catch (error) {
@@ -472,6 +515,21 @@ function FeedPage() {
     }
 
     setSendPostId(null);
+  }
+
+  function openComments(postId: string) {
+    setCommentPostId(postId);
+    setShowAllComments(true);
+    setReplyToCommentId(null);
+    setCommentDraft("");
+    setCommentError((current) => ({ ...current, [postId]: "" }));
+    void loadComments(postId);
+  }
+
+  function closeComments() {
+    setCommentPostId(null);
+    setReplyToCommentId(null);
+    setCommentDraft("");
   }
 
   function formatDate(value: string) {
@@ -614,7 +672,7 @@ function FeedPage() {
                           type="button"
                           aria-expanded={commentPostId === post.id}
                           aria-controls={"feed-comments-" + post.id}
-                          onClick={() => toggleComments(post.id)}
+                          onClick={() => openComments(post.id)}
                         >
                           <span className="feed-action-icon"><FeedActionIcon type="comment" /></span>
                           <span className="feed-action-label">Comentar</span>
@@ -642,57 +700,6 @@ function FeedPage() {
                       </div>
                     </div>
 
-                    {commentPostId === post.id && (
-                      <div id={"feed-comments-" + post.id} className="feed-comment-panel" aria-label="Comentários da publicação">
-                        <div className="feed-comment-list">
-                          {commentLoading && <span>Carregando comentários...</span>}
-                          {!commentLoading && commentError[post.id] && <span className="feed-comment-error">{commentError[post.id]}</span>}
-                          {!commentLoading && !commentError[post.id] && (comments[post.id] ?? []).length === 0 && (
-                            <span>Seja o primeiro a comentar.</span>
-                          )}
-                          {!commentLoading && !commentError[post.id] && (comments[post.id] ?? [])
-                            .slice(showAllComments ? undefined : 0, showAllComments ? undefined : 3)
-                            .map((comment) => (
-                              <div key={comment.id} className="feed-comment-item">
-                                <strong>{comment.full_name || "Usuário LOSI"}</strong>
-                                <p>{comment.content}</p>
-                              </div>
-                            ))}
-                        </div>
-
-                        {!commentLoading && !commentError[post.id] && (comments[post.id] ?? []).length > 3 && (
-                          <button
-                            type="button"
-                            className="feed-comments-toggle"
-                            onClick={() => setShowAllComments((value) => !value)}
-                          >
-                            {showAllComments ? "Ocultar comentários" : `Ver todos os comentários (${(comments[post.id] ?? []).length})`}
-                          </button>
-                        )}
-
-                        {userId ? (
-                          <div className="feed-comment-form">
-                            <input
-                              value={commentDraft}
-                              onChange={(event) => setCommentDraft(event.target.value)}
-                              maxLength={1000}
-                              placeholder="Escreva um comentário..."
-                              aria-label="Escreva um comentário"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => void submitComment(post)}
-                              disabled={!commentDraft.trim() || actionBusy === "comment-" + post.id}
-                            >
-                              {actionBusy === "comment-" + post.id ? "Enviando..." : "Comentar"}
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="feed-comment-login">Entre na sua conta para comentar.</span>
-                        )}
-                      </div>
-                    )}
-
                     {sendPostId === post.id && (
                       <div className="feed-send-panel" aria-label="Enviar publicação">
                         <button type="button" onClick={() => void sendPost(post, "whatsapp")}>WhatsApp</button>
@@ -705,6 +712,54 @@ function FeedPage() {
             )}
           </div>
         </div>
+
+          {commentPostId && (() => {
+            const activePost = posts.find((item) => item.id === commentPostId);
+            if (!activePost) return null;
+            const activeComments = comments[activePost.id] ?? [];
+            const replyTarget = activeComments.find((item) => item.id === replyToCommentId);
+            return (
+              <div className="feed-comments-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeComments(); }}>
+                <section className="feed-comments-sheet" role="dialog" aria-modal="true" aria-label="Comentários da publicação">
+                  <div className="feed-comments-handle" aria-hidden="true" />
+                  <header className="feed-comments-sheet-head">
+                    <div><strong>Comentários</strong><span>{activeComments.length} comentário(s)</span></div>
+                    <button type="button" className="feed-comments-close" onClick={closeComments} aria-label="Fechar comentários">×</button>
+                  </header>
+                  <div className="feed-comments-scroll">
+                    {commentLoading && <div className="feed-comments-loading">Carregando comentários...</div>}
+                    {!commentLoading && commentError[activePost.id] && <div className="feed-comments-loading feed-comment-error">{commentError[activePost.id]}</div>}
+                    {!commentLoading && !commentError[activePost.id] && activeComments.length === 0 && <div className="feed-comments-empty">Seja o primeiro a comentar.</div>}
+                    {!commentLoading && !commentError[activePost.id] && activeComments.map((comment) => {
+                      const liked = commentLikedIds.includes(comment.id);
+                      return (
+                        <article key={comment.id} className={comment.parent_comment_id ? "feed-comment-row feed-comment-row-reply" : "feed-comment-row"}>
+                          <div className="feed-comment-avatar">{(comment.full_name || "U").slice(0, 1).toUpperCase()}</div>
+                          <div className="feed-comment-body">
+                            <div className="feed-comment-bubble"><strong>{comment.full_name || "Usuário LOSI"}</strong><p>{comment.content}</p></div>
+                            <div className="feed-comment-meta">
+                              <span>{formatDate(comment.created_at)}</span>
+                              <button type="button" className={liked ? "is-liked" : ""} onClick={() => void toggleCommentLike(comment.id)}>Curtir <b>{comment.like_count}</b></button>
+                              <button type="button" onClick={() => { setReplyToCommentId(comment.id); setCommentDraft(""); }}>Responder</button>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  <div className="feed-comments-composer">
+                    {replyTarget && <div className="feed-replying"><span>Respondendo a <strong>{replyTarget.full_name || "Usuário LOSI"}</strong></span><button type="button" onClick={() => setReplyToCommentId(null)} aria-label="Cancelar resposta">×</button></div>}
+                    {userId ? (
+                      <div className="feed-comment-form feed-comment-form-sheet">
+                        <input value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void submitComment(activePost); } }} maxLength={1000} placeholder={replyTarget ? "Escreva uma resposta..." : "Adicione um comentário..."} aria-label={replyTarget ? "Escreva uma resposta" : "Adicione um comentário"} />
+                        <button type="button" className="feed-comment-send" onClick={() => void submitComment(activePost)} disabled={!commentDraft.trim() || actionBusy === "comment-" + activePost.id}>{actionBusy === "comment-" + activePost.id ? "..." : "Enviar"}</button>
+                      </div>
+                    ) : <div className="feed-comment-login">Entre na sua conta para comentar.</div>}
+                  </div>
+                </section>
+              </div>
+            );
+          })()}
 
         <aside className="feed-side">
           <section className="feed-side-card">
