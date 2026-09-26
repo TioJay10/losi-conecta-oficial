@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -74,6 +74,91 @@ function FeedActionIcon({ type }: { type: "like" | "comment" | "share" | "send" 
   }
 
   return <svg {...common}><path d="m21 3-8.5 18-3.2-7.3L2 10.5 21 3Z" /><path d="m9.3 13.7 4.6-4.6" /></svg>;
+}
+
+function buildFeedSequence(posts: FeedPost[]) {
+  if (posts.length <= 1) return posts;
+
+  const now = Date.now();
+  const ageHours = (post: FeedPost) => Math.max(0, (now - new Date(post.created_at).getTime()) / 3_600_000);
+  const engagement = (post: FeedPost) =>
+    post.like_count +
+    post.comment_count * 3 +
+    post.repost_count * 4 +
+    post.send_count * 5;
+
+  // A primeira passagem privilegia novidade. O ranking do banco continua
+  // participando, mas uma publicação recém-criada recebe um impulso forte.
+  const freshnessBoost = (post: FeedPost) => {
+    const age = ageHours(post);
+    if (age <= 1) return 12;
+    if (age <= 6) return 8;
+    if (age <= 24) return 5;
+    if (age <= 72) return 2;
+    return 0;
+  };
+
+  const initial = [...posts].sort((a, b) => {
+    const scoreA = freshnessBoost(a) + Number(a.ranking_score || 0);
+    const scoreB = freshnessBoost(b) + Number(b.ranking_score || 0);
+    return scoreB - scoreA || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  // A publicação continua aparecendo na primeira passagem apenas uma vez.
+  // Depois dela, o engajamento determina quantas oportunidades extras ela
+  // recebe durante a rolagem. Assim, engajamento aumenta frequência, não
+  // posição fixa no topo.
+  const extras = new Map<string, number>();
+  for (const post of initial) {
+    const score = engagement(post);
+    const extraCount = score >= 60 ? 3 : score >= 20 ? 2 : score >= 5 ? 1 : 0;
+    if (extraCount > 0) extras.set(post.id, extraCount);
+  }
+
+  const sequence: FeedPost[] = [];
+  const usedExtraIds = new Set<string>();
+  let cursor = 0;
+
+  for (const post of initial) {
+    sequence.push(post);
+
+    // A cada bloco de 4 publicações, insere uma oportunidade de
+    // reaparecimento. Nunca repete a mesma publicação em sequência.
+    if (sequence.length % 4 === 0 && extras.size > 0) {
+      const candidates = initial
+        .filter((candidate) => {
+          const remaining = extras.get(candidate.id) ?? 0;
+          return remaining > 0 && candidate.id !== post.id && !usedExtraIds.has(candidate.id);
+        })
+        .sort((a, b) => engagement(b) - engagement(a));
+
+      const candidate = candidates[cursor % Math.max(1, candidates.length)];
+      if (candidate) {
+        sequence.push(candidate);
+        usedExtraIds.add(candidate.id);
+        extras.set(candidate.id, (extras.get(candidate.id) ?? 1) - 1);
+        if ((extras.get(candidate.id) ?? 0) <= 0) extras.delete(candidate.id);
+        cursor += 1;
+      }
+    }
+  }
+
+  // Se ainda houver posts com saldo de reaparecimento, distribui os
+  // restantes no final, sempre evitando duas ocorrências consecutivas.
+  while (extras.size > 0) {
+    const lastId = sequence.at(-1)?.id;
+    const candidates = initial
+      .filter((candidate) => (extras.get(candidate.id) ?? 0) > 0 && candidate.id !== lastId)
+      .sort((a, b) => engagement(b) - engagement(a));
+
+    const candidate = candidates[0];
+    if (!candidate) break;
+    sequence.push(candidate);
+    extras.set(candidate.id, (extras.get(candidate.id) ?? 1) - 1);
+    if ((extras.get(candidate.id) ?? 0) <= 0) extras.delete(candidate.id);
+  }
+
+  return sequence;
 }
 
 function FeedPage() {
@@ -564,6 +649,7 @@ function FeedPage() {
   }
 
   const location = [profile?.city, profile?.state].filter(Boolean).join(" — ");
+  const feedSequence = useMemo(() => buildFeedSequence(posts), [posts]);
 
   return (
     <main className="feed-page">
@@ -659,11 +745,11 @@ function FeedPage() {
                 <p>As publicações dos fornecedores aparecerão nesta timeline. Seja o primeiro a publicar.</p>
               </section>
             ) : (
-              posts.map((post) => {
+              feedSequence.map((post, index) => {
                 const liked = likedIds.includes(post.id);
                 const isRepost = Boolean(post.original_post_id);
                 return (
-                  <article className="feed-post" key={post.id} id={"feed-post-" + post.id}>
+                  <article className="feed-post" key={post.id + "-" + index} id={index === 0 ? "feed-post-" + post.id : undefined}>
                     <div className="feed-post-head">
                       <div className="feed-avatar">
                         {post.logo_url ? <img src={post.logo_url} alt="" /> : <span>{post.business_name.slice(0, 1).toUpperCase()}</span>}
