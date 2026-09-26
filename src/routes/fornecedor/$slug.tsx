@@ -572,8 +572,7 @@ function ProviderPage() {
           </div>
 
           <div className="provider-profile-actions">
-            <Link
-              to="/feed"
+            <a
               href={"/feed?fornecedor=" + encodeURIComponent(business.slug)}
               className="provider-profile-feed-button"
               aria-label={"Abrir Feed de " + business.business_name}
