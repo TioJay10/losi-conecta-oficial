@@ -94,6 +94,7 @@ function FeedPage() {
   const [commentDraft, setCommentDraft] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  const [commentError, setCommentError] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState("");
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
@@ -294,6 +295,7 @@ function FeedPage() {
 
   async function loadComments(postId: string) {
     setCommentLoading(true);
+    setCommentError((current) => ({ ...current, [postId]: "" }));
 
     try {
       // feed_comments não possui FK para profiles. Buscamos os comentários
@@ -338,8 +340,8 @@ function FeedPage() {
       }));
     } catch (error) {
       console.error("Erro ao carregar comentários:", error);
-      setComments((current) => ({ ...current, [postId]: [] }));
-      setStatusMessage("Não foi possível carregar os comentários agora.");
+      setComments((current) => ({ ...current, [postId]: current[postId] ?? [] }));
+      setCommentError((current) => ({ ...current, [postId]: "Não foi possível carregar os comentários agora. Tente novamente." }));
     } finally {
       setCommentLoading(false);
     }
@@ -348,6 +350,7 @@ function FeedPage() {
   function toggleComments(postId: string) {
     const opening = commentPostId !== postId;
     setShowAllComments(false);
+    setCommentError((current) => ({ ...current, [postId]: "" }));
     setCommentPostId(opening ? postId : null);
     if (opening) void loadComments(postId);
   }
@@ -383,17 +386,43 @@ function FeedPage() {
       setStatusMessage("Entre na sua conta para compartilhar esta publicação.");
       return;
     }
-    if (!profile) {
-      setStatusMessage("Você precisa ter um perfil de fornecedor aprovado para compartilhar no seu Feed.");
-      return;
-    }
     if (actionBusy) return;
 
     setActionBusy("repost-" + post.id);
     try {
+      let shareProfile = profile;
+
+      if (!shareProfile) {
+        const { data: business, error: businessError } = await supabase
+          .from("business_profiles")
+          .select("id,business_name,city,state,logo_url,slug,active,approval_status")
+          .eq("owner_id", userId)
+          .eq("active", true)
+          .eq("approval_status", "approved")
+          .maybeSingle();
+
+        if (businessError) throw businessError;
+        if (!business?.id) {
+          setStatusMessage("Para compartilhar no seu Feed, é necessário ter um perfil de fornecedor aprovado.");
+          return;
+        }
+
+        const { data: service } = await supabase
+          .from("services")
+          .select("categories(name)")
+          .eq("business_id", business.id)
+          .eq("active", true)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        shareProfile = { ...business, main_category: service?.categories?.name ?? null } as FeedProfile;
+        setProfile(shareProfile);
+      }
+
       const originalId = post.original_post_id ?? post.id;
       const { error } = await supabase.rpc("create_feed_post", {
-        p_business_id: profile.id,
+        p_business_id: shareProfile.id,
         p_content: post.content,
         p_media_url: post.media_url,
         p_media_type: post.media_type,
@@ -617,10 +646,11 @@ function FeedPage() {
                       <div id={"feed-comments-" + post.id} className="feed-comment-panel" aria-label="Comentários da publicação">
                         <div className="feed-comment-list">
                           {commentLoading && <span>Carregando comentários...</span>}
-                          {!commentLoading && (comments[post.id] ?? []).length === 0 && (
+                          {!commentLoading && commentError[post.id] && <span className="feed-comment-error">{commentError[post.id]}</span>}
+                          {!commentLoading && !commentError[post.id] && (comments[post.id] ?? []).length === 0 && (
                             <span>Seja o primeiro a comentar.</span>
                           )}
-                          {!commentLoading && (comments[post.id] ?? [])
+                          {!commentLoading && !commentError[post.id] && (comments[post.id] ?? [])
                             .slice(showAllComments ? undefined : 0, showAllComments ? undefined : 3)
                             .map((comment) => (
                               <div key={comment.id} className="feed-comment-item">
@@ -630,7 +660,7 @@ function FeedPage() {
                             ))}
                         </div>
 
-                        {!commentLoading && (comments[post.id] ?? []).length > 3 && (
+                        {!commentLoading && !commentError[post.id] && (comments[post.id] ?? []).length > 3 && (
                           <button
                             type="button"
                             className="feed-comments-toggle"
