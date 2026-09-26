@@ -469,12 +469,18 @@ function FeedPage() {
         mediaUrl = supabase.storage.from("feed-media").getPublicUrl(path).data.publicUrl;
       }
 
+      const activeMentionIds = mentionIds.filter((businessId) => {
+        const supplier = savedSuppliers.find((item) => item.id === businessId);
+        return supplier && text.includes("@" + supplier.business_name);
+      });
+
       const { error } = await supabase.rpc("create_feed_post", {
         p_business_id: currentBusiness.id,
         p_content: text || null,
         p_media_url: mediaUrl,
         p_media_type: mediaType,
         p_original_post_id: null,
+        p_mentioned_business_ids: activeMentionIds.length ? activeMentionIds : null,
       });
 
       if (error) throw error;
