@@ -48,6 +48,34 @@ function FeedIcon({ size = 20 }: { size?: number }) {
   );
 }
 
+function FeedActionIcon({ type }: { type: "like" | "comment" | "share" | "send" }) {
+  const common = {
+    width: 18,
+    height: 18,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.9,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+
+  if (type === "like") {
+    return <svg {...common}><path d="M20.8 8.8c0 5.1-8.8 10.1-8.8 10.1S3.2 13.9 3.2 8.8A4.6 4.6 0 0 1 12 6.1a4.6 4.6 0 0 1 8.8 2.7Z" /></svg>;
+  }
+
+  if (type === "comment") {
+    return <svg {...common}><path d="M20 11.5a7.5 7.5 0 0 1-7.9 7.5 8.6 8.6 0 0 1-3.4-.7L4 20l1.7-3.9A7.2 7.2 0 0 1 4.5 12 7.5 7.5 0 0 1 12 4.5a7.5 7.5 0 0 1 8 7Z" /></svg>;
+  }
+
+  if (type === "share") {
+    return <svg {...common}><path d="m17 3 4 4-4 4" /><path d="M21 7H10a6 6 0 0 0-6 6v1" /><path d="M7 18h4" /></svg>;
+  }
+
+  return <svg {...common}><path d="m21 3-8.5 18-3.2-7.3L2 10.5 21 3Z" /><path d="m9.3 13.7 4.6-4.6" /></svg>;
+}
+
 function FeedPage() {
   const [profile, setProfile] = useState<FeedProfile | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -516,25 +544,29 @@ function FeedPage() {
                     <div className="feed-post-actions">
                       <div className="feed-action-group">
                         <button type="button" className={liked ? "is-liked" : ""} onClick={() => void toggleLike(post)} disabled={actionBusy === "like-" + post.id}>
-                          <span aria-hidden="true">♡</span> Curtir
+                          <span className="feed-action-icon"><FeedActionIcon type="like" /></span>
+                          <span className="feed-action-label">Curtir</span>
                         </button>
                         <small>{post.like_count}</small>
                       </div>
                       <div className="feed-action-group">
                         <button type="button" onClick={() => void toggleComments(post)}>
-                          <span aria-hidden="true">◯</span> Comentar
+                          <span className="feed-action-icon"><FeedActionIcon type="comment" /></span>
+                          <span className="feed-action-label">Comentar</span>
                         </button>
                         <small>{post.comment_count}</small>
                       </div>
                       <div className="feed-action-group">
                         <button type="button" onClick={() => void repostPost(post)} disabled={!profile || actionBusy === "repost-" + post.id}>
-                          <span aria-hidden="true">↻</span> Compartilhar
+                          <span className="feed-action-icon"><FeedActionIcon type="share" /></span>
+                          <span className="feed-action-label">Compartilhar</span>
                         </button>
                         <small>{post.repost_count}</small>
                       </div>
                       <div className="feed-action-group">
                         <button type="button" onClick={() => setSendPostId(sendPostId === post.id ? null : post.id)}>
-                          <span aria-hidden="true">➤</span> Enviar
+                          <span className="feed-action-icon"><FeedActionIcon type="send" /></span>
+                          <span className="feed-action-label">Enviar</span>
                         </button>
                         <small>{post.send_count}</small>
                       </div>
