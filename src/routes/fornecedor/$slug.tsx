@@ -572,6 +572,21 @@ function ProviderPage() {
           </div>
 
           <div className="provider-profile-actions">
+            <Link
+              to="/feed"
+              search={{ fornecedor: business.slug }}
+              className="provider-profile-feed-button"
+              aria-label={"Abrir Feed de " + business.business_name}
+              title={"Feed de " + business.business_name}
+            >
+              <span aria-hidden="true">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 5h14M5 12h10M5 19h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M17 12.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Zm0 0V15l2 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <strong>Feed</strong>
+            </Link>
             <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
             <button type="button" className={"provider-profile-like " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser}>
               <span className="provider-profile-heart" aria-hidden="true">♥</span>
@@ -871,6 +886,8 @@ function ProviderPage() {
         </div>
       )}
       <style>{`
+        .provider-profile-feed-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 16px;border:1px solid #d6b46a;border-radius:12px;background:#07111f;color:#e6c979;text-decoration:none;font-weight:800;box-shadow:0 8px 18px rgba(7,17,31,.12)}
+        .provider-profile-feed-button:hover{background:#0d1b30;color:#f2d991}
         .public-quote-modal-backdrop{z-index:120}
         .public-quote-modal{width:min(680px,calc(100vw - 28px));max-height:88vh;overflow:auto}
         .public-quote-loading{padding:40px;text-align:center;color:#687386}
