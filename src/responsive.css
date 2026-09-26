@@ -14825,3 +14825,23 @@ button.availability-day {
   z-index:10 !important;
   flex:0 0 auto !important;
 }
+
+
+/* PATCH 2026-09-26 — NOVA INCONSISTÊNCIA SEM PERDER O CHAT ATUAL */
+.inconsistency-new-button{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height:40px !important;
+  margin:0 0 12px !important;
+  padding:0 16px !important;
+  border:1px solid #d6b46a !important;
+  border-radius:10px !important;
+  background:#0b182a !important;
+  color:#f0d99a !important;
+  font:700 12px/1 Montserrat,Arial,sans-serif !important;
+  cursor:pointer !important;
+}
+.inconsistency-new-button:hover{
+  background:#13243b !important;
+}
