@@ -858,6 +858,7 @@ function FeedPage() {
       }
 
       await loadFeed(userId);
+      setModalPost((current) => current?.id === post.id ? { ...current, repost_count: current.repost_count + 1 } : current);
       setStatusMessage("Publicação compartilhada no seu Feed.");
     } catch (error) {
       console.error("Erro ao compartilhar publicação:", error);
@@ -888,6 +889,7 @@ function FeedPage() {
         console.error("Erro ao registrar envio:", error);
       } else if ((sendData ?? []).length > 0) {
         setPosts((current) => current.map((item) => item.id === post.id ? { ...item, send_count: item.send_count + 1 } : item));
+        setModalPost((current) => current?.id === post.id ? { ...current, send_count: current.send_count + 1 } : current);
       }
     }
 
@@ -982,6 +984,7 @@ function FeedPage() {
   }
 
   function closePostModal() {
+    if (commentPostId) closeComments();
     setModalPost(null);
   }
 
