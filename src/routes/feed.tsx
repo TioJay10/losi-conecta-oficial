@@ -21,6 +21,7 @@ type FeedPost = {
   media_url: string | null;
   media_type: "image" | "video" | null;
   original_post_id: string | null;
+  active: boolean;
   original_business_name: string | null;
   original_business_slug: string | null;
   original_business_logo_url: string | null;
@@ -247,6 +248,9 @@ function FeedPage() {
   const [modalPost, setModalPost] = useState<FeedPost | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [postMenuId, setPostMenuId] = useState<string | null>(null);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editingPostText, setEditingPostText] = useState("");
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -269,8 +273,65 @@ function FeedPage() {
 
     let loaded = (data ?? []).map((post) => ({
       ...(post as FeedPost),
+      active: true,
       mentions: [],
     }));
+
+    // Publicações ocultas continuam visíveis somente para o próprio autor,
+    // permitindo que ele as edite ou torne visíveis novamente.
+    if (currentUserId) {
+      const { data: hiddenRows, error: hiddenError } = await supabase
+        .from("feed_posts")
+        .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,active,created_at,updated_at")
+        .eq("author_user_id", currentUserId)
+        .eq("active", false)
+        .order("created_at", { ascending: false })
+        .limit(30);
+
+      if (hiddenError) {
+        console.error("Erro ao carregar publicações ocultas:", hiddenError);
+      } else if (hiddenRows?.length) {
+        const businessIds = [...new Set(hiddenRows.map((row) => row.business_id).filter(Boolean))];
+        const { data: hiddenBusinesses } = await supabase
+          .from("business_profiles")
+          .select("id,business_name,slug,city,state,logo_url,active,approval_status")
+          .in("id", businessIds);
+        const businessMap = new Map((hiddenBusinesses ?? []).map((business) => [business.id, business]));
+        const hiddenPosts = hiddenRows
+          .map((row) => {
+            const business = businessMap.get(row.business_id);
+            if (!business) return null;
+            return {
+              id: row.id,
+              author_user_id: row.author_user_id,
+              business_id: row.business_id,
+              content: row.content,
+              media_url: row.media_url,
+              media_type: row.media_type as "image" | "video" | null,
+              original_post_id: row.original_post_id,
+              active: false,
+              original_business_name: null,
+              original_business_slug: null,
+              original_business_logo_url: null,
+              created_at: row.created_at,
+              business_name: business.business_name,
+              slug: business.slug,
+              city: business.city,
+              state: business.state,
+              logo_url: business.logo_url,
+              main_category: null,
+              like_count: 0,
+              comment_count: 0,
+              repost_count: 0,
+              send_count: 0,
+              ranking_score: 0,
+              mentions: [],
+            } as FeedPost;
+          })
+          .filter((post): post is FeedPost => Boolean(post));
+        loaded = [...loaded, ...hiddenPosts];
+      }
+    }
 
     // Para republicações, o banco mantém original_post_id apontando para a
     // publicação original (e não para a republicação intermediária). Buscamos
@@ -448,7 +509,6 @@ function FeedPage() {
   function handleMediaChange(event: ChangeEvent<HTMLInputElement>, type: "image" | "video") {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const maxBytes = type === "video" ? 50 * 1024 * 1024 : 15 * 1024 * 1024;
     if (file.size > maxBytes) {
       setStatusMessage(type === "video" ? "O vídeo deve ter no máximo 50 MB." : "A imagem deve ter no máximo 15 MB.");
@@ -617,6 +677,95 @@ function FeedPage() {
       setStatusMessage("Não foi possível publicar agora.");
     } finally {
       setPublishing(false);
+    }
+  }
+
+  function startEditPost(post: FeedPost) {
+    setPostMenuId(null);
+    setEditingPostId(post.id);
+    setEditingPostText(post.content ?? "");
+  }
+
+  function cancelEditPost() {
+    setEditingPostId(null);
+    setEditingPostText("");
+  }
+
+  async function saveEditPost(post: FeedPost) {
+    if (!userId || post.author_user_id !== userId || actionBusy) return;
+    const content = editingPostText.trim();
+    if (!content && !post.media_url) {
+      setStatusMessage("A publicação precisa ter texto ou mídia.");
+      return;
+    }
+
+    setActionBusy("edit-" + post.id);
+    try {
+      const { data, error } = await supabase
+        .from("feed_posts")
+        .update({ content: content || null, updated_at: new Date().toISOString() })
+        .eq("id", post.id)
+        .eq("author_user_id", userId)
+        .select("id,content,updated_at")
+        .single();
+      if (error) throw error;
+
+      setPosts((current) => current.map((item) => item.id === post.id ? { ...item, content: data.content } : item));
+      setModalPost((current) => current?.id === post.id ? { ...current, content: data.content } : current);
+      cancelEditPost();
+      setStatusMessage("Conteúdo atualizado com sucesso.");
+    } catch (error) {
+      console.error("Erro ao editar publicação:", error);
+      setStatusMessage("Não foi possível editar esta publicação.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
+  async function togglePostVisibility(post: FeedPost) {
+    if (!userId || post.author_user_id !== userId || actionBusy) return;
+    const nextActive = !post.active;
+    setActionBusy("visibility-" + post.id);
+    try {
+      const { error } = await supabase
+        .from("feed_posts")
+        .update({ active: nextActive, updated_at: new Date().toISOString() })
+        .eq("id", post.id)
+        .eq("author_user_id", userId);
+      if (error) throw error;
+
+      setPosts((current) => current.map((item) => item.id === post.id ? { ...item, active: nextActive } : item));
+      setModalPost((current) => current?.id === post.id ? { ...current, active: nextActive } : current);
+      setPostMenuId(null);
+      setStatusMessage(nextActive ? "Conteúdo novamente visível no Feed." : "Conteúdo ocultado para os demais usuários.");
+    } catch (error) {
+      console.error("Erro ao alterar visibilidade da publicação:", error);
+      setStatusMessage("Não foi possível alterar a visibilidade.");
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
+  async function deletePost(post: FeedPost) {
+    if (!userId || post.author_user_id !== userId || actionBusy) return;
+    if (!window.confirm("Excluir esta publicação permanentemente?")) return;
+    setActionBusy("delete-" + post.id);
+    try {
+      const { error } = await supabase
+        .from("feed_posts")
+        .delete()
+        .eq("id", post.id)
+        .eq("author_user_id", userId);
+      if (error) throw error;
+      setPosts((current) => current.filter((item) => item.id !== post.id));
+      setPostMenuId(null);
+      if (modalPost?.id === post.id) closePostModal();
+      setStatusMessage("Publicação excluída com sucesso.");
+    } catch (error) {
+      console.error("Erro ao excluir publicação:", error);
+      setStatusMessage("Não foi possível excluir esta publicação.");
+    } finally {
+      setActionBusy(null);
     }
   }
 
@@ -897,8 +1046,7 @@ function FeedPage() {
     setSendPostId(null);
   }
 
-  function openComments(postId: string) {
-    const postForComments = posts.find((item) => item.id === postId) ?? modalPost;
+  function openComments(postId: string) {    const postForComments = posts.find((item) => item.id === postId) ?? modalPost;
     setCommentPostId(postId);
     if (postForComments) setCommentPostData(postForComments);
     setShowAllComments(true);
@@ -946,7 +1094,7 @@ function FeedPage() {
         return;
       }
 
-      let post = { ...(data as FeedPost), mentions: [] };
+      let post = { ...(data as FeedPost), active: true, mentions: [] };
 
       const { data: mentionRows, error: mentionError } = await supabase
         .from("feed_post_mentions")
@@ -1313,10 +1461,31 @@ function FeedPage() {
                         <span>{[post.city, post.state].filter(Boolean).join(" — ") || "LOSI CONECTA"} · {formatDate(post.created_at)}</span>
                         {post.main_category && <span className="feed-category">{post.main_category}</span>}
                       </div>
+                      {userId === post.author_user_id && (
+                        <div className="feed-post-menu-wrap">
+                          <button type="button" className="feed-post-menu-button" aria-label="Opções da publicação" aria-expanded={postMenuId === post.id} onClick={() => setPostMenuId(postMenuId === post.id ? null : post.id)}>•••</button>
+                          {postMenuId === post.id && (
+                            <div className="feed-post-menu" role="menu">
+                              <button type="button" onClick={() => startEditPost(post)}>Editar conteúdo</button>
+                              <button type="button" onClick={() => void togglePostVisibility(post)}>{post.active ? "Ocultar conteúdo" : "Deixar visível"}</button>
+                              <button type="button" className="danger" onClick={() => void deletePost(post)}>Excluir conteúdo</button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       <Link to="/fornecedor/$slug" params={{ slug: post.slug }} className="feed-profile-link">Ver perfil público</Link>
                     </div>
 
-                    {post.content && <p className="feed-post-text">{renderPostContent(post.content, post.mentions, () => void openPostModal(post.id))}</p>}
+                    {!post.active && userId === post.author_user_id && <div className="feed-hidden-notice">Conteúdo oculto — somente você pode visualizar.</div>}
+                    {editingPostId === post.id ? (
+                      <div className="feed-post-edit-box">
+                        <textarea value={editingPostText} onChange={(event) => setEditingPostText(event.target.value)} maxLength={2000} aria-label="Editar conteúdo da publicação" />
+                        <div className="feed-post-edit-actions">
+                          <button type="button" onClick={cancelEditPost}>Cancelar</button>
+                          <button type="button" className="primary" onClick={() => void saveEditPost(post)} disabled={actionBusy === "edit-" + post.id}>{actionBusy === "edit-" + post.id ? "Salvando..." : "Salvar alterações"}</button>
+                        </div>
+                      </div>
+                    ) : post.content ? <p className="feed-post-text">{renderPostContent(post.content, post.mentions, () => void openPostModal(post.id))}</p> : null}
                     {post.media_url && post.media_type === "image" && <img className="feed-post-media" src={post.media_url} alt="Imagem da publicação" />}
                     {post.media_url && post.media_type === "video" && <video className="feed-post-media" src={post.media_url} controls />}
 
@@ -1397,8 +1566,7 @@ function FeedPage() {
                         className="feed-avatar"
                         aria-label={"Abrir perfil público de " + modalPost.business_name}
                       >
-                        {modalPost.logo_url ? <img src={modalPost.logo_url} alt="" /> : <span>{modalPost.business_name.slice(0, 1).toUpperCase()}</span>}
-                      </Link>
+                        {modalPost.logo_url ? <img src={modalPost.logo_url} alt="" /> : <span>{modalPost.business_name.slice(0, 1).toUpperCase()}</span>}                      </Link>
                       <div className="feed-post-identity">
                         <Link to="/fornecedor/$slug" params={{ slug: modalPost.slug }} className="feed-modal-author-link">
                           <strong>{modalPost.business_name}</strong>
@@ -1406,10 +1574,31 @@ function FeedPage() {
                         <span>{[modalPost.city, modalPost.state].filter(Boolean).join(" — ") || "LOSI CONECTA"} · {formatDate(modalPost.created_at)}</span>
                         {modalPost.main_category && <span className="feed-category">{modalPost.main_category}</span>}
                       </div>
+                      {userId === modalPost.author_user_id && (
+                        <div className="feed-post-menu-wrap">
+                          <button type="button" className="feed-post-menu-button" aria-label="Opções da publicação" aria-expanded={postMenuId === modalPost.id} onClick={() => setPostMenuId(postMenuId === modalPost.id ? null : modalPost.id)}>•••</button>
+                          {postMenuId === modalPost.id && (
+                            <div className="feed-post-menu" role="menu">
+                              <button type="button" onClick={() => startEditPost(modalPost)}>Editar conteúdo</button>
+                              <button type="button" onClick={() => void togglePostVisibility(modalPost)}>{modalPost.active ? "Ocultar conteúdo" : "Deixar visível"}</button>
+                              <button type="button" className="danger" onClick={() => void deletePost(modalPost)}>Excluir conteúdo</button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       <Link to="/fornecedor/$slug" params={{ slug: modalPost.slug }} className="feed-profile-link">Ver perfil público</Link>
                     </div>
 
-                    {modalPost.content && (
+                    {!modalPost.active && userId === modalPost.author_user_id && <div className="feed-hidden-notice">Conteúdo oculto — somente você pode visualizar.</div>}
+                    {editingPostId === modalPost.id ? (
+                      <div className="feed-post-edit-box">
+                        <textarea value={editingPostText} onChange={(event) => setEditingPostText(event.target.value)} maxLength={2000} aria-label="Editar conteúdo da publicação" />
+                        <div className="feed-post-edit-actions">
+                          <button type="button" onClick={cancelEditPost}>Cancelar</button>
+                          <button type="button" className="primary" onClick={() => void saveEditPost(modalPost)} disabled={actionBusy === "edit-" + modalPost.id}>{actionBusy === "edit-" + modalPost.id ? "Salvando..." : "Salvar alterações"}</button>
+                        </div>
+                      </div>
+                    ) : modalPost.content && (
                       <p className="feed-post-text">
                         {renderPostContent(modalPost.content, modalPost.mentions, () => void openPostModal(modalPost.id))}
                       </p>
