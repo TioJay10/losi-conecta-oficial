@@ -166,6 +166,10 @@ function buildFeedSequence(posts: FeedPost[]) {
 
 function FeedPage() {
   const [profile, setProfile] = useState<FeedProfile | null>(null);
+  const [targetBusiness, setTargetBusiness] = useState<FeedProfile | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<Array<{ id: string; post_id: string; requester_user_id: string; post: FeedPost | null; requester_name: string }>>([]);
+  const [targetFollowed, setTargetFollowed] = useState(false);
+  const [targetMode, setTargetMode] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -201,11 +205,12 @@ function FeedPage() {
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
-  async function loadFeed(currentUserId: string | null) {
+  async function loadFeed(currentUserId: string | null, filterBusinessId: string | null = null) {
     setLoading(true);
     const { data, error } = await supabase
       .from("feed_post_rankings")
       .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,created_at,business_name,slug,city,state,logo_url,main_category,like_count,comment_count,repost_count,send_count,ranking_score")
+      .eq(filterBusinessId ? "business_id" : "id", filterBusinessId ?? "00000000-0000-0000-0000-000000000000")
       .order("ranking_score", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(30);
@@ -410,6 +415,35 @@ function FeedPage() {
     async function initialize() {
       const { data } = await supabase.auth.getSession();
       const currentUserId = data.session?.user.id ?? null;
+      const params = new URLSearchParams(window.location.search);
+      const supplierSlug = params.get("fornecedor");
+      let scopedBusinessId: string | null = null;
+
+      if (supplierSlug) {
+        const { data: scopedBusiness } = await supabase
+          .from("business_profiles")
+          .select("id,business_name,city,state,logo_url,slug,active,approval_status")
+          .eq("slug", supplierSlug)
+          .eq("active", true)
+          .eq("approval_status", "approved")
+          .maybeSingle();
+        if (scopedBusiness?.id) {
+          scopedBusinessId = scopedBusiness.id;
+          if (mounted) {
+            setTargetMode(true);
+            setTargetBusiness(scopedBusiness as FeedProfile);
+          }
+          if (currentUserId) {
+            const { data: followRow } = await supabase
+              .from("favorites")
+              .select("business_id")
+              .eq("user_id", currentUserId)
+              .eq("business_id", scopedBusiness.id)
+              .maybeSingle();
+            if (mounted) setTargetFollowed(Boolean(followRow));
+          }
+        }
+      }
 
       if (!mounted) return;
       setUserId(currentUserId);
@@ -442,7 +476,34 @@ function FeedPage() {
         }
       }
 
-      await loadFeed(currentUserId);
+      await loadFeed(currentUserId, scopedBusinessId);
+      if (scopedBusinessId && currentUserId) {
+        const { data: ownedTarget } = await supabase
+          .from("business_profiles")
+          .select("id")
+          .eq("id", scopedBusinessId)
+          .eq("owner_id", currentUserId)
+          .maybeSingle();
+        if (ownedTarget?.id) {
+          const { data: requests } = await supabase
+            .from("supplier_feed_publication_requests")
+            .select("id,post_id,requester_user_id,created_at")
+            .eq("target_business_id", scopedBusinessId)
+            .eq("status", "pending")
+            .order("created_at", { ascending: false });
+          if (requests?.length) {
+            const postIds = requests.map((r) => r.post_id);
+            const requesterIds = requests.map((r) => r.requester_user_id);
+            const [{ data: requestPosts }, { data: requesterProfiles }] = await Promise.all([
+              supabase.from("feed_posts").select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,active,created_at").in("id", postIds),
+              supabase.from("business_profiles").select("owner_id,business_name").in("owner_id", requesterIds),
+            ]);
+            const requesterMap = new Map((requesterProfiles ?? []).map((p) => [p.owner_id, p.business_name]));
+            const postMap = new Map((requestPosts ?? []).map((p) => [p.id, p as unknown as FeedPost]));
+            if (mounted) setPendingRequests(requests.map((r) => ({ ...r, post: postMap.get(r.post_id) ?? null, requester_name: requesterMap.get(r.requester_user_id) ?? "Fornecedor" })));
+          } else if (mounted) setPendingRequests([]);
+        }
+      }
       if (mounted) setAuthChecked(true);
     }
 
@@ -600,14 +661,24 @@ function FeedPage() {
         return supplier && text.includes("@" + supplier.business_name);
       });
 
-      const { error } = await supabase.rpc("create_feed_post", {
-        p_business_id: currentBusiness.id,
-        p_content: text || null,
-        p_media_url: mediaUrl,
-        p_media_type: mediaType,
-        p_original_post_id: null,
-        p_mentioned_business_ids: activeMentionIds.length ? activeMentionIds : null,
-      });
+      const rpcName = targetMode && targetBusiness ? "create_supplier_feed_publication" : "create_feed_post";
+      const rpcArgs = targetMode && targetBusiness
+        ? {
+            p_target_business_id: targetBusiness.id,
+            p_content: text || null,
+            p_media_url: mediaUrl,
+            p_media_type: mediaType,
+            p_mentioned_business_ids: activeMentionIds.length ? activeMentionIds : null,
+          }
+        : {
+            p_business_id: currentBusiness.id,
+            p_content: text || null,
+            p_media_url: mediaUrl,
+            p_media_type: mediaType,
+            p_original_post_id: null,
+            p_mentioned_business_ids: activeMentionIds.length ? activeMentionIds : null,
+          };
+      const { error } = await supabase.rpc(rpcName, rpcArgs);
 
       if (error) throw error;
 
@@ -617,8 +688,8 @@ function FeedPage() {
       setMentionIds([]);
       setMentionSuggestions([]);
       setMentionStart(null);
-      await loadFeed(currentUserId);
-      setStatusMessage("Publicação realizada com sucesso.");
+      await loadFeed(currentUserId, targetBusiness?.id ?? null);
+      setStatusMessage(targetMode ? "Publicação enviada para aprovação do fornecedor." : "Publicação realizada com sucesso.");
     } catch (error) {
       console.error("Erro ao publicar no Feed:", error);
       setStatusMessage("Não foi possível publicar agora.");
@@ -895,6 +966,22 @@ function FeedPage() {
       setStatusMessage("Não foi possível publicar o comentário.");
     } finally {
       setActionBusy(null);
+    }
+  }
+
+  async function reviewPendingPublication(requestId: string, decision: "approved" | "rejected") {
+    try {
+      const { error } = await supabase.rpc("review_supplier_feed_publication", {
+        p_request_id: requestId,
+        p_decision: decision,
+      });
+      if (error) throw error;
+      setPendingRequests((current) => current.filter((item) => item.id !== requestId));
+      if (decision === "approved" && targetBusiness) await loadFeed(userId, targetBusiness.id);
+      setStatusMessage(decision === "approved" ? "Publicação aprovada e adicionada ao Feed." : "Publicação recusada.");
+    } catch (error) {
+      console.error("Erro ao moderar publicação do Feed:", error);
+      setStatusMessage("Não foi possível concluir a moderação.");
     }
   }
 
@@ -1176,20 +1263,53 @@ function FeedPage() {
         <div className="feed-layout-menu-spacer" aria-hidden="true" />
         <div className="feed-main">
           <div className="feed-intro">
-            <span className="feed-kicker">LOSI CONECTA</span>
-            <h1>Feed profissional</h1>
-            <p>Publicações de fornecedores, trabalhos, eventos e novidades.</p>
+            <span className="feed-kicker">{targetMode ? "FEED DO FORNECEDOR" : "LOSI CONECTA"}</span>
+            <h1>{targetMode && targetBusiness ? "Feed de " + targetBusiness.business_name : "Feed profissional"}</h1>
+            <p>{targetMode ? "Publicações deste fornecedor, incluindo conteúdos enviados por fornecedores que ele segue e aprova." : "Publicações de fornecedores, trabalhos, eventos e novidades."}</p>
           </div>
 
-          {authChecked && profile ? (
+          {targetMode && targetBusiness && pendingRequests.length > 0 && (
+            <section className="feed-composer" aria-label="Publicações pendentes de aprovação">
+              <div className="feed-composer-head">
+                <div className="feed-avatar"><span>✓</span></div>
+                <div className="feed-composer-identity">
+                  <strong>Publicações aguardando aprovação</strong>
+                  <span>{pendingRequests.length} publicação(ões) pendente(s)</span>
+                </div>
+              </div>
+              <div className="feed-pending-list">
+                {pendingRequests.map((request) => (
+                  <article key={request.id} className="feed-pending-item">
+                    <strong>{request.requester_name}</strong>
+                    {request.post?.content && <p>{request.post.content}</p>}
+                    {request.post?.media_url && request.post.media_type === "image" && <img src={request.post.media_url} alt="Conteúdo pendente" />}
+                    {request.post?.media_url && request.post.media_type === "video" && <video src={request.post.media_url} controls />}
+                    <div className="feed-post-edit-actions">
+                      <button type="button" onClick={() => void reviewPendingPublication(request.id, "rejected")}>Recusar</button>
+                      <button type="button" className="primary" onClick={() => void reviewPendingPublication(request.id, "approved")}>Aceitar publicação</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {targetMode && targetBusiness && userId && profile && profile.id !== targetBusiness.id && !targetFollowed && (
+            <section className="feed-login-card">
+              <strong>Siga este fornecedor para enviar uma publicação.</strong>
+              <p>Somente fornecedores aprovados que seguem este fornecedor podem solicitar publicações no Feed dele.</p>
+            </section>
+          )}
+
+          {authChecked && profile && (!targetMode || (targetBusiness && profile.id !== targetBusiness.id && targetFollowed)) ? (
             <section className="feed-composer" aria-label="Criar publicação">
               <div className="feed-composer-head">
                 <div className="feed-avatar">
                   {profile.logo_url ? <img src={profile.logo_url} alt="" /> : <span>{profile.business_name.slice(0, 1).toUpperCase()}</span>}
                 </div>
                 <div className="feed-composer-identity">
-                  <strong>{profile.business_name}</strong>
-                  <span>{location || "Fornecedor LOSI CONECTA"}</span>
+                  <strong>{targetMode && targetBusiness ? "Publicar no Feed de " + targetBusiness.business_name : profile.business_name}</strong>
+                  <span>{targetMode ? "Sua publicação ficará aguardando a aprovação do fornecedor." : (location || "Fornecedor LOSI CONECTA")}</span>
                   {profile.main_category && <span className="feed-category">{profile.main_category}</span>}
                 </div>
               </div>
@@ -1199,7 +1319,7 @@ function FeedPage() {
                   ref={postTextRef}
                   value={postText}
                   onChange={handlePostTextChange}
-                  placeholder="No que você está trabalhando? Use @ para marcar fornecedores salvos."
+                  placeholder={targetMode ? "Escreva o conteúdo que deseja enviar para este Feed..." : "No que você está trabalhando? Use @ para marcar fornecedores salvos."}
                   aria-label="Texto da publicação"
                   maxLength={2000}
                 />
@@ -1306,7 +1426,7 @@ function FeedPage() {
                   <input ref={videoInputRef} hidden type="file" accept="video/*" onChange={(event) => handleMediaChange(event, "video")} />
                 </div>
                 <button type="button" className="feed-publish-button" onClick={() => void publishPost()} disabled={publishing || (!postText.trim() && !selectedMedia)}>
-                  {publishing ? "Publicando..." : "Publicar"}
+                  {publishing ? "Enviando..." : (targetMode ? "Enviar para aprovação" : "Publicar")}
                 </button>
               </div>
             </section>
