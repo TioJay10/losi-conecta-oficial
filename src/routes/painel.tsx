@@ -1212,7 +1212,7 @@ function DashboardPage() {
                       boxShadow: "0 8px 18px rgba(7,17,31,.16)",
                     }}
                   >
-                    {notificationPopup.link ? "Ver benefício" : "Ver notificação"}
+                    {notificationPopup.type.startsWith("feed_") ? "Ver publicação" : notificationPopup.link ? "Ver benefício" : "Ver notificação"}
                   </button>
                   <button
                     type="button"
