@@ -1,4 +1,4 @@
-import { Component, useEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react";
+import { Component, useEffect, useMemo, useRef, useState, type ErrorInfo, type KeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../lib/supabase";
 import { OnlineStatus } from "./OnlinePresence";
@@ -39,6 +39,16 @@ type Props = {
   userId: string | null;
   onRequireAuth: () => void;
 };
+
+function getInitial(value: unknown, fallback = "U"): string {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text ? text.slice(0, 1).toUpperCase() : fallback;
+}
+
+function safeName(value: unknown, fallback = "Usuário"): string {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text || fallback;
+}
 
 function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
   const [open, setOpen] = useState(false);
@@ -369,7 +379,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     setSending(false);
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       void sendMessage();
@@ -420,7 +430,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
               <div className="provider-chat-header-profile">
                 <div className="provider-chat-header-identity">
                   <div className="provider-chat-avatar">
-                  {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
+                  {business.logo_url ? <img src={business.logo_url} alt="" /> : getInitial(business.business_name, "F")}
                   </div>
                   <div className="provider-chat-header-copy">
                     <strong id="provider-chat-title">{business.business_name}</strong>
@@ -440,7 +450,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                       const participantId = isSupplier ? activeConversation.requester_id : activeConversation.supplier_id;
                       const participant = profiles[participantId];
                       const supplier = supplierProfiles[participantId];
-                      const name = supplier?.business_name || participant?.full_name || business.business_name;
+                      const name = safeName(supplier?.business_name || participant?.full_name || business.business_name, "Usuário");
                       const avatar = supplier?.logo_url || participant?.avatar_url || null;
                       return <>
                         <div className="provider-chat-participant-avatar">
@@ -449,7 +459,6 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                         <div className="provider-chat-participant-copy">
                           <strong>{name}</strong>
                           <span>{supplierProfiles[participantId] ? "Fornecedor" : "Perfil pessoal"}</span>
-                        <OnlineStatus userId={participantId} compact />
                         </div>
                       </>;
                     })()}
@@ -467,7 +476,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                             const sender = getSenderIdentity(message.sender_id);
                             return <>
                               <div className="provider-chat-message-avatar">
-                                {sender.avatar ? <img src={sender.avatar} alt={sender.name} /> : sender.name.slice(0, 1).toUpperCase()}
+                                {sender.avatar ? <img src={sender.avatar} alt={sender.name} /> : getInitial(sender.name)}
                               </div>
                               <span className="provider-chat-message-sender-name">{sender.name}</span>
                             </>;
@@ -520,7 +529,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                         setActiveConversation(conversation);
                       }}>
                       <div className="provider-chat-conversation-avatar">
-                        {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
+                        {business.logo_url ? <img src={business.logo_url} alt="" /> : getInitial(business.business_name, "F")}
                       </div>
                       <div className="provider-chat-conversation-copy">
                         <strong>{isSupplier ? "Cliente" : business.business_name}</strong>
