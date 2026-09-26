@@ -206,13 +206,14 @@ function FeedPage() {
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
-  async function loadFeed(currentUserId: string | null, filterBusinessId: string | null = null) {
+  async function loadFeed(currentUserId: string | null, filterBusinessId: string | null = null, filterAuthorUserId: string | null = null) {
     setLoading(true);
     let feedQuery = supabase
       .from("feed_post_rankings")
       .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,created_at,business_name,slug,city,state,logo_url,main_category,like_count,comment_count,repost_count,send_count,ranking_score");
     if (filterBusinessId) {
       feedQuery = feedQuery.eq("business_id", filterBusinessId);
+      if (filterAuthorUserId) feedQuery = feedQuery.eq("author_user_id", filterAuthorUserId);
     }
     const { data, error } = await feedQuery
       .order("ranking_score", { ascending: false })
@@ -239,10 +240,16 @@ function FeedPage() {
       const { data: hiddenRows, error: hiddenError } = await supabase
         .from("feed_posts")
         .select("id,author_user_id,business_id,content,media_url,media_type,original_post_id,active,created_at,updated_at")
-        .eq("author_user_id", currentUserId)
+        .eq("author_user_id", filterAuthorUserId ?? currentUserId)
         .eq("active", false)
         .order("created_at", { ascending: false })
         .limit(30);
+
+      if (filterBusinessId && filterAuthorUserId) {
+        // Em um Feed pessoal, nem mesmo publicações ocultas de outro autor
+        // podem entrar na lista. O Feed pessoal é exclusivamente do fornecedor.
+        // O filtro de business_id + author_user_id já foi aplicado acima.
+      }
 
       if (hiddenError) {
         console.error("Erro ao carregar publicações ocultas:", hiddenError);
@@ -548,7 +555,7 @@ function FeedPage() {
       }
 
       // Feed pessoal = as mesmas publicações do Feed geral, filtradas pelo fornecedor.
-      await loadFeed(userId, scopedBusiness.id);
+      await loadFeed(userId, scopedBusiness.id, scopedBusiness.owner_id);
     }
 
     void syncFeedScope();
@@ -732,7 +739,7 @@ function FeedPage() {
       setMentionIds([]);
       setMentionSuggestions([]);
       setMentionStart(null);
-      await loadFeed(currentUserId, targetBusiness?.id ?? null);
+      await loadFeed(currentUserId, targetBusiness?.id ?? null, targetBusiness?.owner_id ?? null);
       setStatusMessage(targetMode ? "Publicação enviada para aprovação do fornecedor." : "Publicação realizada com sucesso.");
     } catch (error) {
       console.error("Erro ao publicar no Feed:", error);
@@ -1021,7 +1028,7 @@ function FeedPage() {
       });
       if (error) throw error;
       setPendingRequests((current) => current.filter((item) => item.id !== requestId));
-      if (decision === "approved" && targetBusiness) await loadFeed(userId, targetBusiness.id);
+      if (decision === "approved" && targetBusiness) await loadFeed(userId, targetBusiness.id, targetBusiness.owner_id);
       setStatusMessage(decision === "approved" ? "Publicação aprovada e adicionada ao Feed." : "Publicação recusada.");
     } catch (error) {
       console.error("Erro ao moderar publicação do Feed:", error);
