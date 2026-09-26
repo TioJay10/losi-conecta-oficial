@@ -36,6 +36,7 @@ type FeedPost = {
   repost_count: number;
   send_count: number;
   ranking_score: number;
+  mentions: Array<{ business_id: string; business_name: string; slug: string }>;
 };
 
 export const Route = createFileRoute("/feed")({
@@ -77,6 +78,56 @@ function FeedActionIcon({ type }: { type: "like" | "comment" | "share" | "send" 
   }
 
   return <svg {...common}><path d="m21 3-8.5 18-3.2-7.3L2 10.5 21 3Z" /><path d="m9.3 13.7 4.6-4.6" /></svg>;
+}
+
+
+function renderPostContent(
+  content: string,
+  mentions: Array<{ business_id: string; business_name: string; slug: string }>,
+) {
+  if (!mentions.length) return content;
+
+  const mentionTokens = mentions
+    .map((mention) => ({ ...mention, token: "@" + mention.business_name }))
+    .sort((a, b) => b.token.length - a.token.length);
+
+  const nodes: Array<string | JSX.Element> = [];
+  let remaining = content;
+
+  while (remaining) {
+    let matchIndex = -1;
+    let matched: (typeof mentionTokens)[number] | null = null;
+
+    for (const mention of mentionTokens) {
+      const index = remaining.indexOf(mention.token);
+      if (index >= 0 && (matchIndex === -1 || index < matchIndex)) {
+        matchIndex = index;
+        matched = mention;
+      }
+    }
+
+    if (!matched || matchIndex === -1) {
+      nodes.push(remaining);
+      break;
+    }
+
+    if (matchIndex > 0) nodes.push(remaining.slice(0, matchIndex));
+
+    nodes.push(
+      <Link
+        key={matched.business_id + "-" + matchIndex + "-" + remaining.length}
+        to="/fornecedor/$slug"
+        params={{ slug: matched.slug }}
+        className="feed-mention-link"
+      >
+        {matched.token}
+      </Link>,
+    );
+
+    remaining = remaining.slice(matchIndex + matched.token.length);
+  }
+
+  return nodes;
 }
 
 function buildFeedSequence(posts: FeedPost[]) {
@@ -211,7 +262,10 @@ function FeedPage() {
       return;
     }
 
-    let loaded = (data ?? []) as FeedPost[];
+    let loaded = (data ?? []).map((post) => ({
+      ...(post as FeedPost),
+      mentions: [],
+    }));
 
     // Para republicações, o banco mantém original_post_id apontando para a
     // publicação original (e não para a republicação intermediária). Buscamos
@@ -265,6 +319,50 @@ function FeedPage() {
               original_business_logo_url: originalBusiness?.logo_url ?? null,
             };
           });
+        }
+      }
+    }
+
+    // Carrega as marcações reais da publicação para transformar somente
+    // os fornecedores efetivamente mencionados em links para o perfil público.
+    const postIds = loaded.map((post) => post.id);
+    if (postIds.length) {
+      const { data: mentionRows, error: mentionError } = await supabase
+        .from("feed_post_mentions")
+        .select("post_id,business_id")
+        .in("post_id", postIds);
+
+      if (mentionError) {
+        console.error("Erro ao carregar marcações do Feed:", mentionError);
+      } else if (mentionRows?.length) {
+        const mentionedBusinessIds = [...new Set(mentionRows.map((row) => row.business_id).filter(Boolean))];
+        const { data: mentionedBusinesses, error: mentionedBusinessError } = await supabase
+          .from("business_profiles")
+          .select("id,business_name,slug")
+          .in("id", mentionedBusinessIds)
+          .eq("active", true)
+          .eq("approval_status", "approved");
+
+        if (mentionedBusinessError) {
+          console.error("Erro ao carregar fornecedores mencionados:", mentionedBusinessError);
+        } else {
+          const mentionedBusinessMap = new Map(
+            (mentionedBusinesses ?? []).map((business) => [business.id, business]),
+          );
+          const mentionsByPost = new Map<string, Array<{ business_id: string; business_name: string; slug: string }>>();
+
+          for (const row of mentionRows) {
+            const business = mentionedBusinessMap.get(row.business_id);
+            if (!business?.business_name || !business.slug) continue;
+            const list = mentionsByPost.get(row.post_id) ?? [];
+            list.push({ business_id: business.id, business_name: business.business_name, slug: business.slug });
+            mentionsByPost.set(row.post_id, list);
+          }
+
+          loaded = loaded.map((post) => ({
+            ...post,
+            mentions: mentionsByPost.get(post.id) ?? [],
+          }));
         }
       }
     }
@@ -1053,7 +1151,7 @@ function FeedPage() {
                       <Link to="/fornecedor/$slug" params={{ slug: post.slug }} className="feed-profile-link">Ver perfil público</Link>
                     </div>
 
-                    {post.content && <p className="feed-post-text">{post.content}</p>}
+                    {post.content && <p className="feed-post-text">{renderPostContent(post.content, post.mentions)}</p>}
                     {post.media_url && post.media_type === "image" && <img className="feed-post-media" src={post.media_url} alt="Imagem da publicação" />}
                     {post.media_url && post.media_type === "video" && <video className="feed-post-media" src={post.media_url} controls />}
 
