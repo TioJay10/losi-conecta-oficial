@@ -44,6 +44,7 @@ function formatDate(value: string) {
 
 export function InconsistencyUserChat({ userId }: { userId: string }) {
   const [conversation, setConversation] = useState<InconsistencyConversation | null>(null);
+  const [conversations, setConversations] = useState<InconsistencyConversation[]>([]);
   const [messages, setMessages] = useState<InconsistencyMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -63,9 +64,7 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
       .from("inconsistency_conversations")
       .select("id,user_id,title,issue_type,description,status,admin_viewed_at,user_viewed_at,created_at,updated_at")
       .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Erro ao carregar notificação de inconsistência:", error);
@@ -74,10 +73,19 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
       return;
     }
 
-    const row = data as InconsistencyConversation | null;
+    const rows = (data ?? []) as InconsistencyConversation[];
+    setConversations(rows);
+    const row = rows[0] ?? null;
     setConversation(row);
     if (row) await loadMessages(row.id);
     setLoading(false);
+  }
+
+  async function openConversation(row: InconsistencyConversation) {
+    setFeedback("");
+    setCreatingNew(false);
+    setConversation(row);
+    await loadMessages(row.id);
   }
 
   async function loadMessages(conversationId: string) {
@@ -154,6 +162,7 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
 
     const row = data as InconsistencyConversation;
     setConversation(row);
+    setConversations((current) => [row, ...current.filter((item) => item.id !== row.id)]);
     await loadMessages(row.id);
     setCreatingNew(false);
     setTitle("");
@@ -229,9 +238,37 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
 
   return (
     <div className="inconsistency-page-shell">
-      <button type="button" className="inconsistency-new-button" onClick={startNewInconsistency}>
-        + Notificar nova inconsistência
-      </button>
+      <div className="inconsistency-history">
+        <div className="inconsistency-history-header">
+          <div>
+            <strong>Minhas inconsistências</strong>
+            <span>Consulte as ocorrências que você já enviou ao administrador.</span>
+          </div>
+          <button type="button" className="inconsistency-new-button" onClick={startNewInconsistency}>
+            + Nova inconsistência
+          </button>
+        </div>
+        <div className="inconsistency-history-list">
+          {conversations.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={"inconsistency-history-item " + (conversation?.id === item.id && !creatingNew ? "is-selected" : "")}
+              onClick={() => void openConversation(item)}
+            >
+              <span className="inconsistency-history-item-main">
+                <strong>{item.title}</strong>
+                <span>{item.issue_type} · {formatDate(item.created_at)}</span>
+              </span>
+              <span className={"inconsistency-history-status status-" + item.status}>
+                {item.status === "resolved" ? "Encerrada" : item.status === "new" ? "Nova" : "Em atendimento"}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <section className="inconsistency-chat">
       <section className="inconsistency-chat">
         <header className="inconsistency-chat-header">
           <div className="inconsistency-chat-identity">
