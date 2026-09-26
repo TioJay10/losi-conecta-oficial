@@ -15237,3 +15237,7 @@ button.availability-day {
     height:29px !important;
   }
 }
+
+
+/* FEED — erro de comentários deve ficar visível no próprio painel */
+.feed-comment-error{display:block;color:#9b3f35 !important;font-size:11px;line-height:1.5;font-weight:700}
