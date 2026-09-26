@@ -116,7 +116,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "sounds" | "communication" | "activity" | "customization" | "inconsistencies">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "sounds" | "referenceImages" | "communication" | "activity" | "customization" | "inconsistencies">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -173,6 +173,13 @@ function AdminPage() {
   const [notificationSoundName, setNotificationSoundName] = useState("");
   const [notificationSoundMessage, setNotificationSoundMessage] = useState("");
   const [notificationSoundSaving, setNotificationSoundSaving] = useState(false);
+  const [referenceImages, setReferenceImages] = useState<Array<{id:string;name:string;usage_location:string;notes:string|null;file_path:string;public_url:string;mime_type:string;file_size:number;created_at:string}>>([]);
+  const [referenceImageFile, setReferenceImageFile] = useState<File | null>(null);
+  const [referenceImageName, setReferenceImageName] = useState("");
+  const [referenceImageUsage, setReferenceImageUsage] = useState("");
+  const [referenceImageNotes, setReferenceImageNotes] = useState("");
+  const [referenceImageSaving, setReferenceImageSaving] = useState(false);
+  const [referenceImageMessage, setReferenceImageMessage] = useState("");
   const [auditLogs, setAuditLogs] = useState<Array<{id:string;action:string;entity_type:string;entity_name:string|null;details:Record<string, unknown>;created_at:string;admin_name:string|null}>>([]);
   const [activitySearch, setActivitySearch] = useState("");
   const [activityActionFilter, setActivityActionFilter] = useState("all");
@@ -243,6 +250,9 @@ function AdminPage() {
       setHomeCustomization({ hero_title: customizationMap.hero_title ?? "", hero_subtitle: customizationMap.hero_subtitle ?? "", hero_button_text: customizationMap.hero_button_text ?? "", color_background: customizationMap.color_background ?? "#0B182A", color_primary: customizationMap.color_primary ?? "#D4AF37", color_secondary: customizationMap.color_secondary ?? "#A4864D", color_text: customizationMap.color_text ?? "#172033", color_button: customizationMap.color_button ?? "#0B182A", color_button_text: customizationMap.color_button_text ?? "#FFFFFF" });
       setHomeCustomizationDefaults({ hero_title: customizationDefaultsMap.hero_title ?? "", hero_subtitle: customizationDefaultsMap.hero_subtitle ?? "", hero_button_text: customizationDefaultsMap.hero_button_text ?? "", color_background: customizationDefaultsMap.color_background ?? "#0B182A", color_primary: customizationDefaultsMap.color_primary ?? "#D4AF37", color_secondary: customizationDefaultsMap.color_secondary ?? "#A4864D", color_text: customizationDefaultsMap.color_text ?? "#172033", color_button: customizationDefaultsMap.color_button ?? "#0B182A", color_button_text: customizationDefaultsMap.color_button_text ?? "#FFFFFF" });
       const { data: soundsData, error: soundsError } = await supabase.from("notification_sounds").select("id,name,file_path,public_url,active,created_at").order("created_at", { ascending: false });
+      const { data: referenceImagesData, error: referenceImagesError } = await supabase.from("admin_reference_images").select("id,name,usage_location,notes,file_path,public_url,mime_type,file_size,created_at").order("created_at", { ascending: false });
+      if (referenceImagesError) setDataError(referenceImagesError.message);
+      setReferenceImages((referenceImagesData ?? []) as typeof referenceImages);
       if (soundsError) setDataError(soundsError.message);
       setNotificationSounds((soundsData ?? []) as typeof notificationSounds);
       setStats({users:usersResult.data?.length??0,businesses:businessesResult.data?.length??0,categories:categoriesResult.data?.length??0,services:servicesResult.data?.length??0,reviews:reviewsResult.data?.length??0});
@@ -259,7 +269,7 @@ function AdminPage() {
     document.addEventListener("visibilitychange", handleRefresh);
 
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","inconsistencies","sounds","communication","activity","customization"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","inconsistencies","sounds","referenceImages","communication","activity","customization"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -393,6 +403,60 @@ function AdminPage() {
       setNotificationSoundMessage(error instanceof Error ? error.message : "Não foi possível enviar o som.");
     } finally {
       setNotificationSoundSaving(false);
+    }
+  }
+
+  async function uploadReferenceImage() {
+    if (!user || !referenceImageFile || referenceImageSaving) return;
+    const file = referenceImageFile;
+    if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
+      setReferenceImageMessage(file.size > 10 * 1024 * 1024 ? "A imagem deve ter no máximo 10 MB." : "Selecione uma imagem válida.");
+      return;
+    }
+    if (!referenceImageName.trim() || !referenceImageUsage.trim()) {
+      setReferenceImageMessage("Informe o nome da imagem e onde ela será usada.");
+      return;
+    }
+    setReferenceImageSaving(true);
+    setReferenceImageMessage("");
+    try {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const filePath = "references/" + crypto.randomUUID() + "." + extension;
+      const normalizedMimeType = file.type === "image/jpg" ? "image/jpeg" : file.type;
+      const { error: uploadError } = await supabase.storage.from("admin-reference-images").upload(filePath, file, { contentType: normalizedMimeType, upsert: false });
+      if (uploadError) throw new Error(uploadError.message);
+      const { data: publicData } = supabase.storage.from("admin-reference-images").getPublicUrl(filePath);
+      const { data, error } = await supabase.from("admin_reference_images").insert({ name: referenceImageName.trim(), usage_location: referenceImageUsage.trim(), notes: referenceImageNotes.trim() || null, file_path: filePath, public_url: publicData.publicUrl, mime_type: normalizedMimeType, file_size: file.size, created_by: user.id }).select("id,name,usage_location,notes,file_path,public_url,mime_type,file_size,created_at").single();
+      if (error) { await supabase.storage.from("admin-reference-images").remove([filePath]); throw new Error(error.message); }
+      setReferenceImages(current => [data as typeof referenceImages[number], ...current]);
+      setReferenceImageFile(null);
+      setReferenceImageName("");
+      setReferenceImageUsage("");
+      setReferenceImageNotes("");
+      setReferenceImageMessage("Imagem de referência enviada com sucesso.");
+    } catch (error) {
+      setReferenceImageMessage(error instanceof Error ? error.message : "Não foi possível enviar a imagem.");
+    } finally {
+      setReferenceImageSaving(false);
+    }
+  }
+
+  async function deleteReferenceImage(image: typeof referenceImages[number]) {
+    if (referenceImageSaving) return;
+    if (!window.confirm(`Excluir a imagem de referência "${image.name}"? O arquivo também será removido do armazenamento.`)) return;
+    setReferenceImageSaving(true);
+    setReferenceImageMessage("");
+    try {
+      const { error: storageError } = await supabase.storage.from("admin-reference-images").remove([image.file_path]);
+      if (storageError) throw new Error(storageError.message);
+      const { error } = await supabase.from("admin_reference_images").delete().eq("id", image.id);
+      if (error) throw new Error(error.message);
+      setReferenceImages(current => current.filter(item => item.id !== image.id));
+      setReferenceImageMessage("Imagem excluída e removida do armazenamento.");
+    } catch (error) {
+      setReferenceImageMessage(error instanceof Error ? error.message : "Não foi possível excluir a imagem.");
+    } finally {
+      setReferenceImageSaving(false);
     }
   }
 
@@ -894,6 +958,7 @@ function AdminPage() {
     { id: "notifications" as const, label: "Notificações", count: unreadAdminNotifications },
     { id: "inconsistencies" as const, label: "Inconsistências" },
     { id: "sounds" as const, label: "Sons de notificação", count: notificationSounds.length },
+    { id: "referenceImages" as const, label: "Imagens de referência", count: referenceImages.length },
     { id: "customization" as const, label: "Personalização" },
     { id: "communication" as const, label: "Central de comunicação" },
     { id: "activity" as const, label: "Auditoria" },
@@ -913,7 +978,7 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "inconsistencies" ? "Notificações de Inconsistências" : section === "sounds" ? "Sons de notificação" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
+  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "inconsistencies" ? "Notificações de Inconsistências" : section === "sounds" ? "Sons de notificação" : section === "referenceImages" ? "Imagens de referência" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -1515,6 +1580,38 @@ function AdminPage() {
                         <div className="admin-item-main">
                           <div><strong>{sound.name}</strong><span>{sound.active ? "Som atual das notificações" : "Disponível para seleção"} · {new Date(sound.created_at).toLocaleString("pt-BR")}</span><audio controls preload="none" src={sound.public_url} style={{ width: "min(100%, 360px)", marginTop: 10 }} /></div>
                           <div className="admin-item-actions"><button type="button" className="admin-action-button" onClick={() => void activateNotificationSound(sound.id)} disabled={sound.active || notificationSoundSaving}>{sound.active ? "Em uso" : "Usar como notificação"}</button>{sound.active && <button type="button" className="admin-action-button" onClick={() => void stopNotificationSound(sound.id)} disabled={notificationSoundSaving}>Parar áudio</button>}<button type="button" className="admin-category-delete" onClick={() => void deleteNotificationSound(sound)} disabled={notificationSoundSaving}>Remover</button></div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              ) : section === "referenceImages" ? (
+                <div className="admin-admin-center">
+                  <section className="admin-admin-center-hero">
+                    <div><div className="admin-badge">REFERÊNCIAS VISUAIS</div><h2>Imagens de referência</h2><p>Envie imagens que serão usadas como referência durante o desenvolvimento e ajustes do LOSI CONECTA.</p></div>
+                    <strong>{referenceImages.length} imagem(ns)</strong>
+                  </section>
+                  <form className="admin-plan-editor" onSubmit={(event) => { event.preventDefault(); void uploadReferenceImage(); }}>
+                    <label>Upload da imagem<input type="file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" onChange={event => setReferenceImageFile(event.target.files?.[0] ?? null)} /></label>
+                    <label>Nome da imagem<input type="text" value={referenceImageName} onChange={event => setReferenceImageName(event.target.value)} maxLength={120} placeholder="Ex.: Tela do feed no celular" required /></label>
+                    <label>Onde vai ser usada<input type="text" value={referenceImageUsage} onChange={event => setReferenceImageUsage(event.target.value)} maxLength={160} placeholder="Ex.: Feed, painel do fornecedor, página de busca" required /></label>
+                    <label>Observações para referência<textarea rows={3} value={referenceImageNotes} onChange={event => setReferenceImageNotes(event.target.value)} maxLength={500} placeholder="Ex.: manter proporções, copiar apenas o espaçamento, usar como inspiração visual..." /></label>
+                    <div className="admin-item-actions"><button type="submit" className="admin-action-button" disabled={!referenceImageFile || referenceImageSaving}>{referenceImageSaving ? "Enviando..." : "Enviar imagem"}</button></div>
+                    <small className="admin-text">JPG, PNG, WEBP ou GIF · máximo de 10 MB. A exclusão remove também o arquivo do Storage.</small>
+                  </form>
+                  {referenceImageMessage && <div className="admin-category-message">{referenceImageMessage}</div>}
+                  <div className="admin-list">
+                    {referenceImages.length === 0 ? <div className="admin-empty">Nenhuma imagem de referência cadastrada ainda.</div> : referenceImages.map(image => (
+                      <article className="admin-list-item" key={image.id}>
+                        <div className="admin-item-main">
+                          <div style={{ width: "100%" }}>
+                            <strong>{image.name}</strong>
+                            <span>Uso: {image.usage_location} · {new Date(image.created_at).toLocaleString("pt-BR")}</span>
+                            {image.notes && <span>Observações: {image.notes}</span>}
+                            <img src={image.public_url} alt={image.name} loading="lazy" style={{ display: "block", width: "min(100%, 520px)", maxHeight: 420, objectFit: "contain", marginTop: 12, borderRadius: 10, border: "1px solid rgba(212,175,55,.35)", background: "#fff" }} />
+                            <small className="admin-text">{(image.file_size / (1024 * 1024)).toFixed(2)} MB · {image.mime_type}</small>
+                          </div>
+                          <div className="admin-item-actions"><button type="button" className="admin-category-delete" onClick={() => void deleteReferenceImage(image)} disabled={referenceImageSaving}>Excluir imagem</button></div>
                         </div>
                       </article>
                     ))}
