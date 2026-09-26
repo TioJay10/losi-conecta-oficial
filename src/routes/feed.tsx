@@ -90,7 +90,7 @@ function FeedPage() {
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [sendPostId, setSendPostId] = useState<string | null>(null);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
-  const [comments, setComments] = useState<Record<string, { id: string; content: string; full_name: string | null; created_at: string; user_id: string; parent_comment_id: string | null; like_count: number }[]>>({});
+  const [comments, setComments] = useState<Record<string, { id: string; content: string; full_name: string | null; logo_url: string | null; created_at: string; user_id: string; parent_comment_id: string | null; like_count: number }[]>>({});
   const [commentLikedIds, setCommentLikedIds] = useState<string[]>([]);
   const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
   const [commentDraft, setCommentDraft] = useState("");
@@ -331,19 +331,40 @@ function FeedPage() {
       }
       const userIds = [...new Set(commentRows.map((item) => item.user_id).filter(Boolean))];
       let profileNames: Record<string, string | null> = {};
+      let profileLogos: Record<string, string | null> = {};
 
       if (userIds.length) {
-        const { data: profileRows, error: profileError } = await supabase
-          .from("profiles")
-          .select("id,full_name")
-          .in("id", userIds);
+        const { data: businessRows, error: businessError } = await supabase
+          .from("business_profiles")
+          .select("owner_id,business_name,logo_url")
+          .in("owner_id", userIds)
+          .eq("active", true)
+          .eq("approval_status", "approved");
 
-        if (profileError) {
-          console.error("Erro ao carregar nomes dos comentários:", profileError);
+        if (businessError) {
+          console.error("Erro ao carregar fornecedores dos comentários:", businessError);
         } else {
-          profileNames = Object.fromEntries(
-            (profileRows ?? []).map((profile) => [profile.id, profile.full_name ?? null]),
-          );
+          for (const business of businessRows ?? []) {
+            profileNames[business.owner_id] = business.business_name ?? null;
+            profileLogos[business.owner_id] = business.logo_url ?? null;
+          }
+        }
+
+        // Fallback para usuários que ainda não possuem perfil de fornecedor.
+        const missingUserIds = userIds.filter((id) => !profileNames[id]);
+        if (missingUserIds.length) {
+          const { data: profileRows, error: profileError } = await supabase
+            .from("profiles")
+            .select("id,full_name")
+            .in("id", missingUserIds);
+
+          if (profileError) {
+            console.error("Erro ao carregar nomes dos comentários:", profileError);
+          } else {
+            for (const profile of profileRows ?? []) {
+              profileNames[profile.id] = profile.full_name ?? null;
+            }
+          }
         }
       }
 
@@ -357,6 +378,7 @@ function FeedPage() {
           parent_comment_id: item.parent_comment_id ?? null,
           like_count: commentLikeCounts[item.id] ?? 0,
           full_name: profileNames[item.user_id] ?? "Usuário LOSI",
+          logo_url: profileLogos[item.user_id] ?? null,
         })),
       }));
     } catch (error) {
@@ -734,7 +756,13 @@ function FeedPage() {
                       const liked = commentLikedIds.includes(comment.id);
                       return (
                         <article key={comment.id} className={comment.parent_comment_id ? "feed-comment-row feed-comment-row-reply" : "feed-comment-row"}>
-                          <div className="feed-comment-avatar">{(comment.full_name || "U").slice(0, 1).toUpperCase()}</div>
+                          <div className="feed-comment-avatar">
+                            {comment.logo_url ? (
+                              <img src={comment.logo_url} alt="" />
+                            ) : (
+                              <span>{(comment.full_name || "U").slice(0, 1).toUpperCase()}</span>
+                            )}
+                          </div>
                           <div className="feed-comment-body">
                             <div className="feed-comment-bubble"><strong>{comment.full_name || "Usuário LOSI"}</strong><p>{comment.content}</p></div>
                             <div className="feed-comment-meta">
