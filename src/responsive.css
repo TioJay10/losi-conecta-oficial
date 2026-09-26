@@ -15087,3 +15087,26 @@ button.availability-day {
 .feed-send-panel{display:flex;flex-wrap:wrap;gap:6px}
 .feed-send-panel button{border:1px solid #d9dee7;background:#fff;color:#263246;border-radius:8px;padding:8px 10px;font:700 10px "Montserrat",Arial,sans-serif;cursor:pointer}
 .feed-send-panel button:hover{border-color:#b38a3c;color:#8f6a2c}
+
+
+/* Feed real: grupos independentes de ações, contadores e comentários */
+.feed-status-message{margin:12px 0;padding:11px 14px;border:1px solid #d9dee8;border-radius:12px;background:#fff;color:#536174;font-size:13px}
+.feed-post-actions{align-items:flex-start}
+.feed-action-group{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:72px}
+.feed-action-group button{width:100%;white-space:nowrap}
+.feed-action-group small{font-size:11px;font-weight:700;color:#687386;line-height:1}
+.feed-action-group button.is-liked{font-weight:800}
+.feed-action-group button:disabled{opacity:.6;cursor:wait}
+.feed-comment-item{padding:9px 0;border-bottom:1px solid #edf0f4}
+.feed-comment-item:last-of-type{border-bottom:0}
+.feed-comment-item strong{display:block;font-size:13px}
+.feed-comment-item p{margin:3px 0 0;font-size:13px;color:#4e5b6d}
+.feed-comment-form{display:flex;gap:8px;margin-top:10px}
+.feed-comment-form input{flex:1;min-width:0;border:1px solid #d9dee8;border-radius:10px;padding:10px 12px;background:#fff}
+.feed-comment-form button{border:1px solid #d6b46a;border-radius:10px;padding:0 14px;background:#0b182a;color:#f0d99a;font-weight:700;cursor:pointer}
+@media(max-width:700px){
+  .feed-action-group{min-width:0;flex:1}
+  .feed-action-group button{font-size:12px;padding-left:5px;padding-right:5px}
+  .feed-comment-form{flex-direction:column}
+  .feed-comment-form button{min-height:42px}
+}
