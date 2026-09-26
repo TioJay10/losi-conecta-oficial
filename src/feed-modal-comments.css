@@ -1,0 +1,39 @@
+/* FEED — comentários abertos a partir da publicação em modal */
+/* Quando o modal da publicação já está aberto, o painel de comentários acompanha
+   a mesma janela visual em vez de voltar para o Feed por trás dela. */
+.feed-post-modal-overlay + .feed-comments-overlay{
+  z-index:1400 !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:22px !important;
+  background:transparent !important;
+  backdrop-filter:none !important;
+  pointer-events:none !important;
+}
+
+.feed-post-modal-overlay + .feed-comments-overlay .feed-comments-sheet{
+  width:min(720px,100%) !important;
+  max-height:calc(100vh - 44px) !important;
+  height:min(680px,calc(100vh - 44px)) !important;
+  border-radius:22px !important;
+  box-shadow:0 24px 80px rgba(0,0,0,.3) !important;
+  pointer-events:auto !important;
+}
+
+.feed-post-modal-overlay + .feed-comments-overlay .feed-comments-handle{
+  display:none !important;
+}
+
+@media(max-width:700px){
+  .feed-post-modal-overlay + .feed-comments-overlay{
+    align-items:flex-end !important;
+    padding:0 !important;
+  }
+
+  .feed-post-modal-overlay + .feed-comments-overlay .feed-comments-sheet{
+    width:100% !important;
+    max-height:94vh !important;
+    height:94vh !important;
+    border-radius:20px 20px 0 0 !important;
+  }
+}
