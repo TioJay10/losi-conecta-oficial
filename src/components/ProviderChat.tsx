@@ -291,61 +291,45 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     setError("");
 
     try {
-      const selectDirect = await supabase
+      // O clique no card "Fornecedores salvos" deve sempre abrir uma conversa
+      // para ESTE fornecedor e ESTE perfil comercial. Não dependemos de uma
+      // conversa anterior existir e não reutilizamos uma conversa reversa.
+      // Isso garante o mesmo comportamento do perfil público.
+      const conversationSelect = await supabase
         .from("chat_conversations")
         .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
+        .eq("business_id", business.id)
         .eq("requester_id", userId)
         .eq("supplier_id", business.owner_id)
         .order("updated_at", { ascending: false })
         .limit(1);
 
-      let data = selectDirect.data?.[0] ?? null;
-      let lookupError = selectDirect.error;
+      let data = conversationSelect.data?.[0] ?? null;
 
-      if (!data && !lookupError) {
-        const selectReverse = await supabase
-          .from("chat_conversations")
-          .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-          .eq("requester_id", business.owner_id)
-          .eq("supplier_id", userId)
-          .order("updated_at", { ascending: false })
-          .limit(1);
-
-        data = selectReverse.data?.[0] ?? null;
-        lookupError = selectReverse.error;
-      }
-
-      if (!data && !lookupError) {
-        const selectByBusiness = await supabase
-          .from("chat_conversations")
-          .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
-          .eq("business_id", business.id)
-          .eq("requester_id", userId)
-          .order("updated_at", { ascending: false })
-          .limit(1);
-
-        data = selectByBusiness.data?.[0] ?? null;
-        lookupError = selectByBusiness.error;
-      }
-
-      if (lookupError) {
-        console.error("Erro ao localizar conversa:", lookupError);
-        setError("Não foi possível iniciar o chat.");
+      if (conversationSelect.error) {
+        console.error("Erro ao localizar conversa do fornecedor salvo:", conversationSelect.error);
+        setError("Não foi possível abrir o chat deste fornecedor.");
         return;
       }
 
+      // Primeira abertura: cria a conversa imediatamente, mesmo sem mensagens.
       if (!data) {
         const created = await supabase
           .from("chat_conversations")
-          .insert({ business_id: business.id, requester_id: userId, supplier_id: business.owner_id })
+          .insert({
+            business_id: business.id,
+            requester_id: userId,
+            supplier_id: business.owner_id,
+          })
           .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
           .single();
 
-        if (created.error) {
-          console.error("Erro ao criar conversa:", created.error);
-          setError("Não foi possível iniciar o chat.");
+        if (created.error || !created.data) {
+          console.error("Erro ao criar conversa do fornecedor salvo:", created.error);
+          setError("Não foi possível abrir o chat deste fornecedor.");
           return;
         }
+
         data = created.data;
       }
 
