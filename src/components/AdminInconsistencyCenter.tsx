@@ -46,7 +46,12 @@ export function AdminInconsistencyCenter() {
         console.error("Erro ao carregar fotos dos usuários das inconsistências:", profilesError);
       } else {
         profilesById = new Map(
-          (profiles ?? []).map((profile) => [profile.id, { full_name: profile.full_name, avatar_url: profile.avatar_url }]),
+          (profiles ?? []).map(
+            (profile): [string, { full_name: string | null; avatar_url: string | null }] => [
+              profile.id,
+              { full_name: profile.full_name, avatar_url: profile.avatar_url },
+            ],
+          ),
         );
       }
     }
