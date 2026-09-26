@@ -15241,3 +15241,176 @@ button.availability-day {
 
 /* FEED — erro de comentários deve ficar visível no próprio painel */
 .feed-comment-error{display:block;color:#9b3f35 !important;font-size:11px;line-height:1.5;font-weight:700}
+
+
+/* FEED — POP-UP DE COMENTÁRIOS BOTTOM SHEET */
+.feed-comments-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1200;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:0;
+  background:rgba(7,18,32,.42);
+  backdrop-filter:blur(2px);
+}
+.feed-comments-sheet{
+  width:min(680px,100%);
+  max-height:min(78vh,760px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:#fff;
+  border-radius:22px 22px 0 0;
+  box-shadow:0 -16px 50px rgba(7,18,32,.24);
+  animation:feed-comments-sheet-in .24s ease-out both;
+}
+@keyframes feed-comments-sheet-in{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+.feed-comments-handle{
+  width:42px;
+  height:4px;
+  margin:9px auto 3px;
+  border-radius:999px;
+  background:#cbd1da;
+  flex:0 0 auto;
+}
+.feed-comments-sheet-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 18px;
+  border-bottom:1px solid #edf0f4;
+  flex:0 0 auto;
+}
+.feed-comments-sheet-head>div{display:grid;gap:3px}
+.feed-comments-sheet-head strong{font-size:16px;color:#172033}
+.feed-comments-sheet-head span{font-size:10px;color:#7a8494}
+.feed-comments-close{
+  width:34px!important;height:34px!important;min-width:34px!important;
+  border:0!important;border-radius:50%!important;background:#f2f4f7!important;
+  color:#263246!important;font:600 22px/1 Arial,sans-serif!important;
+  cursor:pointer!important;display:grid!important;place-items:center!important;
+}
+.feed-comments-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:8px 18px 18px;
+}
+.feed-comments-loading,.feed-comments-empty{
+  padding:35px 10px;
+  text-align:center;
+  color:#7a8494;
+  font-size:12px;
+}
+.feed-comment-row{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 0;
+}
+.feed-comment-row-reply{
+  margin-left:42px;
+  padding-top:4px;
+}
+.feed-comment-avatar{
+  width:38px;height:38px;flex:0 0 38px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#0b182a;color:#d8b86b;
+  font:800 12px "Montserrat",Arial,sans-serif;
+}
+.feed-comment-body{min-width:0;flex:1}
+.feed-comment-bubble{
+  display:inline-block;
+  max-width:100%;
+  padding:9px 12px;
+  border-radius:13px;
+  background:#f3f5f8;
+}
+.feed-comment-bubble strong{display:block;color:#172033;font-size:12px}
+.feed-comment-bubble p{margin:4px 0 0;color:#344054;font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.feed-comment-meta{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:5px 0 0 4px;
+  color:#8992a0;
+  font-size:9px;
+  font-weight:700;
+}
+.feed-comment-meta button{
+  border:0;background:transparent;padding:0;color:#667085;
+  font:800 9px "Montserrat",Arial,sans-serif;cursor:pointer;
+}
+.feed-comment-meta button:hover,.feed-comment-meta button.is-liked{color:#a77b2f}
+.feed-comment-meta b{font-weight:800}
+.feed-comments-composer{
+  flex:0 0 auto;
+  padding:10px 14px max(12px,env(safe-area-inset-bottom));
+  background:#fff;
+  border-top:1px solid #e7ebf0;
+}
+.feed-replying{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:0 0 8px;
+  padding:7px 10px;
+  border-radius:9px;
+  background:#f5f6f8;
+  color:#687386;
+  font-size:10px;
+}
+.feed-replying button{
+  border:0;background:transparent;color:#687386;font-size:18px;line-height:1;cursor:pointer;
+}
+.feed-comment-form-sheet{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin:0!important;
+}
+.feed-comment-form-sheet input{
+  min-height:42px;
+  padding:10px 13px;
+  border-radius:21px;
+  background:#f4f6f8;
+  border:1px solid #e0e4ea;
+  outline:none;
+}
+.feed-comment-form-sheet input:focus{border-color:#b38a3c;box-shadow:0 0 0 3px rgba(179,138,60,.1)}
+.feed-comment-send{
+  min-height:42px;
+  padding:0 15px;
+  border:1px solid #b38a3c;
+  border-radius:21px;
+  background:#0b182a;
+  color:#e6cf93;
+  font:800 11px "Montserrat",Arial,sans-serif;
+  cursor:pointer;
+}
+.feed-comment-send:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){
+  .feed-comments-sheet{
+    width:100%;
+    max-height:88vh;
+    border-radius:20px 20px 0 0;
+  }
+  .feed-comments-scroll{padding-left:13px;padding-right:13px}
+  .feed-comments-sheet-head{padding-left:15px;padding-right:15px}
+  .feed-comment-row-reply{margin-left:30px}
+  .feed-comments-composer{padding-left:10px;padding-right:10px}
+  .feed-comment-form-sheet input{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .feed-comments-sheet{animation:none}
+}
