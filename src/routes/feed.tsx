@@ -379,8 +379,12 @@ function FeedPage() {
   }
 
   async function repostPost(post: FeedPost) {
-    if (!profile || !userId) {
-      setStatusMessage("Entre com um perfil de fornecedor aprovado para compartilhar no seu Feed.");
+    if (!userId) {
+      setStatusMessage("Entre na sua conta para compartilhar esta publicação.");
+      return;
+    }
+    if (!profile) {
+      setStatusMessage("Você precisa ter um perfil de fornecedor aprovado para compartilhar no seu Feed.");
       return;
     }
     if (actionBusy) return;
@@ -388,18 +392,24 @@ function FeedPage() {
     setActionBusy("repost-" + post.id);
     try {
       const originalId = post.original_post_id ?? post.id;
-      const { error } = await supabase.from("feed_posts").insert({
-        author_user_id: userId,
-        business_id: profile.id,
-        content: post.content,
-        media_url: post.media_url,
-        media_type: post.media_type,
-        original_post_id: originalId,
+      const { error } = await supabase.rpc("create_feed_post", {
+        p_business_id: profile.id,
+        p_content: post.content,
+        p_media_url: post.media_url,
+        p_media_type: post.media_type,
+        p_original_post_id: originalId,
       });
 
-      if (error && error.code !== "23505") throw error;
+      if (error) {
+        if (error.code === "23505") {
+          setStatusMessage("Você já compartilhou esta publicação.");
+          return;
+        }
+        throw error;
+      }
+
       await loadFeed(userId);
-      setStatusMessage(error?.code === "23505" ? "Você já compartilhou esta publicação." : "Publicação compartilhada no seu Feed.");
+      setStatusMessage("Publicação compartilhada no seu Feed.");
     } catch (error) {
       console.error("Erro ao compartilhar publicação:", error);
       setStatusMessage("Não foi possível compartilhar esta publicação.");
@@ -571,14 +581,24 @@ function FeedPage() {
                         <small>{post.like_count}</small>
                       </div>
                       <div className="feed-action-group">
-                        <button type="button" onClick={() => void toggleComments(post)}>
+                        <button
+                          type="button"
+                          aria-expanded={commentPostId === post.id}
+                          aria-controls={"feed-comments-" + post.id}
+                          onClick={() => toggleComments(post.id)}
+                        >
                           <span className="feed-action-icon"><FeedActionIcon type="comment" /></span>
                           <span className="feed-action-label">Comentar</span>
                         </button>
                         <small>{post.comment_count}</small>
                       </div>
                       <div className="feed-action-group">
-                        <button type="button" onClick={() => void repostPost(post)} disabled={!profile || actionBusy === "repost-" + post.id}>
+                        <button
+                          type="button"
+                          aria-label="Compartilhar publicação no meu Feed"
+                          onClick={() => void repostPost(post)}
+                          disabled={actionBusy === "repost-" + post.id}
+                        >
                           <span className="feed-action-icon"><FeedActionIcon type="share" /></span>
                           <span className="feed-action-label">Compartilhar</span>
                         </button>
@@ -594,7 +614,7 @@ function FeedPage() {
                     </div>
 
                     {commentPostId === post.id && (
-                      <div className="feed-comment-panel" aria-label="Comentários da publicação">
+                      <div id={"feed-comments-" + post.id} className="feed-comment-panel" aria-label="Comentários da publicação">
                         <div className="feed-comment-list">
                           {commentLoading && <span>Carregando comentários...</span>}
                           {!commentLoading && (comments[post.id] ?? []).length === 0 && (
