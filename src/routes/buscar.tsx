@@ -460,6 +460,10 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
             <span className="marketplace-menu-mark">06</span>
             <span><strong>Feed</strong><small>Conteúdo profissional</small></span>
           </Link>
+          <Link to="/apresentacao" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
+            <span className="marketplace-menu-mark">07</span>
+            <span><strong>Apresentação</strong><small>Conheça o LOSI CONECTA</small></span>
+          </Link>
           <Link to="/painel" onClick={(event) => handleProtectedMenu("/painel", event)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">01</span>
             <span><strong>Visão geral</strong><small>Resumo da conta</small></span>
