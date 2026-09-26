@@ -169,6 +169,11 @@ function FeedPage() {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [likedIds, setLikedIds] = useState<string[]>([]);
   const [postText, setPostText] = useState("");
+  const [savedSuppliers, setSavedSuppliers] = useState<Array<{ id: string; business_name: string; logo_url: string | null; owner_id: string }>>([]);
+  const [mentionSuggestions, setMentionSuggestions] = useState<Array<{ id: string; business_name: string; logo_url: string | null; owner_id: string }>>([]);
+  const [mentionIds, setMentionIds] = useState<string[]>([]);
+  const [mentionStart, setMentionStart] = useState<number | null>(null);
+  const postTextRef = useRef<HTMLTextAreaElement | null>(null);
   const [selectedMedia, setSelectedMedia] = useState<{ file: File; url: string; type: "image" | "video" } | null>(null);
   const [mediaMenuOpen, setMediaMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -283,6 +288,8 @@ function FeedPage() {
       setUserId(currentUserId);
 
       if (currentUserId) {
+        void loadSavedSuppliers(currentUserId);
+
         const { data: business } = await supabase
           .from("business_profiles")
           .select("id,business_name,city,state,logo_url,slug,active,approval_status")
@@ -335,6 +342,87 @@ function FeedPage() {
     setMediaMenuOpen(false);
     setStatusMessage("");
     event.target.value = "";
+  }
+
+  async function loadSavedSuppliers(currentUserId: string) {
+    const { data: favoriteRows, error: favoriteError } = await supabase
+      .from("favorites")
+      .select("business_id")
+      .eq("user_id", currentUserId);
+
+    if (favoriteError) {
+      console.error("Erro ao carregar fornecedores salvos para marcação:", favoriteError);
+      setSavedSuppliers([]);
+      return;
+    }
+
+    const ids = (favoriteRows ?? []).map((row) => row.business_id).filter(Boolean);
+    if (!ids.length) {
+      setSavedSuppliers([]);
+      return;
+    }
+
+    const { data: businesses, error: businessError } = await supabase
+      .from("business_profiles")
+      .select("id,business_name,logo_url,owner_id")
+      .in("id", ids)
+      .eq("active", true)
+      .eq("approval_status", "approved")
+      .order("business_name", { ascending: true });
+
+    if (businessError) {
+      console.error("Erro ao carregar fornecedores salvos:", businessError);
+      setSavedSuppliers([]);
+      return;
+    }
+
+    setSavedSuppliers((businesses ?? []) as Array<{ id: string; business_name: string; logo_url: string | null; owner_id: string }>);
+  }
+
+  function handlePostTextChange(event: ChangeEvent<HTMLTextAreaElement>) {
+    const value = event.target.value;
+    setPostText(value);
+
+    const caret = event.target.selectionStart ?? value.length;
+    const beforeCaret = value.slice(0, caret);
+    const match = beforeCaret.match(/(^|\s)@([^@\n]*)$/u);
+
+    if (!match) {
+      setMentionSuggestions([]);
+      setMentionStart(null);
+      return;
+    }
+
+    const start = caret - match[2].length - 1;
+    const query = match[2].trim().toLocaleLowerCase("pt-BR");
+    const suggestions = savedSuppliers
+      .filter((supplier) => supplier.business_name.toLocaleLowerCase("pt-BR").includes(query))
+      .slice(0, 8);
+
+    setMentionStart(start);
+    setMentionSuggestions(suggestions);
+  }
+
+  function selectMention(supplier: { id: string; business_name: string; logo_url: string | null; owner_id: string }) {
+    const textarea = postTextRef.current;
+    if (!textarea || mentionStart === null) return;
+
+    const caret = textarea.selectionStart ?? postText.length;
+    const prefix = postText.slice(0, mentionStart);
+    const suffix = postText.slice(caret);
+    const inserted = "@" + supplier.business_name + " ";
+    const nextText = prefix + inserted + suffix;
+
+    setPostText(nextText);
+    setMentionIds((current) => current.includes(supplier.id) ? current : [...current, supplier.id]);
+    setMentionSuggestions([]);
+    setMentionStart(null);
+
+    requestAnimationFrame(() => {
+      const nextCaret = prefix.length + inserted.length;
+      textarea.focus();
+      textarea.setSelectionRange(nextCaret, nextCaret);
+    });
   }
 
   async function publishPost() {
@@ -394,6 +482,9 @@ function FeedPage() {
       if (selectedMedia?.url) URL.revokeObjectURL(selectedMedia.url);
       setSelectedMedia(null);
       setPostText("");
+      setMentionIds([]);
+      setMentionSuggestions([]);
+      setMentionStart(null);
       await loadFeed(currentUserId);
       setStatusMessage("Publicação realizada com sucesso.");
     } catch (error) {
@@ -739,13 +830,72 @@ function FeedPage() {
                 </div>
               </div>
 
-              <textarea
-                value={postText}
-                onChange={(event) => setPostText(event.target.value)}
-                placeholder="No que você está trabalhando?"
-                aria-label="Texto da publicação"
-                maxLength={2000}
-              />
+              <div style={{ position: "relative" }}>
+                <textarea
+                  ref={postTextRef}
+                  value={postText}
+                  onChange={handlePostTextChange}
+                  placeholder="No que você está trabalhando? Use @ para marcar fornecedores salvos."
+                  aria-label="Texto da publicação"
+                  maxLength={2000}
+                />
+
+                {mentionSuggestions.length > 0 && (
+                  <div
+                    className="feed-mention-suggestions"
+                    role="listbox"
+                    aria-label="Fornecedores salvos para marcar"
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      top: "100%",
+                      zIndex: 30,
+                      marginTop: 6,
+                      background: "#fff",
+                      border: "1px solid #d8dee8",
+                      borderRadius: 12,
+                      boxShadow: "0 12px 30px rgba(10,24,49,.16)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{ padding: "8px 12px", fontSize: 11, fontWeight: 700, color: "#8b6b1f", textTransform: "uppercase", letterSpacing: ".06em" }}>
+                      Fornecedores salvos
+                    </div>
+                    {mentionSuggestions.map((supplier) => (
+                      <button
+                        key={supplier.id}
+                        type="button"
+                        role="option"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => selectMention(supplier)}
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          padding: "10px 12px",
+                          border: 0,
+                          borderTop: "1px solid #eef1f5",
+                          background: "#fff",
+                          color: "#17233a",
+                          textAlign: "left",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {supplier.logo_url ? (
+                          <img src={supplier.logo_url} alt="" style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover", flex: "0 0 auto" }} />
+                        ) : (
+                          <span style={{ width: 34, height: 34, borderRadius: "50%", display: "grid", placeItems: "center", background: "#142744", color: "#d6ad4b", fontWeight: 800, flex: "0 0 auto" }}>
+                            {supplier.business_name.slice(0, 1).toUpperCase()}
+                          </span>
+                        )}
+                        <span style={{ fontWeight: 700 }}>{supplier.business_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {selectedMedia && (
                 <div className="feed-media-preview">
