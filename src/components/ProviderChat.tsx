@@ -216,6 +216,52 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     if (!activeConversation || !userId) return;
 
     let mounted = true;
+    const participantId = isSupplier ? activeConversation.requester_id : activeConversation.supplier_id;
+
+    async function loadActiveParticipantIdentity() {
+      const [profileResult, supplierResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id,full_name,avatar_url")
+          .eq("id", participantId)
+          .maybeSingle(),
+        supabase
+          .from("business_profiles")
+          .select("owner_id,business_name,logo_url,slug")
+          .eq("owner_id", participantId)
+          .eq("active", true)
+          .eq("approval_status", "approved")
+          .maybeSingle(),
+      ]);
+
+      if (!mounted) return;
+
+      if (!profileResult.error && profileResult.data) {
+        setProfiles((current) => ({
+          ...current,
+          [profileResult.data.id]: profileResult.data as UserProfile,
+        }));
+      }
+
+      if (!supplierResult.error && supplierResult.data) {
+        setSupplierProfiles((current) => ({
+          ...current,
+          [supplierResult.data.owner_id]: supplierResult.data as SupplierProfile,
+        }));
+      }
+    }
+
+    void loadActiveParticipantIdentity();
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeConversation?.id, isSupplier, userId]);
+
+  useEffect(() => {
+    if (!activeConversation || !userId) return;
+
+    let mounted = true;
     setMessages([]);
     setError("");
     async function loadMessages() {
