@@ -755,7 +755,7 @@ function FeedPage() {
                     {!commentLoading && !commentError[activePost.id] && activeComments.map((comment) => {
                       const liked = commentLikedIds.includes(comment.id);
                       return (
-                        <article key={comment.id} className={comment.parent_comment_id ? "feed-comment-row feed-comment-row-reply" : "feed-comment-row"}>
+                        <article key={comment.id} className={comment.user_id === userId ? "feed-comment-row feed-comment-row-mine" : (comment.parent_comment_id ? "feed-comment-row feed-comment-row-reply" : "feed-comment-row")}>
                           <div className="feed-comment-avatar">
                             {comment.logo_url ? (
                               <img src={comment.logo_url} alt="" />
