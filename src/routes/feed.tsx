@@ -249,13 +249,16 @@ function FeedPage() {
       if (hiddenError) {
         console.error("Erro ao carregar publicações ocultas:", hiddenError);
       } else if (hiddenRows?.length) {
-        const businessIds = [...new Set(hiddenRows.map((row) => row.business_id).filter(Boolean))];
+        const scopedHiddenRows = filterBusinessId
+          ? hiddenRows.filter((row) => row.business_id === filterBusinessId)
+          : hiddenRows;
+        const businessIds = [...new Set(scopedHiddenRows.map((row) => row.business_id).filter(Boolean))];
         const { data: hiddenBusinesses } = await supabase
           .from("business_profiles")
           .select("id,business_name,slug,city,state,logo_url,active,approval_status")
           .in("id", businessIds);
         const businessMap = new Map((hiddenBusinesses ?? []).map((business) => [business.id, business]));
-        const hiddenPosts = hiddenRows
+        const hiddenPosts = scopedHiddenRows
           .map((row) => {
             const business = businessMap.get(row.business_id);
             if (!business) return null;
@@ -707,7 +710,6 @@ function FeedPage() {
         return supplier && text.includes("@" + supplier.business_name);
       });
 
-      const postingToOwnPersonalFeed = Boolean(targetMode && targetBusiness && profile?.id === targetBusiness.id);
       const requestingAnotherSupplierFeed = Boolean(targetMode && targetBusiness && profile?.id !== targetBusiness.id);
       const rpcName = requestingAnotherSupplierFeed ? "create_supplier_feed_publication" : "create_feed_post";
       const rpcArgs = requestingAnotherSupplierFeed && targetBusiness
