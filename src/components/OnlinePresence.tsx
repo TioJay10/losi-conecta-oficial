@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 
-const PRESENCE_PREFIX = "losi-user-presence-";
+const PRESENCE_CHANNEL = "losi-global-presence";
 
 type OnlinePresenceContextValue = {
   onlineUsers: Set<string>;
@@ -13,11 +13,11 @@ const OnlinePresenceContext = createContext<OnlinePresenceContextValue>({
   currentUserId: null,
 });
 
-function presenceChannel(userId: string) {
+function createPresenceChannel() {
   try {
-    return supabase.channel(PRESENCE_PREFIX + userId, {
+    return supabase.channel(PRESENCE_CHANNEL, {
       config: {
-        presence: { key: userId },
+        presence: { key: "user" },
       },
     });
   } catch (error) {
@@ -26,73 +26,17 @@ function presenceChannel(userId: string) {
   }
 }
 
-export function OnlinePresenceTracker({ userId }: { userId: string | null }) {
-  useEffect(() => {
-    if (!userId) return;
-
-    const channel = presenceChannel(userId);
-    if (!channel) return;
-    let active = true;
-
-    channel.subscribe(async (status) => {
-      if (status !== "SUBSCRIBED" || !active) return;
-      const result = await channel.track({
-        userId,
-        online_at: new Date().toISOString(),
-      });
-      if (result !== "ok") {
-        console.warn("Não foi possível registrar presença online:", result);
-      }
-    });
-
-    return () => {
-      active = false;
-      void channel.untrack();
-      void supabase.removeChannel(channel);
-    };
-  }, [userId]);
-
-  return null;
+function readOnlineUsers(channel: ReturnType<typeof createPresenceChannel>) {
+  if (!channel) return new Set<string>();
+  const state = channel.presenceState() as Record<string, unknown[]>;
+  return new Set(Object.keys(state));
 }
 
-function usePresenceSubscription(userId: string | null, skip = false) {
-  const [online, setOnline] = useState(false);
-
-  useEffect(() => {
-    if (!userId || skip) {
-      setOnline(false);
-      return;
-    }
-
-    let active = true;
-    const channel = presenceChannel(userId);
-    if (!channel) return;
-
-    const sync = () => {
-      if (!active) return;
-      const state = channel.presenceState() as Record<string, unknown[]>;
-      setOnline(Object.keys(state).length > 0);
-    };
-
-    channel.on("presence", { event: "sync" }, sync);
-    channel.on("presence", { event: "join" }, sync);
-    channel.on("presence", { event: "leave" }, sync);
-
-    channel.subscribe((status) => {
-      if (status === "SUBSCRIBED") sync();
-      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-        if (active) setOnline(false);
-      }
-    });
-
-    return () => {
-      active = false;
-      setOnline(false);
-      void supabase.removeChannel(channel);
-    };
-  }, [userId, skip]);
-
-  return online;
+export function OnlinePresenceTracker({ userId }: { userId: string | null }) {
+  // Mantido por compatibilidade com chamadas antigas. A presença real é
+  // administrada pelo OnlinePresenceProvider em um único canal compartilhado.
+  void userId;
+  return null;
 }
 
 export function OnlineStatus({
@@ -103,10 +47,7 @@ export function OnlineStatus({
   compact?: boolean;
 }) {
   const { onlineUsers, currentUserId } = useContext(OnlinePresenceContext);
-  const isCurrentUser = Boolean(userId && currentUserId === userId);
-  const ownPresence = isCurrentUser && onlineUsers.has(userId as string);
-  const subscribedPresence = usePresenceSubscription(userId, isCurrentUser);
-  const online = ownPresence || subscribedPresence;
+  const online = Boolean(userId && onlineUsers.has(userId));
 
   return (
     <span
@@ -130,38 +71,52 @@ export function OnlinePresenceProvider({
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!userId) {
+    const channel = createPresenceChannel();
+    if (!channel) {
       setOnlineUsers(new Set());
       return;
     }
 
-    const channel = presenceChannel(userId);
-    if (!channel) return;
     let active = true;
 
     const sync = () => {
       if (!active) return;
-      setOnlineUsers(new Set([userId]));
+      setOnlineUsers(readOnlineUsers(channel));
     };
 
+    channel.on("presence", { event: "sync" }, sync);
+    channel.on("presence", { event: "join" }, sync);
+    channel.on("presence", { event: "leave" }, sync);
+
     channel.subscribe(async (status) => {
-      if (status !== "SUBSCRIBED" || !active) return;
-      const result = await channel.track({
-        userId,
-        online_at: new Date().toISOString(),
-      });
-      if (result === "ok") sync();
+      if (!active || status !== "SUBSCRIBED") return;
+
+      if (userId) {
+        const result = await channel.track({
+          userId,
+          online_at: new Date().toISOString(),
+        });
+
+        if (result !== "ok") {
+          console.warn("Não foi possível registrar presença online:", result);
+        }
+      }
+
+      sync();
     });
 
     return () => {
       active = false;
-      setOnlineUsers(new Set());
       void channel.untrack();
       void supabase.removeChannel(channel);
+      setOnlineUsers(new Set());
     };
   }, [userId]);
 
-  const value = useMemo(() => ({ onlineUsers, currentUserId: userId }), [onlineUsers, userId]);
+  const value = useMemo(
+    () => ({ onlineUsers, currentUserId: userId }),
+    [onlineUsers, userId],
+  );
 
   return (
     <OnlinePresenceContext.Provider value={value}>
@@ -171,9 +126,6 @@ export function OnlinePresenceProvider({
 }
 
 export function useOnlineStatus(userId: string | null) {
-  const { onlineUsers, currentUserId } = useContext(OnlinePresenceContext);
-  const isCurrentUser = Boolean(userId && currentUserId === userId);
-  const ownPresence = isCurrentUser && onlineUsers.has(userId as string);
-  const subscribedPresence = usePresenceSubscription(userId, isCurrentUser);
-  return Boolean(ownPresence || subscribedPresence);
+  const { onlineUsers } = useContext(OnlinePresenceContext);
+  return Boolean(userId && onlineUsers.has(userId));
 }
