@@ -454,12 +454,12 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
       </header>
 
       <nav className={"marketplace-category-bar" + (mobileMenuOpen ? " mobile-open" : "")} aria-label="Navegação principal">
+
+        <div className="marketplace-category-inner">
           <Link to="/feed" onClick={() => setMobileMenuOpen(false)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">06</span>
             <span><strong>Feed</strong><small>Conteúdo profissional</small></span>
           </Link>
-
-        <div className="marketplace-category-inner">
           <Link to="/painel" onClick={(event) => handleProtectedMenu("/painel", event)} className="marketplace-menu-link">
             <span className="marketplace-menu-mark">01</span>
             <span><strong>Visão geral</strong><small>Resumo da conta</small></span>
