@@ -262,7 +262,11 @@ function AdminPage() {
     if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","inconsistencies","sounds","communication","activity","customization"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => { if (!session) navigate({ to: "/entrar" }); });
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      // Durante refresh, a sessão persistida pode ser restaurada de forma assíncrona.
+      // Só um SIGNED_OUT real deve tirar o usuário do painel.
+      if (event === "SIGNED_OUT" && !session) navigate({ to: "/entrar" });
+    });
     return () => {
       mounted = false;
       window.removeEventListener("focus", handleRefresh);
