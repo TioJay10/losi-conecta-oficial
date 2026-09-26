@@ -246,6 +246,7 @@ function FeedPage() {
   const [statusMessage, setStatusMessage] = useState("");
   const [modalPost, setModalPost] = useState<FeedPost | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1010,10 +1011,61 @@ function FeedPage() {
   const location = [profile?.city, profile?.state].filter(Boolean).join(" — ");
   const feedSequence = useMemo(() => buildFeedSequence(posts), [posts]);
 
+  async function logout() {
+    setMobileMenuOpen(false);
+    await supabase.auth.signOut();
+    window.location.href = "/entrar";
+  }
+
   return (
     <main className="feed-page">
+      {mobileMenuOpen && (
+        <button
+          type="button"
+          className="feed-mobile-menu-overlay"
+          aria-label="Fechar menu"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      <aside className={`feed-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
+        <div className="feed-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
+        <div className="feed-sidebar-caption">PAINEL PROFISSIONAL</div>
+        <nav className="feed-sidebar-nav" aria-label="Menu do painel">
+          <button type="button" className="feed-nav-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/painel"; }}>
+            <span className="feed-nav-mark">01</span><span><strong>Visão geral</strong><small>Resumo da conta</small></span>
+          </button>
+          <button type="button" className="feed-nav-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/buscar"; }}>
+            <span className="feed-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span>
+          </button>
+          <button type="button" className="feed-nav-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/meu-perfil"; }}>
+            <span className="feed-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span>
+          </button>
+          <button type="button" className="feed-nav-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/meus-servicos"; }}>
+            <span className="feed-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span>
+          </button>
+          <button type="button" className="feed-nav-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/notificar-inconsistencia"; }}>
+            <span className="feed-nav-mark">05</span><span><strong>Notificar Inconsistências</strong><small>Falar com o administrador</small></span>
+          </button>
+          <button type="button" className="feed-nav-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/orcamentos"; }}>
+            <span className="feed-nav-mark">06</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
+          </button>
+        </nav>
+        <div className="feed-sidebar-footer">
+          <div className="feed-sidebar-status"><span></span> Conta profissional</div>
+          <button type="button" className="feed-sidebar-logout" onClick={() => void logout()}>Sair da conta</button>
+        </div>
+      </aside>
       <header className="feed-header">
         <div className="feed-header-inner">
+          <button
+            type="button"
+            className="feed-mobile-menu-button"
+            onClick={() => setMobileMenuOpen((value) => !value)}
+            aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span></span><span></span><span></span>
+          </button>
           <Link to="/buscar" className="feed-brand" aria-label="Voltar para o LOSI CONECTA">
             LOSI <span>CONECTA</span>
           </Link>
@@ -1026,6 +1078,7 @@ function FeedPage() {
       </header>
 
       <section className="feed-layout">
+        <div className="feed-layout-menu-spacer" aria-hidden="true" />
         <div className="feed-main">
           <div className="feed-intro">
             <span className="feed-kicker">LOSI CONECTA</span>
