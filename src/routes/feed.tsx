@@ -257,7 +257,7 @@ function FeedPage() {
               </section>
             ) : (
               localPosts.map((post) => (
-                <article className="feed-post" key={post.id}>
+                <article className="feed-post" key={post.id} id={"feed-post-" + post.id}>
                   <div className="feed-post-head">
                     <div className="feed-avatar">
                       {profile?.logo_url ? <img src={profile.logo_url} alt="" /> : <span>{profile?.business_name?.slice(0, 1).toUpperCase() || "L"}</span>}
