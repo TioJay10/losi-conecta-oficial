@@ -12,7 +12,7 @@ type Business = {
 };
 
 type UserProfile = { id: string; full_name: string | null; avatar_url: string | null };
-type SupplierProfile = { owner_id: string; business_name: string; logo_url: string | null; slug: string; };
+type SupplierProfile = { owner_id: string; business_name: string; logo_url: string | null; slug: string };
 
 type Conversation = {
   id: string;
@@ -89,10 +89,6 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
         .from("chat_conversations")
         .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview");
 
-      // No painel do fornecedor mostramos a caixa de entrada completa.
-      // Para quem está conversando com um fornecedor salvo, mostramos somente
-      // as conversas daquele fornecedor. Isso evita que uma instância de chat
-      // abra uma conversa pertencente a outro fornecedor.
       const { data, error: loadError } = isSupplier
         ? await conversationQuery
             .or("requester_id.eq." + userId + ",supplier_id.eq." + userId)
@@ -291,10 +287,6 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     setError("");
 
     try {
-      // O clique no card "Fornecedores salvos" deve sempre abrir uma conversa
-      // para ESTE fornecedor e ESTE perfil comercial. Não dependemos de uma
-      // conversa anterior existir e não reutilizamos uma conversa reversa.
-      // Isso garante o mesmo comportamento do perfil público.
       const conversationSelect = await supabase
         .from("chat_conversations")
         .select("id,business_id,requester_id,supplier_id,updated_at,last_message_at,last_message_preview")
@@ -312,7 +304,6 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
         return;
       }
 
-      // Primeira abertura: cria a conversa imediatamente, mesmo sem mensagens.
       if (!data) {
         const created = await supabase
           .from("chat_conversations")
@@ -430,7 +421,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
               <div className="provider-chat-header-profile">
                 <div className="provider-chat-header-identity">
                   <div className="provider-chat-avatar">
-                  {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
+                    {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
                   </div>
                   <div className="provider-chat-header-copy">
                     <strong id="provider-chat-title">{business.business_name}</strong>
@@ -459,7 +450,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                         <div className="provider-chat-participant-copy">
                           <strong>{name}</strong>
                           <span>{supplierProfiles[participantId] ? "Fornecedor" : "Perfil pessoal"}</span>
-                        <OnlineStatus userId={participantId} compact />
+                          <OnlineStatus userId={participantId} compact />
                         </div>
                       </>;
                     })()}
@@ -519,16 +510,49 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
                   {loading && <div className="provider-chat-empty">Carregando conversas...</div>}
                   {!loading && sortedConversations.length === 0 && (
                     <div className="provider-chat-empty">
-                      <strong>{isSupplier ? "Nenhuma conversa ainda" : "Comece uma conversa"}</strong>
-                      <span>{isSupplier ? "Quando alguém falar com você, a conversa aparecerá aqui." : "Tire suas dúvidas com o fornecedor antes de seguir para o WhatsApp."}</span>
+                      <strong>{isSupplier ? "Nenhuma conversa ainda" : "Inicie uma nova conversa"}</strong>
+                      <span>
+                        {isSupplier
+                          ? "Quando alguém falar com você, a conversa aparecerá aqui."
+                          : "Você ainda não iniciou uma conversa com este fornecedor."}
+                      </span>
+                      {!isSupplier && (
+                        <button
+                          type="button"
+                          className="provider-chat-start-button"
+                          onClick={() => void openNewConversation()}
+                          disabled={loading}
+                        >
+                          Iniciar conversa
+                        </button>
+                      )}
                     </div>
                   )}
+
+                  {!loading && !isSupplier && sortedConversations.length > 0 && (
+                    <div className="provider-chat-new-conversation-row">
+                      <button
+                        type="button"
+                        className="provider-chat-start-button"
+                        onClick={() => void openNewConversation()}
+                        disabled={loading}
+                      >
+                        + Nova conversa
+                      </button>
+                    </div>
+                  )}
+
                   {sortedConversations.map((conversation) => (
-                    <button type="button" className="provider-chat-conversation-item" key={conversation.id} onClick={() => {
+                    <button
+                      type="button"
+                      className="provider-chat-conversation-item"
+                      key={conversation.id}
+                      onClick={() => {
                         setError("");
                         setMessages([]);
                         setActiveConversation(conversation);
-                      }}>
+                      }}
+                    >
                       <div className="provider-chat-conversation-avatar">
                         {business.logo_url ? <img src={business.logo_url} alt="" /> : business.business_name.slice(0, 1).toUpperCase()}
                       </div>
@@ -552,7 +576,6 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
     </>
   );
 }
-
 
 type ProviderChatBoundaryProps = Props;
 
