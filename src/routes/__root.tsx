@@ -420,8 +420,13 @@ function RootComponent() {
     let unsubscribe = () => {};
     import("../lib/supabase").then(({ supabase }) => {
       if (!mounted) return;
-      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
         if (!mounted) return;
+        // Durante um refresh, o Supabase pode emitir um estado transitório
+        // sem sessão antes de restaurar a sessão persistida. Nunca trate
+        // esse estado transitório como logout; somente SIGNED_OUT encerra
+        // a sessão de fato.
+        if (!session && event !== "SIGNED_OUT") return;
         setIsAuthenticated(Boolean(session));
         setCurrentUserId(session?.user?.id ?? null);
         setAuthChecked(true);
