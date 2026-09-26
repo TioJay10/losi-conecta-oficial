@@ -196,9 +196,42 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
 
   if (loading) return <div className="inconsistency-loading">Carregando canal de atendimento...</div>;
 
+  const historyPanel = (
+    <div className="inconsistency-history">
+      <div className="inconsistency-history-header">
+        <div>
+          <strong>Minhas inconsistências</strong>
+          <span>Consulte as ocorrências que você já enviou ao administrador.</span>
+        </div>
+        <button type="button" className="inconsistency-new-button" onClick={startNewInconsistency}>
+          + Nova inconsistência
+        </button>
+      </div>
+      <div className="inconsistency-history-list">
+        {conversations.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={"inconsistency-history-item " + (conversation?.id === item.id && !creatingNew ? "is-selected" : "")}
+            onClick={() => void openConversation(item)}
+          >
+            <span className="inconsistency-history-item-main">
+              <strong>{item.title}</strong>
+              <span>{item.issue_type} · {formatDate(item.created_at)}</span>
+            </span>
+            <span className={"inconsistency-history-status status-" + item.status}>
+              {item.status === "resolved" ? "Encerrada" : item.status === "new" ? "Nova" : "Em atendimento"}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   if (!conversation || conversation.status === "resolved" || creatingNew) {
     return (
       <div className="inconsistency-page-shell">
+        {historyPanel}
         {conversation && creatingNew && (
           <button type="button" className="inconsistency-new-button" onClick={cancelNewInconsistency}>
             ← Voltar para a ocorrência atual
@@ -238,35 +271,7 @@ export function InconsistencyUserChat({ userId }: { userId: string }) {
 
   return (
     <div className="inconsistency-page-shell">
-      <div className="inconsistency-history">
-        <div className="inconsistency-history-header">
-          <div>
-            <strong>Minhas inconsistências</strong>
-            <span>Consulte as ocorrências que você já enviou ao administrador.</span>
-          </div>
-          <button type="button" className="inconsistency-new-button" onClick={startNewInconsistency}>
-            + Nova inconsistência
-          </button>
-        </div>
-        <div className="inconsistency-history-list">
-          {conversations.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={"inconsistency-history-item " + (conversation?.id === item.id && !creatingNew ? "is-selected" : "")}
-              onClick={() => void openConversation(item)}
-            >
-              <span className="inconsistency-history-item-main">
-                <strong>{item.title}</strong>
-                <span>{item.issue_type} · {formatDate(item.created_at)}</span>
-              </span>
-              <span className={"inconsistency-history-status status-" + item.status}>
-                {item.status === "resolved" ? "Encerrada" : item.status === "new" ? "Nova" : "Em atendimento"}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {historyPanel}
 
       <section className="inconsistency-chat">
       <section className="inconsistency-chat">
