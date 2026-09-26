@@ -24,7 +24,7 @@ export function AdminInconsistencyCenter() {
     if (!supabase) return;
     const { data, error } = await supabase
       .from("inconsistency_conversations")
-      .select("id,user_id,title,issue_type,description,status,admin_viewed_at,user_viewed_at,created_at,updated_at,user:profiles!inconsistency_conversations_user_id_fkey(full_name,avatar_url)")
+      .select("id,user_id,title,issue_type,description,status,admin_viewed_at,user_viewed_at,created_at,updated_at")
       .order("updated_at", { ascending: false });
 
     if (error) {
@@ -32,7 +32,31 @@ export function AdminInconsistencyCenter() {
       setLoading(false);
       return;
     }
-    setItems((data ?? []) as unknown as ConversationWithUser[]);
+
+    const conversations = (data ?? []) as Array<Omit<ConversationWithUser, "user"> & { user_id: string }>;
+    const userIds = [...new Set(conversations.map((item) => item.user_id).filter(Boolean))];
+    let profilesById = new Map<string, { full_name: string | null; avatar_url: string | null }>();
+
+    if (userIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id,full_name,avatar_url")
+        .in("id", userIds);
+      if (profilesError) {
+        console.error("Erro ao carregar fotos dos usuários das inconsistências:", profilesError);
+      } else {
+        profilesById = new Map(
+          (profiles ?? []).map((profile) => [profile.id, { full_name: profile.full_name, avatar_url: profile.avatar_url }]),
+        );
+      }
+    }
+
+    setItems(
+      conversations.map((item) => ({
+        ...item,
+        user: profilesById.get(item.user_id) ?? null,
+      })) as ConversationWithUser[],
+    );
     setLoading(false);
   }
 
