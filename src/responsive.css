@@ -15185,3 +15185,22 @@ button.availability-day {
 .feed-comments-toggle{display:inline-flex;align-items:center;margin-top:8px;border:0;background:transparent;color:#8f6a2c;font:800 11px "Montserrat",Arial,sans-serif;padding:5px 0;cursor:pointer}
 .feed-comments-toggle:hover{text-decoration:underline}
 .feed-comment-login{display:block;margin-top:10px}
+
+
+/* PATCH 2026-09-26 — FEED CENTRALIZADO NO DESKTOP + ÍCONE FEED DOURADO */
+@media(min-width:901px){
+  .feed-layout{
+    width:min(760px,calc(100% - 36px));
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .feed-side{display:none}
+}
+.marketplace-feed-icon,
+.marketplace-feed-icon:hover,
+.marketplace-feed-icon:active,
+.marketplace-feed-icon:visited{
+  color:#b38a3c !important;
+  background:transparent !important;
+}
