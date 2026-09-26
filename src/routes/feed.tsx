@@ -21,6 +21,7 @@ type FeedPost = {
   media_url: string | null;
   media_type: "image" | "video" | null;
   original_post_id: string | null;
+  original_business_name: string | null;
   created_at: string;
   business_name: string;
   slug: string;
@@ -203,7 +204,58 @@ function FeedPage() {
       return;
     }
 
-    const loaded = (data ?? []) as FeedPost[];
+    let loaded = (data ?? []) as FeedPost[];
+
+    // Para republicações, o banco mantém original_post_id apontando para a
+    // publicação original (e não para a republicação intermediária). Buscamos
+    // o fornecedor dessa publicação para exibir "Compartilhado de X por Y".
+    const originalIds = [...new Set(
+      loaded
+        .map((post) => post.original_post_id)
+        .filter((id): id is string => Boolean(id)),
+    )];
+
+    if (originalIds.length) {
+      const { data: originalRows, error: originalError } = await supabase
+        .from("feed_posts")
+        .select("id,business_id")
+        .in("id", originalIds);
+
+      if (originalError) {
+        console.error("Erro ao carregar origem das republicações:", originalError);
+      } else if (originalRows?.length) {
+        const originalBusinessIds = [...new Set(originalRows.map((row) => row.business_id).filter(Boolean))];
+        const { data: originalBusinesses, error: originalBusinessError } = await supabase
+          .from("business_profiles")
+          .select("id,business_name")
+          .in("id", originalBusinessIds);
+
+        if (originalBusinessError) {
+          console.error("Erro ao carregar fornecedores das publicações originais:", originalBusinessError);
+        } else {
+          const businessNames = new Map(
+            (originalBusinesses ?? []).map((business) => [business.id, business.business_name]),
+          );
+          const originalBusinessByPostId = new Map(
+            originalRows.map((row) => [row.id, businessNames.get(row.business_id) ?? null]),
+          );
+
+          loaded = loaded.map((post) => ({
+            ...post,
+            original_business_name: post.original_post_id
+              ? originalBusinessByPostId.get(post.original_post_id) ?? null
+              : null,
+          }));
+        }
+      }
+    }
+
+    // Publicações originais não têm fornecedor de origem separado.
+    loaded = loaded.map((post) => ({
+      ...post,
+      original_business_name: post.original_business_name ?? null,
+    }));
+
     setPosts(loaded);
 
     if (currentUserId && loaded.length) {
@@ -755,7 +807,13 @@ function FeedPage() {
                         {post.logo_url ? <img src={post.logo_url} alt="" /> : <span>{post.business_name.slice(0, 1).toUpperCase()}</span>}
                       </div>
                       <div className="feed-post-identity">
-                        {isRepost && <small className="feed-repost-label">Compartilhado por {post.business_name}</small>}
+                        {isRepost && (
+                          <small className="feed-repost-label">
+                            {post.original_business_name
+                              ? `Compartilhado de ${post.original_business_name} por ${post.business_name}`
+                              : `Compartilhado por ${post.business_name}`}
+                          </small>
+                        )}
                         <strong>{post.business_name}</strong>
                         <span>{[post.city, post.state].filter(Boolean).join(" — ") || "LOSI CONECTA"} · {formatDate(post.created_at)}</span>
                         {post.main_category && <span className="feed-category">{post.main_category}</span>}
