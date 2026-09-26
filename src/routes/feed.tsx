@@ -332,10 +332,9 @@ function FeedPage() {
 
     setActionBusy("comment-" + post.id);
     try {
-      const { error } = await supabase.from("feed_comments").insert({
-        post_id: post.id,
-        user_id: userId,
-        content: content.slice(0, 1000),
+      const { error } = await supabase.rpc("create_feed_comment", {
+        p_post_id: post.id,
+        p_content: content.slice(0, 1000),
       });
       if (error) throw error;
       setCommentDraft("");
@@ -379,7 +378,7 @@ function FeedPage() {
     }
   }
 
-  async function sendPost(post: FeedPost, channel: "whatsapp" | "facebook" | "instagram" | "copy") {
+  async function sendPost(post: FeedPost, channel: "whatsapp" | "copy") {
     const url = window.location.origin + "/feed#feed-post-" + encodeURIComponent(post.id);
     const text = [post.business_name, post.content].filter(Boolean).join(" — ");
     const encodedUrl = encodeURIComponent(url);
@@ -387,14 +386,6 @@ function FeedPage() {
 
     if (channel === "whatsapp") {
       window.open("https://wa.me/?text=" + encodedText, "_blank", "noopener,noreferrer");
-    } else if (channel === "facebook") {
-      window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl, "_blank", "noopener,noreferrer");
-    } else if (channel === "instagram") {
-      if (navigator.share) {
-        await navigator.share({ title: post.business_name, text, url }).catch(() => undefined);
-      } else {
-        await navigator.clipboard?.writeText(url);
-      }
     } else {
       await navigator.clipboard?.writeText(url);
     }
@@ -598,8 +589,6 @@ function FeedPage() {
                     {sendPostId === post.id && (
                       <div className="feed-send-panel" aria-label="Enviar publicação">
                         <button type="button" onClick={() => void sendPost(post, "whatsapp")}>WhatsApp</button>
-                        <button type="button" onClick={() => void sendPost(post, "instagram")}>Instagram</button>
-                        <button type="button" onClick={() => void sendPost(post, "facebook")}>Facebook</button>
                         <button type="button" onClick={() => void sendPost(post, "copy")}>Copiar link</button>
                       </div>
                     )}
