@@ -11,6 +11,7 @@ type FeedProfile = {
   logo_url: string | null;
   slug: string;
   main_category: string | null;
+  owner_id?: string | null;
 };
 
 type FeedPost = {
@@ -244,12 +245,6 @@ function FeedPage() {
         .eq("active", false)
         .order("created_at", { ascending: false })
         .limit(30);
-
-      if (filterBusinessId && filterAuthorUserId) {
-        // Em um Feed pessoal, nem mesmo publicações ocultas de outro autor
-        // podem entrar na lista. O Feed pessoal é exclusivamente do fornecedor.
-        // O filtro de business_id + author_user_id já foi aplicado acima.
-      }
 
       if (hiddenError) {
         console.error("Erro ao carregar publicações ocultas:", hiddenError);
