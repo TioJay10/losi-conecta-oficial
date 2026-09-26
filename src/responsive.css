@@ -15611,3 +15611,21 @@ button.availability-day {
   .feed-header-inner{position:relative;width:calc(100% - 24px);min-height:60px;padding-left:52px;box-sizing:border-box}
   .feed-layout{width:calc(100% - 24px);margin:0 auto}
 }
+
+
+/* PATCH 2026-09-26 — OPÇÕES DO AUTOR EM CADA PUBLICAÇÃO */
+.feed-post-head{position:relative}
+.feed-post-menu-wrap{position:relative;display:flex;align-items:flex-start;flex:0 0 auto}
+.feed-post-menu-button{border:0;background:transparent;color:#142744;font-size:21px;font-weight:900;line-height:1;padding:4px 7px;cursor:pointer;letter-spacing:1px}
+.feed-post-menu-button:hover{color:#b38a3c}
+.feed-post-menu{position:absolute;right:0;top:34px;z-index:80;min-width:190px;padding:6px;background:#fff;border:1px solid #d9dee7;border-radius:12px;box-shadow:0 16px 40px rgba(10,24,49,.18)}
+.feed-post-menu button{display:block;width:100%;padding:10px 12px;border:0;border-radius:8px;background:#fff;color:#142744;text-align:left;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.feed-post-menu button:hover{background:#f4f6f9}
+.feed-post-menu button.danger{color:#b42318}
+.feed-hidden-notice{margin:10px 0;padding:9px 12px;border:1px solid rgba(180,138,60,.45);border-radius:10px;background:#fff8e8;color:#80621f;font-size:12px;font-weight:800}
+.feed-post-edit-box{margin:10px 0}
+.feed-post-edit-box textarea{display:block;width:100%;min-height:110px;box-sizing:border-box;padding:12px;border:1px solid #cfd6e2;border-radius:12px;resize:vertical;font:inherit;color:#142744;background:#fff}
+.feed-post-edit-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.feed-post-edit-actions button{border:1px solid #cfd6e2;background:#fff;color:#142744;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer}
+.feed-post-edit-actions button.primary{border-color:#b38a3c;background:#b38a3c;color:#fff}
+@media(max-width:700px){.feed-post-menu{right:0;min-width:180px}.feed-post-menu-button{font-size:20px}.feed-post-edit-actions{flex-wrap:wrap}.feed-post-edit-actions button{flex:1}}
