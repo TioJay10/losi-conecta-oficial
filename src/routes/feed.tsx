@@ -22,6 +22,8 @@ type FeedPost = {
   media_type: "image" | "video" | null;
   original_post_id: string | null;
   original_business_name: string | null;
+  original_business_slug: string | null;
+  original_business_logo_url: string | null;
   created_at: string;
   business_name: string;
   slug: string;
@@ -232,25 +234,37 @@ function FeedPage() {
         const originalBusinessIds = [...new Set(originalRows.map((row) => row.business_id).filter(Boolean))];
         const { data: originalBusinesses, error: originalBusinessError } = await supabase
           .from("business_profiles")
-          .select("id,business_name")
+          .select("id,business_name,slug,logo_url")
           .in("id", originalBusinessIds);
 
         if (originalBusinessError) {
           console.error("Erro ao carregar fornecedores das publicações originais:", originalBusinessError);
         } else {
-          const businessNames = new Map(
-            (originalBusinesses ?? []).map((business) => [business.id, business.business_name]),
+          const businessData = new Map(
+            (originalBusinesses ?? []).map((business) => [
+              business.id,
+              {
+                name: business.business_name,
+                slug: business.slug,
+                logo_url: business.logo_url,
+              },
+            ]),
           );
           const originalBusinessByPostId = new Map(
-            originalRows.map((row) => [row.id, businessNames.get(row.business_id) ?? null]),
+            originalRows.map((row) => [row.id, businessData.get(row.business_id) ?? null]),
           );
 
-          loaded = loaded.map((post) => ({
-            ...post,
-            original_business_name: post.original_post_id
+          loaded = loaded.map((post) => {
+            const originalBusiness = post.original_post_id
               ? originalBusinessByPostId.get(post.original_post_id) ?? null
-              : null,
-          }));
+              : null;
+            return {
+              ...post,
+              original_business_name: originalBusiness?.name ?? null,
+              original_business_slug: originalBusiness?.slug ?? null,
+              original_business_logo_url: originalBusiness?.logo_url ?? null,
+            };
+          });
         }
       }
     }
@@ -259,6 +273,8 @@ function FeedPage() {
     loaded = loaded.map((post) => ({
       ...post,
       original_business_name: post.original_business_name ?? null,
+      original_business_slug: post.original_business_slug ?? null,
+      original_business_logo_url: post.original_business_logo_url ?? null,
     }));
 
     setPosts(loaded);
@@ -904,11 +920,30 @@ function FeedPage() {
               </div>
 
               {selectedMedia && (
-                <div className="feed-media-preview">
+                <div
+                  className="feed-media-preview"
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    maxWidth: 280,
+                    margin: "10px auto",
+                    borderRadius: 12,
+                    overflow: "hidden",
+                  }}
+                >
                   {selectedMedia.type === "image" ? (
-                    <img src={selectedMedia.url} alt="Pré-visualização da imagem" />
+                    <img
+                      src={selectedMedia.url}
+                      alt="Miniatura da imagem antes da publicação"
+                      style={{ display: "block", width: "100%", height: 180, objectFit: "cover" }}
+                    />
                   ) : (
-                    <video src={selectedMedia.url} controls aria-label="Pré-visualização do vídeo" />
+                    <video
+                      src={selectedMedia.url}
+                      controls
+                      aria-label="Miniatura do vídeo antes da publicação"
+                      style={{ display: "block", width: "100%", height: 180, objectFit: "cover" }}
+                    />
                   )}
                   <button type="button" onClick={() => { URL.revokeObjectURL(selectedMedia.url); setSelectedMedia(null); }} aria-label="Remover mídia">×</button>
                 </div>
@@ -964,10 +999,51 @@ function FeedPage() {
                       </div>
                       <div className="feed-post-identity">
                         {isRepost && (
-                          <small className="feed-repost-label">
-                            {post.original_business_name
-                              ? `Compartilhado de ${post.original_business_name} por ${post.business_name}`
-                              : `Compartilhado por ${post.business_name}`}
+                          <small className="feed-repost-label" style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
+                            <span>Compartilhado de</span>
+                            {post.original_business_slug && post.original_business_name ? (
+                              <Link
+                                to="/fornecedor/$slug"
+                                params={{ slug: post.original_business_slug }}
+                                style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 700 }}
+                              >
+                                {post.original_business_logo_url ? (
+                                  <img
+                                    src={post.original_business_logo_url}
+                                    alt=""
+                                    style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <span
+                                    aria-hidden="true"
+                                    style={{ width: 24, height: 24, borderRadius: "50%", display: "inline-grid", placeItems: "center", background: "#142744", color: "#d6ad4b", fontWeight: 800 }}
+                                  >
+                                    {post.original_business_name.slice(0, 1).toUpperCase()}
+                                  </span>
+                                )}
+                                <span>{post.original_business_name}</span>
+                              </Link>
+                            ) : (
+                              <span>{post.original_business_name ?? "publicação original"}</span>
+                            )}
+                            <span>por</span>
+                            <Link
+                              to="/fornecedor/$slug"
+                              params={{ slug: post.slug }}
+                              style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 700 }}
+                            >
+                              {post.logo_url ? (
+                                <img src={post.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} />
+                              ) : (
+                                <span
+                                  aria-hidden="true"
+                                  style={{ width: 24, height: 24, borderRadius: "50%", display: "inline-grid", placeItems: "center", background: "#142744", color: "#d6ad4b", fontWeight: 800 }}
+                                >
+                                  {post.business_name.slice(0, 1).toUpperCase()}
+                                </span>
+                              )}
+                              <span>{post.business_name}</span>
+                            </Link>
                           </small>
                         )}
                         <strong>{post.business_name}</strong>
