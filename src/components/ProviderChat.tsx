@@ -63,6 +63,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
   const [profiles, setProfiles] = useState<Record<string, UserProfile>>({});
   const [supplierProfiles, setSupplierProfiles] = useState<Record<string, SupplierProfile>>({});
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const openingConversationRef = useRef(false);
 
   const isSupplier = Boolean(userId && userId === business.owner_id);
 
@@ -341,6 +342,8 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
       onRequireAuth();
       return;
     }
+    if (openingConversationRef.current) return;
+    openingConversationRef.current = true;
     if (!business.id || !business.owner_id) {
       setError("Este perfil não está preparado para receber mensagens.");
       return;
@@ -391,6 +394,7 @@ function ProviderChatContent({ business, userId, onRequireAuth }: Props) {
       console.error("Erro ao preparar conversa:", chatError);
       setError("Não foi possível abrir a conversa. Tente novamente.");
     } finally {
+      openingConversationRef.current = false;
       setLoading(false);
     }
   }
