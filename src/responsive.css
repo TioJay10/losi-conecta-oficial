@@ -15319,6 +15319,10 @@ button.availability-day {
   margin-left:42px;
   padding-top:4px;
 }
+.feed-comment-row-mine{
+  justify-content:flex-start;
+  flex-direction:row;
+}
 .feed-comment-avatar{
   width:38px;height:38px;flex:0 0 38px;
   display:grid;place-items:center;
