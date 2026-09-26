@@ -927,6 +927,7 @@ function FeedPage() {
     const existing = posts.find((item) => item.id === postId);
     if (existing) {
       setModalPost(existing);
+      window.history.replaceState({}, "", "/feed?post=" + encodeURIComponent(postId));
       return;
     }
 
@@ -975,6 +976,7 @@ function FeedPage() {
       }
 
       setModalPost(post);
+      window.history.replaceState({}, "", "/feed?post=" + encodeURIComponent(postId));
     } catch (error) {
       console.error("Erro ao abrir publicação no modal:", error);
       setStatusMessage("Não foi possível abrir esta publicação.");
@@ -986,6 +988,8 @@ function FeedPage() {
   function closePostModal() {
     if (commentPostId) closeComments();
     setModalPost(null);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("post")) window.history.replaceState({}, "", "/feed");
   }
 
   useEffect(() => {
@@ -996,6 +1000,12 @@ function FeedPage() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [modalPost]);
+
+  useEffect(() => {
+    const postId = new URLSearchParams(window.location.search).get("post");
+    if (!postId || !authChecked) return;
+    void openPostModal(postId);
+  }, [authChecked]);
 
   const location = [profile?.city, profile?.state].filter(Boolean).join(" — ");
   const feedSequence = useMemo(() => buildFeedSequence(posts), [posts]);
