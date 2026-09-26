@@ -294,34 +294,62 @@ function FeedPage() {
 
   async function loadComments(postId: string) {
     setCommentLoading(true);
-    const { data, error } = await supabase
-      .from("feed_comments")
-      .select("id,content,created_at,user_id,profiles(full_name)")
-      .eq("post_id", postId)
-      .eq("active", true)
-      .order("created_at", { ascending: true });
 
-    if (error) {
-      console.error("Erro ao carregar comentários:", error);
-    } else {
+    try {
+      // feed_comments não possui FK para profiles. Buscamos os comentários
+      // primeiro e os nomes dos autores separadamente para não depender
+      // de um relacionamento inexistente no Supabase.
+      const { data, error } = await supabase
+        .from("feed_comments")
+        .select("id,content,created_at,user_id")
+        .eq("post_id", postId)
+        .eq("active", true)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+
+      const commentRows = data ?? [];
+      const userIds = [...new Set(commentRows.map((item) => item.user_id).filter(Boolean))];
+      let profileNames: Record<string, string | null> = {};
+
+      if (userIds.length) {
+        const { data: profileRows, error: profileError } = await supabase
+          .from("profiles")
+          .select("id,full_name")
+          .in("id", userIds);
+
+        if (profileError) {
+          console.error("Erro ao carregar nomes dos comentários:", profileError);
+        } else {
+          profileNames = Object.fromEntries(
+            (profileRows ?? []).map((profile) => [profile.id, profile.full_name ?? null]),
+          );
+        }
+      }
+
       setComments((current) => ({
         ...current,
-        [postId]: (data ?? []).map((item: any) => ({
+        [postId]: commentRows.map((item) => ({
           id: item.id,
           content: item.content,
           created_at: item.created_at,
-          full_name: item.profiles?.full_name ?? "Usuário LOSI",
+          full_name: profileNames[item.user_id] ?? "Usuário LOSI",
         })),
       }));
+    } catch (error) {
+      console.error("Erro ao carregar comentários:", error);
+      setComments((current) => ({ ...current, [postId]: [] }));
+      setStatusMessage("Não foi possível carregar os comentários agora.");
+    } finally {
+      setCommentLoading(false);
     }
-    setCommentLoading(false);
   }
 
-  async function toggleComments(postId: string) {
+  function toggleComments(postId: string) {
     const opening = commentPostId !== postId;
-    setCommentPostId(opening ? postId : null);
     setShowAllComments(false);
-    if (opening) await loadComments(postId);
+    setCommentPostId(opening ? postId : null);
+    if (opening) void loadComments(postId);
   }
 
   async function submitComment(post: FeedPost) {
