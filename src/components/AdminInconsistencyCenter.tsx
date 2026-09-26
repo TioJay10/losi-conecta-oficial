@@ -195,6 +195,19 @@ export function AdminInconsistencyCenter() {
             <div className="admin-inconsistency-messages" ref={messagesRef}>
               {messages.map((item) => (
                 <div key={item.id} className={"inconsistency-message-row " + (item.sender_role === "admin" ? "is-admin-user" : "is-client-user")}>
+                  {item.sender_role === "user" && (
+                    selected.user?.avatar_url ? (
+                      <img
+                        className="admin-inconsistency-message-avatar"
+                        src={selected.user.avatar_url}
+                        alt={selected.user.full_name ? `Foto de perfil de ${selected.user.full_name}` : "Foto de perfil"}
+                      />
+                    ) : (
+                      <span className="admin-inconsistency-message-avatar admin-inconsistency-message-avatar-fallback">
+                        {(selected.user?.full_name || "U").slice(0, 1).toUpperCase()}
+                      </span>
+                    )
+                  )}
                   <div className="admin-inconsistency-bubble">
                     <span>{item.sender_role === "admin" ? "Administrador" : "Usuário"}</span>
                     <p>{item.message}</p>
