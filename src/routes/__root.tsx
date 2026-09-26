@@ -157,7 +157,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
     }) {
       const type = typeof notification.type === "string" ? notification.type.toLowerCase() : "";
       if (type.startsWith("feed_")) {
-        return message || title || "Você recebeu uma nova interação no Feed.";
+        return "Você recebeu uma nova interação no Feed.";
       }
 
       if (type.includes("like")) {
