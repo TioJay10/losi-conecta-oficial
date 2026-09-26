@@ -707,8 +707,10 @@ function FeedPage() {
         return supplier && text.includes("@" + supplier.business_name);
       });
 
-      const rpcName = targetMode && targetBusiness ? "create_supplier_feed_publication" : "create_feed_post";
-      const rpcArgs = targetMode && targetBusiness
+      const postingToOwnPersonalFeed = Boolean(targetMode && targetBusiness && profile?.id === targetBusiness.id);
+      const requestingAnotherSupplierFeed = Boolean(targetMode && targetBusiness && profile?.id !== targetBusiness.id);
+      const rpcName = requestingAnotherSupplierFeed ? "create_supplier_feed_publication" : "create_feed_post";
+      const rpcArgs = requestingAnotherSupplierFeed && targetBusiness
         ? {
             p_target_business_id: targetBusiness.id,
             p_content: text || null,
@@ -735,7 +737,7 @@ function FeedPage() {
       setMentionSuggestions([]);
       setMentionStart(null);
       await loadFeed(currentUserId, targetBusiness?.id ?? null, targetBusiness?.owner_id ?? null);
-      setStatusMessage(targetMode ? "Publicação enviada para aprovação do fornecedor." : "Publicação realizada com sucesso.");
+      setStatusMessage(requestingAnotherSupplierFeed ? "Publicação enviada para aprovação do fornecedor." : "Publicação realizada com sucesso.");
     } catch (error) {
       console.error("Erro ao publicar no Feed:", error);
       setStatusMessage("Não foi possível publicar agora.");
@@ -1472,7 +1474,7 @@ function FeedPage() {
                   <input ref={videoInputRef} hidden type="file" accept="video/*" onChange={(event) => handleMediaChange(event, "video")} />
                 </div>
                 <button type="button" className="feed-publish-button" onClick={() => void publishPost()} disabled={publishing || (!postText.trim() && !selectedMedia)}>
-                  {publishing ? "Enviando..." : (targetMode ? "Enviar para aprovação" : "Publicar")}
+                  {publishing ? "Enviando..." : (requestingAnotherSupplierFeed ? "Enviar para aprovação" : "Publicar")}
                 </button>
               </div>
             </section>
