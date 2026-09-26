@@ -10,6 +10,7 @@ import type { ErrorInfo, PointerEvent as ReactPointerEvent, ReactNode } from "re
 import "../responsive.css";
 import "../montserrat.css";
 import "../panel-header-contrast.css";
+import "../feed-modal-comments.css";
 import { OnlinePresenceProvider } from "../components/OnlinePresence";
 
 export const Route = createRootRoute({
@@ -137,8 +138,6 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
         audio.muted = false;
         audio.volume = 0.35;
 
-        // Somente este caminho reproduz áudio: ele é chamado exclusivamente
-        // depois de um INSERT real em public.notifications.
         const playPromise = audio.play();
         if (playPromise) {
           void playPromise.catch((error) => {
@@ -201,12 +200,9 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
 
       try {
         const message = getNotificationMessage(notification);
-        // Som e aviso só são disparados após um INSERT de notificação
-        // realmente novo e não lido.
         playNotificationSound();
         showToast(message);
       } catch (error) {
-        // Uma falha no alerta nunca pode derrubar a navegação principal.
         console.warn("Erro isolado ao processar nova notificação:", error);
       }
     }
@@ -426,10 +422,6 @@ function RootComponent() {
       if (!mounted) return;
       const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
         if (!mounted) return;
-        // Durante um refresh, o Supabase pode emitir um estado transitório
-        // sem sessão antes de restaurar a sessão persistida. Nunca trate
-        // esse estado transitório como logout; somente SIGNED_OUT encerra
-        // a sessão de fato.
         if (!session && event !== "SIGNED_OUT") return;
         setIsAuthenticated(Boolean(session));
         setCurrentUserId(session?.user?.id ?? null);
