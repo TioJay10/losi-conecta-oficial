@@ -9,6 +9,7 @@ type FeedProfile = {
   state: string | null;
   logo_url: string | null;
   slug: string;
+  main_category: string | null;
 };
 
 type LocalPost = {
@@ -17,6 +18,8 @@ type LocalPost = {
   mediaUrl: string | null;
   mediaType: "image" | "video" | null;
   createdAt: string;
+  originalPostId?: string | null;
+  repostedBy?: string | null;
 };
 
 export const Route = createFileRoute("/feed")({
@@ -39,6 +42,8 @@ function FeedPage() {
   const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: "image" | "video"; name: string } | null>(null);
   const [localPosts, setLocalPosts] = useState<LocalPost[]>([]);
   const [mediaMenuOpen, setMediaMenuOpen] = useState(false);
+  const [sendPostId, setSendPostId] = useState<string | null>(null);
+  const [commentPostId, setCommentPostId] = useState<string | null>(null);
   const [likedIds, setLikedIds] = useState<string[]>([]);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
@@ -59,12 +64,26 @@ function FeedPage() {
 
       const { data: business } = await supabase
         .from("business_profiles")
-        .select("business_name,city,state,logo_url,slug")
+        .select("id,business_name,city,state,logo_url,slug")
         .eq("owner_id", userId)
         .maybeSingle();
 
+      let mainCategory: string | null = null;
+      if (business?.id) {
+        const { data: service } = await supabase
+          .from("services")
+          .select("categories(name)")
+          .eq("business_id", business.id)
+          .eq("active", true)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        mainCategory = service?.categories?.name ?? null;
+      }
+
       if (mounted) {
-        setProfile((business ?? null) as FeedProfile | null);
+        setProfile(business ? ({ ...business, main_category: mainCategory } as FeedProfile) : null);
         setAuthChecked(true);
       }
     }
@@ -106,6 +125,43 @@ function FeedPage() {
     setLikedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   }
 
+  function repostPost(post: LocalPost) {
+    setLocalPosts((current) => [
+      {
+        ...post,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        originalPostId: post.originalPostId ?? post.id,
+        repostedBy: profile?.business_name ?? "Seu negócio",
+      },
+      ...current,
+    ]);
+    setSendPostId(null);
+  }
+
+  async function sendPost(post: LocalPost, channel: "whatsapp" | "facebook" | "instagram" | "copy") {
+    const url = window.location.origin + "/feed#" + encodeURIComponent(post.originalPostId ?? post.id);
+    const text = [profile?.business_name, post.text].filter(Boolean).join(" — ");
+    const encodedUrl = encodeURIComponent(url);
+    const encodedText = encodeURIComponent(text + " " + url);
+
+    if (channel === "whatsapp") {
+      window.open("https://wa.me/?text=" + encodedText, "_blank", "noopener,noreferrer");
+    } else if (channel === "facebook") {
+      window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl, "_blank", "noopener,noreferrer");
+    } else if (channel === "instagram") {
+      if (navigator.share) {
+        await navigator.share({ title: profile?.business_name ?? "LOSI CONECTA", text, url }).catch(() => undefined);
+      } else {
+        await navigator.clipboard?.writeText(url);
+      }
+    } else {
+      await navigator.clipboard?.writeText(url);
+    }
+
+    setSendPostId(null);
+  }
+
   const location = [profile?.city, profile?.state].filter(Boolean).join(" — ");
 
   return (
@@ -142,6 +198,7 @@ function FeedPage() {
                 <div className="feed-composer-identity">
                   <strong>{profile.business_name}</strong>
                   <span>{location || "Fornecedor LOSI CONECTA"}</span>
+                  {profile.main_category && <span className="feed-category">{profile.main_category}</span>}
                 </div>
               </div>
 
@@ -206,8 +263,10 @@ function FeedPage() {
                       {profile?.logo_url ? <img src={profile.logo_url} alt="" /> : <span>{profile?.business_name?.slice(0, 1).toUpperCase() || "L"}</span>}
                     </div>
                     <div className="feed-post-identity">
+                      {post.repostedBy && <small className="feed-repost-label">Compartilhado por {post.repostedBy}</small>}
                       <strong>{profile?.business_name || "Fornecedor LOSI CONECTA"}</strong>
                       <span>{location || "LOSI CONECTA"} · agora</span>
+                      {profile?.main_category && <span className="feed-category">{profile.main_category}</span>}
                     </div>
                     {profile?.slug && <Link to="/fornecedor/$slug" params={{ slug: profile.slug }} className="feed-profile-link">Ver perfil público</Link>}
                   </div>
@@ -221,9 +280,30 @@ function FeedPage() {
                     <button type="button" className={likedIds.includes(post.id) ? "is-liked" : ""} onClick={() => toggleLike(post.id)}>
                       <span aria-hidden="true">♡</span> Curtir
                     </button>
-                    <button type="button"><span aria-hidden="true">◯</span> Comentar</button>
+                    <button type="button" onClick={() => setCommentPostId(commentPostId === post.id ? null : post.id)}>
+                      <span aria-hidden="true">◯</span> Comentar
+                    </button>
+                    <button type="button" onClick={() => repostPost(post)}>
+                      <span aria-hidden="true">↻</span> Compartilhar
+                    </button>
+                    <button type="button" onClick={() => setSendPostId(sendPostId === post.id ? null : post.id)}>
+                      <span aria-hidden="true">➤</span> Enviar
+                    </button>
                     {profile?.slug && <Link to="/fornecedor/$slug" params={{ slug: profile.slug }}>Ver perfil público</Link>}
                   </div>
+                  {commentPostId === post.id && (
+                    <div className="feed-comment-panel">
+                      <span>Os comentários entrarão aqui quando o módulo de comentários for conectado ao banco.</span>
+                    </div>
+                  )}
+                  {sendPostId === post.id && (
+                    <div className="feed-send-panel" aria-label="Enviar publicação">
+                      <button type="button" onClick={() => void sendPost(post, "whatsapp")}>WhatsApp</button>
+                      <button type="button" onClick={() => void sendPost(post, "instagram")}>Instagram</button>
+                      <button type="button" onClick={() => void sendPost(post, "facebook")}>Facebook</button>
+                      <button type="button" onClick={() => void sendPost(post, "copy")}>Copiar link</button>
+                    </div>
+                  )}
                 </article>
               ))
             )}
