@@ -15204,3 +15204,36 @@ button.availability-day {
   color:#b38a3c !important;
   background:transparent !important;
 }
+
+
+/* PATCH 2026-09-26 — ÍCONE DE MENSAGEM DO PAINEL DO FORNECEDOR */
+.dashboard-page .dashboard-saved-provider-card .provider-chat-trigger{
+  width:46px !important;
+  height:46px !important;
+  min-width:46px !important;
+  min-height:46px !important;
+  padding:0 !important;
+  color:#0b182a !important;
+  background:transparent !important;
+}
+.dashboard-page .dashboard-saved-provider-card .provider-chat-trigger-icon{
+  width:31px !important;
+  height:31px !important;
+  color:#0b182a !important;
+}
+.dashboard-page .dashboard-saved-provider-card .provider-chat-trigger:hover{
+  color:#0b182a !important;
+  background:transparent !important;
+}
+@media(max-width:700px){
+  .dashboard-page .dashboard-saved-provider-card .provider-chat-trigger{
+    width:44px !important;
+    height:44px !important;
+    min-width:44px !important;
+    min-height:44px !important;
+  }
+  .dashboard-page .dashboard-saved-provider-card .provider-chat-trigger-icon{
+    width:29px !important;
+    height:29px !important;
+  }
+}
