@@ -15322,13 +15322,13 @@ button.availability-day {
   padding-top:4px;
 }
 .feed-comment-row-mine{
-  justify-content:flex-start;
+  justify-content:flex-end;
   flex-direction:row;
 }
 .feed-comment-row-other{
-  justify-content:flex-end;
+  justify-content:flex-start;
 }
-.feed-comment-row-other .feed-comment-body{
+.feed-comment-row-mine .feed-comment-body{
   flex:0 1 auto;
   max-width:82%;
 }
