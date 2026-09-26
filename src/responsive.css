@@ -15091,10 +15091,54 @@ button.availability-day {
 
 /* Feed real: grupos independentes de ações, contadores e comentários */
 .feed-status-message{margin:12px 0;padding:11px 14px;border:1px solid #d9dee8;border-radius:12px;background:#fff;color:#536174;font-size:13px}
-.feed-post-actions{align-items:flex-start}
-.feed-action-group{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:72px}
-.feed-action-group button{width:100%;white-space:nowrap}
-.feed-action-group small{font-size:11px;font-weight:700;color:#687386;line-height:1}
+.feed-post-actions{
+  align-items:stretch;
+  justify-content:space-between;
+  gap:4px;
+}
+.feed-action-group{
+  display:flex;
+  flex:1 1 0;
+  min-width:0;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+}
+.feed-action-group button{
+  width:100%;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  white-space:nowrap;
+}
+.feed-action-icon{
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.feed-action-icon svg{
+  display:block;
+  width:18px;
+  height:18px;
+}
+.feed-action-label{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.feed-action-group small{
+  min-height:12px;
+  font-size:10px;
+  font-weight:700;
+  color:#687386;
+  line-height:1;
+}
 .feed-action-group button.is-liked{font-weight:800}
 .feed-action-group button:disabled{opacity:.6;cursor:wait}
 .feed-comment-item{padding:9px 0;border-bottom:1px solid #edf0f4}
@@ -15105,8 +15149,34 @@ button.availability-day {
 .feed-comment-form input{flex:1;min-width:0;border:1px solid #d9dee8;border-radius:10px;padding:10px 12px;background:#fff}
 .feed-comment-form button{border:1px solid #d6b46a;border-radius:10px;padding:0 14px;background:#0b182a;color:#f0d99a;font-weight:700;cursor:pointer}
 @media(max-width:700px){
-  .feed-action-group{min-width:0;flex:1}
-  .feed-action-group button{font-size:12px;padding-left:5px;padding-right:5px}
+  .feed-post-actions{
+    gap:0;
+    margin-top:12px;
+    padding-top:10px;
+  }
+  .feed-action-group{
+    flex:1 1 25%;
+    min-width:0;
+  }
+  .feed-action-group button{
+    min-height:38px;
+    gap:4px;
+    padding:5px 2px;
+    font-size:10px;
+    border-radius:7px;
+  }
+  .feed-action-icon,
+  .feed-action-icon svg{
+    width:17px;
+    height:17px;
+    flex-basis:17px;
+  }
+  .feed-action-label{
+    max-width:calc(100% - 21px);
+  }
+  .feed-action-group small{
+    font-size:10px;
+  }
   .feed-comment-form{flex-direction:column}
   .feed-comment-form button{min-height:42px}
 }
