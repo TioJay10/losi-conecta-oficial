@@ -16000,3 +16000,61 @@ button.availability-day {
     max-height:44px !important;
   }
 }
+
+
+/* FAQ — estrutura pai > filho > neto, responsiva */
+.losi-faq-page{min-height:100vh;background:#fdfcf9;color:#142744;overflow-x:hidden}
+.losi-faq-header{width:min(1180px,calc(100% - 48px));margin:0 auto;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.losi-faq-back{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 18px;border:1px solid #d6b46a;border-radius:10px;background:#071a33;color:#f0d99a;text-decoration:none;font-weight:800;font-size:12px}
+.losi-faq-hero{background:linear-gradient(145deg,#071a33,#102b4b);color:#fff;border-block:1px solid rgba(214,180,106,.25)}
+.losi-faq-hero-inner{width:min(900px,calc(100% - 48px));margin:0 auto;padding:54px 0 48px;text-align:center}
+.losi-faq-kicker{color:#f0d99a;font-size:10px;font-weight:900;letter-spacing:.2em}
+.losi-faq-hero h1{margin:10px 0;color:#fff;font-size:clamp(30px,5vw,46px);line-height:1.05}
+.losi-faq-hero p{max-width:680px;margin:0 auto;color:#dbe3ef;font-size:15px;line-height:1.65}
+.losi-faq-search{width:min(620px,100%);margin:26px auto 0;display:flex;align-items:center;gap:10px;box-sizing:border-box;padding:0 16px;min-height:52px;background:#fff;border:1px solid #e0e5ec;border-radius:14px;color:#7a8494;box-shadow:0 12px 32px rgba(0,0,0,.16);text-align:left}
+.losi-faq-search input{width:100%;border:0;outline:0;background:transparent;color:#172033;font:inherit;font-size:14px}
+.losi-faq-content{width:min(980px,calc(100% - 48px));margin:0 auto;padding:38px 0 56px;display:grid;gap:24px}
+.losi-faq-category{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:22px;box-shadow:0 8px 28px rgba(15,28,48,.055)}
+.losi-faq-category-head{display:grid;grid-template-columns:46px minmax(0,1fr);gap:14px;align-items:start;margin-bottom:14px}
+.losi-faq-category-number{width:46px;height:46px;display:grid;place-items:center;border-radius:12px;background:#071a33;color:#f0d99a;font-size:11px;font-weight:900}
+.losi-faq-category h2{margin:1px 0 4px;font-size:21px;line-height:1.2}
+.losi-faq-category-head p{margin:0;color:#687386;font-size:12px;line-height:1.5}
+.losi-faq-list{display:grid;gap:8px}
+.losi-faq-item{border:1px solid #e3e7ed;border-radius:12px;background:#fff;overflow:hidden}
+.losi-faq-question{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 16px;border:0;background:transparent;color:#172033;text-align:left;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.losi-faq-question:hover{background:#faf9f5}
+.losi-faq-question span{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.losi-faq-question b{flex:0 0 auto;color:#b38a3c;font-size:10px;margin-top:2px}
+.losi-faq-question i{flex:0 0 auto;width:25px;height:25px;display:grid;place-items:center;border:1px solid #d6b46a;border-radius:50%;color:#a77b2f;font-style:normal;font-size:18px;line-height:1}
+.losi-faq-item.is-open{border-color:rgba(179,138,60,.55);box-shadow:0 8px 24px rgba(15,28,48,.06)}
+.losi-faq-answer{padding:0 51px 16px}
+.losi-faq-answer p{margin:0;color:#5e697b;font-size:13px;line-height:1.7}
+.losi-faq-empty{display:grid;gap:5px;justify-items:center;padding:44px 20px;border:1px dashed #ccd3de;border-radius:16px;color:#687386;text-align:center}
+.losi-faq-empty strong{color:#142744}
+.losi-faq-footer{width:min(980px,calc(100% - 48px));margin:0 auto;padding:24px 0 42px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;color:#687386;font-size:11px}
+.losi-faq-footer strong{color:#142744;letter-spacing:.12em}
+.losi-faq-footer a{color:#a77b2f;font-weight:800;text-decoration:none}
+@media(max-width:700px){
+ .losi-faq-header{width:calc(100% - 24px);min-height:64px}
+ .losi-faq-back{min-height:36px;padding:0 11px;font-size:10px}
+ .losi-faq-hero-inner{width:calc(100% - 24px);padding:38px 0 34px}
+ .losi-faq-hero h1{font-size:31px}
+ .losi-faq-hero p{font-size:13px;line-height:1.55}
+ .losi-faq-search{min-height:48px;margin-top:21px}
+ .losi-faq-content{width:calc(100% - 24px);padding:22px 0 38px;gap:14px}
+ .losi-faq-category{padding:14px;border-radius:15px}
+ .losi-faq-category-head{grid-template-columns:38px minmax(0,1fr);gap:10px;margin-bottom:11px}
+ .losi-faq-category-number{width:38px;height:38px;border-radius:10px}
+ .losi-faq-category h2{font-size:17px}
+ .losi-faq-question{padding:13px 12px;font-size:12px;gap:10px}
+ .losi-faq-answer{padding:0 38px 13px 30px}
+ .losi-faq-answer p{font-size:12px;line-height:1.6}
+ .losi-faq-footer{width:calc(100% - 24px);padding-bottom:28px}
+}
+@media(max-width:380px){
+ .losi-faq-header{gap:8px}
+ .losi-faq-back{padding:0 8px;font-size:9px}
+ .losi-faq-category{padding:11px}
+ .losi-faq-question{padding:12px 9px;font-size:11px}
+ .losi-faq-answer{padding-left:26px;padding-right:8px}
+}
