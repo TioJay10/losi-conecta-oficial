@@ -585,7 +585,7 @@ function ProviderPage() {
             </a>
             <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
             <button type="button" className={"provider-profile-like-icon " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser} title={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"}>
-              <span className="provider-profile-heart" aria-hidden="true">♥</span>
+              <span className="provider-profile-heart" aria-hidden="true">♥</span><span className="provider-profile-like-count" aria-hidden="true">{likeCount}</span>
             </button>
             <button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>
             {userId !== business.owner_id && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}
@@ -910,6 +910,26 @@ function ProviderPage() {
         .provider-profile-like-icon:disabled{opacity:.55;cursor:wait;transform:none}
         .provider-profile-like-icon:focus-visible,.provider-profile-feed-icon:focus-visible{outline:2px solid #d6b46a;outline-offset:3px}
         .provider-profile-feed-icon + .provider-chat-trigger-group{margin-left:0}
+        .provider-profile-like-icon{position:relative}
+        .provider-profile-like-count{display:block;font-size:10px;font-weight:800;line-height:1;color:currentColor;margin-top:1px}
+        .provider-chat-trigger-group{position:relative}
+        .provider-online-status{position:absolute;left:50%;top:calc(100% + 2px);transform:translateX(-50%);display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;line-height:1.1;font-size:9px;font-weight:700;color:#687386;z-index:3;pointer-events:none}
+        .provider-online-dot{width:7px;height:7px;min-width:7px;border-radius:50%;display:inline-block}
+        .provider-online-dot.is-online{background:#22a447}
+        .provider-online-dot.is-offline{background:#d33b3b}
+        .provider-online-status-compact{font-size:8px}
+        @media(max-width:700px){
+          .provider-profile-like-icon{flex-direction:column !important;gap:1px !important}
+          .provider-profile-like-icon .provider-profile-heart{font-size:29px !important;line-height:.95 !important}
+          .provider-profile-like-count{font-size:10px !important;line-height:1 !important}
+          .provider-chat-trigger-group{overflow:visible !important}
+          .provider-online-status{top:calc(100% + 1px);font-size:9px}
+        }
+        @media(max-width:380px){
+          .provider-profile-like-icon .provider-profile-heart{font-size:27px !important}
+          .provider-profile-like-count{font-size:9px !important}
+          .provider-online-status{font-size:8px}
+        }
 
         .public-quote-modal-backdrop{z-index:120}
         .public-quote-modal{width:min(680px,calc(100vw - 28px));max-height:88vh;overflow:auto}
