@@ -13843,42 +13843,42 @@ button.availability-day {
 }
 
 .provider-chat-trigger{
-  width:38px;
-  height:38px;
-  min-width:38px;
-  min-height:38px;
-  padding:4px;
+  width:52px;
+  height:52px;
+  min-width:52px;
+  min-height:52px;
+  padding:0;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   border:0;
-  border-radius:8px;
+  border-radius:50%;
   background:transparent;
   box-shadow:none;
-  color:#d4af37;
+  color:#07111f;
   cursor:pointer;
   transition:transform .18s ease,color .18s ease,opacity .18s ease;
 }
 
 .provider-chat-trigger:hover{
-  transform:translateY(-1px);
+  transform:scale(1.08);
   background:transparent;
   box-shadow:none;
-  color:#f0d99a;
+  color:#0d1b30;
 }
 
 .provider-chat-trigger:focus-visible{
-  outline:2px solid rgba(212,175,55,.7);
+  outline:2px solid #d6b46a;
   outline-offset:3px;
 }
 
 .provider-chat-trigger-icon{
-  width:25px;
-  height:25px;
+  width:34px;
+  height:34px;
   display:block;
   fill:none;
   stroke:currentColor;
-  stroke-width:1.8;
+  stroke-width:1.9;
   stroke-linecap:round;
   stroke-linejoin:round;
 }
