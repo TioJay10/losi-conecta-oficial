@@ -600,16 +600,25 @@ function ProviderPage() {
         </div>
       </section>
 
+      <nav className="provider-profile-nav" aria-label="Seções do perfil">
+        <a href="#provider-about">Sobre</a>
+        {business.portfolio_urls?.length > 0 && <a href="#provider-portfolio">Portfólio</a>}
+        <a href="#provider-services">Serviços</a>
+        <a href="#provider-reviews">Avaliações</a>
+        {business.show_availability && <a href="#provider-availability">Disponibilidade</a>}
+        <a href="#provider-contact">Contato</a>
+      </nav>
+
       <section className="provider-profile-content">
         <div className="provider-profile-main">
-          <div className="provider-profile-card">
+          <div id="provider-about" className="provider-profile-card">
             <div className="catalog-kicker">SOBRE O FORNECEDOR</div>
             <h2>Conheça o trabalho</h2>
             <p>{business.description || "Este profissional ainda não adicionou uma descrição."}</p>
           </div>
 
           {business.portfolio_urls?.length > 0 && (
-            <div className="provider-profile-card">
+            <div id="provider-portfolio" className="provider-profile-card">
               <div className="catalog-kicker">PORTFÓLIO</div>
               <h2>Trabalhos realizados</h2>
               <div className="provider-portfolio-grid">
@@ -651,7 +660,7 @@ function ProviderPage() {
 
 
 {business.show_availability && (
-            <div className="provider-profile-card provider-availability-public">
+            <div id="provider-availability" className="provider-profile-card provider-availability-public">
               <div className="catalog-kicker">DISPONIBILIDADE</div>
               <h2>Agenda do fornecedor</h2>
               <p>Consulte as datas que este fornecedor informa como livres.</p>
@@ -661,7 +670,7 @@ function ProviderPage() {
             </div>
           )}
 
-          <div className="provider-profile-card provider-reviews-card">
+          <div id="provider-reviews" className="provider-profile-card provider-reviews-card">
             <div className="catalog-kicker">AVALIAÇÕES</div>
             <div className="provider-rating-summary">
               <strong>{averageRating ? averageRating.toFixed(1) : "—"}</strong>
@@ -690,7 +699,7 @@ function ProviderPage() {
             </form>
           </div>
 
-          <div className="provider-profile-card">
+          <div id="provider-services" className="provider-profile-card">
             <div className="catalog-kicker">SERVIÇOS</div>
             <h2>O que oferece</h2>
             {business.services.length === 0 ? (
@@ -711,7 +720,7 @@ function ProviderPage() {
           </div>
         </div>
 
-        <aside className="provider-profile-side">
+        <aside id="provider-contact" className="provider-profile-side">
           <div className="provider-profile-card">
             <div className="catalog-kicker">CONTATO</div>
             <h2>Informações</h2>
@@ -885,6 +894,12 @@ function ProviderPage() {
         </div>
       )}
       <style>{`
+        .provider-profile-nav{max-width:1180px;margin:0 auto;padding:12px 6vw;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #e3e6ee;background:#fff;position:sticky;top:0;z-index:20}
+        .provider-profile-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border:1px solid #e3e6ee;border-radius:999px;background:#fff;color:#344054;text-decoration:none;font-size:13px;font-weight:800;transition:.2s}
+        .provider-profile-nav a:hover{border-color:#4f46c7;color:#4f46c7;background:#f8f7ff}
+        .provider-profile-nav a:focus-visible{outline:2px solid #4f46c7;outline-offset:2px}
+        .provider-profile-card{scroll-margin-top:72px}
+        .provider-profile-nav + .provider-profile-content{padding-top:28px}
         .provider-profile-feed-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 16px;border:1px solid #d6b46a;border-radius:12px;background:#07111f;color:#e6c979;text-decoration:none;font-weight:800;box-shadow:0 8px 18px rgba(7,17,31,.12)}
         .provider-profile-feed-button:hover{background:#0d1b30;color:#f2d991}
         .public-quote-modal-backdrop{z-index:120}
@@ -899,7 +914,7 @@ function ProviderPage() {
         .public-quote-items>div{display:flex;justify-content:space-between;gap:14px;padding:13px 15px;border-bottom:1px solid #edf0f4}.public-quote-items>div:last-child{border-bottom:0}
         .public-quote-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0;font-size:14px}.public-quote-total strong{font-size:22px;color:#8a6d2f}
         .public-quote-note{padding:12px 14px;border-radius:12px;background:#f8f9fb;color:#687386}
-        .public-quote-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:20px}.public-quote-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-weight:700;cursor:pointer;transition:.2s}.public-quote-actions button:disabled{opacity:.65;cursor:wait}.public-quote-reject{border:1px solid #d9dee8;background:#fff;color:#7c3030}.public-quote-accept{border:1px solid #d6b46a;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;box-shadow:0 8px 18px rgba(7,17,31,.12)}.public-quote-response-message{margin-top:16px;padding:14px;border-radius:12px;font-weight:700;text-align:center}.public-quote-response-message.accepted{background:#eefaf3;color:#237345}.public-quote-response-message.rejected{background:#fff1f1;color:#a32f2f}        @media(max-width:700px){.public-quote-grid{grid-template-columns:1fr}.public-quote-modal{padding:20px}}
+        .public-quote-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:20px}.public-quote-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-weight:700;cursor:pointer;transition:.2s}.public-quote-actions button:disabled{opacity:.65;cursor:wait}.public-quote-reject{border:1px solid #d9dee8;background:#fff;color:#7c3030}.public-quote-accept{border:1px solid #d6b46a;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;box-shadow:0 8px 18px rgba(7,17,31,.12)}.public-quote-response-message{margin-top:16px;padding:14px;border-radius:12px;font-weight:700;text-align:center}.public-quote-response-message.accepted{background:#eefaf3;color:#237345}.public-quote-response-message.rejected{background:#fff1f1;color:#a32f2f}        @media(max-width:700px){.provider-profile-nav{position:static;padding:10px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.provider-profile-nav a{width:100%;min-width:0;padding:0 8px;font-size:12px}.provider-profile-nav + .provider-profile-content{padding-top:20px}.public-quote-grid{grid-template-columns:1fr}.public-quote-modal{padding:20px}}
       `}</style>
       {authModalOpen && <AuthModal onClose={() => { setAuthModalOpen(false); setPendingAuthAction(null); }} onAuthenticated={handleAuthenticatedFromModal} />}
     </main>
