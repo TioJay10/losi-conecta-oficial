@@ -169,8 +169,8 @@ export function HomePage({ customizationOverride, preview = false }: { customiza
 
           <nav aria-label="Links do rodapé" style={styles.footerNav}>
             <Link to="/buscar" style={styles.footerLink}>Encontrar fornecedores</Link>
-            <Link to="/entrar" style={styles.footerLink}>Entrar</Link>
             <Link to="/faq" style={styles.footerLink}>Perguntas frequentes</Link>
+            <Link to="/entrar" style={styles.footerLink}>Entrar</Link>
           </nav>
         </div>
 
