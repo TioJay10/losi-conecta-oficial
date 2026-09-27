@@ -15629,3 +15629,8 @@ button.availability-day {
 .feed-post-edit-actions button{border:1px solid #cfd6e2;background:#fff;color:#142744;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer}
 .feed-post-edit-actions button.primary{border-color:#b38a3c;background:#b38a3c;color:#fff}
 @media(max-width:700px){.feed-post-menu{right:0;min-width:180px}.feed-post-menu-button{font-size:20px}.feed-post-edit-actions{flex-wrap:wrap}.feed-post-edit-actions button{flex:1}}
+/* PAINÉIS — fundo geral creme quase imperceptível */
+.dashboard-page,
+.admin-page {
+  background: #fdfcf9 !important;
+}
