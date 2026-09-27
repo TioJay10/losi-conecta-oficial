@@ -1259,6 +1259,9 @@ function FeedPage() {
   }, [authChecked]);
 
   const location = [profile?.city, profile?.state].filter(Boolean).join(" — ");
+  const requestingAnotherSupplierFeed = Boolean(
+    targetMode && targetBusiness && targetBusiness.owner_id !== userId,
+  );
   const feedSequence = useMemo(() => buildFeedSequence(posts), [posts]);
 
   async function logout() {
