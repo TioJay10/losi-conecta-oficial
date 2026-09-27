@@ -441,6 +441,7 @@ function RootComponent() {
     location.pathname === "/" ||
     location.pathname === "/entrar" ||
     location.pathname === "/buscar" ||
+    location.pathname === "/faq" ||
     location.pathname.startsWith("/fornecedor/");
 
   if (!authChecked && !publicRoute) {
