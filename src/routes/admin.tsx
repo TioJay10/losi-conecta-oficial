@@ -614,8 +614,8 @@ function AdminPage() {
   async function uploadPresentationVideo() {
     if (!user || !presentationFile || presentationSaving) return;
     const file = presentationFile;
-    if (!file.type.startsWith("video/") || file.size > 50 * 1024 * 1024) {
-      setPresentationMessage(file.size > 50 * 1024 * 1024 ? "O vídeo deve ter no máximo 50 MB." : "Selecione um vídeo válido.");
+    if (!file.type.startsWith("video/") || file.size > 200 * 1024 * 1024) {
+      setPresentationMessage(file.size > 200 * 1024 * 1024 ? "O vídeo deve ter no máximo 200 MB." : "Selecione um vídeo válido.");
       return;
     }
     setPresentationSaving(true);
