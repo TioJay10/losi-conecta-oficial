@@ -574,23 +574,18 @@ function ProviderPage() {
           <div className="provider-profile-actions">
             <a
               href={"/feed?fornecedor=" + encodeURIComponent(business.slug)}
-              className="provider-profile-feed-button"
+              className="provider-profile-feed-icon"
               aria-label={"Abrir Feed de " + business.business_name}
-              title={"Feed de " + business.business_name}
+              title={"Abrir Feed de " + business.business_name}
             >
-              <span aria-hidden="true">
-                <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 5h14M5 12h10M5 19h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M17 12.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Zm0 0V15l2 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <strong>Feed</strong>
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M5 5h14M5 12h10M5 19h7" />
+                <path d="M17 12.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Zm0 0V15l2 1" />
+              </svg>
             </a>
             <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
-            <button type="button" className={"provider-profile-like " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser}>
+            <button type="button" className={"provider-profile-like-icon " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser} title={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"}>
               <span className="provider-profile-heart" aria-hidden="true">♥</span>
-              <span className="provider-profile-like-count">{likeCount}</span>
-              <span className="provider-profile-like-label">{likedByCurrentUser ? "Curtido" : "Curtir perfil"}</span>
             </button>
             <button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>
             {userId !== business.owner_id && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}
@@ -900,8 +895,22 @@ function ProviderPage() {
         .provider-profile-nav a:focus-visible{outline:2px solid #4f46c7;outline-offset:2px}
         .provider-profile-card{scroll-margin-top:72px}
         .provider-profile-nav + .provider-profile-content{padding-top:28px}
-        .provider-profile-feed-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 16px;border:1px solid #d6b46a;border-radius:12px;background:#07111f;color:#e6c979;text-decoration:none;font-weight:800;box-shadow:0 8px 18px rgba(7,17,31,.12)}
-        .provider-profile-feed-button:hover{background:#0d1b30;color:#f2d991}
+        .provider-profile-feed-icon,.provider-profile-like-icon{width:52px;height:52px;min-width:52px;min-height:52px;padding:0;margin:0;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:transparent;box-shadow:none;text-decoration:none;cursor:pointer;transition:transform .18s ease,opacity .18s ease}
+        .provider-profile-feed-icon{color:#d6b46a}
+        .provider-profile-feed-icon svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .provider-profile-feed-icon:hover{color:#f2d991;transform:scale(1.08);background:transparent}
+        .provider-profile-like-icon{font:inherit}
+        .provider-profile-like-icon .provider-profile-heart{font-size:34px;line-height:1}
+        .provider-profile-like-icon.neutral{color:#8a93a3}
+        .provider-profile-like-icon.green{color:#16803a}
+        .provider-profile-like-icon.yellow{color:#f2c94c}
+        .provider-profile-like-icon.red{color:#c43737}
+        .provider-profile-like-icon.gold{color:#d6b23f;text-shadow:0 0 10px rgba(220,174,53,.35)}
+        .provider-profile-like-icon:hover{transform:scale(1.08);background:transparent;box-shadow:none}
+        .provider-profile-like-icon:disabled{opacity:.55;cursor:wait;transform:none}
+        .provider-profile-like-icon:focus-visible,.provider-profile-feed-icon:focus-visible{outline:2px solid #d6b46a;outline-offset:3px}
+        .provider-profile-feed-icon + .provider-chat-trigger-group{margin-left:0}
+
         .public-quote-modal-backdrop{z-index:120}
         .public-quote-modal{width:min(680px,calc(100vw - 28px));max-height:88vh;overflow:auto}
         .public-quote-loading{padding:40px;text-align:center;color:#687386}
@@ -914,7 +923,7 @@ function ProviderPage() {
         .public-quote-items>div{display:flex;justify-content:space-between;gap:14px;padding:13px 15px;border-bottom:1px solid #edf0f4}.public-quote-items>div:last-child{border-bottom:0}
         .public-quote-total{display:flex;justify-content:space-between;align-items:center;padding:18px 0;font-size:14px}.public-quote-total strong{font-size:22px;color:#8a6d2f}
         .public-quote-note{padding:12px 14px;border-radius:12px;background:#f8f9fb;color:#687386}
-        .public-quote-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:20px}.public-quote-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-weight:700;cursor:pointer;transition:.2s}.public-quote-actions button:disabled{opacity:.65;cursor:wait}.public-quote-reject{border:1px solid #d9dee8;background:#fff;color:#7c3030}.public-quote-accept{border:1px solid #d6b46a;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;box-shadow:0 8px 18px rgba(7,17,31,.12)}.public-quote-response-message{margin-top:16px;padding:14px;border-radius:12px;font-weight:700;text-align:center}.public-quote-response-message.accepted{background:#eefaf3;color:#237345}.public-quote-response-message.rejected{background:#fff1f1;color:#a32f2f}        @media(max-width:700px){.provider-profile-nav{position:static;padding:10px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.provider-profile-nav a{width:100%;min-width:0;padding:0 8px;font-size:12px}.provider-profile-nav + .provider-profile-content{padding-top:20px}.public-quote-grid{grid-template-columns:1fr}.public-quote-modal{padding:20px}}
+        .public-quote-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:20px}.public-quote-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-weight:700;cursor:pointer;transition:.2s}.public-quote-actions button:disabled{opacity:.65;cursor:wait}.public-quote-reject{border:1px solid #d9dee8;background:#fff;color:#7c3030}.public-quote-accept{border:1px solid #d6b46a;background:linear-gradient(145deg,#0b182a,#07111f);color:#f0d99a;box-shadow:0 8px 18px rgba(7,17,31,.12)}.public-quote-response-message{margin-top:16px;padding:14px;border-radius:12px;font-weight:700;text-align:center}.public-quote-response-message.accepted{background:#eefaf3;color:#237345}.public-quote-response-message.rejected{background:#fff1f1;color:#a32f2f}        @media(max-width:700px){.provider-profile-actions{gap:10px}.provider-profile-feed-icon,.provider-profile-like-icon{width:48px;height:48px;min-width:48px;min-height:48px}.provider-profile-feed-icon svg{width:31px;height:31px}.provider-profile-like-icon .provider-profile-heart{font-size:31px}.provider-profile-nav{position:static;padding:10px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.provider-profile-nav a{width:100%;min-width:0;padding:0 8px;font-size:12px}.provider-profile-nav + .provider-profile-content{padding-top:20px}.public-quote-grid{grid-template-columns:1fr}.public-quote-modal{padding:20px}}
       `}</style>
       {authModalOpen && <AuthModal onClose={() => { setAuthModalOpen(false); setPendingAuthAction(null); }} onAuthenticated={handleAuthenticatedFromModal} />}
     </main>
