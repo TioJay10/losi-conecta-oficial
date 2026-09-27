@@ -161,6 +161,7 @@ export function HomePage({ customizationOverride, preview = false }: { customiza
       <footer style={styles.footer}>
         <div style={styles.footerBrand}>LOSI CONECTA</div>
         <div style={styles.footerText}>Encontre. Conheça. Conecte.</div>
+        <Link to="/faq" style={styles.footerLink}>Perguntas frequentes</Link>
       </footer>
     </main>
   );
@@ -464,6 +465,7 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 12,
   },
   footerBrand: { fontWeight: 900, letterSpacing: ".12em", color: "var(--home-color-text)" },
+  footerLink: { color: "#a77b2f", fontWeight: 800, textDecoration: "none" },
   footerText: { fontWeight: 600 },
 };
 
