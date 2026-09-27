@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 
 type FeedProfile = {
@@ -94,7 +94,7 @@ function renderPostContent(
     .map((mention) => ({ ...mention, token: "@" + mention.business_name }))
     .sort((a, b) => b.token.length - a.token.length);
 
-  const nodes: Array<string | JSX.Element> = [];
+  const nodes: ReactNode[] = [];
   let remaining = content;
 
   while (remaining) {
