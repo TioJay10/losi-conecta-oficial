@@ -158,10 +158,26 @@ export function HomePage({ customizationOverride, preview = false }: { customiza
         </div>
       </section>
 
-      <footer style={styles.footer}>
-        <div style={styles.footerBrand}>LOSI CONECTA</div>
-        <div style={styles.footerText}>Encontre. Conheça. Conecte.</div>
-        <Link to="/faq" style={styles.footerLink}>Perguntas frequentes</Link>
+      <footer className="home-footer" style={styles.footer}>
+        <div style={styles.footerMain}>
+          <div style={styles.footerBrandBlock}>
+            <div style={styles.footerBrand}>LOSI CONECTA</div>
+            <p style={styles.footerDescription}>
+              Encontre profissionais, empresas e fornecedores para o seu próximo evento.
+            </p>
+          </div>
+
+          <nav aria-label="Links do rodapé" style={styles.footerNav}>
+            <Link to="/buscar" style={styles.footerLink}>Encontrar fornecedores</Link>
+            <Link to="/entrar" style={styles.footerLink}>Entrar</Link>
+            <Link to="/faq" style={styles.footerLink}>Perguntas frequentes</Link>
+          </nav>
+        </div>
+
+        <div style={styles.footerBottom}>
+          <span style={styles.footerText}>Encontre. Conheça. Conecte.</span>
+          <span style={styles.footerCopyright}>© {new Date().getFullYear()} LOSI CONECTA. Todos os direitos reservados.</span>
+        </div>
       </footer>
     </main>
   );
@@ -455,17 +471,51 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 14,
   },
   footer: {
-    borderTop: "1px solid #e4e6ec",
-    padding: "28px 6vw",
+    marginTop: 0,
+    padding: "42px 5vw 24px",
+    background: "var(--home-color-button)",
+    color: "#fff",
+    borderTop: "1px solid rgba(214,180,106,.28)",
+    boxSizing: "border-box",
+  },
+  footerMain: {
+    maxWidth: 1180,
+    margin: "0 auto",
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 40,
+    paddingBottom: 32,
+    borderBottom: "1px solid rgba(255,255,255,.12)",
+  },
+  footerBrandBlock: { maxWidth: 430 },
+  footerBrand: { fontWeight: 900, letterSpacing: ".12em", color: "#f0d99a", fontSize: 17 },
+  footerDescription: {
+    margin: "12px 0 0",
+    color: "#c4cbd7",
+    fontSize: 14,
+    lineHeight: 1.6,
+    maxWidth: 390,
+  },
+  footerNav: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    flexWrap: "wrap",
+    gap: "10px 24px",
+    paddingTop: 2,
+  },
+  footerLink: { color: "#f0d99a", fontWeight: 800, textDecoration: "none", fontSize: 13 },
+  footerBottom: {
+    maxWidth: 1180,
+    margin: "20px auto 0",
     display: "flex",
     justifyContent: "space-between",
-    gap: 20,
+    alignItems: "center",
+    gap: 16,
     flexWrap: "wrap",
-    color: "#7f8795",
-    fontSize: 12,
   },
-  footerBrand: { fontWeight: 900, letterSpacing: ".12em", color: "var(--home-color-text)" },
-  footerLink: { color: "#a77b2f", fontWeight: 800, textDecoration: "none" },
-  footerText: { fontWeight: 600 },
+  footerText: { color: "#c4cbd7", fontWeight: 600, fontSize: 12 },
+  footerCopyright: { color: "#8f9aaa", fontSize: 11, fontWeight: 600 },
 };
 
