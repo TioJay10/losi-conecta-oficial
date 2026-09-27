@@ -710,9 +710,16 @@ function FeedPage() {
         return supplier && text.includes("@" + supplier.business_name);
       });
 
-      const requestingAnotherSupplierFeed = Boolean(targetMode && targetBusiness && profile?.id !== targetBusiness.id);
-      const rpcName = requestingAnotherSupplierFeed ? "create_supplier_feed_publication" : "create_feed_post";
-      const rpcArgs = requestingAnotherSupplierFeed && targetBusiness
+      // Feed geral e Feed pessoal do próprio fornecedor usam exatamente a mesma publicação.
+      // O Feed pessoal é somente uma visão filtrada pelo fornecedor autor; nunca criamos uma cópia.
+      const postingToAnotherSupplierFeed = Boolean(
+        targetMode && targetBusiness && targetBusiness.owner_id !== currentUserId,
+      );
+      const postingToOwnPersonalFeed = Boolean(
+        targetMode && targetBusiness && targetBusiness.owner_id === currentUserId,
+      );
+      const rpcName = postingToAnotherSupplierFeed ? "create_supplier_feed_publication" : "create_feed_post";
+      const rpcArgs = postingToAnotherSupplierFeed && targetBusiness
         ? {
             p_target_business_id: targetBusiness.id,
             p_content: text || null,
@@ -738,8 +745,19 @@ function FeedPage() {
       setMentionIds([]);
       setMentionSuggestions([]);
       setMentionStart(null);
-      await loadFeed(currentUserId, targetBusiness?.id ?? null, targetBusiness?.owner_id ?? null);
-      setStatusMessage(requestingAnotherSupplierFeed ? "Publicação enviada para aprovação do fornecedor." : "Publicação realizada com sucesso.");
+
+      // Publicação normal: o Feed geral nunca recebe o filtro do fornecedor que
+      // estava aberto antes. No Feed pessoal do próprio fornecedor, aplicamos
+      // somente o filtro daquele fornecedor. É sempre o mesmo feed_posts.id.
+      if (postingToOwnPersonalFeed) {
+        await loadFeed(currentUserId, targetBusiness!.id, currentUserId);
+      } else if (!postingToAnotherSupplierFeed) {
+        await loadFeed(currentUserId, null, null);
+      } else {
+        await loadFeed(currentUserId, targetBusiness?.id ?? null, targetBusiness?.owner_id ?? null);
+      }
+
+      setStatusMessage(postingToAnotherSupplierFeed ? "Publicação enviada para aprovação do fornecedor." : "Publicação realizada com sucesso.");
     } catch (error) {
       console.error("Erro ao publicar no Feed:", error);
       setStatusMessage("Não foi possível publicar agora.");
