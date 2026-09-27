@@ -78,10 +78,10 @@ function FAQPage() {
             <div className="losi-faq-list">{c.items.map((item,ii) => {
               const key=c.title+ii; const isOpen=open===key;
               return <article className={"losi-faq-item"+(isOpen?" is-open":"")} key={key}>
-                <button type="button" className="losi-faq-question" aria-expanded={isOpen} aria-controls={"faq-"+ii} onClick={() => setOpen(isOpen?null:key)}>
+                <button type="button" className="losi-faq-question" aria-expanded={isOpen} aria-controls={"faq-"+key.replace(/[^a-zA-Z0-9]/g, "-")} onClick={() => setOpen(isOpen?null:key)}>
                   <span><b>{String(ii+1).padStart(2,"0")}</b>{item.q}</span><i aria-hidden="true">{isOpen?"−":"+"}</i>
                 </button>
-                {isOpen && <div id={"faq-"+ii} className="losi-faq-answer"><p>{item.a}</p></div>}
+                {isOpen && <div id={"faq-"+key.replace(/[^a-zA-Z0-9]/g, "-")} className="losi-faq-answer"><p>{item.a}</p></div>}
               </article>;
             })}</div>
           </section>
