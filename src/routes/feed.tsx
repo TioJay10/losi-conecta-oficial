@@ -566,9 +566,9 @@ function FeedPage() {
   function handleMediaChange(event: ChangeEvent<HTMLInputElement>, type: "image" | "video") {
     const file = event.target.files?.[0];
     if (!file) return;
-    const maxBytes = type === "video" ? 50 * 1024 * 1024 : 15 * 1024 * 1024;
+    const maxBytes = type === "video" ? 200 * 1024 * 1024 : 15 * 1024 * 1024;
     if (file.size > maxBytes) {
-      setStatusMessage(type === "video" ? "O vídeo deve ter no máximo 50 MB." : "A imagem deve ter no máximo 15 MB.");
+      setStatusMessage(type === "video" ? "O vídeo deve ter no máximo 200 MB." : "A imagem deve ter no máximo 15 MB.");
       event.target.value = "";
       return;
     }
