@@ -585,7 +585,7 @@ function ProviderPage() {
                 </svg>
               </span>
               <strong>Feed</strong>
-            </Link>
+            </a>
             <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
             <button type="button" className={"provider-profile-like " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser}>
               <span className="provider-profile-heart" aria-hidden="true">♥</span>
