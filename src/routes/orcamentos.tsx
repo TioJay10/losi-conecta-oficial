@@ -580,6 +580,10 @@ function QuotesPage() {
 
   async function createAndSendProposal() {
     if (!businessId || !userId) return;
+
+    // Abre a janela do WhatsApp imediatamente no clique para evitar que o
+    // navegador bloqueie o popup depois das operações assíncronas no Supabase.
+    const whatsappWindow = window.open("about:blank", "_blank");
     const request = proposalMode === "request" ? supplierPendingRequests.find((item) => item.id === proposalRequestId) : null;
     if (proposalMode === "request" && !request) {
       setMessageType("error"); setMessage("Selecione uma solicitação para montar a proposta."); return;
@@ -656,7 +660,13 @@ function QuotesPage() {
       ].filter(Boolean).join("\n");
       const number = normalizeWhatsAppNumber(recipientPhone);
       const whatsappUrl = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage) : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
-      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      if (whatsappWindow && !whatsappWindow.closed) {
+        whatsappWindow.location.href = whatsappUrl;
+      } else {
+        // Fallback: se o navegador bloquear a nova janela, navega diretamente
+        // para o WhatsApp sem perder o destinatário nem a mensagem.
+        window.location.href = whatsappUrl;
+      }
 
       const createdQuote = { ...(quote as QuoteRow), quote_items: validItems.map((item, index) => ({
         id: "local-" + index, description: item.description, quantity: item.quantity, unit_price: item.unit_price, total: item.quantity * item.unit_price,
@@ -665,6 +675,7 @@ function QuotesPage() {
       if (request) setRequests((current) => current.map((item) => item.id === request.id ? { ...item, status: "quoted" } : item));
       resetProposalForm(); setMessageType("success"); setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
     } catch (error: any) {
+      if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
       console.error("Erro ao criar proposta:", error); setMessageType("error"); setMessage(error?.message || "Não foi possível criar a proposta.");
     } finally { setSavingProposal(false); }
   }
