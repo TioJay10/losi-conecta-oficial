@@ -25,7 +25,7 @@ type QuoteRow = {
   id: string;
   request_id: string;
   business_id: string;
-  client_id: string;
+  client_id: string | null;
   subtotal: number;
   discount: number;
   total: number;
@@ -845,7 +845,7 @@ function QuotesPage() {
     if (delivery !== "pdf") whatsappWindow = window.open("about:blank", "_blank");
     setSavingProposal(true); setMessage("");
     try {
-      const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || userId;
+      const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || null;
       const requestPayload = {
         business_id: businessId, requester_id: recipientOwnerId, service_id: request?.service_id || null,
         client_name: finalRecipientName, client_email: request?.client_email || null, client_phone: recipientPhone,
@@ -907,7 +907,8 @@ function QuotesPage() {
         }
         setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
       } else if (delivery === "pdf") {
-        generateQuotePdf(createdQuote).save(buildPdfFileName(createdQuote));
+        const pdf = await generateQuotePdf(createdQuote);
+        pdf.save(buildPdfFileName(createdQuote));
         setMessage("Proposta criada e o PDF profissional foi gerado.");
       } else {
         await shareQuotePdfOnWhatsApp(createdQuote);
