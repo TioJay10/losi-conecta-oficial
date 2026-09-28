@@ -2,8 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
 
 type RequestRow = {
   id: string;
@@ -440,7 +438,11 @@ function QuotesPage() {
     return `LOSI-CONNECTA-Orcamento-${recipient || "cliente"}-${quote.id.slice(0, 8)}.pdf`;
   }
 
-  function generateQuotePdf(quote: QuoteRow) {
+  async function generateQuotePdf(quote: QuoteRow) {
+    const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+      import("jspdf"),
+      import("jspdf-autotable"),
+    ]);
     const request = quote.quote_requests;
     const supplier = businessContacts[quote.business_id];
     const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
@@ -625,7 +627,7 @@ function QuotesPage() {
   }
 
   async function downloadQuotePdf(quote: QuoteRow) {
-    const pdf = generateQuotePdf(quote);
+    const pdf = await generateQuotePdf(quote);
     pdf.save(buildPdfFileName(quote));
     setMessageType("success");
     setMessage("PDF profissional gerado com sucesso.");
@@ -635,7 +637,7 @@ function QuotesPage() {
     const request = quote.quote_requests;
     const recipientPhone = normalizeWhatsAppNumber(request?.client_phone);
     const recipientName = request?.client_name || "cliente";
-    const pdf = generateQuotePdf(quote);
+    const pdf = await generateQuotePdf(quote);
     const blob = pdf.output("blob");
     const file = new File([blob], buildPdfFileName(quote), { type: "application/pdf" });
     const message = `Olá, ${recipientName}! Preparei seu orçamento pelo LOSI CONECTA. Vou enviar o PDF da proposta por aqui.`;
