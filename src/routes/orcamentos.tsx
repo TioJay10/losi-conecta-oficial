@@ -439,10 +439,7 @@ function QuotesPage() {
   }
 
   async function generateQuotePdf(quote: QuoteRow) {
-    const [{ jsPDF }, { default: autoTable }] = await Promise.all([
-      import("jspdf"),
-      import("jspdf-autotable"),
-    ]);
+    const { jsPDF } = await import("jspdf");
     const request = quote.quote_requests;
     const supplier = businessContacts[quote.business_id];
     const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
@@ -534,40 +531,57 @@ function QuotesPage() {
       ["Data", formatQuoteDate(request?.event_date ?? null)],
       ["Local", request?.event_location || "Nao informado"],
     ];
-    autoTable(pdf, {
-      startY: y,
-      body: eventRows,
-      theme: "plain",
-      styles: { font: "helvetica", fontSize: 8.5, textColor: ink, cellPadding: 2.2 },
-      columnStyles: { 0: { fontStyle: "bold", cellWidth: 30 }, 1: { cellWidth: pageWidth - 66 } },
-      margin: { left: 18, right: 18 },
-    });
-    y = (pdf as any).lastAutoTable.finalY + 8;
+    pdf.setFontSize(8.5);
+    for (const [label, value] of eventRows) {
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(...ink);
+      pdf.text(label, 18, y);
+      pdf.setFont("helvetica", "normal");
+      const lines = pdf.splitTextToSize(String(value), pageWidth - 66);
+      pdf.text(lines, 45, y);
+      y += Math.max(6, lines.length * 4.5);
+    }
+    y += 4;
 
     sectionTitle("Itens da proposta", y);
     y += 5;
-    autoTable(pdf, {
-      startY: y,
-      head: [["Item", "Qtd.", "Valor unitario", "Total"]],
-      body: (quote.quote_items ?? []).map((item) => [
-        item.description,
-        String(item.quantity),
-        money(Number(item.unit_price)),
-        money(Number(item.total)),
-      ]),
-      theme: "grid",
-      headStyles: { fillColor: navy, textColor: gold, fontStyle: "bold", fontSize: 8, halign: "center" },
-      bodyStyles: { fontSize: 8.2, textColor: ink, cellPadding: 3 },
-      alternateRowStyles: { fillColor: [249, 250, 251] },
-      columnStyles: {
-        0: { cellWidth: 82 },
-        1: { cellWidth: 18, halign: "center" },
-        2: { cellWidth: 36, halign: "right" },
-        3: { cellWidth: 36, halign: "right", fontStyle: "bold" },
-      },
-      margin: { left: 18, right: 18 },
-    });
-    y = (pdf as any).lastAutoTable.finalY + 8;
+    const items = quote.quote_items ?? [];
+    const rowHeight = 8;
+    const tableX = 18;
+    const colX = [18, 100, 118, 154, pageWidth - 18];
+    pdf.setFillColor(...navy);
+    pdf.rect(tableX, y - 5, pageWidth - 36, 9, "F");
+    pdf.setTextColor(...gold);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.text("Item", 21, y + 1);
+    pdf.text("Qtd.", 103, y + 1);
+    pdf.text("Valor unitario", 121, y + 1);
+    pdf.text("Total", pageWidth - 21, y + 1, { align: "right" });
+    y += 6;
+    pdf.setFontSize(7.8);
+    for (const item of items) {
+      if (y > pageHeight - 62) {
+        footer();
+        pdf.addPage();
+        drawHeader();
+        y = 53;
+      }
+      pdf.setFillColor(249, 250, 251);
+      pdf.rect(tableX, y - 4, pageWidth - 36, rowHeight, "F");
+      pdf.setTextColor(...ink);
+      pdf.setFont("helvetica", "normal");
+      const desc = pdf.splitTextToSize(item.description, 78);
+      pdf.text(desc.slice(0, 2), 21, y + 1);
+      pdf.text(String(item.quantity), 109, y + 1, { align: "center" });
+      pdf.text(money(Number(item.unit_price)), 149, y + 1, { align: "right" });
+      pdf.setFont("helvetica", "bold");
+      pdf.text(money(Number(item.total)), pageWidth - 21, y + 1, { align: "right" });
+      y += Math.max(rowHeight, desc.length * 4.2);
+      pdf.setDrawColor(225, 228, 232);
+      pdf.line(tableX, y - 4, pageWidth - 18, y - 4);
+    }
+    y += 4;
 
     const totalsX = pageWidth - 82;
     const totalsW = 64;
@@ -627,10 +641,18 @@ function QuotesPage() {
   }
 
   async function downloadQuotePdf(quote: QuoteRow) {
-    const pdf = await generateQuotePdf(quote);
-    pdf.save(buildPdfFileName(quote));
-    setMessageType("success");
-    setMessage("PDF profissional gerado com sucesso.");
+    try {
+      setMessageType("");
+      setMessage("Gerando PDF...");
+      const pdf = await generateQuotePdf(quote);
+      pdf.save(buildPdfFileName(quote));
+      setMessageType("success");
+      setMessage("PDF profissional gerado com sucesso.");
+    } catch (error: any) {
+      console.error("Erro ao gerar PDF:", error);
+      setMessageType("error");
+      setMessage(error?.message || "Não foi possível gerar o PDF. Tente novamente.");
+    }
   }
 
   async function shareQuotePdfOnWhatsApp(quote: QuoteRow) {
