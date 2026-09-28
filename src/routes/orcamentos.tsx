@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 type RequestRow = {
   id: string;
@@ -429,6 +431,233 @@ function QuotesPage() {
       return;
     }
     window.open("https://wa.me/" + number + "?text=" + encodeURIComponent(text), "_blank", "noopener,noreferrer");
+  }
+
+  function buildPdfFileName(quote: QuoteRow) {
+    const recipient = (quote.quote_requests?.client_name || "cliente")
+      .normalize("NFD").replace(/[\\u0300-\\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
+    return `LOSI-CONNECTA-Orcamento-${recipient || "cliente"}-${quote.id.slice(0, 8)}.pdf`;
+  }
+
+  function generateQuotePdf(quote: QuoteRow) {
+    const request = quote.quote_requests;
+    const supplier = businessContacts[quote.business_id];
+    const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
+    const companyName = supplier?.business_name || "LOSI CONECTA";
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const navy: [number, number, number] = [7, 26, 51];
+    const gold: [number, number, number] = [240, 217, 154];
+    const ink: [number, number, number] = [31, 41, 55];
+    const muted: [number, number, number] = [100, 110, 125];
+    const light: [number, number, number] = [246, 247, 249];
+
+    const drawHeader = () => {
+      pdf.setFillColor(...navy);
+      pdf.rect(0, 0, pageWidth, 42, "F");
+      pdf.setTextColor(...gold);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(18);
+      pdf.text("LOSI CONECTA", 18, 17);
+      pdf.setFontSize(9);
+      pdf.setTextColor(230, 234, 240);
+      pdf.text("PROPOSTA COMERCIAL", 18, 25);
+      pdf.setTextColor(...gold);
+      pdf.setFontSize(8);
+      pdf.text("ORCAMENTO", pageWidth - 18, 17, { align: "right" });
+      pdf.setTextColor(230, 234, 240);
+      pdf.text("Encontre. Conheca. Conecte.", pageWidth - 18, 25, { align: "right" });
+      pdf.setDrawColor(...gold);
+      pdf.setLineWidth(0.5);
+      pdf.line(18, 33, pageWidth - 18, 33);
+    };
+
+    const footer = () => {
+      const y = pageHeight - 13;
+      pdf.setDrawColor(220, 223, 228);
+      pdf.setLineWidth(0.3);
+      pdf.line(18, y - 4, pageWidth - 18, y - 4);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(...muted);
+      pdf.text("Documento gerado pelo LOSI CONECTA", 18, y);
+      pdf.text(`Pagina ${pdf.getNumberOfPages()}`, pageWidth - 18, y, { align: "right" });
+    };
+
+    const sectionTitle = (title: string, y: number) => {
+      pdf.setFillColor(...light);
+      pdf.roundedRect(18, y - 5, pageWidth - 36, 10, 2, 2, "F");
+      pdf.setTextColor(...navy);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.text(title.toUpperCase(), 22, y + 1);
+    };
+
+    drawHeader();
+    let y = 53;
+
+    pdf.setTextColor(...navy);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    pdf.text(request?.event_title || "Proposta de servico", 18, y);
+    y += 8;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(9);
+    pdf.setTextColor(...muted);
+    pdf.text(`Emitido em ${new Date(quote.sent_at || quote.created_at).toLocaleDateString("pt-BR")}`, 18, y);
+    y += 12;
+
+    sectionTitle("Destinatario", y);
+    y += 9;
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(9); pdf.setTextColor(...ink);
+    pdf.text("Nome", 18, y);
+    pdf.setFont("helvetica", "normal"); pdf.text(request?.client_name || "Nao informado", 45, y);
+    y += 6;
+    pdf.setFont("helvetica", "bold"); pdf.text("WhatsApp", 18, y);
+    pdf.setFont("helvetica", "normal"); pdf.text(request?.client_phone || "Nao informado", 45, y);
+    y += 6;
+    if (request?.client_email) {
+      pdf.setFont("helvetica", "bold"); pdf.text("E-mail", 18, y);
+      pdf.setFont("helvetica", "normal"); pdf.text(request.client_email, 45, y);
+      y += 6;
+    }
+    y += 5;
+
+    sectionTitle("Dados do evento", y);
+    y += 9;
+    const eventRows = [
+      ["Evento", request?.event_title || "Nao informado"],
+      ["Data", formatQuoteDate(request?.event_date ?? null)],
+      ["Local", request?.event_location || "Nao informado"],
+    ];
+    autoTable(pdf, {
+      startY: y,
+      body: eventRows,
+      theme: "plain",
+      styles: { font: "helvetica", fontSize: 8.5, textColor: ink, cellPadding: 2.2 },
+      columnStyles: { 0: { fontStyle: "bold", cellWidth: 30 }, 1: { cellWidth: pageWidth - 66 } },
+      margin: { left: 18, right: 18 },
+    });
+    y = (pdf as any).lastAutoTable.finalY + 8;
+
+    sectionTitle("Itens da proposta", y);
+    y += 5;
+    autoTable(pdf, {
+      startY: y,
+      head: [["Item", "Qtd.", "Valor unitario", "Total"]],
+      body: (quote.quote_items ?? []).map((item) => [
+        item.description,
+        String(item.quantity),
+        money(Number(item.unit_price)),
+        money(Number(item.total)),
+      ]),
+      theme: "grid",
+      headStyles: { fillColor: navy, textColor: gold, fontStyle: "bold", fontSize: 8, halign: "center" },
+      bodyStyles: { fontSize: 8.2, textColor: ink, cellPadding: 3 },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
+      columnStyles: {
+        0: { cellWidth: 82 },
+        1: { cellWidth: 18, halign: "center" },
+        2: { cellWidth: 36, halign: "right" },
+        3: { cellWidth: 36, halign: "right", fontStyle: "bold" },
+      },
+      margin: { left: 18, right: 18 },
+    });
+    y = (pdf as any).lastAutoTable.finalY + 8;
+
+    const totalsX = pageWidth - 82;
+    const totalsW = 64;
+    pdf.setFillColor(...light);
+    pdf.roundedRect(totalsX, y, totalsW, 31, 2, 2, "F");
+    pdf.setFontSize(8);
+    pdf.setTextColor(...muted);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Subtotal", totalsX + 5, y + 8);
+    pdf.text(money(Number(quote.subtotal)), totalsX + totalsW - 5, y + 8, { align: "right" });
+    pdf.text("Desconto", totalsX + 5, y + 15);
+    pdf.text(money(Number(quote.discount)), totalsX + totalsW - 5, y + 15, { align: "right" });
+    pdf.setDrawColor(210, 214, 220);
+    pdf.line(totalsX + 5, y + 19, totalsX + totalsW - 5, y + 19);
+    pdf.setTextColor(...navy);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(11);
+    pdf.text("TOTAL", totalsX + 5, y + 26);
+    pdf.setTextColor(...gold);
+    pdf.text(money(Number(quote.total)), totalsX + totalsW - 5, y + 26, { align: "right" });
+    y += 40;
+
+    if (quote.validity_until || quote.notes) {
+      sectionTitle("Condicoes da proposta", y);
+      y += 9;
+      pdf.setTextColor(...ink);
+      pdf.setFontSize(8.5);
+      if (quote.validity_until) {
+        pdf.setFont("helvetica", "bold"); pdf.text("Validade:", 18, y);
+        pdf.setFont("helvetica", "normal"); pdf.text(formatQuoteDate(quote.validity_until), 39, y);
+        y += 6;
+      }
+      if (quote.notes) {
+        pdf.setFont("helvetica", "bold"); pdf.text("Observacoes:", 18, y);
+        pdf.setFont("helvetica", "normal");
+        const notes = pdf.splitTextToSize(quote.notes, pageWidth - 60);
+        pdf.text(notes, 43, y);
+        y += notes.length * 4.5 + 3;
+      }
+    }
+
+    y = Math.max(y + 10, pageHeight - 48);
+    pdf.setDrawColor(...gold);
+    pdf.setLineWidth(0.7);
+    pdf.line(18, y, 78, y);
+    pdf.setTextColor(...navy);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(9);
+    pdf.text(supplierName, 18, y + 6);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(...muted);
+    pdf.text(companyName, 18, y + 11);
+
+    footer();
+    return pdf;
+  }
+
+  async function downloadQuotePdf(quote: QuoteRow) {
+    const pdf = generateQuotePdf(quote);
+    pdf.save(buildPdfFileName(quote));
+    setMessageType("success");
+    setMessage("PDF profissional gerado com sucesso.");
+  }
+
+  async function shareQuotePdfOnWhatsApp(quote: QuoteRow) {
+    const request = quote.quote_requests;
+    const recipientPhone = normalizeWhatsAppNumber(request?.client_phone);
+    const recipientName = request?.client_name || "cliente";
+    const pdf = generateQuotePdf(quote);
+    const blob = pdf.output("blob");
+    const file = new File([blob], buildPdfFileName(quote), { type: "application/pdf" });
+    const message = `Olá, ${recipientName}! Preparei seu orçamento pelo LOSI CONECTA. Vou enviar o PDF da proposta por aqui.`;
+    try {
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Orçamento LOSI CONECTA", text: message });
+        setMessageType("success");
+        setMessage("PDF pronto para ser compartilhado pelo WhatsApp.");
+        return;
+      }
+    } catch (error: any) {
+      if (error?.name === "AbortError") return;
+      console.error("Erro ao compartilhar PDF:", error);
+    }
+
+    pdf.save(buildPdfFileName(quote));
+    const whatsappUrl = recipientPhone
+      ? "https://wa.me/" + recipientPhone + "?text=" + encodeURIComponent(message)
+      : "https://wa.me/?text=" + encodeURIComponent(message);
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    setMessageType("success");
+    setMessage("O PDF foi baixado. O WhatsApp foi aberto para você anexar o PDF à conversa.");
   }
 
   function shareQuoteOnWhatsApp(quote: QuoteRow) {
@@ -1170,7 +1399,20 @@ function QuotesPage() {
 
               {selectedQuote.validity_until && <p className="quote-modal-note"><strong>Validade:</strong> {dateOnly(selectedQuote.validity_until)}</p>}
               {selectedQuote.notes && <p className="quote-modal-note"><strong>Observações:</strong> {selectedQuote.notes}</p>}
-              <div className="quote-modal-actions">
+              <div className="quote-modal-actions quote-modal-actions-enhanced">
+                {isSupplier && (
+                  <>
+                    <button type="button" className="quotes-whatsapp" onClick={() => shareQuoteOnWhatsApp(selectedQuote)}>
+                      Enviar pelo WhatsApp
+                    </button>
+                    <button type="button" className="quotes-secondary" onClick={() => downloadQuotePdf(selectedQuote)}>
+                      Gerar PDF
+                    </button>
+                    <button type="button" className="quotes-secondary" onClick={() => shareQuotePdfOnWhatsApp(selectedQuote)}>
+                      PDF + WhatsApp
+                    </button>
+                  </>
+                )}
                 <button type="button" className="quotes-secondary quote-delete-button" onClick={() => deleteQuote(selectedQuote)}>
                   Excluir orçamento
                 </button>
