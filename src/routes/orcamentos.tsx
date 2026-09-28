@@ -725,6 +725,21 @@ function QuotesPage() {
   const selectedItemLines = selectedQuote?.quote_items ?? [];
 
   const closeQuoteModal = () => setSelectedQuote(null);
+  function prepareProposalFromRequest(request: RequestRow) {
+    setProposalMode("request");
+    setProposalRequestId(request.id);
+    setProposalRecipientName(request.client_name || "");
+    setProposalRecipientPhone(request.client_phone || "");
+    setProposalEventTitle(request.event_title || "");
+    setProposalEventDate(request.event_date || "");
+    setProposalEventLocation(request.event_location || "");
+    setProposalEventDescription(request.description || "");
+    setProposalProfileLink("");
+    setResolvedProposalRecipient(null);
+    setSelectedRequest(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const closeRequestModal = () => setSelectedRequest(null);
   const closeDashboardModal = () => { setDashboardFilter(null); setDashboardDateFilter("all"); setDashboardDateValue(""); };
 
@@ -1089,23 +1104,23 @@ function QuotesPage() {
       <section className="quotes-content">
         <div className="quotes-kicker">ORÇAMENTOS</div>
         <h1>Orçamentos e solicitações</h1>
-        <p className="quotes-intro">Acompanhe o que você solicitou, os orçamentos que recebeu e, quando também for fornecedor, as solicitações e propostas da sua empresa.</p>
+        <p className="quotes-intro">Acompanhe suas solicitações e propostas. Como fornecedor, você pode enviar uma proposta para qualquer cliente, tenha ele solicitado orçamento ou não.</p>
 
         {isSupplier && (
           <section className="proposal-builder" aria-labelledby="proposal-builder-title">
             <div className="proposal-builder-head">
               <div>
                 <div className="quotes-kicker">NOVA PROPOSTA</div>
-                <h2 id="proposal-builder-title">Preparar orçamento para o cliente</h2>
-                <p>Monte uma proposta completa e envie diretamente pelo WhatsApp, mesmo quando o cliente ainda não criou uma solicitação no LOSI CONECTA.</p>
+                <h2 id="proposal-builder-title">Enviar proposta para o cliente</h2>
+                <p>Crie uma proposta diretamente para o cliente ou responda a uma solicitação já recebida. O cliente não precisa ter solicitado orçamento para você enviar uma proposta.</p>
               </div>
             </div>
 
             <div className="proposal-field" style={{ marginBottom: 18 }}>
-              <label>Tipo de envio</label>
+              <label>Origem da proposta</label>
               <div className="proposal-mode-grid">
-                <button type="button" className={"quotes-secondary proposal-mode-button " + (proposalMode === "direct" ? "active" : "")} onClick={() => setProposalMode("direct")}>Enviar diretamente</button>
-                <button type="button" className={"quotes-secondary proposal-mode-button " + (proposalMode === "request" ? "active" : "")} onClick={() => setProposalMode("request")}>A partir de uma solicitação</button>
+                <button type="button" className={"quotes-secondary proposal-mode-button " + (proposalMode === "direct" ? "active" : "")} onClick={() => setProposalMode("direct")}>Novo orçamento para cliente</button>
+                <button type="button" className={"quotes-secondary proposal-mode-button " + (proposalMode === "request" ? "active" : "")} onClick={() => setProposalMode("request")}>Responder solicitação recebida</button>
               </div>
             </div>
             {proposalMode === "request" && (
@@ -1196,16 +1211,16 @@ function QuotesPage() {
                 <div className="proposal-actions">
                   <button type="button" className="quotes-secondary" onClick={resetProposalForm}>Limpar</button>
                   <button type="button" className="quotes-whatsapp" disabled={savingProposal} onClick={() => createAndSendProposal("whatsapp")}>
-                    {savingProposal ? "Preparando..." : "Criar e enviar pelo WhatsApp"}
+                    {savingProposal ? "Preparando..." : "Enviar proposta pelo WhatsApp"}
                   </button>
                   <button type="button" className="proposal-primary" disabled={savingProposal} onClick={() => createAndSendProposal("pdf")}>
-                    {savingProposal ? "Preparando..." : "Criar e gerar PDF"}
+                    {savingProposal ? "Preparando..." : "Gerar proposta em PDF"}
                   </button>
                   <button type="button" className="quotes-secondary" disabled={savingProposal} onClick={() => createAndSendProposal("pdf-whatsapp")}>
-                    {savingProposal ? "Preparando..." : "Criar PDF + WhatsApp"}
+                    {savingProposal ? "Preparando..." : "PDF + WhatsApp"}
                   </button>
                 </div>
-                <p className="proposal-hint">O WhatsApp abre no número informado; o PDF é gerado com a identidade LOSI CONECTA. No celular compatível, “PDF + WhatsApp” permite compartilhar o arquivo diretamente pelo menu de compartilhamento.</p>
+                <p className="proposal-hint">O cliente pode ter solicitado uma proposta ou não. No envio direto, informe nome e WhatsApp do destinatário. O WhatsApp abre no número informado; o PDF é gerado com a identidade LOSI CONECTA.</p>
           </section>
         )}
 
@@ -1380,6 +1395,13 @@ function QuotesPage() {
                     <strong>Preparar e enviar o orçamento ao cliente.</strong>
                   </div>
                   <div className="quote-modal-actions">
+                  <button
+                    type="button"
+                    className="proposal-primary"
+                    onClick={() => prepareProposalFromRequest(selectedRequest)}
+                  >
+                    Preparar orçamento
+                  </button>
                   <button
                     type="button"
                     className="quotes-whatsapp"
