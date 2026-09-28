@@ -807,12 +807,12 @@ function QuotesPage() {
     }
   }
 
-  async function createAndSendProposal() {
+  async function createAndSendProposal(delivery: "whatsapp" | "pdf" | "pdf-whatsapp" = "whatsapp") {
     if (!businessId || !userId) return;
 
-    // Abre a janela do WhatsApp imediatamente no clique para evitar que o
-    // navegador bloqueie o popup depois das operações assíncronas no Supabase.
-    const whatsappWindow = window.open("about:blank", "_blank");
+    // O WhatsApp é aberto imediatamente no clique quando essa é a opção escolhida,
+    // evitando bloqueio de popup depois das operações assíncronas no Supabase.
+    const whatsappWindow = delivery !== "pdf" ? window.open("about:blank", "_blank") : null;
     const request = proposalMode === "request" ? supplierPendingRequests.find((item) => item.id === proposalRequestId) : null;
     if (proposalMode === "request" && !request) {
       setMessageType("error"); setMessage("Selecione uma solicitação para montar a proposta."); return;
@@ -889,20 +889,28 @@ function QuotesPage() {
       ].filter(Boolean).join("\n");
       const number = normalizeWhatsAppNumber(recipientPhone);
       const whatsappUrl = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage) : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
-      if (whatsappWindow && !whatsappWindow.closed) {
-        whatsappWindow.location.href = whatsappUrl;
-      } else {
-        // Fallback: se o navegador bloquear a nova janela, navega diretamente
-        // para o WhatsApp sem perder o destinatário nem a mensagem.
-        window.location.href = whatsappUrl;
-      }
 
       const createdQuote = { ...(quote as QuoteRow), quote_items: validItems.map((item, index) => ({
         id: "local-" + index, description: item.description, quantity: item.quantity, unit_price: item.unit_price, total: item.quantity * item.unit_price,
       })), quote_requests: quoteRequest } as QuoteRow;
       setQuotes((current) => [createdQuote, ...current]);
       if (request) setRequests((current) => current.map((item) => item.id === request.id ? { ...item, status: "quoted" } : item));
-      resetProposalForm(); setMessageType("success"); setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
+
+      if (delivery === "whatsapp") {
+        if (whatsappWindow && !whatsappWindow.closed) {
+          whatsappWindow.location.href = whatsappUrl;
+        } else {
+          window.location.href = whatsappUrl;
+        }
+        setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
+      } else if (delivery === "pdf") {
+        generateQuotePdf(createdQuote).save(buildPdfFileName(createdQuote));
+        setMessage("Proposta criada e o PDF profissional foi gerado.");
+      } else {
+        await shareQuotePdfOnWhatsApp(createdQuote);
+      }
+
+      resetProposalForm(); setMessageType("success");
     } catch (error: any) {
       if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
       console.error("Erro ao criar proposta:", error); setMessageType("error"); setMessage(error?.message || "Não foi possível criar a proposta.");
@@ -1151,11 +1159,17 @@ function QuotesPage() {
 
                 <div className="proposal-actions">
                   <button type="button" className="quotes-secondary" onClick={resetProposalForm}>Limpar</button>
-                  <button type="button" className="proposal-primary" disabled={savingProposal} onClick={createAndSendProposal}>
-                    {savingProposal ? "Preparando proposta..." : "Criar proposta e enviar pelo WhatsApp"}
+                  <button type="button" className="quotes-whatsapp" disabled={savingProposal} onClick={() => createAndSendProposal("whatsapp")}>
+                    {savingProposal ? "Preparando..." : "Criar e enviar pelo WhatsApp"}
+                  </button>
+                  <button type="button" className="proposal-primary" disabled={savingProposal} onClick={() => createAndSendProposal("pdf")}>
+                    {savingProposal ? "Preparando..." : "Criar e gerar PDF"}
+                  </button>
+                  <button type="button" className="quotes-secondary" disabled={savingProposal} onClick={() => createAndSendProposal("pdf-whatsapp")}>
+                    {savingProposal ? "Preparando..." : "Criar PDF + WhatsApp"}
                   </button>
                 </div>
-                <p className="proposal-hint">O WhatsApp será aberto com a mensagem pronta e o link da proposta. O formulário pode ser usado com ou sem uma solicitação anterior.</p>
+                <p className="proposal-hint">O WhatsApp abre no número informado; o PDF é gerado com a identidade LOSI CONECTA. No celular compatível, “PDF + WhatsApp” permite compartilhar o arquivo diretamente pelo menu de compartilhamento.</p>
           </section>
         )}
 
