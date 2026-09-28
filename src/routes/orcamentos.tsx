@@ -812,7 +812,7 @@ function QuotesPage() {
 
     // O WhatsApp é aberto imediatamente no clique quando essa é a opção escolhida,
     // evitando bloqueio de popup depois das operações assíncronas no Supabase.
-    const whatsappWindow = delivery !== "pdf" ? window.open("about:blank", "_blank") : null;
+    let whatsappWindow: Window | null = null;
     const request = proposalMode === "request" ? supplierPendingRequests.find((item) => item.id === proposalRequestId) : null;
     if (proposalMode === "request" && !request) {
       setMessageType("error"); setMessage("Selecione uma solicitação para montar a proposta."); return;
@@ -840,6 +840,7 @@ function QuotesPage() {
     const subtotal = validItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
     const discount = Math.max(0, Number(proposalDiscount.replace(",", ".")) || 0);
     const total = Math.max(0, subtotal - discount);
+    if (delivery !== "pdf") whatsappWindow = window.open("about:blank", "_blank");
     setSavingProposal(true); setMessage("");
     try {
       const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || userId;
@@ -908,6 +909,7 @@ function QuotesPage() {
         setMessage("Proposta criada e o PDF profissional foi gerado.");
       } else {
         await shareQuotePdfOnWhatsApp(createdQuote);
+        if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
       }
 
       resetProposalForm(); setMessageType("success");
