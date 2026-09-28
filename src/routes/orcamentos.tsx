@@ -664,16 +664,20 @@ function QuotesPage() {
 
   function shareQuoteOnWhatsApp(quote: QuoteRow) {
     const request = quote.quote_requests;
+    const recipientPhone = request?.client_phone;
+    const number = normalizeWhatsAppNumber(recipientPhone);
+    if (!number) {
+      setMessageType("error");
+      setMessage("O WhatsApp do cliente não foi informado ou está inválido neste orçamento.");
+      return;
+    }
     const business = businessContacts[quote.business_id];
     const message = buildQuoteWhatsAppMessage(
       quote,
       request?.client_name || "cliente",
       business?.business_name || "Fornecedor",
     );
-    const number = normalizeWhatsAppNumber(request?.client_phone);
-    const url = number
-      ? "https://wa.me/" + number + "?text=" + encodeURIComponent(message)
-      : "https://wa.me/?text=" + encodeURIComponent(message);
+    const url = "https://wa.me/" + number + "?text=" + encodeURIComponent(message);
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
@@ -846,8 +850,12 @@ function QuotesPage() {
     setSavingProposal(true); setMessage("");
     try {
       const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || null;
+      // Solicitações diretas podem ser feitas para um cliente externo, sem conta LOSI.
+      // Nesse caso o requester é o próprio fornecedor e client_id fica nulo, evitando
+      // que a notificação de "orçamento recebido" volte para quem enviou a proposta.
+      const requestOwnerId = recipientOwnerId || userId;
       const requestPayload = {
-        business_id: businessId, requester_id: recipientOwnerId, service_id: request?.service_id || null,
+        business_id: businessId, requester_id: requestOwnerId, service_id: request?.service_id || null,
         client_name: finalRecipientName, client_email: request?.client_email || null, client_phone: recipientPhone,
         event_title: proposalEventTitle.trim(), event_date: proposalEventDate || request?.event_date || null,
         event_location: proposalEventLocation.trim() || request?.event_location || null,
@@ -891,6 +899,7 @@ function QuotesPage() {
         profileUrl ? "Acesse sua proposta pelo link abaixo:" : "", profileUrl,
       ].filter(Boolean).join("\n");
       const number = normalizeWhatsAppNumber(recipientPhone);
+      if (!number) throw new Error("O WhatsApp do destinatário não é válido. Informe DDD + número, com ou sem o código 55.");
       const whatsappUrl = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage) : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
 
       const createdQuote = { ...(quote as QuoteRow), quote_items: validItems.map((item, index) => ({
