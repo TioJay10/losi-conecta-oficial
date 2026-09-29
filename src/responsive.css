@@ -16133,3 +16133,31 @@ body :where(label){
     line-height:1.55;
   }
 }
+
+
+/* LOSI CONECTA — AJUSTE FINAL DE LEGIBILIDADE
+   Somente tipografia: preserva estrutura, espaçamento, componentes e funcionalidades. */
+@media (min-width: 701px){
+  .marketplace-card-body>p{font-size:12px}
+  .marketplace-services span{font-size:10px}
+  .marketplace-profile-link{font-size:12px}
+  .marketplace-contact{font-size:11px}
+  .feed-post-actions button,.feed-post-actions a{font-size:12px}
+}
+
+@media (max-width: 700px){
+  .marketplace-card-body>p{font-size:12px;line-height:1.55}
+  .marketplace-services span{font-size:10px}
+  .marketplace-profile-link{font-size:11px}
+  .marketplace-contact{font-size:11px}
+  .feed-profile-link{font-size:11px}
+  .feed-post-actions button,.feed-post-actions a{font-size:11px}
+  .losi-faq-hero p{font-size:14px}
+  .losi-faq-question{font-size:13px}
+  .losi-faq-answer p{font-size:13px;line-height:1.65}
+}
+
+@media (max-width: 380px){
+  .losi-faq-question{font-size:12px}
+  .losi-faq-answer p{font-size:13px}
+}
