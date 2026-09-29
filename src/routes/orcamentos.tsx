@@ -542,7 +542,7 @@ function QuotesPage() {
       pdf.setFontSize(7.5);
       pdf.setTextColor(...muted);
       pdf.text("Documento gerado pelo LOSI CONECTA", 18, y);
-      pdf.text(\`Pagina \${pdf.getNumberOfPages()}\`, pageWidth - 18, y, { align: "right" });
+      pdf.text(`Pagina ${pdf.getNumberOfPages()}`, pageWidth - 18, y, { align: "right" });
     };
 
     const section = (title: string, y: number) => {
