@@ -16161,3 +16161,247 @@ body :where(label){
   .losi-faq-question{font-size:12px}
   .losi-faq-answer p{font-size:13px}
 }
+
+
+/* LOSI CONECTA — MOBILE FINAL
+   Tipografia consistente + responsividade da Busca.
+   Não altera estrutura, componentes ou funcionalidades. */
+@media only screen and (max-width: 768px) {
+  .marketplace-header-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 60px;
+    padding: 0 12px;
+  }
+
+  .marketplace-logo {
+    font-size: 18px;
+    letter-spacing: -.035em;
+  }
+
+  .marketplace-main-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    height: 42px;
+    margin-bottom: 9px;
+  }
+
+  .marketplace-main-search input {
+    font-size: 14px;
+    padding: 0 12px;
+  }
+
+  .marketplace-main-search button {
+    width: 46px;
+    font-size: 20px;
+  }
+
+  .marketplace-header-actions {
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .marketplace-account {
+    font-size: 12px;
+    max-width: 92px;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  .marketplace-category-inner {
+    padding: 0 10px;
+    gap: 2px;
+    scrollbar-width: none;
+  }
+
+  .marketplace-category-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .marketplace-category-inner button {
+    padding: 11px 10px;
+    font-size: 11px;
+  }
+
+  .marketplace-search-panel {
+    margin-top: 14px;
+    padding: 0 12px;
+  }
+
+  .marketplace-breadcrumb {
+    font-size: 10px;
+    margin-bottom: 9px;
+  }
+
+  .marketplace-search-panel h1 {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .marketplace-search-panel > p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 6px 0 13px;
+  }
+
+  .marketplace-filter-row {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 11px;
+  }
+
+  .marketplace-filter-row label,
+  .marketplace-filter-group label {
+    font-size: 10px;
+  }
+
+  .marketplace-filter-main input,
+  .marketplace-filter-field input,
+  .marketplace-filter-field select,
+  .marketplace-filter-group select {
+    height: 42px;
+    font-size: 14px;
+  }
+
+  .marketplace-search-button {
+    grid-column: auto;
+    width: 100%;
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .marketplace-content {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 14px;
+    padding: 0 12px 36px;
+  }
+
+  .marketplace-sidebar {
+    position: static;
+    padding: 13px;
+  }
+
+  .marketplace-results-top {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 11px;
+  }
+
+  .marketplace-results-context {
+    font-size: 10px;
+  }
+
+  .marketplace-results-top h2 {
+    font-size: 19px;
+    line-height: 1.25;
+  }
+
+  .marketplace-sort {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .marketplace-sort select {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    font-size: 13px;
+  }
+
+  .marketplace-active-filters span {
+    font-size: 11px;
+  }
+
+  .marketplace-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .marketplace-card-media {
+    height: 170px;
+  }
+
+  .marketplace-card-body {
+    padding: 13px;
+  }
+
+  .marketplace-card-heading h3 {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .marketplace-location {
+    font-size: 11px;
+  }
+
+  .marketplace-rating {
+    font-size: 11px;
+  }
+
+  .marketplace-rating strong {
+    font-size: 13px;
+  }
+
+  .marketplace-card-body > p {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .marketplace-services span {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  .marketplace-profile-link,
+  .marketplace-contact {
+    font-size: 12px;
+  }
+
+  .marketplace-contact {
+    padding: 8px 10px;
+  }
+
+  .marketplace-empty {
+    padding: 28px 18px;
+  }
+
+  .marketplace-empty strong {
+    font-size: 15px;
+  }
+
+  .marketplace-empty p,
+  .marketplace-message {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+}
+
+@media only screen and (max-width: 380px) {
+  .marketplace-logo {
+    font-size: 17px;
+  }
+
+  .marketplace-search-panel h1 {
+    font-size: 20px;
+  }
+
+  .marketplace-card-media {
+    height: 155px;
+  }
+
+  .marketplace-card-heading h3 {
+    font-size: 15px;
+  }
+
+  .marketplace-card-body > p {
+    font-size: 12px;
+  }
+
+  .marketplace-profile-link,
+  .marketplace-contact {
+    font-size: 11px;
+  }
+}
