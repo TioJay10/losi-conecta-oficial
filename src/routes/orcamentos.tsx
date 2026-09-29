@@ -432,11 +432,41 @@ function QuotesPage() {
     window.open("https://wa.me/" + number + "?text=" + encodeURIComponent(text), "_blank", "noopener,noreferrer");
   }
 
-  function buildPdfFileName(quote: QuoteRow) {
-    const recipient = (quote.quote_requests?.client_name || "cliente")
-      .normalize("NFD").replace(/[\\u0300-\\u036f]/g, "")
-      .replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase();
-    return `LOSI-CONNECTA-Orcamento-${recipient || "cliente"}-${quote.id.slice(0, 8)}.pdf`;
+  type ProposalDraft = {
+    recipientName: string;
+    recipientPhone: string;
+    eventTitle: string;
+    eventDate: string | null;
+    eventLocation: string;
+    eventDescription: string;
+    items: { description: string; quantity: number; unit_price: number; total: number }[];
+    subtotal: number;
+    discount: number;
+    total: number;
+    validityUntil: string | null;
+    notes: string;
+    supplierName: string;
+    companyName: string;
+    supplierPhone: string;
+    supplierEmail: string;
+    supplierProfileUrl: string;
+  };
+
+  function sanitizeFilePart(value: string) {
+    return value
+      .normalize("NFD")
+      .replace(/[\\u0300-\\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .toLowerCase();
+  }
+
+  function buildPdfFileName(value: QuoteRow | ProposalDraft) {
+    const recipient = "recipientName" in value
+      ? value.recipientName
+      : value.quote_requests?.client_name || "cliente";
+    const suffix = "id" in value ? value.id.slice(0, 8) : Date.now().toString().slice(-8);
+    return \`LOSI-CONNECTA-Proposta-\${sanitizeFilePart(recipient) || "cliente"}-\${suffix}.pdf\`;
   }
 
   function downloadPdfBlob(pdf: jsPDF, fileName: string, targetWindow?: Window | null) {
@@ -447,10 +477,6 @@ function QuotesPage() {
 
     const url = URL.createObjectURL(blob);
 
-    // O atributo download não é confiável em Safari/iOS. Quando uma janela
-    // já foi aberta pelo clique do usuário, mostramos o PDF nela para que
-    // o navegador ofereça Salvar/Compartilhar; em desktop, também tentamos
-    // o download direto pelo link.
     if (targetWindow && !targetWindow.closed) {
       targetWindow.location.href = url;
       window.setTimeout(() => URL.revokeObjectURL(url), 60000);
@@ -466,7 +492,6 @@ function QuotesPage() {
     link.click();
     link.remove();
 
-    // Fallback para navegadores que ignoram o atributo download.
     window.setTimeout(() => {
       if (document.visibilityState === "visible") {
         const opened = window.open(url, "_blank", "noopener,noreferrer");
@@ -475,16 +500,10 @@ function QuotesPage() {
       } else {
         window.setTimeout(() => URL.revokeObjectURL(url), 60000);
       }
-    }, 250);
+    }, 300);
   }
 
-  async function generateQuotePdf(quote: QuoteRow) {
-    if (!quote?.id) throw new Error("O orçamento selecionado não possui um identificador válido.");
-    const request = quote.quote_requests;
-    if (!request) throw new Error("Os dados do cliente deste orçamento não foram carregados. Feche o orçamento e abra novamente.");
-    const supplier = businessContacts[quote.business_id];
-    const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
-    const companyName = supplier?.business_name || "LOSI CONECTA";
+  async function generateProposalPdf(draft: ProposalDraft) {
     const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -494,28 +513,28 @@ function QuotesPage() {
     const muted: [number, number, number] = [100, 110, 125];
     const light: [number, number, number] = [246, 247, 249];
 
-    const drawHeader = () => {
+    const header = () => {
       pdf.setFillColor(...navy);
-      pdf.rect(0, 0, pageWidth, 42, "F");
+      pdf.rect(0, 0, pageWidth, 43, "F");
       pdf.setTextColor(...gold);
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(18);
+      pdf.setFontSize(19);
       pdf.text("LOSI CONECTA", 18, 17);
       pdf.setFontSize(9);
-      pdf.setTextColor(230, 234, 240);
+      pdf.setTextColor(232, 235, 240);
       pdf.text("PROPOSTA COMERCIAL", 18, 25);
       pdf.setTextColor(...gold);
       pdf.setFontSize(8);
-      pdf.text("ORCAMENTO", pageWidth - 18, 17, { align: "right" });
-      pdf.setTextColor(230, 234, 240);
+      pdf.text("PROPOSTA", pageWidth - 18, 17, { align: "right" });
+      pdf.setTextColor(232, 235, 240);
       pdf.text("Encontre. Conheca. Conecte.", pageWidth - 18, 25, { align: "right" });
       pdf.setDrawColor(...gold);
-      pdf.setLineWidth(0.5);
-      pdf.line(18, 33, pageWidth - 18, 33);
+      pdf.setLineWidth(0.6);
+      pdf.line(18, 34, pageWidth - 18, 34);
     };
 
     const footer = () => {
-      const y = pageHeight - 13;
+      const y = pageHeight - 12;
       pdf.setDrawColor(220, 223, 228);
       pdf.setLineWidth(0.3);
       pdf.line(18, y - 4, pageWidth - 18, y - 4);
@@ -523,10 +542,10 @@ function QuotesPage() {
       pdf.setFontSize(7.5);
       pdf.setTextColor(...muted);
       pdf.text("Documento gerado pelo LOSI CONECTA", 18, y);
-      pdf.text(`Pagina ${pdf.getNumberOfPages()}`, pageWidth - 18, y, { align: "right" });
+      pdf.text(\`Pagina \${pdf.getNumberOfPages()}\`, pageWidth - 18, y, { align: "right" });
     };
 
-    const sectionTitle = (title: string, y: number) => {
+    const section = (title: string, y: number) => {
       pdf.setFillColor(...light);
       pdf.roundedRect(18, y - 5, pageWidth - 36, 10, 2, 2, "F");
       pdf.setTextColor(...navy);
@@ -535,106 +554,112 @@ function QuotesPage() {
       pdf.text(title.toUpperCase(), 22, y + 1);
     };
 
-    drawHeader();
-    let y = 53;
+    header();
+    let y = 54;
 
     pdf.setTextColor(...navy);
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(16);
-    pdf.text(request?.event_title || "Proposta de servico", 18, y);
+    pdf.setFontSize(17);
+    pdf.text(draft.eventTitle || "Proposta comercial", 18, y);
     y += 8;
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(9);
+    pdf.setFontSize(8.5);
     pdf.setTextColor(...muted);
-    pdf.text(`Emitido em ${new Date(quote.sent_at || quote.created_at).toLocaleDateString("pt-BR")}`, 18, y);
+    pdf.text(\`Emitida em \${new Date().toLocaleDateString("pt-BR")}\`, 18, y);
     y += 12;
 
-    sectionTitle("Destinatario", y);
+    section("Destinatario", y);
     y += 9;
-    pdf.setFont("helvetica", "bold"); pdf.setFontSize(9); pdf.setTextColor(...ink);
+    pdf.setTextColor(...ink);
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "bold");
     pdf.text("Nome", 18, y);
-    pdf.setFont("helvetica", "normal"); pdf.text(request?.client_name || "Nao informado", 45, y);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(draft.recipientName || "Nao informado", 45, y);
     y += 6;
-    pdf.setFont("helvetica", "bold"); pdf.text("WhatsApp", 18, y);
-    pdf.setFont("helvetica", "normal"); pdf.text(request?.client_phone || "Nao informado", 45, y);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("WhatsApp", 18, y);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(draft.recipientPhone || "Nao informado", 45, y);
     y += 6;
-    if (request?.client_email) {
-      pdf.setFont("helvetica", "bold"); pdf.text("E-mail", 18, y);
-      pdf.setFont("helvetica", "normal"); pdf.text(request.client_email, 45, y);
-      y += 6;
-    }
-    y += 5;
+    y += 4;
 
-    sectionTitle("Dados do evento", y);
+    section("Dados do evento", y);
     y += 9;
-    const eventRows = [
-      ["Evento", request?.event_title || "Nao informado"],
-      ["Data", formatQuoteDate(request?.event_date ?? null)],
-      ["Local", request?.event_location || "Nao informado"],
+    const eventRows: [string, string][] = [
+      ["Evento", draft.eventTitle || "Nao informado"],
+      ["Data", formatQuoteDate(draft.eventDate)],
+      ["Local", draft.eventLocation || "Nao informado"],
     ];
     pdf.setFontSize(8.5);
     for (const [label, value] of eventRows) {
-      pdf.setFont("helvetica", "bold");
       pdf.setTextColor(...ink);
+      pdf.setFont("helvetica", "bold");
       pdf.text(label, 18, y);
       pdf.setFont("helvetica", "normal");
-      const lines = pdf.splitTextToSize(String(value), pageWidth - 66);
+      const lines = pdf.splitTextToSize(value, pageWidth - 66);
       pdf.text(lines, 45, y);
       y += Math.max(6, lines.length * 4.5);
     }
-    y += 4;
-
-    sectionTitle("Itens da proposta", y);
+    if (draft.eventDescription) {
+      y += 2;
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Detalhes", 18, y);
+      pdf.setFont("helvetica", "normal");
+      const lines = pdf.splitTextToSize(draft.eventDescription, pageWidth - 45);
+      pdf.text(lines, 45, y);
+      y += lines.length * 4.5;
+    }
     y += 5;
-    const items = quote.quote_items ?? [];
-    const rowHeight = 8;
-    const tableX = 18;
-    const colX = [18, 100, 118, 154, pageWidth - 18];
+
+    section("Itens da proposta", y);
+    y += 5;
     pdf.setFillColor(...navy);
-    pdf.rect(tableX, y - 5, pageWidth - 36, 9, "F");
+    pdf.rect(18, y - 5, pageWidth - 36, 9, "F");
     pdf.setTextColor(...gold);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
     pdf.text("Item", 21, y + 1);
-    pdf.text("Qtd.", 103, y + 1);
-    pdf.text("Valor unitario", 121, y + 1);
+    pdf.text("Qtd.", 108, y + 1, { align: "center" });
+    pdf.text("Unitario", 149, y + 1, { align: "right" });
     pdf.text("Total", pageWidth - 21, y + 1, { align: "right" });
-    y += 6;
-    pdf.setFontSize(7.8);
-    for (const item of items) {
-      if (y > pageHeight - 62) {
+    y += 7;
+
+    for (const item of draft.items) {
+      if (y > pageHeight - 70) {
         footer();
         pdf.addPage();
-        drawHeader();
-        y = 53;
+        header();
+        y = 54;
       }
       pdf.setFillColor(249, 250, 251);
-      pdf.rect(tableX, y - 4, pageWidth - 36, rowHeight, "F");
+      const desc = pdf.splitTextToSize(item.description, 78);
+      const rowHeight = Math.max(8, desc.length * 4.2);
+      pdf.rect(18, y - 4, pageWidth - 36, rowHeight, "F");
       pdf.setTextColor(...ink);
       pdf.setFont("helvetica", "normal");
-      const desc = pdf.splitTextToSize(item.description, 78);
-      pdf.text(desc.slice(0, 2), 21, y + 1);
-      pdf.text(String(item.quantity), 109, y + 1, { align: "center" });
-      pdf.text(money(Number(item.unit_price)), 149, y + 1, { align: "right" });
+      pdf.text(desc.slice(0, 3), 21, y + 1);
+      pdf.text(String(item.quantity), 108, y + 1, { align: "center" });
+      pdf.text(money(item.unit_price), 149, y + 1, { align: "right" });
       pdf.setFont("helvetica", "bold");
-      pdf.text(money(Number(item.total)), pageWidth - 21, y + 1, { align: "right" });
-      y += Math.max(rowHeight, desc.length * 4.2);
+      pdf.text(money(item.total), pageWidth - 21, y + 1, { align: "right" });
+      y += rowHeight;
       pdf.setDrawColor(225, 228, 232);
-      pdf.line(tableX, y - 4, pageWidth - 18, y - 4);
+      pdf.line(18, y - 4, pageWidth - 18, y - 4);
     }
-    y += 4;
+    y += 5;
 
     const totalsX = pageWidth - 82;
     const totalsW = 64;
     pdf.setFillColor(...light);
     pdf.roundedRect(totalsX, y, totalsW, 31, 2, 2, "F");
+    pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
     pdf.setTextColor(...muted);
-    pdf.setFont("helvetica", "normal");
     pdf.text("Subtotal", totalsX + 5, y + 8);
-    pdf.text(money(Number(quote.subtotal)), totalsX + totalsW - 5, y + 8, { align: "right" });
+    pdf.text(money(draft.subtotal), totalsX + totalsW - 5, y + 8, { align: "right" });
     pdf.text("Desconto", totalsX + 5, y + 15);
-    pdf.text(money(Number(quote.discount)), totalsX + totalsW - 5, y + 15, { align: "right" });
+    pdf.text(money(draft.discount), totalsX + totalsW - 5, y + 15, { align: "right" });
     pdf.setDrawColor(210, 214, 220);
     pdf.line(totalsX + 5, y + 19, totalsX + totalsW - 5, y + 19);
     pdf.setTextColor(...navy);
@@ -642,40 +667,71 @@ function QuotesPage() {
     pdf.setFontSize(11);
     pdf.text("TOTAL", totalsX + 5, y + 26);
     pdf.setTextColor(...gold);
-    pdf.text(money(Number(quote.total)), totalsX + totalsW - 5, y + 26, { align: "right" });
+    pdf.text(money(draft.total), totalsX + totalsW - 5, y + 26, { align: "right" });
     y += 40;
 
-    if (quote.validity_until || quote.notes) {
-      sectionTitle("Condicoes da proposta", y);
+    if (draft.validityUntil || draft.notes) {
+      section("Condicoes da proposta", y);
       y += 9;
       pdf.setTextColor(...ink);
       pdf.setFontSize(8.5);
-      if (quote.validity_until) {
-        pdf.setFont("helvetica", "bold"); pdf.text("Validade:", 18, y);
-        pdf.setFont("helvetica", "normal"); pdf.text(formatQuoteDate(quote.validity_until), 39, y);
+      if (draft.validityUntil) {
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Validade:", 18, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(formatQuoteDate(draft.validityUntil), 39, y);
         y += 6;
       }
-      if (quote.notes) {
-        pdf.setFont("helvetica", "bold"); pdf.text("Observacoes:", 18, y);
+      if (draft.notes) {
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Observacoes:", 18, y);
         pdf.setFont("helvetica", "normal");
-        const notes = pdf.splitTextToSize(quote.notes, pageWidth - 60);
+        const notes = pdf.splitTextToSize(draft.notes, pageWidth - 60);
         pdf.text(notes, 43, y);
         y += notes.length * 4.5 + 3;
       }
     }
 
-    y = Math.max(y + 10, pageHeight - 48);
+    if (draft.supplierPhone || draft.supplierEmail || draft.supplierProfileUrl) {
+      y += 4;
+      section("Contato do fornecedor", y);
+      y += 9;
+      pdf.setFontSize(8.5);
+      pdf.setTextColor(...ink);
+      if (draft.supplierPhone) {
+        pdf.setFont("helvetica", "bold"); pdf.text("Telefone:", 18, y);
+        pdf.setFont("helvetica", "normal"); pdf.text(draft.supplierPhone, 45, y); y += 5;
+      }
+      if (draft.supplierEmail) {
+        pdf.setFont("helvetica", "bold"); pdf.text("E-mail:", 18, y);
+        pdf.setFont("helvetica", "normal"); pdf.text(draft.supplierEmail, 45, y); y += 5;
+      }
+      if (draft.supplierProfileUrl) {
+        pdf.setFont("helvetica", "bold"); pdf.text("Perfil:", 18, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(pdf.splitTextToSize(draft.supplierProfileUrl, pageWidth - 55), 45, y);
+        y += 5;
+      }
+    }
+
+    y = Math.max(y + 9, pageHeight - 47);
+    if (y > pageHeight - 28) {
+      footer();
+      pdf.addPage();
+      header();
+      y = 54;
+    }
     pdf.setDrawColor(...gold);
     pdf.setLineWidth(0.7);
     pdf.line(18, y, 78, y);
     pdf.setTextColor(...navy);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
-    pdf.text(supplierName, 18, y + 6);
+    pdf.text(draft.supplierName || "Fornecedor", 18, y + 6);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(7.5);
     pdf.setTextColor(...muted);
-    pdf.text(companyName, 18, y + 11);
+    pdf.text(draft.companyName || "LOSI CONECTA", 18, y + 11);
 
     footer();
     return pdf;
@@ -896,135 +952,268 @@ function QuotesPage() {
   async function createAndSendProposal(delivery: "whatsapp" | "pdf" | "pdf-whatsapp" = "whatsapp") {
     if (!businessId || !userId) return;
 
-    // O WhatsApp é aberto imediatamente no clique quando essa é a opção escolhida,
-    // evitando bloqueio de popup depois das operações assíncronas no Supabase.
-    let whatsappWindow: Window | null = null;
-    let pdfWindow: Window | null = null;
-    const request = proposalMode === "request" ? supplierPendingRequests.find((item) => item.id === proposalRequestId) : null;
+    const request = proposalMode === "request"
+      ? supplierPendingRequests.find((item) => item.id === proposalRequestId) || null
+      : null;
+
     if (proposalMode === "request" && !request) {
-      setMessageType("error"); setMessage("Selecione uma solicitação para montar a proposta."); return;
-    }
-    const recipientName = proposalRecipientName.trim();
-    const profileLink = proposalProfileLink.trim();
-    let linkedRecipient = resolvedProposalRecipient;
-    if (profileLink && !linkedRecipient) linkedRecipient = await resolveProposalRecipient(profileLink, request ?? undefined);
-    if (profileLink && !linkedRecipient) {
-      setMessageType("error"); setMessage("Identifique o destinatário pelo link do perfil público antes de enviar a proposta."); return;
-    }
-    if (request && linkedRecipient && linkedRecipient.owner_id !== request.requester_id) {
-      setMessageType("error"); setMessage("O perfil público informado não corresponde ao solicitante desta solicitação."); return;
-    }
-    const finalRecipientName = linkedRecipient?.business_name || recipientName;
-    const recipientPhone = linkedRecipient?.whatsapp || linkedRecipient?.phone || proposalRecipientPhone.trim() || request?.client_phone || "";
-    if (!finalRecipientName) { setMessageType("error"); setMessage("Informe o nome do destinatário."); return; }
-    if (delivery !== "pdf" && !recipientPhone) {
       setMessageType("error");
-      setMessage("Informe o WhatsApp do destinatário para enviar a proposta por WhatsApp.");
+      setMessage("Selecione uma solicitação para montar a proposta.");
       return;
     }
-    if (!proposalEventTitle.trim()) { setMessageType("error"); setMessage("Informe o nome ou título do evento."); return; }
+
+    const recipientNameInput = proposalRecipientName.trim();
+    if (!recipientNameInput) {
+      setMessageType("error");
+      setMessage("Informe o nome do destinatário.");
+      return;
+    }
+
+    if (!proposalEventTitle.trim()) {
+      setMessageType("error");
+      setMessage("Informe o nome ou título do evento.");
+      return;
+    }
 
     const validItems = proposalItems.map((item) => ({
-      description: item.description.trim(), quantity: Number(item.quantity), unit_price: Number(item.unitPrice.replace(",", "."))
-    })).filter((item) => item.description && item.quantity > 0 && Number.isFinite(item.unit_price) && item.unit_price >= 0);
-    if (!validItems.length) { setMessageType("error"); setMessage("Adicione pelo menos um item válido à proposta."); return; }
+      description: item.description.trim(),
+      quantity: Number(item.quantity),
+      unit_price: Number(item.unitPrice.replace(",", ".")),
+    })).filter((item) =>
+      item.description &&
+      item.quantity > 0 &&
+      Number.isFinite(item.unit_price) &&
+      item.unit_price >= 0
+    );
+
+    if (!validItems.length) {
+      setMessageType("error");
+      setMessage("Adicione pelo menos um item válido à proposta.");
+      return;
+    }
+
     const subtotal = validItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
     const discount = Math.max(0, Number(proposalDiscount.replace(",", ".")) || 0);
     const total = Math.max(0, subtotal - discount);
+
+    // Abrimos as janelas no próprio clique. Assim, Safari/iPhone e bloqueadores
+    // de popup não impedem a entrega depois que o PDF ou Supabase terminarem.
+    let whatsappWindow: Window | null = null;
+    let pdfWindow: Window | null = null;
     if (delivery === "whatsapp" || delivery === "pdf-whatsapp") {
       whatsappWindow = window.open("about:blank", "_blank");
-    } else if (delivery === "pdf") {
-      // Abre uma aba imediatamente no gesto do usuário para evitar bloqueio
-      // de popup depois que Supabase/jsPDF terminarem as operações assíncronas.
+    }
+    if (delivery === "pdf" || delivery === "pdf-whatsapp") {
       pdfWindow = window.open("about:blank", "_blank");
     }
-    setSavingProposal(true); setMessage("");
-    try {
-      const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || null;
-      // Solicitações diretas podem ser feitas para um cliente externo, sem conta LOSI.
-      // Nesse caso o requester é o próprio fornecedor e client_id fica nulo, evitando
-      // que a notificação de "orçamento recebido" volte para quem enviou a proposta.
-      const requestOwnerId = recipientOwnerId || userId;
-      const requestPayload = {
-        business_id: businessId, requester_id: requestOwnerId, service_id: request?.service_id || null,
-        client_name: finalRecipientName, client_email: request?.client_email || null, client_phone: recipientPhone,
-        event_title: proposalEventTitle.trim(), event_date: proposalEventDate || request?.event_date || null,
-        event_location: proposalEventLocation.trim() || request?.event_location || null,
-        description: proposalEventDescription.trim() || request?.description || null,
-        status: "quoted", source: proposalMode,
-      };
-      let quoteRequest = request;
-      if (!quoteRequest) {
-        const { data: createdRequest, error: requestError } = await supabase.from("quote_requests").insert(requestPayload)
-          .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source").single();
-        if (requestError || !createdRequest) throw requestError || new Error("Não foi possível criar os dados da proposta.");
-        quoteRequest = createdRequest as RequestRow;
-      }
-      const { data: quote, error: quoteError } = await supabase.from("quotes").insert({
-        request_id: quoteRequest.id, business_id: businessId, client_id: recipientOwnerId, subtotal, discount, total,
-        validity_until: proposalValidity || null, notes: proposalNotes.trim() || null, status: "sent", sent_at: new Date().toISOString(),
-      }).select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,public_response_token").single();
-      if (quoteError || !quote) throw quoteError || new Error("Não foi possível criar a proposta.");
 
-      const { error: itemsError } = await supabase.from("quote_items").insert(validItems.map((item) => ({
-        quote_id: quote.id, description: item.description, quantity: item.quantity, unit_price: item.unit_price, total: item.quantity * item.unit_price,
-      })));
-      if (itemsError) {
-        await supabase.from("quotes").delete().eq("id", quote.id).eq("business_id", businessId);
-        if (!request) await supabase.from("quote_requests").delete().eq("id", quoteRequest.id).eq("business_id", businessId);
-        throw itemsError;
+    setSavingProposal(true);
+    setMessage("");
+
+    try {
+      let linkedRecipient = resolvedProposalRecipient;
+      if (proposalProfileLink.trim() && !linkedRecipient) {
+        linkedRecipient = await resolveProposalRecipient(proposalProfileLink.trim(), request ?? undefined);
       }
-      if (request) await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", request.id).eq("business_id", businessId);
+
+      if (proposalProfileLink.trim() && !linkedRecipient) {
+        throw new Error("Identifique o destinatário pelo link do perfil público antes de enviar a proposta.");
+      }
+
+      if (request && linkedRecipient && linkedRecipient.owner_id !== request.requester_id) {
+        throw new Error("O perfil público informado não corresponde ao solicitante desta solicitação.");
+      }
+
+      const finalRecipientName = linkedRecipient?.business_name || recipientNameInput;
+      const recipientPhone = linkedRecipient?.whatsapp
+        || linkedRecipient?.phone
+        || proposalRecipientPhone.trim()
+        || request?.client_phone
+        || "";
+
+      if ((delivery === "whatsapp" || delivery === "pdf-whatsapp") && !normalizeWhatsAppNumber(recipientPhone)) {
+        throw new Error("Informe um WhatsApp válido do destinatário para enviar a proposta.");
+      }
 
       const supplier = businessContacts[businessId];
-      const profileUrl = supplier?.slug ? window.location.origin + "/fornecedor/" + supplier.slug + "?proposta=" + quote.id + "&token=" + quote.public_response_token : "";
       const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
-      const whatsappMessage = [
-        "Olá, " + finalRecipientName + "!", "", "Preparei sua proposta pelo LOSI CONECTA.", "",
-        "Fornecedor: " + supplierName, "Empresa: " + (supplier?.business_name || "Não informada"),
-        "Telefone: " + (supplier?.phone || supplier?.whatsapp || "Não informado"), "E-mail: " + userEmail,
-        linkedRecipient ? "Perfil público do destinatário: " + (window.location.origin + "/fornecedor/" + linkedRecipient.slug) : "",
-        "Evento: " + proposalEventTitle.trim(), proposalEventDate ? "Data do evento: " + formatQuoteDate(proposalEventDate) : "",
-        proposalEventLocation.trim() ? "Local: " + proposalEventLocation.trim() : "", "", "Valor total: " + money(total),
-        proposalValidity ? "Validade: " + formatQuoteDate(proposalValidity) : "", "",
-        profileUrl ? "Acesse sua proposta pelo link abaixo:" : "", profileUrl,
-      ].filter(Boolean).join("\n");
-      const number = normalizeWhatsAppNumber(recipientPhone);
-      if (delivery !== "pdf" && !number) {
-        throw new Error("O WhatsApp do destinatário não é válido. Informe DDD + número, com ou sem o código 55.");
+      const companyName = supplier?.business_name || "LOSI CONECTA";
+      const supplierPhone = supplier?.whatsapp || supplier?.phone || "";
+      const supplierProfileUrl = supplier?.slug
+        ? window.location.origin + "/fornecedor/" + supplier.slug
+        : "";
+
+      const draft: ProposalDraft = {
+        recipientName: finalRecipientName,
+        recipientPhone,
+        eventTitle: proposalEventTitle.trim(),
+        eventDate: proposalEventDate || request?.event_date || null,
+        eventLocation: proposalEventLocation.trim() || request?.event_location || "",
+        eventDescription: proposalEventDescription.trim() || request?.description || "",
+        items: validItems.map((item) => ({
+          ...item,
+          total: item.quantity * item.unit_price,
+        })),
+        subtotal,
+        discount,
+        total,
+        validityUntil: proposalValidity || null,
+        notes: proposalNotes.trim(),
+        supplierName,
+        companyName,
+        supplierPhone,
+        supplierEmail: userEmail,
+        supplierProfileUrl,
+      };
+
+      // A entrega é independente do banco. Primeiro geramos/abrimos o material
+      // pedido pelo usuário; a gravação no Supabase acontece depois e não bloqueia
+      // PDF ou WhatsApp se houver uma falha de permissão/relação.
+      if (delivery === "pdf" || delivery === "pdf-whatsapp") {
+        const pdf = await generateProposalPdf(draft);
+        downloadPdfBlob(pdf, buildPdfFileName(draft), pdfWindow);
       }
-      const whatsappUrl = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage) : "";
 
-      const createdQuote = { ...(quote as QuoteRow), quote_items: validItems.map((item, index) => ({
-        id: "local-" + index, description: item.description, quantity: item.quantity, unit_price: item.unit_price, total: item.quantity * item.unit_price,
-      })), quote_requests: quoteRequest } as QuoteRow;
-      setQuotes((current) => [createdQuote, ...current]);
-      if (request) setRequests((current) => current.map((item) => item.id === request.id ? { ...item, status: "quoted" } : item));
+      const whatsappMessage = [
+        "Olá, " + draft.recipientName + "!",
+        "",
+        "Preparei sua proposta comercial pelo LOSI CONECTA.",
+        "",
+        "FORNECEDOR",
+        "Nome: " + draft.supplierName,
+        "Empresa: " + draft.companyName,
+        draft.supplierPhone ? "Telefone: " + draft.supplierPhone : "",
+        draft.supplierEmail ? "E-mail: " + draft.supplierEmail : "",
+        "",
+        "DADOS DO EVENTO",
+        "Evento: " + draft.eventTitle,
+        draft.eventDate ? "Data: " + formatQuoteDate(draft.eventDate) : "",
+        draft.eventLocation ? "Local: " + draft.eventLocation : "",
+        "",
+        "ITENS DA PROPOSTA",
+        ...draft.items.map((item) => "• " + item.quantity + "x " + item.description + " — " + money(item.total)),
+        "",
+        "Subtotal: " + money(draft.subtotal),
+        "Desconto: " + money(draft.discount),
+        "TOTAL: " + money(draft.total),
+        draft.validityUntil ? "Validade: " + formatQuoteDate(draft.validityUntil) : "",
+        draft.notes ? "Observações: " + draft.notes : "",
+        draft.supplierProfileUrl ? "" : "",
+        draft.supplierProfileUrl ? "Perfil público: " + draft.supplierProfileUrl : "",
+        "",
+        "Proposta enviada pelo LOSI CONECTA.",
+      ].filter(Boolean).join("\n");
 
-      if (delivery === "whatsapp") {
+      if (delivery === "whatsapp" || delivery === "pdf-whatsapp") {
+        const whatsappUrl = "https://wa.me/" + normalizeWhatsAppNumber(draft.recipientPhone) + "?text=" + encodeURIComponent(whatsappMessage);
         if (whatsappWindow && !whatsappWindow.closed) {
           whatsappWindow.location.href = whatsappUrl;
         } else {
           window.location.href = whatsappUrl;
         }
-        setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
-      } else if (delivery === "pdf") {
-        const pdf = await generateQuotePdf(createdQuote);
-        downloadPdfBlob(pdf, buildPdfFileName(createdQuote), pdfWindow);
-        setMessage(pdfWindow && !pdfWindow.closed
-          ? "Proposta criada. O PDF foi aberto em uma nova aba para salvar ou compartilhar."
-          : "Proposta criada e o PDF profissional foi gerado.");
-      } else {
-        await shareQuotePdfOnWhatsApp(createdQuote);
-        if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
       }
 
-      resetProposalForm(); setMessageType("success");
+      // Persistência opcional/isolada: se o banco falhar, o material já foi
+      // entregue ao usuário. O erro é mostrado sem desfazer PDF/WhatsApp.
+      let persistenceError: string | null = null;
+      try {
+        const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || null;
+        const requestOwnerId = recipientOwnerId || userId;
+        const requestPayload = {
+          business_id: businessId,
+          requester_id: requestOwnerId,
+          service_id: request?.service_id || null,
+          client_name: draft.recipientName,
+          client_email: request?.client_email || null,
+          client_phone: draft.recipientPhone,
+          event_title: draft.eventTitle,
+          event_date: draft.eventDate,
+          event_location: draft.eventLocation || null,
+          description: draft.eventDescription || null,
+          status: "quoted",
+          source: proposalMode,
+        };
+
+        let quoteRequest = request;
+        if (!quoteRequest) {
+          const { data: createdRequest, error: requestError } = await supabase
+            .from("quote_requests")
+            .insert(requestPayload)
+            .select("id,business_id,requester_id,service_id,client_name,client_email,client_phone,event_title,event_date,event_location,description,status,created_at,source")
+            .single();
+
+          if (requestError || !createdRequest) throw requestError || new Error("Não foi possível salvar os dados da proposta.");
+          quoteRequest = createdRequest as RequestRow;
+        }
+
+        const { data: quote, error: quoteError } = await supabase.from("quotes").insert({
+          request_id: quoteRequest.id,
+          business_id: businessId,
+          client_id: recipientOwnerId,
+          subtotal: draft.subtotal,
+          discount: draft.discount,
+          total: draft.total,
+          validity_until: draft.validityUntil,
+          notes: draft.notes || null,
+          status: "sent",
+          sent_at: new Date().toISOString(),
+        }).select("id,request_id,business_id,client_id,subtotal,discount,total,validity_until,notes,status,sent_at,viewed_at,responded_at,created_at,public_response_token").single();
+
+        if (quoteError || !quote) throw quoteError || new Error("Não foi possível salvar a proposta.");
+
+        const { error: itemsError } = await supabase.from("quote_items").insert(
+          draft.items.map((item) => ({
+            quote_id: quote.id,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total: item.total,
+          }))
+        );
+
+        if (itemsError) throw itemsError;
+        if (request) {
+          await supabase.from("quote_requests").update({ status: "quoted" }).eq("id", request.id).eq("business_id", businessId);
+        }
+
+        const createdQuote = {
+          ...(quote as QuoteRow),
+          quote_items: draft.items.map((item, index) => ({ id: "local-" + index, ...item })),
+          quote_requests: quoteRequest,
+        } as QuoteRow;
+        setQuotes((current) => [createdQuote, ...current]);
+        if (request) {
+          setRequests((current) => current.map((item) => item.id === request.id ? { ...item, status: "quoted" } : item));
+        }
+      } catch (error: any) {
+        console.error("Falha ao salvar proposta (entrega já realizada):", error);
+        persistenceError = error?.message || "A proposta foi enviada, mas não foi salva no histórico.";
+      }
+
+      resetProposalForm();
+      setMessageType(persistenceError ? "error" : "success");
+      if (delivery === "pdf") {
+        setMessage(persistenceError
+          ? "PDF gerado. O envio foi concluído, mas a proposta não pôde ser salva no histórico."
+          : "Proposta gerada em PDF com sucesso. O PDF foi aberto para salvar ou compartilhar.");
+      } else if (delivery === "pdf-whatsapp") {
+        setMessage(persistenceError
+          ? "PDF e WhatsApp foram preparados. A proposta não pôde ser salva no histórico."
+          : "PDF gerado e WhatsApp aberto com a proposta pronta para envio.");
+      } else {
+        setMessage(persistenceError
+          ? "WhatsApp aberto com a proposta pronta. Ela não pôde ser salva no histórico."
+          : "WhatsApp aberto com a proposta pronta para envio.");
+      }
     } catch (error: any) {
       if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
       if (pdfWindow && !pdfWindow.closed) pdfWindow.close();
-      console.error("Erro ao criar proposta:", error); setMessageType("error"); setMessage(error?.message || "Não foi possível criar a proposta.");
-    } finally { setSavingProposal(false); }
+      console.error("Erro ao preparar proposta:", error);
+      setMessageType("error");
+      setMessage(error?.message || "Não foi possível preparar a proposta.");
+    } finally {
+      setSavingProposal(false);
+    }
   }
 
   async function deleteQuote(quote: QuoteRow) {
