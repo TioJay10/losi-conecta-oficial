@@ -729,33 +729,47 @@ function QuotesPage() {
     }
 
     if (draft.supplierPhone || draft.supplierEmail || draft.supplierProfileUrl) {
+      const contactRows: { label: string; value: string }[] = [];
+      if (draft.supplierPhone) contactRows.push({ label: "Telefone:", value: draft.supplierPhone });
+      if (draft.supplierEmail) contactRows.push({ label: "E-mail:", value: draft.supplierEmail });
+      if (draft.supplierProfileUrl) contactRows.push({ label: "Perfil:", value: draft.supplierProfileUrl });
+
+      const contactHeight = 10 + contactRows.reduce((sum, row) => {
+        const lines = pdf.splitTextToSize(row.value, pageWidth - 63);
+        return sum + Math.max(5, lines.length * 4.5);
+      }, 0);
+
+      if (y + 4 + contactHeight + 34 > pageHeight - 18) {
+        footer();
+        pdf.addPage();
+        header();
+        y = 54;
+      }
+
       y += 4;
       section("Contato do fornecedor", y);
       y += 9;
       pdf.setFontSize(8.5);
       pdf.setTextColor(...ink);
-      if (draft.supplierPhone) {
-        pdf.setFont("helvetica", "bold"); pdf.text("Telefone:", 18, y);
-        pdf.setFont("helvetica", "normal"); pdf.text(draft.supplierPhone, 45, y); y += 5;
-      }
-      if (draft.supplierEmail) {
-        pdf.setFont("helvetica", "bold"); pdf.text("E-mail:", 18, y);
-        pdf.setFont("helvetica", "normal"); pdf.text(draft.supplierEmail, 45, y); y += 5;
-      }
-      if (draft.supplierProfileUrl) {
-        pdf.setFont("helvetica", "bold"); pdf.text("Perfil:", 18, y);
+
+      for (const row of contactRows) {
+        pdf.setFont("helvetica", "bold");
+        pdf.text(row.label, 18, y);
         pdf.setFont("helvetica", "normal");
-        pdf.text(pdf.splitTextToSize(draft.supplierProfileUrl, pageWidth - 55), 45, y);
-        y += 5;
+        const valueLines = pdf.splitTextToSize(row.value, pageWidth - 63);
+        pdf.text(valueLines, 45, y);
+        y += Math.max(5, valueLines.length * 4.5);
       }
     }
 
-    y = Math.max(y + 9, pageHeight - 47);
-    if (y > pageHeight - 28) {
+    const signatureHeight = 22;
+    if (y + 9 + signatureHeight + 12 > pageHeight - 12) {
       footer();
       pdf.addPage();
       header();
       y = 54;
+    } else {
+      y += 9;
     }
     pdf.setDrawColor(...gold);
     pdf.setLineWidth(0.7);
