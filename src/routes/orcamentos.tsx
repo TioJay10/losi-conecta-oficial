@@ -702,7 +702,7 @@ function QuotesPage() {
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(11);
     pdf.text("TOTAL", totalsX + 5, y + 26);
-    pdf.setTextColor(...gold);
+    pdf.setTextColor(212, 175, 55);
     pdf.text(money(draft.total), totalsX + totalsW - 5, y + 26, { align: "right" });
     y += 40;
 
