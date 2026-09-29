@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import { AppLogo } from "./AppLogo";
+import { ParticleButton } from "./ParticleButton";
 import { supabase } from "../lib/supabase";
 
 export type HomeCustomization = { hero_title: string; hero_subtitle: string; hero_button_text: string; color_background: string; color_primary: string; color_secondary: string; color_text: string; color_button: string; color_button_text: string };
@@ -51,7 +52,7 @@ export function HomePage({ customizationOverride, preview = false }: { customiza
           <a href="#categorias" style={styles.navLink}>Categorias</a>
         </nav>
 
-        <Link to="/entrar" style={styles.headerButton}>Entrar</Link>
+        <ParticleButton><Link to="/entrar" style={styles.headerButton}>Entrar</Link></ParticleButton>
       </header>
 
       <section className="home-hero" style={styles.hero}>
@@ -65,8 +66,8 @@ export function HomePage({ customizationOverride, preview = false }: { customiza
         </p>
 
         <div style={styles.heroActions}>
-          <Link to="/buscar" style={styles.primaryButton}>{activeCustomization.hero_button_text || "Encontrar fornecedores"}</Link>
-          <a href="#como-funciona" style={styles.secondaryButton}>Entender como funciona</a>
+          <ParticleButton><Link to="/buscar" style={styles.primaryButton}>{activeCustomization.hero_button_text || "Encontrar fornecedores"}</Link></ParticleButton>
+          <ParticleButton><a href="#como-funciona" style={styles.secondaryButton}>Entender como funciona</a></ParticleButton>
         </div>
 
         <div style={styles.heroNote}>
@@ -154,7 +155,7 @@ export function HomePage({ customizationOverride, preview = false }: { customiza
               profissionais e oportunidades no mercado de eventos.
             </p>
           </div>
-          <Link to="/entrar" style={styles.ctaButton}>Criar minha conta</Link>
+          <ParticleButton><Link to="/entrar" style={styles.ctaButton}>Criar minha conta</Link></ParticleButton>
         </div>
       </section>
 
