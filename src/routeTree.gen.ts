@@ -16,6 +16,8 @@ import { Route as NotificarInconsistenciaRouteImport } from './routes/notificar-
 import { Route as MeusServicosRouteImport } from './routes/meus-servicos'
 import { Route as OrcamentosRouteImport } from './routes/orcamentos'
 import { Route as RecibosRouteImport } from './routes/recibos'
+import { Route as RecibosRecebidosRouteImport } from './routes/recibos-recebidos'
+import { Route as EmitirReciboTokenRouteImport } from './routes/emitir-recibo/$token'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
 
@@ -73,6 +75,18 @@ const RecibosRoute = RecibosRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const RecibosRecebidosRoute = RecibosRecebidosRouteImport.update({
+  id: '/recibos-recebidos',
+  path: '/recibos-recebidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const EmitirReciboTokenRoute = EmitirReciboTokenRouteImport.update({
+  id: '/emitir-recibo/$token',
+  path: '/emitir-recibo/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const BuscarRoute = BuscarRouteImport.update({
   id: '/buscar',
   path: '/buscar',
@@ -102,6 +116,8 @@ export interface FileRoutesByFullPath {
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
   '/recibos': typeof RecibosRoute
+  '/recibos-recebidos': typeof RecibosRecebidosRoute
+  '/emitir-recibo/$token': typeof EmitirReciboTokenRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -117,6 +133,8 @@ export interface FileRoutesByTo {
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
   '/recibos': typeof RecibosRoute
+  '/recibos-recebidos': typeof RecibosRecebidosRoute
+  '/emitir-recibo/$token': typeof EmitirReciboTokenRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -133,16 +151,18 @@ export interface FileRoutesById {
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
   '/recibos': typeof RecibosRoute
+  '/recibos-recebidos': typeof RecibosRecebidosRoute
+  '/emitir-recibo/$token': typeof EmitirReciboTokenRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/recibos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
+  fullPaths: '/' | '/recibos-recebidos' | '/emitir-recibo/$token' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/recibos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/recibos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
-  id: '__root__' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/recibos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
+  to: '/' | '/recibos-recebidos' | '/emitir-recibo/$token' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/recibos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
+  id: '__root__' | '/recibos-recebidos' | '/emitir-recibo/$token' | '/' | '/admin' | '/admin-perfil' | '/entrar' | '/meu-perfil' | '/painel' | '/meus-servicos' | '/orcamentos' | '/recibos' | '/buscar' | '/fornecedor/$slug' | '/notificar-inconsistencia'
   fileRoutesById: FileRoutesById
 }
 
@@ -232,6 +252,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MeusServicosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recibos': {
+      id: '/recibos'
+      path: '/recibos'
+      fullPath: '/recibos'
+      preLoaderRoute: typeof RecibosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recibos-recebidos': {
+      id: '/recibos-recebidos'
+      path: '/recibos-recebidos'
+      fullPath: '/recibos-recebidos'
+      preLoaderRoute: typeof RecibosRecebidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/emitir-recibo/$token': {
+      id: '/emitir-recibo/$token'
+      path: '/emitir-recibo/$token'
+      fullPath: '/emitir-recibo/$token'
+      preLoaderRoute: typeof EmitirReciboTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orcamentos': {
       id: '/orcamentos'
       path: '/orcamentos'
@@ -253,6 +294,8 @@ const rootRouteChildren: RootRouteChildren = {
   MeusServicosRoute,
   OrcamentosRoute,
   RecibosRoute,
+  RecibosRecebidosRoute,
+  EmitirReciboTokenRoute,
   BuscarRoute,
   FornecedorSlugRoute,
 }
