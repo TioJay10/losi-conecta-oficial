@@ -16502,3 +16502,63 @@ body :where(label){
 .losi-particle-burst{z-index:20!important;overflow:visible}
 .losi-particle-button-shell{overflow:visible!important}
 .losi-particle-burst i{will-change:transform,opacity}
+
+
+/* PERFIL DO FORNECEDOR — ações estáveis em celular horizontal e tablets compactos */
+@media (min-width:701px) and (max-width:1100px){
+  .provider-page .provider-profile-actions{
+    width:100% !important;
+    max-width:100% !important;
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    align-items:stretch !important;
+    justify-content:stretch !important;
+    gap:10px !important;
+    box-sizing:border-box !important;
+  }
+  .provider-page .provider-profile-actions > a.provider-profile-feed-icon,
+  .provider-page .provider-profile-actions > .provider-chat-trigger-group,
+  .provider-page .provider-profile-actions > button.provider-profile-like-icon{
+    flex:0 0 48px !important;
+    width:48px !important;
+    min-width:48px !important;
+    max-width:48px !important;
+    height:46px !important;
+    min-height:46px !important;
+    max-height:46px !important;
+  }
+  .provider-page .provider-profile-actions > .provider-chat-trigger-group{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  .provider-page .provider-profile-actions > .provider-chat-trigger-group .provider-chat-trigger{
+    width:48px !important;
+    min-width:48px !important;
+    max-width:48px !important;
+    height:46px !important;
+    min-height:46px !important;
+    max-height:46px !important;
+  }
+  .provider-page .provider-profile-actions > .provider-profile-save,
+  .provider-page .provider-profile-actions > .provider-profile-quote,
+  .provider-page .provider-profile-actions > .provider-profile-contact,
+  .provider-page .provider-profile-actions > .provider-profile-report{
+    flex:1 1 0 !important;
+    width:auto !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:46px !important;
+    min-height:46px !important;
+    max-height:46px !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    text-align:center !important;
+    white-space:normal !important;
+    overflow-wrap:anywhere !important;
+    line-height:1.2 !important;
+  }
+}
