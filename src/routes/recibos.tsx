@@ -278,6 +278,7 @@ function ReceiptsPage() {
   const [paymentMethod, setPaymentMethod] = useState("PIX");
   const [description, setDescription] = useState("");
   const [city, setCity] = useState("");
+  const [signatureData, setSignatureData] = useState<string | null>(null);
   const [history, setHistory] = useState<ReceiptData[]>([]);
   const [message, setMessage] = useState("");
 
@@ -321,7 +322,7 @@ function ReceiptsPage() {
   function resetForm() {
     setClientName(""); setClientDocument(""); setClientAddress(""); setService("");
     setServiceDate(new Date().toISOString().slice(0,10)); setAmount("");
-    setPaymentMethod("PIX"); setDescription("");
+    setPaymentMethod("PIX"); setDescription(""); setSignatureData(null);
   }
 
   function generate() {
