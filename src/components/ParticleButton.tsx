@@ -1,11 +1,7 @@
-import { cloneElement, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactElement } from "react";
+import { useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 
 type ParticleButtonProps = {
-  children: ReactElement<{
-    className?: string;
-    onClick?: (event: MouseEvent) => void;
-    onPointerDown?: (event: PointerEvent) => void;
-  }>;
+  children: ReactNode;
 };
 
 export function ParticleButton({ children }: ParticleButtonProps) {
@@ -18,19 +14,15 @@ export function ParticleButton({ children }: ParticleButtonProps) {
     timerRef.current = window.setTimeout(() => setBurst(0), 720);
   };
 
-  const child = cloneElement(children, {
-    className: `${children.props.className ?? ""} losi-particle-button`.trim(),
-    onPointerDown: (event: PointerEvent) => {
-      trigger();
-      children.props.onPointerDown?.(event);
-    },
-    onClick: (event: MouseEvent) => {
-      children.props.onClick?.(event);
-    },
-  });
+  const handlePointerDown = (_event: PointerEvent<HTMLSpanElement>) => {
+    trigger();
+  };
 
   return (
-    <span className="losi-particle-button-shell">
+    <span
+      className="losi-particle-button-shell"
+      onPointerDown={handlePointerDown}
+    >
       {burst > 0 && (
         <span key={burst} className="losi-particle-burst" aria-hidden="true">
           {Array.from({ length: 18 }, (_, index) => (
@@ -45,7 +37,7 @@ export function ParticleButton({ children }: ParticleButtonProps) {
           ))}
         </span>
       )}
-      {child}
+      {children}
     </span>
   );
 }
