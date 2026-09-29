@@ -16455,3 +16455,26 @@ body :where(label){
   .losi-particle-burst{display:none}
 }
 @media (max-width:700px){.losi-particle-burst i{width:4px;height:4px}}
+
+/* LOSI CONECTA — CORREÇÃO DO CABEÇALHO MOBILE */
+@media (max-width:700px){
+  .home-page .home-header > .losi-particle-button-shell{
+    position:absolute!important;
+    left:14px!important;
+    right:auto!important;
+    top:13px!important;
+    z-index:12!important;
+  }
+  .home-page .home-header > .losi-particle-button-shell .losi-particle-button{
+    font-size:11px!important;
+    padding:8px 11px!important;
+  }
+  .home-page .home-header .mobile-centered-brand{
+    width:100%!important;
+    justify-content:center!important;
+    text-align:center!important;
+  }
+}
+.losi-particle-burst{z-index:20!important;overflow:visible}
+.losi-particle-button-shell{overflow:visible!important}
+.losi-particle-burst i{will-change:transform,opacity}
