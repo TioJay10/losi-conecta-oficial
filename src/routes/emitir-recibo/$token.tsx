@@ -1,7 +1,7 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { jsPDF } from "jspdf";
-import "../receipts.css";
+import "../../receipts.css";
 
 export const Route = createFileRoute("/emitir-recibo/$token")({ component: PublicReceiptPage });
 const API = "https://bpvaftobiosjesdbaany.supabase.co/functions/v1/public-receipt";
