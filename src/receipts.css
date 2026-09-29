@@ -108,3 +108,99 @@
 .public-signature{position:relative;border:1px dashed #cfd7e2;border-radius:12px;background:#fbfcfe;overflow:hidden}.public-signature canvas{display:block;width:100%;height:180px;touch-action:none}.public-signature button{position:absolute;right:9px;top:9px;border:1px solid #d7dee8;border-radius:7px;background:#fff;color:#536174;padding:6px 9px;font-size:10px;font-weight:700}.signature-upload{display:flex!important;gap:8px;align-items:center;margin-top:10px!important;padding:10px;border:1px solid #e1e6ee;border-radius:9px;background:#fafbfd}.signature-upload span{font-size:11px!important;color:#344054!important}.signature-upload input{padding:5px!important;border:0!important;box-shadow:none!important;font-size:11px!important}
 .public-submit{margin-top:20px}.public-receipt-success{text-align:center}.success-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 12px;border-radius:50%;background:#071a33;color:#f0d99a;font-size:28px;font-weight:800}.public-receipt-success h2{margin:0;color:#071a33;font-size:24px}.public-receipt-success p{color:#687386;font-size:13px}.received-summary{display:grid;gap:4px;margin:18px auto;padding:16px;max-width:480px;border:1px solid #e3e7ed;border-radius:12px;background:#f8fafc}.received-summary strong{color:#071a33;font-size:14px}.received-summary span{color:#687386;font-size:11px}.received-summary b{color:#b88a32;font-size:18px}.public-receipt-footer{text-align:center;margin-top:18px;color:#c4cbd5;font-size:10px}.public-receipt-loading{min-height:80vh;display:grid;place-items:center;color:#fff}
 @media(max-width:700px){.receipts-mode-grid{grid-template-columns:1fr}.public-receipt-page{padding:22px 12px 36px;background:linear-gradient(180deg,#071a33 0 180px,#f5f7fb 180px)}.public-receipt-hero,.public-receipt-card,.public-receipt-success{padding:18px;border-radius:15px}.public-receipt-hero h1{font-size:23px}.public-receipt-brand{margin-bottom:18px}.public-receipt-brand small{display:none}.public-signature canvas{height:150px}.public-receipt-grid{grid-template-columns:1fr}.public-receipt-grid label.wide{grid-column:auto}}
+
+
+.receipts-signature-group{
+  margin-top:22px;
+  padding-top:20px;
+  border-top:1px solid #edf0f4;
+}
+.receipts-signature-help{
+  margin:-4px 0 12px;
+  color:#718096;
+  font-size:12px;
+  line-height:1.55;
+}
+.receipts-signature-pad{
+  position:relative;
+  padding:10px;
+  border:1px dashed #cbd5e1;
+  border-radius:12px;
+  background:#fbfcfe;
+}
+.receipts-signature-pad canvas{
+  display:block;
+  width:100%;
+  height:150px;
+  background:#fff;
+  border-radius:8px;
+  touch-action:none;
+  cursor:crosshair;
+}
+.receipts-signature-pad>button{
+  position:absolute;
+  top:18px;
+  right:18px;
+  padding:7px 10px;
+  border:1px solid #d7dee8;
+  border-radius:7px;
+  background:#fff;
+  color:#536174;
+  font-size:10px;
+  font-weight:700;
+}
+.receipts-signature-upload{
+  display:flex!important;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+  padding:10px 12px;
+  border:1px solid #e1e6ee;
+  border-radius:9px;
+  background:#fff;
+}
+.receipts-signature-upload span{
+  color:#344054!important;
+  font-size:11px!important;
+  font-weight:600;
+}
+.receipts-signature-upload input{
+  min-width:0;
+  padding:3px!important;
+  border:0!important;
+  box-shadow:none!important;
+  font-size:11px!important;
+}
+.receipts-signature-status{
+  display:block;
+  margin-top:8px;
+  color:#b88a32;
+  font-size:11px;
+  font-weight:700;
+}
+.receipt-paper-signature{
+  display:flex;
+  min-height:54px;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  margin-top:12px;
+  padding-top:4px;
+  border-top:1px solid #d7dde6;
+}
+.receipt-paper-signature img{
+  display:block;
+  width:130px;
+  height:38px;
+  object-fit:contain;
+  margin-bottom:-2px;
+}
+.receipt-paper-signature span{
+  color:#718096;
+  font-size:8px;
+}
+@media(max-width:700px){
+  .receipts-signature-pad canvas{height:130px}
+  .receipts-signature-upload{align-items:flex-start;flex-direction:column}
+  .receipts-signature-pad>button{top:17px;right:17px}
+}
