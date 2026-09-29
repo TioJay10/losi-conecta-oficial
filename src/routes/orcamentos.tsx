@@ -439,12 +439,24 @@ function QuotesPage() {
     return `LOSI-CONNECTA-Orcamento-${recipient || "cliente"}-${quote.id.slice(0, 8)}.pdf`;
   }
 
-  function downloadPdfBlob(pdf: jsPDF, fileName: string) {
+  function downloadPdfBlob(pdf: jsPDF, fileName: string, targetWindow?: Window | null) {
     const blob = pdf.output("blob");
     if (!(blob instanceof Blob) || blob.size === 0) {
       throw new Error("O PDF foi gerado vazio. Tente novamente.");
     }
+
     const url = URL.createObjectURL(blob);
+
+    // O atributo download não é confiável em Safari/iOS. Quando uma janela
+    // já foi aberta pelo clique do usuário, mostramos o PDF nela para que
+    // o navegador ofereça Salvar/Compartilhar; em desktop, também tentamos
+    // o download direto pelo link.
+    if (targetWindow && !targetWindow.closed) {
+      targetWindow.location.href = url;
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      return;
+    }
+
     const link = document.createElement("a");
     link.href = url;
     link.download = fileName;
@@ -453,7 +465,17 @@ function QuotesPage() {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+    // Fallback para navegadores que ignoram o atributo download.
+    window.setTimeout(() => {
+      if (document.visibilityState === "visible") {
+        const opened = window.open(url, "_blank", "noopener,noreferrer");
+        if (opened) window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+        else window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } else {
+        window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      }
+    }, 250);
   }
 
   async function generateQuotePdf(quote: QuoteRow) {
@@ -877,6 +899,7 @@ function QuotesPage() {
     // O WhatsApp é aberto imediatamente no clique quando essa é a opção escolhida,
     // evitando bloqueio de popup depois das operações assíncronas no Supabase.
     let whatsappWindow: Window | null = null;
+    let pdfWindow: Window | null = null;
     const request = proposalMode === "request" ? supplierPendingRequests.find((item) => item.id === proposalRequestId) : null;
     if (proposalMode === "request" && !request) {
       setMessageType("error"); setMessage("Selecione uma solicitação para montar a proposta."); return;
@@ -908,7 +931,13 @@ function QuotesPage() {
     const subtotal = validItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
     const discount = Math.max(0, Number(proposalDiscount.replace(",", ".")) || 0);
     const total = Math.max(0, subtotal - discount);
-    if (delivery !== "pdf") whatsappWindow = window.open("about:blank", "_blank");
+    if (delivery === "whatsapp" || delivery === "pdf-whatsapp") {
+      whatsappWindow = window.open("about:blank", "_blank");
+    } else if (delivery === "pdf") {
+      // Abre uma aba imediatamente no gesto do usuário para evitar bloqueio
+      // de popup depois que Supabase/jsPDF terminarem as operações assíncronas.
+      pdfWindow = window.open("about:blank", "_blank");
+    }
     setSavingProposal(true); setMessage("");
     try {
       const recipientOwnerId = linkedRecipient?.owner_id || request?.requester_id || null;
@@ -981,8 +1010,10 @@ function QuotesPage() {
         setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
       } else if (delivery === "pdf") {
         const pdf = await generateQuotePdf(createdQuote);
-        downloadPdfBlob(pdf, buildPdfFileName(createdQuote));
-        setMessage("Proposta criada e o PDF profissional foi gerado.");
+        downloadPdfBlob(pdf, buildPdfFileName(createdQuote), pdfWindow);
+        setMessage(pdfWindow && !pdfWindow.closed
+          ? "Proposta criada. O PDF foi aberto em uma nova aba para salvar ou compartilhar."
+          : "Proposta criada e o PDF profissional foi gerado.");
       } else {
         await shareQuotePdfOnWhatsApp(createdQuote);
         if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
@@ -991,6 +1022,7 @@ function QuotesPage() {
       resetProposalForm(); setMessageType("success");
     } catch (error: any) {
       if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
+      if (pdfWindow && !pdfWindow.closed) pdfWindow.close();
       console.error("Erro ao criar proposta:", error); setMessageType("error"); setMessage(error?.message || "Não foi possível criar a proposta.");
     } finally { setSavingProposal(false); }
   }
@@ -1241,13 +1273,13 @@ function QuotesPage() {
                     {savingProposal ? "Preparando..." : "Enviar proposta pelo WhatsApp"}
                   </button>
                   <button type="button" className="proposal-primary" disabled={savingProposal} onClick={() => createAndSendProposal("pdf")}>
-                    {savingProposal ? "Preparando..." : "Gerar proposta em PDF"}
+                    {savingProposal ? "Gerando PDF..." : "Gerar proposta em PDF"}
                   </button>
                   <button type="button" className="quotes-secondary" disabled={savingProposal} onClick={() => createAndSendProposal("pdf-whatsapp")}>
                     {savingProposal ? "Preparando..." : "PDF + WhatsApp"}
                   </button>
                 </div>
-                <p className="proposal-hint">O cliente pode ter solicitado uma proposta ou não. No envio direto, informe nome e WhatsApp do destinatário. O WhatsApp abre no número informado; o PDF é gerado com a identidade LOSI CONECTA.</p>
+                <p className="proposal-hint">Esta ferramenta é para o fornecedor criar e enviar uma proposta comercial ao cliente. No envio direto, informe os dados do destinatário. O PDF usa a identidade premium do LOSI CONECTA e pode ser salvo ou compartilhado pelo navegador.</p>
           </section>
         )}
 
