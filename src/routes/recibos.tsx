@@ -313,6 +313,8 @@ function ReceiptsPage() {
 
           {message && <div className="receipts-message">{message}</div>}
 
+          <div className="receipts-mode-grid"><Link to="/recibos" className="receipts-mode-card active"><span>01</span><strong>Emitir recibo</strong><small>Para entregar ao seu contratante</small></Link><Link to="/recibos-recebidos" className="receipts-mode-card"><span>02</span><strong>Recebidos</strong><small>Solicite e receba recibos de prestadores</small></Link></div>
+
           <div className="receipts-layout">
             <section className="receipts-form-card">
               <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 01</span><h2>Dados do contratante</h2></div><span className="receipts-step">1</span></div>
