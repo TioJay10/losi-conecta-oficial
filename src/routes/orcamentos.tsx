@@ -873,7 +873,11 @@ function QuotesPage() {
     const finalRecipientName = linkedRecipient?.business_name || recipientName;
     const recipientPhone = linkedRecipient?.whatsapp || linkedRecipient?.phone || proposalRecipientPhone.trim() || request?.client_phone || "";
     if (!finalRecipientName) { setMessageType("error"); setMessage("Informe o nome do destinatário."); return; }
-    if (!recipientPhone) { setMessageType("error"); setMessage("Informe o WhatsApp do destinatário ou use o link de um perfil público que possua WhatsApp cadastrado."); return; }
+    if (delivery !== "pdf" && !recipientPhone) {
+      setMessageType("error");
+      setMessage("Informe o WhatsApp do destinatário para enviar a proposta por WhatsApp.");
+      return;
+    }
     if (!proposalEventTitle.trim()) { setMessageType("error"); setMessage("Informe o nome ou título do evento."); return; }
 
     const validItems = proposalItems.map((item) => ({
@@ -936,8 +940,10 @@ function QuotesPage() {
         profileUrl ? "Acesse sua proposta pelo link abaixo:" : "", profileUrl,
       ].filter(Boolean).join("\n");
       const number = normalizeWhatsAppNumber(recipientPhone);
-      if (!number) throw new Error("O WhatsApp do destinatário não é válido. Informe DDD + número, com ou sem o código 55.");
-      const whatsappUrl = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage) : "https://wa.me/?text=" + encodeURIComponent(whatsappMessage);
+      if (delivery !== "pdf" && !number) {
+        throw new Error("O WhatsApp do destinatário não é válido. Informe DDD + número, com ou sem o código 55.");
+      }
+      const whatsappUrl = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(whatsappMessage) : "";
 
       const createdQuote = { ...(quote as QuoteRow), quote_items: validItems.map((item, index) => ({
         id: "local-" + index, description: item.description, quantity: item.quantity, unit_price: item.unit_price, total: item.quantity * item.unit_price,
