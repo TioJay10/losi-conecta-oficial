@@ -54,7 +54,6 @@ type BusinessContact = {
   city: string | null;
   state: string | null;
   cep: string | null;
-  avatar_url?: string | null;
 };
 
 type PublicProfile = {
@@ -69,6 +68,7 @@ type PersonalIdentity = {
   city: string | null;
   state: string | null;
   cep: string | null;
+  avatar_url: string | null;
 };
 
 
@@ -451,6 +451,8 @@ function QuotesPage() {
     supplierPhone: string;
     supplierEmail: string;
     supplierProfileUrl: string;
+    supplierAvatarUrl: string;
+    supplierAvatarDataUrl?: string;
   };
 
   function sanitizeFilePart(value: string) {
@@ -540,7 +542,8 @@ function QuotesPage() {
       const photoY = 8;
       if (draft.supplierAvatarDataUrl) {
         try {
-          pdf.addImage(draft.supplierAvatarDataUrl, "JPEG", photoX, photoY, photoSize, photoSize);
+          const imageFormat = draft.supplierAvatarDataUrl.startsWith("data:image/png") ? "PNG" : "JPEG";
+          pdf.addImage(draft.supplierAvatarDataUrl, imageFormat, photoX, photoY, photoSize, photoSize);
         } catch {
           // Mantem o cabecalho funcional mesmo se a imagem nao puder ser incorporada.
         }
@@ -1098,6 +1101,7 @@ function QuotesPage() {
         supplierPhone,
         supplierEmail: userEmail,
         supplierProfileUrl,
+        supplierAvatarUrl: personalIdentity?.avatar_url || "",
       };
 
       // A entrega é independente do banco. Primeiro geramos/abrimos o material
