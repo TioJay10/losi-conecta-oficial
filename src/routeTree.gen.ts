@@ -15,6 +15,7 @@ import { Route as PainelRouteImport } from './routes/painel'
 import { Route as NotificarInconsistenciaRouteImport } from './routes/notificar-inconsistencia'
 import { Route as MeusServicosRouteImport } from './routes/meus-servicos'
 import { Route as OrcamentosRouteImport } from './routes/orcamentos'
+import { Route as RecibosRouteImport } from './routes/recibos'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
 
@@ -66,6 +67,12 @@ const OrcamentosRoute = OrcamentosRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const RecibosRoute = RecibosRouteImport.update({
+  id: '/recibos',
+  path: '/recibos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const BuscarRoute = BuscarRouteImport.update({
   id: '/buscar',
   path: '/buscar',
@@ -94,6 +101,8 @@ export interface FileRoutesByFullPath {
   '/notificar-inconsistencia': typeof NotificarInconsistenciaRoute
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
+  '/recibos': typeof RecibosRoute
+  '/recibos': typeof RecibosRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -108,6 +117,7 @@ export interface FileRoutesByTo {
   '/notificar-inconsistencia': typeof NotificarInconsistenciaRoute
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
+  '/recibos': typeof RecibosRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -242,6 +252,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificarInconsistenciaRoute,
   MeusServicosRoute,
   OrcamentosRoute,
+  RecibosRoute,
   BuscarRoute,
   FornecedorSlugRoute,
 }
