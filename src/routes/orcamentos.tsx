@@ -466,7 +466,7 @@ function QuotesPage() {
       ? value.recipientName
       : value.quote_requests?.client_name || "cliente";
     const suffix = "id" in value ? value.id.slice(0, 8) : Date.now().toString().slice(-8);
-    return \`LOSI-CONNECTA-Proposta-\${sanitizeFilePart(recipient) || "cliente"}-\${suffix}.pdf\`;
+    return `LOSI-CONNECTA-Proposta-${sanitizeFilePart(recipient) || "cliente"}-${suffix}.pdf`;
   }
 
   function downloadPdfBlob(pdf: jsPDF, fileName: string, targetWindow?: Window | null) {
