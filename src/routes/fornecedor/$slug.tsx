@@ -572,21 +572,23 @@ function ProviderPage() {
           </div>
 
           <div className="provider-profile-actions">
-            <a
-              href={"/feed?fornecedor=" + encodeURIComponent(business.slug)}
-              className="provider-profile-feed-icon"
-              aria-label={"Abrir Feed de " + business.business_name}
-              title={"Abrir Feed de " + business.business_name}
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M5 5h14M5 12h10M5 19h7" />
-                <path d="M17 12.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Zm0 0V15l2 1" />
-              </svg>
-            </a>
-            <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
-            <button type="button" className={"provider-profile-like-icon " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser} title={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"}>
-              <span className="provider-profile-heart" aria-hidden="true">♥</span><span className="provider-profile-like-count" aria-hidden="true">{likeCount}</span>
-            </button>
+            <div className="provider-profile-icon-group" aria-label="Ações rápidas do fornecedor">
+              <a
+                href={"/feed?fornecedor=" + encodeURIComponent(business.slug)}
+                className="provider-profile-feed-icon"
+                aria-label={"Abrir Feed de " + business.business_name}
+                title={"Abrir Feed de " + business.business_name}
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M5 5h14M5 12h10M5 19h7" />
+                  <path d="M17 12.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0-0 9Zm0 0V15l2 1" />
+                </svg>
+              </a>
+              <ProviderChat business={{ id: business.id, business_name: business.business_name, slug: business.slug, logo_url: business.logo_url, owner_id: business.owner_id }} userId={userId} onRequireAuth={openChatAfterAuth} />
+              <button type="button" className={"provider-profile-like-icon " + heartClass + (likedByCurrentUser ? " liked" : "")} onClick={toggleLike} disabled={likeBusy} aria-label={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"} aria-pressed={likedByCurrentUser} title={likedByCurrentUser ? "Remover curtida" : "Curtir perfil"}>
+                <span className="provider-profile-heart" aria-hidden="true">♥</span><span className="provider-profile-like-count" aria-hidden="true">{likeCount}</span>
+              </button>
+            </div>
             <button type="button" className="provider-profile-save" onClick={toggleFavorite} disabled={favoriteBusy}>{favoriteBusy ? "Salvando..." : isFavorite ? "Fornecedor salvo" : "Salvar fornecedor"}</button>
             {userId !== business.owner_id && <button type="button" className="provider-profile-quote" onClick={openQuoteRequest}>Solicitar orçamento</button>}
             {whatsapp && <button type="button" className="provider-profile-contact" onClick={openWhatsApp}>Conversar pelo WhatsApp</button>}
