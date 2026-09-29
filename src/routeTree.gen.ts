@@ -102,7 +102,6 @@ export interface FileRoutesByFullPath {
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
   '/recibos': typeof RecibosRoute
-  '/recibos': typeof RecibosRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
@@ -133,6 +132,7 @@ export interface FileRoutesById {
   '/notificar-inconsistencia': typeof NotificarInconsistenciaRoute
   '/meus-servicos': typeof MeusServicosRoute
   '/orcamentos': typeof OrcamentosRoute
+  '/recibos': typeof RecibosRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
 }
