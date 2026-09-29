@@ -54,6 +54,7 @@ type BusinessContact = {
   city: string | null;
   state: string | null;
   cep: string | null;
+  avatar_url?: string | null;
 };
 
 type PublicProfile = {
@@ -154,7 +155,7 @@ function QuotesPage() {
 
       const { data: identityData } = await supabase
         .from("profiles")
-        .select("full_name,address,city,state,cep")
+        .select("full_name,address,city,state,cep,avatar_url")
         .eq("id", currentUser.id)
         .maybeSingle();
       if (mounted) setPersonalIdentity((identityData ?? null) as PersonalIdentity | null);
@@ -513,21 +514,53 @@ function QuotesPage() {
     const muted: [number, number, number] = [100, 110, 125];
     const light: [number, number, number] = [246, 247, 249];
 
+    if (draft.supplierAvatarUrl && !draft.supplierAvatarDataUrl) {
+      try {
+        const response = await fetch(draft.supplierAvatarUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          const reader = new FileReader();
+          draft.supplierAvatarDataUrl = await new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Imagem invalida"));
+            reader.onerror = () => reject(reader.error || new Error("Nao foi possivel ler a imagem"));
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch {
+        draft.supplierAvatarDataUrl = undefined;
+      }
+    }
+
     const header = () => {
       pdf.setFillColor(...navy);
       pdf.rect(0, 0, pageWidth, 43, "F");
+
+      const photoSize = 20;
+      const photoX = 18;
+      const photoY = 8;
+      if (draft.supplierAvatarDataUrl) {
+        try {
+          pdf.addImage(draft.supplierAvatarDataUrl, "JPEG", photoX, photoY, photoSize, photoSize);
+        } catch {
+          // Mantem o cabecalho funcional mesmo se a imagem nao puder ser incorporada.
+        }
+      }
+
+      const textX = draft.supplierAvatarDataUrl ? 44 : 18;
       pdf.setTextColor(...gold);
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(19);
-      pdf.text("LOSI CONECTA", 18, 17);
-      pdf.setFontSize(9);
+      pdf.setFontSize(14);
+      const supplierNameLines = pdf.splitTextToSize(draft.supplierName || "Fornecedor", pageWidth - textX - 20);
+      pdf.text(supplierNameLines.slice(0, 2), textX, 17);
+      pdf.setFontSize(8.5);
       pdf.setTextColor(232, 235, 240);
-      pdf.text("PROPOSTA COMERCIAL", 18, 25);
+      pdf.text("PROPOSTA COMERCIAL", textX, 29);
+
       pdf.setTextColor(...gold);
       pdf.setFontSize(8);
-      pdf.text("PROPOSTA", pageWidth - 18, 17, { align: "right" });
+      pdf.text("LOSI CONECTA", pageWidth - 18, 17, { align: "right" });
       pdf.setTextColor(232, 235, 240);
-      pdf.text("Encontre. Conheca. Conecte.", pageWidth - 18, 25, { align: "right" });
+      pdf.text("PROPOSTA", pageWidth - 18, 25, { align: "right" });
       pdf.setDrawColor(...gold);
       pdf.setLineWidth(0.6);
       pdf.line(18, 34, pageWidth - 18, 34);
@@ -613,7 +646,7 @@ function QuotesPage() {
     y += 5;
 
     section("Itens da proposta", y);
-    y += 5;
+    y += 13;
     pdf.setFillColor(...navy);
     pdf.rect(18, y - 5, pageWidth - 36, 9, "F");
     pdf.setTextColor(...gold);
@@ -1050,6 +1083,7 @@ function QuotesPage() {
         eventDate: proposalEventDate || request?.event_date || null,
         eventLocation: proposalEventLocation.trim() || request?.event_location || "",
         eventDescription: proposalEventDescription.trim() || request?.description || "",
+        supplierAvatarUrl: personalIdentity?.avatar_url || "",
         items: validItems.map((item) => ({
           ...item,
           total: item.quantity * item.unit_price,
