@@ -16682,3 +16682,81 @@ body :where(label){
     margin:0 !important;
   }
 }
+
+/* PERFIL DO FORNECEDOR — grupo único de ícones rápidos */
+.provider-page .provider-profile-icon-group{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  gap:8px;
+  min-width:0;
+  height:46px;
+  box-sizing:border-box;
+}
+.provider-page .provider-profile-icon-group > .provider-profile-feed-icon,
+.provider-page .provider-profile-icon-group > button.provider-profile-like-icon{
+  flex:0 0 46px !important;
+  width:46px !important;
+  min-width:46px !important;
+  max-width:46px !important;
+  height:46px !important;
+  min-height:46px !important;
+  max-height:46px !important;
+}
+.provider-page .provider-profile-icon-group > .provider-chat-trigger-group{
+  flex:0 0 auto !important;
+  width:auto !important;
+  min-width:0 !important;
+  max-width:none !important;
+  height:46px !important;
+  min-height:46px !important;
+  max-height:46px !important;
+  display:inline-flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:3px !important;
+  overflow:visible !important;
+}
+.provider-page .provider-profile-icon-group .provider-chat-trigger-group .provider-chat-trigger{
+  flex:0 0 46px !important;
+  width:46px !important;
+  min-width:46px !important;
+  max-width:46px !important;
+  height:46px !important;
+  min-height:46px !important;
+  max-height:46px !important;
+}
+.provider-page .provider-profile-icon-group .provider-online-status{
+  position:static !important;
+  display:inline-flex !important;
+  flex:0 0 auto !important;
+  align-items:center !important;
+  width:auto !important;
+  min-width:0 !important;
+  height:auto !important;
+  min-height:0 !important;
+  margin:0 !important;
+  gap:2px !important;
+  white-space:nowrap !important;
+  font-size:8px !important;
+  line-height:1 !important;
+}
+.provider-page .provider-profile-icon-group .provider-online-dot{
+  flex:0 0 6px !important;
+  width:6px !important;
+  height:6px !important;
+  min-width:6px !important;
+  margin:0 !important;
+}
+@media (min-width:701px) and (max-width:1100px){
+  .provider-page .provider-profile-actions > .provider-profile-icon-group{
+    flex:0 0 auto !important;
+    width:auto !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:46px !important;
+    margin:0 !important;
+  }
+}
