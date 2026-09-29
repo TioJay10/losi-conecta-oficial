@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
-import { AppLogo } from "../components/AppLogo";
+
 
 export const Route = createFileRoute("/recibos")({ component: ReceiptsPage });
 
@@ -21,9 +21,11 @@ type ReceiptData = {
   description: string; city: string; createdAt: string;
 };
 
-const NAVY = "#071a33";
-const GOLD = "#f0d99a";
-const GOLD_DARK = "#b88a32";
+function amountFromInput(value: string) {
+  const normalized = value.replace(/\\./g, "").replace(",", ".").replace(/[^0-9.]/g, "");
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
 function money(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
