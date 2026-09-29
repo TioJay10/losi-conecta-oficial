@@ -16716,7 +16716,7 @@ body :where(label){
   flex-direction:row !important;
   align-items:center !important;
   justify-content:center !important;
-  gap:3px !important;
+  gap:6px !important;
   overflow:visible !important;
 }
 .provider-page .provider-profile-icon-group .provider-chat-trigger-group .provider-chat-trigger{
