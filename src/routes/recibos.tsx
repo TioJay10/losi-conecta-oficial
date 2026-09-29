@@ -217,8 +217,8 @@ function ReceiptsPage() {
       if (!user) { navigate({ to: "/entrar" }); return; }
 
       const [{ data: businessData }, { data: profileData }] = await Promise.all([
-        supabase.from("business_profiles").select("business_name,owner_id,document,address,bairro,city,state,cep,phone,whatsapp").eq("owner_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("full_name,document,address,city,state,cep").eq("id", user.id).maybeSingle(),
+        supabase.from("business_profiles").select("business_name,owner_id,address,bairro,city,state,cep,phone,whatsapp").eq("owner_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name,address,city,state,cep").eq("id", user.id).maybeSingle(),
       ]);
       if (!active) return;
       setBusiness((businessData as Business | null) ?? null);
