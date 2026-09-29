@@ -178,6 +178,9 @@ export interface RootRouteChildren {
   BuscarRoute: typeof BuscarRoute
   FornecedorSlugRoute: typeof FornecedorSlugRoute
   NotificarInconsistenciaRoute: typeof NotificarInconsistenciaRoute
+  RecibosRoute: typeof RecibosRoute
+  RecibosRecebidosRoute: typeof RecibosRecebidosRoute
+  EmitirReciboTokenRoute: typeof EmitirReciboTokenRoute
 }
 
 declare module '@tanstack/react-router' {
