@@ -1,0 +1,92 @@
+/* LOSI CONECTA — página de recibos */
+.receipts-page{min-height:100vh;background:#f5f7fb;color:#172033}
+.receipts-page .dashboard-sidebar{background:#071a33}
+.receipts-header{position:sticky;top:0;z-index:20}
+.receipts-back{display:inline-flex;align-items:center;text-decoration:none}
+.receipts-content{max-width:1320px!important}
+.receipts-hero{display:flex;align-items:center;justify-content:space-between;gap:28px;margin-bottom:22px;padding:28px;border:1px solid #e3e8f0;border-radius:20px;background:linear-gradient(135deg,#fff 0%,#f8fafc 100%);box-shadow:0 12px 34px rgba(7,26,51,.06)}
+.receipts-hero h1{margin:9px 0 8px;color:#071a33;font-size:32px;line-height:1.15}
+.receipts-hero p{max-width:760px;margin:0;color:#647084;font-size:14px;line-height:1.6}
+.receipts-hero-mark{min-width:210px;padding:18px;border-radius:16px;background:#071a33;border:1px solid rgba(240,217,154,.28);text-align:center;box-shadow:0 12px 24px rgba(7,26,51,.15)}
+.receipts-hero-mark span{font-size:25px;font-weight:800;color:#fff;letter-spacing:.03em}
+.receipts-hero-mark strong{font-size:15px;color:#f0d99a;letter-spacing:.08em}
+.receipts-hero-mark small{display:block;margin-top:9px;color:#d7deea;font-size:9px;font-weight:700;letter-spacing:.1em}
+.receipts-message{margin-bottom:18px;padding:12px 15px;border:1px solid rgba(184,138,50,.35);border-radius:12px;background:#fff9e9;color:#725315;font-size:13px;font-weight:700}
+.receipts-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.75fr);gap:20px;align-items:start}
+.receipts-form-card,.receipts-preview-card,.receipts-history-card{border:1px solid #e1e6ee;border-radius:18px;background:#fff;box-shadow:0 10px 30px rgba(7,26,51,.05)}
+.receipts-form-card,.receipts-preview-card,.receipts-history-card{padding:22px}
+.receipts-card-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.receipts-kicker{display:block;color:#b88a32;font-size:10px;font-weight:800;letter-spacing:.13em}
+.receipts-card-head h2{margin:5px 0 0;color:#071a33;font-size:19px;line-height:1.25}
+.receipts-step,.receipts-count{display:grid;place-items:center;min-width:30px;height:30px;padding:0 8px;border-radius:9px;background:#071a33;color:#f0d99a;font-size:12px;font-weight:800}
+.receipts-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:20px}
+.receipts-form-grid label{display:grid;gap:7px;min-width:0}
+.receipts-form-grid label.wide{grid-column:1/-1}
+.receipts-form-grid label>span{color:#344054;font-size:11px;font-weight:800}
+.receipts-form-grid input,.receipts-form-grid select,.receipts-form-grid textarea{width:100%;min-width:0;box-sizing:border-box;border:1px solid #d7dee8;border-radius:10px;background:#fff;color:#172033;padding:11px 12px;font:inherit;font-size:13px;outline:none;transition:border-color .18s,box-shadow .18s}
+.receipts-form-grid textarea{resize:vertical;min-height:96px;line-height:1.5}
+.receipts-form-grid input:focus,.receipts-form-grid select:focus,.receipts-form-grid textarea:focus{border-color:#b88a32;box-shadow:0 0 0 3px rgba(184,138,50,.12)}
+.receipts-divider{height:1px;margin:25px 0;border-top:1px solid #edf0f4}
+.receipts-provider{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;padding:14px;border-radius:12px;background:#071a33}
+.receipts-provider span{display:block;color:#bfc9d8;font-size:9px;font-weight:800;letter-spacing:.08em}
+.receipts-provider strong{display:block;margin-top:5px;color:#f0d99a;font-size:12px;overflow-wrap:anywhere}
+.receipts-primary{width:100%;margin-top:18px;border:1px solid #c79d4b;border-radius:11px;padding:13px 16px;background:linear-gradient(135deg,#f0d99a,#d6b46a);color:#071a33;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 8px 18px rgba(184,138,50,.2);transition:transform .16s,box-shadow .16s}
+.receipts-primary:hover{transform:translateY(-1px);box-shadow:0 11px 22px rgba(184,138,50,.26)}
+.receipts-note{margin:10px 0 0;color:#7b8595;font-size:11px;line-height:1.5;text-align:center}
+.receipts-preview-card{position:sticky;top:94px}
+.receipt-paper{margin-top:18px;padding:17px;border:1px solid #dfe4eb;border-radius:10px;background:#fff;box-shadow:0 15px 30px rgba(7,26,51,.09);font-family:Arial,sans-serif}
+.receipt-paper-top{display:flex;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:3px solid #071a33}
+.receipt-paper-top strong{color:#071a33;font-size:20px}
+.receipt-paper-top span{color:#b88a32;font-size:11px;font-weight:800}
+.receipt-paper-top small{display:block;margin-top:5px;color:#7b8595;font-size:7px;font-weight:700}
+.receipt-paper-top b{color:#071a33;font-size:8px;white-space:nowrap}
+.receipt-paper-title{margin:17px 0 8px;color:#071a33;font-size:15px;font-weight:800}
+.receipt-paper>p{margin:0;color:#5f6b7c;font-size:9px;line-height:1.5}
+.receipt-paper-value{margin:14px 0;padding:12px;border:1px solid #e3e7ed;border-radius:8px;background:#f7f9fb}
+.receipt-paper-value small,.receipt-paper-section small{display:block;color:#8791a0;font-size:7px;font-weight:800;letter-spacing:.05em}
+.receipt-paper-value strong{display:block;margin-top:5px;color:#071a33;font-size:18px}
+.receipt-paper-value span{display:block;margin-top:3px;color:#687386;font-size:8px}
+.receipt-paper-section{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;margin-top:10px;padding:11px;border-bottom:1px solid #edf0f4}
+.receipt-paper-section small:nth-of-type(2){grid-column:2;grid-row:1}
+.receipt-paper-section strong:nth-of-type(2){grid-column:2;grid-row:2}
+.receipt-paper-section strong{color:#263246;font-size:9px;overflow-wrap:anywhere}
+.receipt-paper-section span{grid-column:1/-1;color:#687386;font-size:8px}
+.receipt-paper-footer{margin-top:16px;color:#a1a8b3;font-size:7px;text-align:center}
+.receipts-history-card{margin-top:20px}
+.receipts-empty{display:grid;gap:5px;margin-top:16px;padding:26px;border:1px dashed #d6dce6;border-radius:12px;text-align:center}
+.receipts-empty strong{color:#344054;font-size:13px}
+.receipts-empty span{color:#7b8595;font-size:12px}
+.receipts-history-list{display:grid;gap:9px;margin-top:16px}
+.receipts-history-list article{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 14px;border:1px solid #e4e8ef;border-radius:11px}
+.receipts-history-list article>div:first-child{min-width:0}
+.receipts-history-list article strong{display:block;color:#071a33;font-size:12px}
+.receipts-history-list article>div:first-child span{display:block;margin-top:4px;color:#687386;font-size:11px;overflow-wrap:anywhere}
+.receipts-history-meta{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.receipts-history-meta b{color:#071a33;font-size:12px}
+.receipts-history-meta>span{color:#7b8595;font-size:10px}
+.receipts-history-meta button{border:1px solid #d6b46a;border-radius:8px;padding:8px 10px;background:#fff9e9;color:#725315;font-size:11px;font-weight:800;cursor:pointer}
+.receipts-state{min-height:100vh;display:grid;place-items:center;color:#647084;font-family:Montserrat,Arial,sans-serif}
+@media(max-width:900px){
+  .receipts-layout{grid-template-columns:1fr}
+  .receipts-preview-card{position:static}
+}
+@media(max-width:700px){
+  .receipts-content{padding:20px 14px 42px!important}
+  .receipts-header{padding-left:14px!important;padding-right:14px!important}
+  .receipts-hero{align-items:flex-start;flex-direction:column;padding:20px;border-radius:16px}
+  .receipts-hero h1{font-size:25px}
+  .receipts-hero-mark{width:100%;min-width:0}
+  .receipts-form-card,.receipts-preview-card,.receipts-history-card{padding:16px;border-radius:15px}
+  .receipts-form-grid{grid-template-columns:1fr;gap:12px}
+  .receipts-form-grid label.wide{grid-column:auto}
+  .receipts-provider{grid-template-columns:1fr}
+  .receipt-paper{padding:14px}
+  .receipts-history-list article{align-items:flex-start;flex-direction:column}
+  .receipts-history-meta{justify-content:flex-start;width:100%}
+}
+@media(max-width:380px){
+  .receipts-content{padding-left:10px!important;padding-right:10px!important}
+  .receipts-hero h1{font-size:22px}
+  .receipts-card-head h2{font-size:17px}
+  .receipt-paper-top strong{font-size:18px}
+}
