@@ -439,6 +439,23 @@ function QuotesPage() {
     return `LOSI-CONNECTA-Orcamento-${recipient || "cliente"}-${quote.id.slice(0, 8)}.pdf`;
   }
 
+  function downloadPdfBlob(pdf: jsPDF, fileName: string) {
+    const blob = pdf.output("blob");
+    if (!(blob instanceof Blob) || blob.size === 0) {
+      throw new Error("O PDF foi gerado vazio. Tente novamente.");
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.rel = "noopener";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
   async function generateQuotePdf(quote: QuoteRow) {
     if (!quote?.id) throw new Error("O orçamento selecionado não possui um identificador válido.");
     const request = quote.quote_requests;
@@ -648,23 +665,7 @@ function QuotesPage() {
       setMessage("Gerando PDF...");
       const pdf = await generateQuotePdf(quote);
       const fileName = buildPdfFileName(quote);
-      const blob = pdf.output("blob");
-      if (!(blob instanceof Blob) || blob.size === 0) {
-        throw new Error("O PDF foi gerado vazio. Tente abrir o orçamento novamente e gerar o arquivo.");
-      }
-
-      // Download explícito por Blob: evita depender exclusivamente do FileSaver
-      // interno do jsPDF, principalmente no Safari/iOS.
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.rel = "noopener";
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      downloadPdfBlob(pdf, fileName);
 
       setMessageType("success");
       setMessage("PDF profissional gerado com sucesso.");
@@ -695,7 +696,7 @@ function QuotesPage() {
       console.error("Erro ao compartilhar PDF:", error);
     }
 
-    pdf.save(buildPdfFileName(quote));
+    downloadPdfBlob(pdf, buildPdfFileName(quote));
     const whatsappUrl = recipientPhone
       ? "https://wa.me/" + recipientPhone + "?text=" + encodeURIComponent(message)
       : "https://wa.me/?text=" + encodeURIComponent(message);
@@ -980,7 +981,7 @@ function QuotesPage() {
         setMessage("Proposta criada e o WhatsApp foi aberto para envio ao cliente.");
       } else if (delivery === "pdf") {
         const pdf = await generateQuotePdf(createdQuote);
-        pdf.save(buildPdfFileName(createdQuote));
+        downloadPdfBlob(pdf, buildPdfFileName(createdQuote));
         setMessage("Proposta criada e o PDF profissional foi gerado.");
       } else {
         await shareQuotePdfOnWhatsApp(createdQuote);
