@@ -16405,3 +16405,53 @@ body :where(label){
     font-size: 11px;
   }
 }
+
+
+/* LOSI CONECTA — PARTICLE BUTTON
+   Microinteração dourada para os botões da página inicial. */
+.losi-particle-button-shell{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  isolation:isolate;
+}
+.losi-particle-button{
+  position:relative !important;
+  z-index:2;
+  transform:translateZ(0);
+  transition:transform .16s ease, box-shadow .2s ease;
+}
+.losi-particle-button:active{transform:scale(.97) translateZ(0)}
+.losi-particle-burst{
+  position:absolute;
+  inset:50%;
+  z-index:1;
+  width:1px;
+  height:1px;
+  pointer-events:none;
+}
+.losi-particle-burst i{
+  position:absolute;
+  left:0;
+  top:0;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#d6b46a;
+  box-shadow:0 0 8px rgba(214,180,106,.8);
+  transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(0) scale(.35);
+  opacity:0;
+  animation:losi-particle-burst .58s cubic-bezier(.16,1,.3,1) var(--particle-delay) forwards;
+}
+@keyframes losi-particle-burst{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(0) scale(.3)}
+  12%{opacity:1}
+  70%{opacity:.9}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(var(--particle-distance)) scale(.05)}
+}
+@media (prefers-reduced-motion:reduce){
+  .losi-particle-button{transition:none}
+  .losi-particle-burst{display:none}
+}
+@media (max-width:700px){.losi-particle-burst i{width:4px;height:4px}}
