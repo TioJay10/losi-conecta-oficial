@@ -125,7 +125,7 @@ function ReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData; busi
   doc.setTextColor(35,45,60);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.text(business?.business_name || profile?.full_name || "Prestador", margin + 7, y + 23);
+  const providerLines = doc.splitTextToSize(business?.business_name || profile?.full_name || "Prestador", contentW/2 - 14).slice(0, 2);\n  doc.text(providerLines, margin + 7, y + 23);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(95,105,120);
@@ -137,7 +137,7 @@ function ReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData; busi
   doc.setTextColor(35,45,60);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.text(receipt.clientName || "Não informado", margin + contentW/2 + 7, y + 23);
+  const clientLines = doc.splitTextToSize(receipt.clientName || "Não informado", contentW/2 - 14).slice(0, 2);\n  doc.text(clientLines, margin + contentW/2 + 7, y + 23);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(95,105,120);
@@ -154,7 +154,7 @@ function ReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData; busi
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(35,45,60);
-  doc.text(receipt.service || "Prestação de serviços", margin + 7, y + 18);
+  const serviceLines = doc.splitTextToSize(receipt.service || "Prestação de serviços", contentW - 14).slice(0, 2);\n  doc.text(serviceLines, margin + 7, y + 18);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(105,115,130);
