@@ -565,7 +565,7 @@ function QuotesPage() {
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8.5);
     pdf.setTextColor(...muted);
-    pdf.text(\`Emitida em \${new Date().toLocaleDateString("pt-BR")}\`, 18, y);
+    pdf.text(`Emitida em ${new Date().toLocaleDateString("pt-BR")}`, 18, y);
     y += 12;
 
     section("Destinatario", y);
