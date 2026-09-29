@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
 import "../receipts.css";
@@ -19,7 +19,7 @@ type Profile = {
 type ReceiptData = {
   id: string; number: string; clientName: string; clientDocument: string; clientAddress: string;
   service: string; serviceDate: string; amount: number; paymentMethod: string;
-  description: string; city: string; createdAt: string;
+  description: string; city: string; signatureData: string | null; createdAt: string;
 };
 
 function amountFromInput(value: string) {
@@ -36,6 +36,74 @@ function dateBR(value: string) {
   if (!value) return "—";
   const [y,m,d] = value.split("-");
   return y && m && d ? `${d}/${m}/${y}` : value;
+}
+
+
+function SignaturePad({ value, onChange }: { value: string | null; onChange: (value: string | null) => void }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawing = useRef(false);
+
+  const position = (event: PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    return { x: (event.clientX - rect.left) * canvas.width / rect.width, y: (event.clientY - rect.top) * canvas.height / rect.height };
+  };
+
+  const start = (event: PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current!;
+    const point = position(event);
+    const context = canvas.getContext("2d")!;
+    drawing.current = true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+  };
+
+  const move = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (!drawing.current) return;
+    const point = position(event);
+    const context = canvasRef.current!.getContext("2d")!;
+    context.lineWidth = 3;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.strokeStyle = "#071a33";
+    context.lineTo(point.x, point.y);
+    context.stroke();
+  };
+
+  const finish = () => {
+    if (!drawing.current) return;
+    drawing.current = false;
+    onChange(canvasRef.current!.toDataURL("image/png"));
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current!;
+    canvas.getContext("2d")!.clearRect(0, 0, canvas.width, canvas.height);
+    onChange(null);
+  };
+
+  return (
+    <div className="receipts-signature-pad">
+      <canvas ref={canvasRef} width={760} height={220} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} />
+      <button type="button" onClick={clear}>Limpar assinatura</button>
+      <label className="receipts-signature-upload">
+        <span>Ou enviar assinatura em imagem</span>
+        <input type="file" accept="image/png,image/jpeg" onChange={event => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          if (file.size > 500000) {
+            window.alert("A assinatura deve ter até 500 KB.");
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = () => onChange(String(reader.result));
+          reader.readAsDataURL(file);
+        }} />
+      </label>
+      {value && <span className="receipts-signature-status">✓ Assinatura adicionada ao recibo</span>}
+    </div>
+  );
 }
 
 function ReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData; business: Business | null; profile: Profile | null }) {
@@ -248,7 +316,7 @@ function ReceiptsPage() {
     amount: amountNumber, paymentMethod, description,
     city: city || business?.city || profile?.city || "",
     createdAt: new Date().toISOString(),
-  }), [clientName,clientDocument,clientAddress,service,serviceDate,amountNumber,paymentMethod,description,city,business,profile]);
+  }), [clientName,clientDocument,clientAddress,service,serviceDate,amountNumber,paymentMethod,description,city,signatureData,business,profile]);
 
   function resetForm() {
     setClientName(""); setClientDocument(""); setClientAddress(""); setService("");
@@ -336,6 +404,12 @@ function ReceiptsPage() {
                 <label className="wide"><span>Descrição / observações</span><textarea rows={4} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Informações adicionais sobre o serviço..." /></label>
               </div>
 
+              <div className="receipts-signature-group">
+                <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 03</span><h2>Assinatura do prestador</h2></div><span className="receipts-step">3</span></div>
+                <p className="receipts-signature-help">Assine diretamente na tela ou envie uma imagem da sua assinatura. Ela será incluída no PDF.</p>
+                <SignaturePad value={signatureData} onChange={setSignatureData} />
+              </div>
+
               <div className="receipts-provider">
                 <div><span>PRESTADOR</span><strong>{supplierName}</strong></div>
                 <div><span>DOCUMENTO</span><strong>{supplierDocument}</strong></div>
@@ -354,7 +428,7 @@ function ReceiptsPage() {
                 <div className="receipt-paper-value"><small>VALOR RECEBIDO</small><strong>{money(amountNumber)}</strong><span>{paymentMethod}</span></div>
                 <div className="receipt-paper-section"><small>PRESTADOR</small><strong>{supplierName}</strong><small>CONTRATANTE / PAGADOR</small><strong>{clientName || "—"}</strong></div>
                 <div className="receipt-paper-section"><small>SERVIÇO</small><strong>{service || "Prestação de serviços"}</strong><span>{dateBR(serviceDate)}</span></div>
-                <div className="receipt-paper-footer">Documento profissional LOSI CONECTA</div>
+                <div className="receipt-paper-signature">{signatureData ? <img src={signatureData} alt="Assinatura do prestador" /> : null}<span>Assinatura do prestador</span></div><div className="receipt-paper-footer">Documento profissional LOSI CONECTA</div>
               </div>
             </aside>
           </div>
