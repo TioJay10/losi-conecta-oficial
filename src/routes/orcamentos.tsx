@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { AppLogo } from "../components/AppLogo";
+import { jsPDF } from "jspdf";
 
 type RequestRow = {
   id: string;
@@ -439,8 +440,9 @@ function QuotesPage() {
   }
 
   async function generateQuotePdf(quote: QuoteRow) {
-    const { jsPDF } = await import("jspdf");
+    if (!quote?.id) throw new Error("O orçamento selecionado não possui um identificador válido.");
     const request = quote.quote_requests;
+    if (!request) throw new Error("Os dados do cliente deste orçamento não foram carregados. Feche o orçamento e abra novamente.");
     const supplier = businessContacts[quote.business_id];
     const supplierName = personalIdentity?.full_name || supplier?.business_name || "Fornecedor";
     const companyName = supplier?.business_name || "LOSI CONECTA";
@@ -645,11 +647,29 @@ function QuotesPage() {
       setMessageType("");
       setMessage("Gerando PDF...");
       const pdf = await generateQuotePdf(quote);
-      pdf.save(buildPdfFileName(quote));
+      const fileName = buildPdfFileName(quote);
+      const blob = pdf.output("blob");
+      if (!(blob instanceof Blob) || blob.size === 0) {
+        throw new Error("O PDF foi gerado vazio. Tente abrir o orçamento novamente e gerar o arquivo.");
+      }
+
+      // Download explícito por Blob: evita depender exclusivamente do FileSaver
+      // interno do jsPDF, principalmente no Safari/iOS.
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.rel = "noopener";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+
       setMessageType("success");
       setMessage("PDF profissional gerado com sucesso.");
     } catch (error: any) {
-      console.error("Erro ao gerar PDF:", error);
+      console.error("Erro ao gerar/baixar PDF:", error);
       setMessageType("error");
       setMessage(error?.message || "Não foi possível gerar o PDF. Tente novamente.");
     }
