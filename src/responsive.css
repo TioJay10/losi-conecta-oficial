@@ -16416,13 +16416,15 @@ body :where(label){
   justify-content:center;
   isolation:isolate;
 }
-.losi-particle-button{
+.losi-particle-button-shell > a,
+.losi-particle-button-shell > button{
   position:relative !important;
   z-index:2;
   transform:translateZ(0);
   transition:transform .16s ease, box-shadow .2s ease;
 }
-.losi-particle-button:active{transform:scale(.97) translateZ(0)}
+.losi-particle-button-shell > a:active,
+.losi-particle-button-shell > button:active{transform:scale(.97) translateZ(0)}
 .losi-particle-burst{
   position:absolute;
   inset:50%;
@@ -16451,7 +16453,7 @@ body :where(label){
   100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(var(--particle-distance)) scale(.05)}
 }
 @media (prefers-reduced-motion:reduce){
-  .losi-particle-button{transition:none}
+  .losi-particle-button-shell > a,.losi-particle-button-shell > button{transition:none}
   .losi-particle-burst{display:none}
 }
 @media (max-width:700px){.losi-particle-burst i{width:4px;height:4px}}
@@ -16460,12 +16462,12 @@ body :where(label){
 @media (max-width:700px){
   .home-page .home-header > .losi-particle-button-shell{
     position:absolute!important;
-    left:14px!important;
-    right:auto!important;
+    left:auto!important;
+    right:14px!important;
     top:13px!important;
     z-index:12!important;
   }
-  .home-page .home-header > .losi-particle-button-shell .losi-particle-button{
+  .home-page .home-header > .losi-particle-button-shell > a{
     font-size:11px!important;
     padding:8px 11px!important;
   }
