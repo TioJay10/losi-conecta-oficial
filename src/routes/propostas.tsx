@@ -343,11 +343,11 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     doc.rect(0, 0, 62, H, "F");
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(19);
-    doc.text("ATIVIDADES", 13, 40);
+    doc.setFontSize(15);
+    doc.text("ATIVIDADES", 12, 39);
     doc.setTextColor(...gold);
-    doc.setFontSize(19);
-    doc.text("PROPOSTAS", 13, 51);
+    doc.setFontSize(15);
+    doc.text("PROPOSTAS", 12, 49);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.2);
     doc.setTextColor(225,231,239);
@@ -357,12 +357,12 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
         : "Uma programação pensada para promover participação, organização e uma experiência positiva para o público.",
       36
     );
-    doc.text(sideText, 13, 69, { lineHeightFactor: 1.4 });
+    doc.text(sideText, 12, 65, { lineHeightFactor: 1.4 });
     doc.setFillColor(...gold);
-    doc.rect(13, 112, 28, 2.5, "F");
+    doc.rect(12, 108, 26, 2.5, "F");
     doc.setTextColor(255,255,255);
-    doc.setFontSize(6.5);
-    doc.text(supplier.toUpperCase().slice(0, 26), 13, 126);
+    doc.setFontSize(6.2);
+    doc.text(supplier.toUpperCase().slice(0, 24), 12, 121);
     return 56;
   };
 
