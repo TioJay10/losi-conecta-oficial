@@ -712,7 +712,7 @@ function ProposalsPage() {
               <div className="proposal-document-preview">
                 <div className="proposal-preview-page proposal-preview-cover">
                   <div className="proposal-cover-lines"></div>
-                  <div className="proposal-cover-brand"><strong>LOSI</strong><span>CONECTA</span></div>
+                  <div className="proposal-cover-brand"><strong>{supplier}</strong><span>PROPOSTA</span></div>
                   <div className="proposal-cover-title"><small>APRESENTAÇÃO DE SERVIÇOS</small><h3>PROPOSTA</h3><h4>COMERCIAL</h4><i></i><strong>{preview.title}</strong><span>APRESENTADA PARA</span><b>{preview.recipient || "Cliente / empresa"}</b></div>
                   <div className="proposal-cover-footer"><span>PREPARADA POR</span><strong>{supplier}</strong><small>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ") || "LOSI Gestão em Lazer"}</small></div>
                 </div>
