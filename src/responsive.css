@@ -17376,3 +17376,42 @@ body,
   text-shadow:none !important;
   outline:none !important;
 }
+
+
+/* AJUSTE FINAL — remover somente a profundidade, mantendo o neon dourado. */
+.dashboard-page [class*="card"],
+.dashboard-page [class*="group"],
+.dashboard-page [class*="head"],
+.dashboard-page [class*="title"],
+.dashboard-page [class*="subtitle"],
+.dashboard-page [class*="section"]{
+  box-shadow:none !important;
+}
+
+/* Apenas o neon dourado permanece no primeiro card principal de cada página. */
+.dashboard-page > .dashboard-card:first-child,
+.dashboard-page .dashboard-main > .dashboard-card:first-child,
+.dashboard-page .dashboard-content > .dashboard-card:first-child,
+.dashboard-page .proposals-form-card,
+.dashboard-page .receipts-form-card,
+.dashboard-page .quotes-dashboard-card,
+.dashboard-page .business-services-card,
+.dashboard-page .personal-profile-card{
+  box-shadow:
+    0 0 0 1px rgba(214,180,106,.14),
+    0 0 7px rgba(214,180,106,.25) !important;
+}
+
+/* Sem profundidade em hover, foco ou clique. */
+.dashboard-page > .dashboard-card:first-child:hover,
+.dashboard-page .dashboard-main > .dashboard-card:first-child:hover,
+.dashboard-page .dashboard-content > .dashboard-card:first-child:hover,
+.dashboard-page .proposals-form-card:hover,
+.dashboard-page .receipts-form-card:hover,
+.dashboard-page .quotes-dashboard-card:hover,
+.dashboard-page .business-services-card:hover,
+.dashboard-page .personal-profile-card:hover{
+  box-shadow:
+    0 0 0 1px rgba(214,180,106,.14),
+    0 0 7px rgba(214,180,106,.25) !important;
+}
