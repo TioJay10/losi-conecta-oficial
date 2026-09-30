@@ -781,6 +781,7 @@ function ProposalsPage() {
               <div className="proposals-activities">
                 <div className="proposals-field-label">Atividades propostas</div>
                 <div className="proposals-check-grid">{activityOptions.map(item => <label key={item} className={draft.activities.includes(item) ? "selected" : ""}><input type="checkbox" checked={draft.activities.includes(item)} onChange={() => toggleActivity(item)} /><span>{item}</span></label>)}</div>
+                <select className="proposals-activity-select-mobile" value="" onChange={e => { if (e.target.value) toggleActivity(e.target.value); }} aria-label="Selecionar atividade proposta"><option value="">Selecionar atividade...</option>{activityOptions.map(item => <option key={item} value={item}>{draft.activities.includes(item) ? `✓ ${item}` : item}</option>)}</select>
                  <div className="proposals-custom-activity">
                    <input value={customActivity} onChange={e => setCustomActivity(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addCustomActivity(); } }} placeholder="Adicionar outra atividade manualmente" />
                    <button type="button" onClick={addCustomActivity}>Adicionar</button>
