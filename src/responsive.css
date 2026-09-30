@@ -16931,3 +16931,45 @@ body :where(label){
     0 3px 7px rgba(7,17,31,.06),
     inset 0 1px rgba(255,255,255,.98) !important;
 }
+
+
+/* PAINEL DO FORNECEDOR — acabamento dos cards e menu */
+.dashboard-page .dashboard-card,
+.dashboard-page .dashboard-status,
+.dashboard-page .dashboard-quotes-overview,
+.dashboard-page .dashboard-metric-card,
+.dashboard-page .dashboard-plan-card,
+.dashboard-page .dashboard-saved,
+.dashboard-page .dashboard-saved-card,
+.dashboard-page .dashboard-onboarding,
+.dashboard-page .dashboard-grid > button,
+.dashboard-page .dashboard-status-card,
+.dashboard-page .dashboard-commercial-card,
+.dashboard-page .dashboard-operation-card {
+  border-radius: 10px !important;
+  box-shadow:
+    0 12px 24px rgba(7,17,31,.09),
+    0 3px 7px rgba(7,17,31,.055),
+    inset 0 1px rgba(255,255,255,.9) !important;
+}
+
+.dashboard-page .dashboard-card:hover,
+.dashboard-page .dashboard-metric-card:hover,
+.dashboard-page .dashboard-plan-card:hover,
+.dashboard-page .dashboard-saved-card:hover,
+.dashboard-page .dashboard-grid > button:hover {
+  box-shadow:
+    0 16px 30px rgba(7,17,31,.12),
+    0 4px 9px rgba(7,17,31,.065),
+    inset 0 1px rgba(255,255,255,.95) !important;
+}
+
+.dashboard-page .dashboard-sidebar-nav .dashboard-nav-item,
+.dashboard-page .dashboard-sidebar-nav .dashboard-nav-item:hover,
+.dashboard-page .dashboard-sidebar-nav .dashboard-nav-item:focus,
+.dashboard-page .dashboard-sidebar-nav .dashboard-nav-item:active,
+.dashboard-page .dashboard-sidebar-nav .dashboard-nav-item strong,
+.dashboard-page .dashboard-sidebar-nav .dashboard-nav-item small,
+.dashboard-page .dashboard-sidebar-nav .dashboard-nav-item span {
+  text-decoration: none !important;
+}
