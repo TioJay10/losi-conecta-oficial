@@ -209,3 +209,199 @@
   .proposals-preview-panel.is-fullscreen .proposal-document-preview{height:calc(100vh - 65px)}
   .proposals-preview-panel.is-fullscreen .proposal-preview-page{width:794px}
 }
+
+/* PROPOSTAS — proteção de layout em qualquer largura + atividades em dropdown no mobile. */
+.proposals-page,
+.proposals-page .dashboard-main,
+.proposals-content,
+.proposals-layout,
+.proposals-form-card,
+.proposals-preview-panel,
+.proposals-hero,
+.proposals-form-grid,
+.proposals-activities,
+.proposals-cta-group{
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.proposals-page{
+  overflow-x:hidden;
+}
+.proposals-form-grid > label,
+.proposals-form-grid input,
+.proposals-form-grid select,
+.proposals-form-grid textarea,
+.proposals-custom-activity,
+.proposals-custom-activity input,
+.proposals-custom-activity button{
+  min-width:0;
+  max-width:100%;
+}
+.proposals-form-grid label > span,
+.proposals-field-label,
+.proposals-card-head h2,
+.proposals-hero h1,
+.proposals-hero p,
+.proposals-note,
+.proposals-cta-help{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.proposals-card-head > div{
+  min-width:0;
+}
+.proposals-card-head h2{
+  max-width:100%;
+}
+.proposals-actions > *{
+  min-width:0;
+}
+.proposals-activity-select-mobile{
+  display:none;
+}
+@media(max-width:700px){
+  .proposals-content{
+    width:100%;
+    padding-left:10px;
+    padding-right:10px;
+  }
+  .proposals-layout{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    gap:12px;
+  }
+  .proposals-form-card,
+  .proposals-preview-panel{
+    width:100%;
+    border-radius:12px;
+  }
+  .proposals-form-card{
+    padding:14px;
+  }
+  .proposals-form-grid{
+    width:100%;
+    grid-template-columns:minmax(0,1fr);
+  }
+  .proposals-form-grid input,
+  .proposals-form-grid select,
+  .proposals-form-grid textarea{
+    font-size:14px;
+  }
+  .proposals-check-grid{
+    display:none;
+  }
+  .proposals-activity-select-mobile{
+    display:block;
+    width:100%;
+    height:44px;
+    margin-top:10px;
+    box-sizing:border-box;
+    border:1px solid #d9dfe7;
+    border-radius:9px;
+    background:#fff;
+    color:#1b2635;
+    padding:0 11px;
+    font:600 13px/1.2 Montserrat,Arial,sans-serif;
+    outline:none;
+  }
+  .proposals-activity-select-mobile:focus{
+    border-color:#b88a32;
+    box-shadow:0 0 0 3px rgba(214,180,106,.14);
+  }
+  .proposals-custom-activity{
+    width:100%;
+  }
+  .proposals-custom-list{
+    max-width:100%;
+    overflow:hidden;
+  }
+  .proposals-custom-list button{
+    max-width:100%;
+    overflow-wrap:anywhere;
+    white-space:normal;
+  }
+  .proposals-actions{
+    width:100%;
+  }
+  .proposals-secondary,
+  .proposals-primary{
+    box-sizing:border-box;
+  }
+  .proposals-preview-head{
+    align-items:flex-start;
+    gap:8px;
+  }
+  .proposals-preview-head > div:first-child{
+    min-width:0;
+  }
+  .proposals-preview-tools{
+    flex:0 0 auto;
+  }
+  .proposal-document-preview{
+    width:100%;
+    min-width:0;
+  }
+  .proposal-preview-page{
+    width:100%;
+    max-width:100%;
+  }
+  .proposal-preview-info{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .proposal-preview-standard-head{
+    flex-wrap:wrap;
+    gap:6px 8px;
+  }
+  .proposal-preview-standard-head h3,
+  .proposal-preview-standard-head small{
+    overflow-wrap:anywhere;
+  }
+  .proposal-preview-activities{
+    width:100%;
+    grid-template-columns:minmax(0,1fr);
+  }
+  .proposal-preview-side,
+  .proposal-preview-activity-content{
+    min-width:0;
+  }
+}
+@media(max-width:380px){
+  .proposals-content{
+    padding-left:8px;
+    padding-right:8px;
+  }
+  .proposals-form-card{
+    padding:12px;
+  }
+  .proposals-card-head{
+    gap:8px;
+  }
+  .proposals-card-head h2{
+    font-size:16px;
+  }
+  .proposals-step{
+    flex:0 0 28px;
+    width:28px;
+    height:28px;
+  }
+  .proposals-preview-panel{
+    padding:8px;
+  }
+  .proposals-preview-fullscreen{
+    max-width:120px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+@media(max-width:330px){
+  .proposals-preview-tools{
+    flex-direction:column;
+    align-items:flex-end;
+  }
+  .proposals-preview-head h2{
+    font-size:16px;
+  }
+}
