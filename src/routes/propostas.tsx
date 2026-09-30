@@ -194,7 +194,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     let cursor = y;
 
     chunks.forEach((chunk, index) => {
-      const height = 21 + chunk.length * lineH;
+      const height = 13 + chunk.length * lineH;
       if (cursor + height > contentBottom) {
         addFooter();
         cursor = addStandardPage("APRESENTAÇÃO", "CONTINUAÇÃO");
@@ -205,12 +205,12 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
       doc.setTextColor(...gold);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7);
-      doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", x + 8, cursor + 11);
+      doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", x + 8, cursor + 9);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.2);
       doc.setTextColor(...ink);
-      doc.text(chunk, x + 8, cursor + 22, { lineHeightFactor: 1.35 });
-      cursor += height + 8;
+      doc.text(chunk, x + 8, cursor + 16, { lineHeightFactor: 1.35 });
+      cursor += height + 6;
     });
     return cursor;
   };
@@ -232,35 +232,35 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   doc.setTextColor(...muted);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.text("APRESENTAÇÃO COMERCIAL  •  PROPOSTA PROFISSIONAL", 37, 47);
+  doc.text("APRESENTAÇÃO COMERCIAL  •  PROPOSTA PROFISSIONAL", 37, 40);
 
   doc.setTextColor(...navy);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(31);
-  doc.text("PROPOSTA", 37, 105);
+  doc.text("PROPOSTA", 37, 91);
   doc.setTextColor(...gold);
   doc.setFontSize(34);
-  doc.text("COMERCIAL", 37, 119);
+  doc.text("COMERCIAL", 37, 105);
   doc.setFillColor(...gold);
-  doc.rect(37, 124, Math.min(74, Math.max(35, doc.getTextWidth("COMERCIAL") + 5)), 3.2, "F");
+  doc.rect(37, 110, Math.min(74, Math.max(35, doc.getTextWidth("COMERCIAL") + 5)), 3.2, "F");
 
   doc.setTextColor(...muted);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.text("APRESENTAÇÃO DE SERVIÇOS", 37, 143);
+  doc.text("APRESENTAÇÃO DE SERVIÇOS", 37, 128);
   doc.setTextColor(...ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   const coverTitle = doc.splitTextToSize(proposalTitle, 128).slice(0, 2);
-  doc.text(coverTitle, 37, 155, { lineHeightFactor: 1.12 });
+  doc.text(coverTitle, 37, 140, { lineHeightFactor: 1.12 });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...muted);
-  doc.text("APRESENTADA PARA", 37, 180);
+  doc.text("APRESENTADA PARA", 37, 161);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(...navy);
-  doc.text(doc.splitTextToSize(draft.recipient || "Cliente / empresa", 125).slice(0, 2), 37, 189, { lineHeightFactor: 1.15 });
+  doc.text(doc.splitTextToSize(draft.recipient || "Cliente / empresa", 125).slice(0, 2), 37, 170, { lineHeightFactor: 1.15 });
 
   doc.setFillColor(...navy);
   doc.roundedRect(37, 235, 136, 35, 2, 2, "F");
@@ -363,7 +363,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     doc.setTextColor(255,255,255);
     doc.setFontSize(6.2);
     doc.text(supplier.toUpperCase().slice(0, 24), 12, 121);
-    return 56;
+    return 31;
   };
 
   let activityY = addActivitiesPage();
@@ -415,7 +415,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
     let cursor = startY;
     chunks.forEach((chunk, index) => {
-      const h = 20 + chunk.length * 4.1;
+      const h = 13 + chunk.length * 4.1;
       if (cursor + h > 220) {
         addFooter();
         cursor = addStandardPage("DETALHAMENTO", "CONTINUAÇÃO");
@@ -425,12 +425,12 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
       doc.setTextColor(...gold);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7);
-      doc.text(index === 0 ? heading : "CONTINUAÇÃO", margin + 8, cursor + 10);
+      doc.text(index === 0 ? heading : "CONTINUAÇÃO", margin + 8, cursor + 9);
       doc.setTextColor(...ink);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.8);
-      doc.text(chunk, margin + 8, cursor + 20, { lineHeightFactor: 1.35 });
-      cursor += h + 8;
+      doc.text(chunk, margin + 8, cursor + 16, { lineHeightFactor: 1.35 });
+      cursor += h + 6;
     });
     return cursor;
   };
