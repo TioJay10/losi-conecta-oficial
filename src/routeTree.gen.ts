@@ -17,6 +17,7 @@ import { Route as MeusServicosRouteImport } from './routes/meus-servicos'
 import { Route as OrcamentosRouteImport } from './routes/orcamentos'
 import { Route as RecibosRouteImport } from './routes/recibos'
 import { Route as RecibosRecebidosRouteImport } from './routes/recibos-recebidos'
+import { Route as PropostasRouteImport } from './routes/propostas'
 import { Route as EmitirReciboTokenRouteImport } from './routes/emitir-recibo/$token'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as FornecedorSlugRouteImport } from './routes/fornecedor/$slug'
@@ -75,6 +76,12 @@ const RecibosRoute = RecibosRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const PropostasRoute = PropostasRouteImport.update({
+  id: '/propostas',
+  path: '/propostas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 const RecibosRecebidosRoute = RecibosRecebidosRouteImport.update({
   id: '/recibos-recebidos',
   path: '/recibos-recebidos',
@@ -117,6 +124,8 @@ export interface FileRoutesByFullPath {
   '/orcamentos': typeof OrcamentosRoute
   '/recibos': typeof RecibosRoute
   '/recibos-recebidos': typeof RecibosRecebidosRoute
+  '/propostas': typeof PropostasRoute
+  '/propostas': typeof PropostasRoute
   '/emitir-recibo/$token': typeof EmitirReciboTokenRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
@@ -134,6 +143,7 @@ export interface FileRoutesByTo {
   '/orcamentos': typeof OrcamentosRoute
   '/recibos': typeof RecibosRoute
   '/recibos-recebidos': typeof RecibosRecebidosRoute
+  '/propostas': typeof PropostasRoute
   '/emitir-recibo/$token': typeof EmitirReciboTokenRoute
   '/buscar': typeof BuscarRoute
   '/fornecedor/$slug': typeof FornecedorSlugRoute
@@ -180,6 +190,7 @@ export interface RootRouteChildren {
   NotificarInconsistenciaRoute: typeof NotificarInconsistenciaRoute
   RecibosRoute: typeof RecibosRoute
   RecibosRecebidosRoute: typeof RecibosRecebidosRoute
+  PropostasRoute: typeof PropostasRoute
   EmitirReciboTokenRoute: typeof EmitirReciboTokenRoute
 }
 
@@ -262,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecibosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/propostas': {
+      id: '/propostas'
+      path: '/propostas'
+      fullPath: '/propostas'
+      preLoaderRoute: typeof PropostasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recibos-recebidos': {
       id: '/recibos-recebidos'
       path: '/recibos-recebidos'
@@ -298,6 +316,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrcamentosRoute,
   RecibosRoute,
   RecibosRecebidosRoute,
+  PropostasRoute,
   EmitirReciboTokenRoute,
   BuscarRoute,
   FornecedorSlugRoute,
