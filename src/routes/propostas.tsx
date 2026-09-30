@@ -183,9 +183,12 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     return visible.length;
   };
 
-  const drawTextCard = (heading: string, text: string, y: number, width = contentW, maxLines = 7) => {
+  const drawTextCard = (heading: string, text: string, y: number, _width = contentW, maxLines = 7) => {
     const lineH = 4.15;
-    const lines = doc.splitTextToSize(text || "Informação a definir.", width);
+    const textWidth = contentW;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.2);
+    const lines = doc.splitTextToSize(text || "Informação a definir.", textWidth);
     const chunks: string[][] = [];
     for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
     let cursor = y;
@@ -202,7 +205,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
       doc.setTextColor(...ink);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.2);
-      doc.text(chunk, margin, cursor + 7, { lineHeightFactor: 1.32 });
+      doc.text(chunk, margin, cursor + 7, { maxWidth: textWidth, lineHeightFactor: 1.32 });
       cursor += 7 + bodyHeight + 9;
     });
     return cursor;
@@ -396,7 +399,10 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   let finalY = addStandardPage("DETALHAMENTO", "E CONSIDERAÇÕES FINAIS");
 
   const drawFinalCard = (heading: string, text: string, startY: number, maxLines = 6) => {
-    const lines = doc.splitTextToSize(text || "Informação a definir.", contentW);
+    const textWidth = contentW;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.8);
+    const lines = doc.splitTextToSize(text || "Informação a definir.", textWidth);
     const chunks: string[][] = [];
     for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
     let cursor = startY;
@@ -413,7 +419,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
       doc.setTextColor(...ink);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.8);
-      doc.text(chunk, margin, cursor + 7, { lineHeightFactor: 1.32 });
+      doc.text(chunk, margin, cursor + 7, { maxWidth: textWidth, lineHeightFactor: 1.32 });
       cursor += 7 + bodyHeight + 9;
     });
     return cursor;
@@ -720,23 +726,23 @@ function ProposalsPage() {
                   <div className="proposal-cover-footer"><span>PREPARADA POR</span><strong>{supplier}</strong><small>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ") || "LOSI Gestão em Lazer"}</small></div>
                 </div>
 
-                <div className="proposal-preview-page">
-                  <div className="proposal-preview-section-title"><span>02</span><h3>APRESENTAÇÃO</h3></div>
-                  <div className="proposal-preview-box"><small>CONTEXTO DA PROPOSTA</small><p>{preview.description || "Sua descrição aparecerá aqui."}</p></div>
-                  <div className="proposal-preview-box"><small>OBJETIVO</small><p>{preview.objective || buildObjective(preview.proposalType)}</p></div>
+                <div className="proposal-preview-page proposal-preview-presentation">
+                  <div className="proposal-preview-standard-head"><span>02</span><h3>APRESENTAÇÃO</h3></div>
+                  <div className="proposal-preview-text-section"><small>CONTEXTO DA PROPOSTA</small><p>{preview.description || "Sua descrição aparecerá aqui."}</p></div>
+                  <div className="proposal-preview-text-section"><small>OBJETIVO</small><p>{preview.objective || buildObjective(preview.proposalType)}</p></div>
                   <h5>INFORMAÇÕES DO PROJETO</h5>
-                  <div className="proposal-preview-info">{[["Tipo",preview.proposalType],["Data",dateBR(preview.eventDate)],["Horário",preview.eventTime||"A definir"],["Duração",preview.duration||"A definir"],["Local",preview.location||"A definir"],["Público",preview.audience||"A definir"]].map(([label,value])=><div key={label}><small>{label}</small><strong>{value}</strong></div>)}</div>
+                  <div className="proposal-preview-info">{[["Tipo",preview.proposalType],["Data",dateBR(preview.eventDate)],["Horário",preview.eventTime||"A definir"],["Duração",preview.duration||"A definir"],["Local",preview.location||"A definir"],["Público",preview.audience||"A definir"],["Faixa etária",preview.ageRange||"A definir"],["Responsável",preview.responsible||"A definir"]].map(([label,value])=><div key={label}><small>{label}</small><strong>{value}</strong></div>)}</div>
                 </div>
 
                 <div className="proposal-preview-page proposal-preview-activities">
-                  <div className="proposal-preview-side"><strong>ATIVIDADES</strong><span>PROPOSTAS</span><small>Uma programação pensada para participação, organização e uma experiência positiva.</small></div>
-                  <div className="proposal-preview-activity-content"><h3>O que será realizado</h3>{(preview.activities.length?preview.activities:[preview.proposalType]).slice(0,7).map(item=><div key={item}><i></i><span>{item}</span></div>)}<h5>DESENVOLVIMENTO</h5><p>{preview.methodology || "A programação será conduzida por profissionais e adaptada ao espaço, ao perfil do público e à dinâmica do evento."}</p></div>
+                  <div className="proposal-preview-side"><strong>ATIVIDADES</strong><span>PROPOSTAS</span><small>Uma programação pensada para promover participação, organização e uma experiência positiva para o público.</small></div>
+                  <div className="proposal-preview-activity-content"><h3>ATIVIDADES</h3>{(preview.activities.length?preview.activities:[preview.proposalType]).slice(0,7).map(item=><div key={item}><i></i><span>{item}</span></div>)}<h5>DESENVOLVIMENTO</h5><p>{preview.methodology || "A programação será conduzida por profissionais e adaptada ao espaço, ao perfil do público e à dinâmica do evento."}</p></div>
                 </div>
 
-                <div className="proposal-preview-page">
-                  <div className="proposal-preview-final-head"><span>04</span><h3>DETALHAMENTO</h3><small>E CONSIDERAÇÕES FINAIS</small></div>
-                  <div className="proposal-preview-final-box"><small>EQUIPE E ESTRUTURA</small><p>{preview.team || "Equipe dimensionada de acordo com o público, duração e características do projeto."}</p></div>
-                  <div className="proposal-preview-final-box"><small>CONSIDERAÇÕES</small><p>{preview.notes || "A programação poderá ser ajustada em conjunto com o contratante após a análise do local e das necessidades do público."}</p></div>
+                <div className="proposal-preview-page proposal-preview-detail">
+                  <div className="proposal-preview-standard-head"><span>04</span><h3>DETALHAMENTO</h3><small>E CONSIDERAÇÕES FINAIS</small></div>
+                  <div className="proposal-preview-text-section"><small>EQUIPE E ESTRUTURA</small><p>{preview.team || "Equipe dimensionada de acordo com o público, duração e características do projeto."}</p></div>
+                  <div className="proposal-preview-text-section"><small>CONSIDERAÇÕES</small><p>{preview.notes || "A programação poderá ser ajustada em conjunto com o contratante após a análise do local e das necessidades do público."}</p></div>
                   <div className="proposal-preview-next"><small>PRÓXIMO PASSO</small><strong>{(preview.cta === "custom" ? preview.ctaCustom : ctaOptions.find(item => item.value === preview.cta)?.text || ctaOptions[0].text) || "Fale conosco para alinharmos os próximos passos."}</strong></div>
                   <div className="proposal-preview-signature"><strong>{supplier}</strong><span>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ")}</span></div>
                 </div>
