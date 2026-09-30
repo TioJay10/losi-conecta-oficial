@@ -861,6 +861,9 @@ function DashboardPage() {
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/recibos" }); }}>
             <span className="dashboard-nav-mark">07</span><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span>
           </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/propostas" }); }}>
+            <span className="dashboard-nav-mark">08</span><span><strong>Propostas</strong><small>Apresentações comerciais</small></span>
+          </button>
         </nav>
         <div className="dashboard-sidebar-footer">
           <div className="dashboard-sidebar-status"><span></span> Conta profissional</div>
