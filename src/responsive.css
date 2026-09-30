@@ -16847,3 +16847,40 @@ body :where(label){
     background: rgba(214,180,106,.65);
   }
 }
+
+/* MENU DO PAINEL DESKTOP — rolagem independente da navegação */
+@media only screen and (min-width: 769px) {
+  .dashboard-page .dashboard-sidebar {
+    overflow: hidden !important;
+    min-height: 100vh !important;
+    height: 100vh !important;
+  }
+
+  .dashboard-page .dashboard-sidebar-nav {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 4px !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .dashboard-page .dashboard-sidebar-nav::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .dashboard-page .dashboard-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .dashboard-page .dashboard-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(214,180,106,.45);
+    border-radius: 999px;
+  }
+
+  .dashboard-page .dashboard-sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(214,180,106,.65);
+  }
+}
