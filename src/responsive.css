@@ -16884,3 +16884,50 @@ body :where(label){
     background: rgba(214,180,106,.65);
   }
 }
+
+/* ADMIN — acabamento visual: menus sem sublinhado, cards menos arredondados e profundidade consistente. */
+.admin-page a,
+.admin-page a:hover,
+.admin-page a:focus,
+.admin-page .admin-menu button,
+.admin-page .admin-menu button:hover,
+.admin-page .admin-menu button:focus{
+  text-decoration:none !important;
+}
+.admin-page .admin-card,
+.admin-page .admin-stat-card,
+.admin-page .admin-list-item,
+.admin-page .admin-review-card,
+.admin-page .admin-commercial-card,
+.admin-page .admin-commercial-subscriptions,
+.admin-page .admin-subscriptions-section,
+.admin-page .admin-category-create,
+.admin-page .admin-security-section,
+.admin-page .admin-security-hero,
+.admin-page .admin-security-card,
+.admin-page .admin-security-metrics article,
+.admin-page .admin-pending-panel,
+.admin-page .admin-metric,
+.admin-page .admin-table-section,
+.admin-page .admin-overview-card,
+.admin-page .admin-operation-card,
+.admin-page .admin-finance-panel,
+.admin-page .admin-broadcast-form,
+.admin-page .admin-broadcast-history,
+.admin-page .admin-admin-center-hero{
+  border-radius:12px !important;
+  box-shadow:
+    0 10px 22px rgba(7,17,31,.08),
+    0 2px 5px rgba(7,17,31,.05),
+    inset 0 1px rgba(255,255,255,.96) !important;
+}
+.admin-page .admin-card:hover,
+.admin-page .admin-stat-card:hover,
+.admin-page .admin-commercial-card:hover,
+.admin-page .admin-overview-card:hover,
+.admin-page .admin-operation-card:hover{
+  box-shadow:
+    0 14px 28px rgba(7,17,31,.11),
+    0 3px 7px rgba(7,17,31,.06),
+    inset 0 1px rgba(255,255,255,.98) !important;
+}
