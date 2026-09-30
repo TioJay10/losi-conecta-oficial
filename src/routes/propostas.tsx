@@ -113,7 +113,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   const footerTextY = 284;
   const contentBottom = 268;
   const navy = [7, 26, 51] as const;
-  const gold = [214, 180, 106] as const;
+  const gold = [190, 145, 48] as const;
   const ink = [27, 38, 53] as const;
   const muted = [104, 116, 132] as const;
   const pale = [246, 248, 251] as const;
@@ -154,7 +154,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   const addStandardPage = (title: string, subtitle = "") => {
     doc.addPage();
     pageNumber += 1;
-    doc.setFillColor(...pale);
+    doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, W, H, "F");
     doc.setFillColor(...navy);
     doc.rect(0, 0, W, 13, "F");
@@ -184,36 +184,30 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   };
 
   const drawTextCard = (heading: string, text: string, y: number, width = contentW, maxLines = 7) => {
-    const x = margin;
-    const lineH = 4.2;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.2);
-    const lines = doc.splitTextToSize(text || "Informação a definir.", width - 16);
+    const lineH = 4.15;
+    const lines = doc.splitTextToSize(text || "Informação a definir.", width);
     const chunks: string[][] = [];
     for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
     let cursor = y;
-
     chunks.forEach((chunk, index) => {
-      const height = 13 + chunk.length * lineH;
-      if (cursor + height > contentBottom) {
+      const bodyHeight = chunk.length * lineH;
+      if (cursor + 7 + bodyHeight > contentBottom) {
         addFooter();
         cursor = addStandardPage("APRESENTAÇÃO", "CONTINUAÇÃO");
       }
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(226, 230, 236);
-      doc.roundedRect(x, cursor, width, height, 3, 3, "FD");
       doc.setTextColor(...gold);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7);
-      doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", x + 8, cursor + 9);
+      doc.setFontSize(7.4);
+      doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", margin, cursor);
+      doc.setTextColor(...ink);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.2);
-      doc.setTextColor(...ink);
-      doc.text(chunk, x + 8, cursor + 16, { lineHeightFactor: 1.35 });
-      cursor += height + 6;
+      doc.text(chunk, margin, cursor + 7, { lineHeightFactor: 1.32 });
+      cursor += 7 + bodyHeight + 9;
     });
     return cursor;
   };
+
 
   // CAPA
   doc.setFillColor(255, 255, 255);
@@ -232,49 +226,47 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   doc.setTextColor(...muted);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.text("APRESENTAÇÃO COMERCIAL  •  PROPOSTA PROFISSIONAL", 37, 40);
+  doc.text("APRESENTAÇÃO COMERCIAL  •  PROPOSTA PROFISSIONAL", 37, 43);
 
   doc.setTextColor(...navy);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(31);
-  doc.text("PROPOSTA", 37, 91);
+  doc.text("PROPOSTA", 37, 76);
   doc.setTextColor(...gold);
   doc.setFontSize(34);
-  doc.text("COMERCIAL", 37, 105);
+  doc.text("COMERCIAL", 37, 90);
   doc.setFillColor(...gold);
-  doc.rect(37, 110, Math.min(74, Math.max(35, doc.getTextWidth("COMERCIAL") + 5)), 3.2, "F");
+  doc.rect(37, 95, Math.min(74, Math.max(35, doc.getTextWidth("COMERCIAL") + 5)), 2.8, "F");
 
   doc.setTextColor(...muted);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.text("APRESENTAÇÃO DE SERVIÇOS", 37, 128);
+  doc.text("APRESENTAÇÃO DE SERVIÇOS", 37, 107);
   doc.setTextColor(...ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   const coverTitle = doc.splitTextToSize(proposalTitle, 128).slice(0, 2);
-  doc.text(coverTitle, 37, 140, { lineHeightFactor: 1.12 });
+  doc.text(coverTitle, 37, 116, { lineHeightFactor: 1.08 });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...muted);
-  doc.text("APRESENTADA PARA", 37, 161);
+  doc.text("APRESENTADA PARA", 37, 132);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(...navy);
-  doc.text(doc.splitTextToSize(draft.recipient || "Cliente / empresa", 125).slice(0, 2), 37, 170, { lineHeightFactor: 1.15 });
+  doc.text(doc.splitTextToSize(draft.recipient || "Cliente / empresa", 125).slice(0, 2), 37, 141, { lineHeightFactor: 1.12 });
 
-  doc.setFillColor(...navy);
-  doc.roundedRect(37, 235, 136, 35, 2, 2, "F");
   doc.setTextColor(...gold);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.text("PREPARADA POR", 45, 245);
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(10);
-  doc.text(doc.splitTextToSize(supplier, 115).slice(0, 2), 45, 254, { lineHeightFactor: 1.05 });
+  doc.setFontSize(7.4);
+  doc.text("PREPARADA POR", 37, 226);
+  doc.setTextColor(...navy);
+  doc.setFontSize(11);
+  doc.text(doc.splitTextToSize(supplier, 125).slice(0, 2), 37, 235, { lineHeightFactor: 1.08 });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(...gold);
-  doc.text(supplierLocation || "Prestador de serviços", 45, 265);
+  doc.setFontSize(7.2);
+  doc.setTextColor(...muted);
+  doc.text(supplierLocation || "Prestador de serviços", 37, 247);
   addFooter();
 
   // PÁGINA DE APRESENTAÇÃO
@@ -369,71 +361,65 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   let activityY = addActivitiesPage();
   const selected = draft.activities.length ? draft.activities : [draft.proposalType];
   selected.forEach((item) => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.7);
-    const itemLines = doc.splitTextToSize(item, 102).slice(0, 2);
-    const cardH = itemLines.length > 1 ? 22 : 17;
-    if (activityY + cardH > 245) {
+    const itemLines = doc.splitTextToSize(item, 108).slice(0, 2);
+    const lineCount = itemLines.length;
+    const itemH = lineCount > 1 ? 18 : 14;
+    if (activityY + itemH > 245) {
       addFooter();
       activityY = addActivitiesPage(true);
     }
-    doc.setFillColor(248,250,252);
-    doc.roundedRect(73, activityY, 119, cardH, 2, 2, "F");
     doc.setFillColor(...gold);
-    doc.circle(81, activityY + cardH / 2, 2.1, "F");
+    doc.circle(76, activityY + 1.8, 1.5, "F");
     doc.setTextColor(...ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.7);
-    doc.text(itemLines, 88, activityY + (itemLines.length > 1 ? 8.2 : 10.7), { lineHeightFactor: 1.15 });
-    activityY += cardH + 5;
+    doc.setFontSize(8.8);
+    doc.text(itemLines, 82, activityY + 4.2, { lineHeightFactor: 1.18 });
+    activityY += itemH + 3;
   });
-
-  if (activityY + 39 > contentBottom) {
+  if (activityY + 32 > contentBottom) {
     addFooter();
     activityY = addActivitiesPage(true);
   }
-  doc.setTextColor(...navy);
+  doc.setTextColor(...gold);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11.5);
-  doc.text("DESENVOLVIMENTO", 73, activityY + 5);
+  doc.setFontSize(7.4);
+  doc.text("DESENVOLVIMENTO", 73, activityY + 3);
   const method = draft.methodology || "As atividades serão conduzidas por profissionais responsáveis, com adaptação ao espaço, ao perfil do público e à dinâmica do evento. A programação poderá ser ajustada conforme as condições do local.";
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.3);
   doc.setTextColor(...muted);
-  const methodLines = doc.splitTextToSize(method, 119).slice(0, 5);
-  doc.text(methodLines, 73, activityY + 15, { lineHeightFactor: 1.35 });
+  const methodLines = doc.splitTextToSize(method, 119).slice(0, 6);
+  doc.text(methodLines, 73, activityY + 10, { lineHeightFactor: 1.32 });
   addFooter();
 
   // PÁGINA FINAL — os blocos são dimensionados pelo número real de linhas.
   let finalY = addStandardPage("DETALHAMENTO", "E CONSIDERAÇÕES FINAIS");
 
   const drawFinalCard = (heading: string, text: string, startY: number, maxLines = 6) => {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.8);
-    const lines = doc.splitTextToSize(text || "Informação a definir.", contentW - 16);
+    const lines = doc.splitTextToSize(text || "Informação a definir.", contentW);
     const chunks: string[][] = [];
     for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
     let cursor = startY;
     chunks.forEach((chunk, index) => {
-      const h = 13 + chunk.length * 4.1;
-      if (cursor + h > 220) {
+      const bodyHeight = chunk.length * 4.1;
+      if (cursor + 7 + bodyHeight > 250) {
         addFooter();
         cursor = addStandardPage("DETALHAMENTO", "CONTINUAÇÃO");
       }
-      doc.setFillColor(255,255,255);
-      doc.roundedRect(margin, cursor, contentW, h, 3, 3, "F");
       doc.setTextColor(...gold);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7);
-      doc.text(index === 0 ? heading : "CONTINUAÇÃO", margin + 8, cursor + 9);
+      doc.setFontSize(7.4);
+      doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", margin, cursor);
       doc.setTextColor(...ink);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.8);
-      doc.text(chunk, margin + 8, cursor + 16, { lineHeightFactor: 1.35 });
-      cursor += h + 6;
+      doc.text(chunk, margin, cursor + 7, { lineHeightFactor: 1.32 });
+      cursor += 7 + bodyHeight + 9;
     });
     return cursor;
   };
+
+
 
   finalY = drawFinalCard(
     "Equipe e estrutura",
@@ -455,15 +441,16 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     }
     const lines = doc.splitTextToSize(ctaText || ctaOptions[0].text, contentW - 28).slice(0, 4);
     const h = Math.max(34, 22 + lines.length * 4.3);
-    doc.setFillColor(...gold);
-    doc.roundedRect(margin, startY, contentW, h, 3, 3, "F");
-    doc.setTextColor(...navy);
+    doc.setDrawColor(...gold);
+    doc.setLineWidth(0.8);
+    doc.line(margin, startY, margin + 28, startY);
+    doc.setTextColor(...gold);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
-    doc.text("PRÓXIMO PASSO", margin + 8, startY + 10);
+    doc.text("PRÓXIMO PASSO", margin, startY + 7);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text(lines, margin + 8, startY + 20, { lineHeightFactor: 1.25 });
+    doc.text(lines, margin, startY + 16, { lineHeightFactor: 1.25 });
     return startY + h;
   };
 
