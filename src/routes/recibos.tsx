@@ -360,6 +360,7 @@ function ReceiptsPage() {
           <Link to="/notificar-inconsistencia" className="dashboard-nav-item"><span className="dashboard-nav-mark">05</span><span><strong>Notificar Inconsistências</strong><small>Falar com o administrador</small></span></Link>
           <Link to="/orcamentos" className="dashboard-nav-item"><span className="dashboard-nav-mark">06</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></Link>
           <Link to="/recibos" className="dashboard-nav-item active"><span className="dashboard-nav-mark">07</span><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></Link>
+          <Link to="/propostas" className="dashboard-nav-item"><span className="dashboard-nav-mark">08</span><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></Link>
         </nav>
         <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><Link to="/painel" className="dashboard-sidebar-logout">Voltar ao painel</Link></div>
       </aside>
