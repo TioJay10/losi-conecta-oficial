@@ -17280,3 +17280,99 @@ body,
   border:0 !important;
   background:transparent !important;
 }
+
+
+/* PAINEL LOSI — REGRA DEFINITIVA DE EFEITOS
+   Somente o PRIMEIRO/CARD PRINCIPAL de cada página recebe neon e profundidade.
+   Títulos, subtítulos, cabeçalhos, parágrafos, grupos e botões nunca recebem. */
+.dashboard-page [class*="card"],
+.dashboard-page [class*="group"],
+.dashboard-page [class*="head"],
+.dashboard-page [class*="title"],
+.dashboard-page [class*="subtitle"],
+.dashboard-page [class*="section"],
+.dashboard-page h1,
+.dashboard-page h2,
+.dashboard-page h3,
+.dashboard-page h4,
+.dashboard-page p,
+.dashboard-page span,
+.dashboard-page button,
+.dashboard-page a{
+  box-shadow:none !important;
+  text-shadow:none !important;
+  outline:none !important;
+}
+
+/* Primeiro card estrutural de cada módulo: único ponto de profundidade/neon. */
+.dashboard-page > .dashboard-card:first-child,
+.dashboard-page .dashboard-main > .dashboard-card:first-child,
+.dashboard-page .dashboard-content > .dashboard-card:first-child,
+.dashboard-page .proposals-form-card,
+.dashboard-page .receipts-form-card,
+.dashboard-page .quotes-dashboard-card,
+.dashboard-page .business-services-card,
+.dashboard-page .personal-profile-card{
+  border-color:rgba(214,180,106,.82) !important;
+  box-shadow:
+    0 0 0 1px rgba(214,180,106,.14),
+    0 0 7px rgba(214,180,106,.25),
+    0 8px 18px rgba(7,17,31,.08) !important;
+}
+
+/* Mesmo quando houver hover/focus/active, elementos internos continuam sem efeitos. */
+.dashboard-page [class*="card"]:hover,
+.dashboard-page [class*="card"]:focus,
+.dashboard-page [class*="card"]:focus-visible,
+.dashboard-page [class*="card"]:active,
+.dashboard-page [class*="group"]:hover,
+.dashboard-page [class*="group"]:focus,
+.dashboard-page [class*="group"]:focus-visible,
+.dashboard-page [class*="group"]:active,
+.dashboard-page h1:hover,
+.dashboard-page h1:focus,
+.dashboard-page h1:active,
+.dashboard-page h2:hover,
+.dashboard-page h2:focus,
+.dashboard-page h2:active,
+.dashboard-page h3:hover,
+.dashboard-page h3:focus,
+.dashboard-page h3:active,
+.dashboard-page p:hover,
+.dashboard-page p:focus,
+.dashboard-page p:active{
+  box-shadow:none !important;
+  text-shadow:none !important;
+  outline:none !important;
+}
+
+/* Profundidade geral do painel do fornecedor mais discreta. */
+.dashboard-page .dashboard-card,
+.dashboard-page .dashboard-status,
+.dashboard-page .dashboard-quotes-overview,
+.dashboard-page .dashboard-plan-card,
+.dashboard-page .dashboard-saved,
+.dashboard-page .dashboard-onboarding,
+.dashboard-page .dashboard-status-card,
+.dashboard-page .dashboard-commercial-card,
+.dashboard-page .dashboard-operation-card{
+  box-shadow:
+    0 0 0 1px rgba(214,180,106,.10),
+    0 0 6px rgba(214,180,106,.18),
+    0 7px 16px rgba(7,17,31,.065) !important;
+}
+
+/* Cabeçalhos e textos permanecem completamente planos, inclusive ao toque/clique. */
+.dashboard-page .proposals-card-head,
+.dashboard-page .receipts-card-head,
+.dashboard-page .business-section-title,
+.dashboard-page .personal-profile-card-header,
+.dashboard-page .proposal-preview-text-section,
+.dashboard-page .receipt-paper-section,
+.dashboard-page .receipts-signature-group,
+.dashboard-page .proposals-group-card,
+.dashboard-page .proposals-cta-group{
+  box-shadow:none !important;
+  text-shadow:none !important;
+  outline:none !important;
+}
