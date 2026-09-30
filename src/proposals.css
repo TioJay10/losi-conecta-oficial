@@ -168,3 +168,23 @@
   .proposal-cover-brand{font-size:15px}
   .proposal-cover-brand strong{max-width:230px}
 }
+
+/* Ajuste fino da barra lateral do PDF: título menor, alinhado e com margem segura. */
+.proposal-preview-side{
+  padding-left:12px;
+  padding-right:12px;
+}
+.proposal-preview-side strong,
+.proposal-preview-side span{
+  display:block;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  line-height:1.05;
+}
+.proposal-preview-side strong{font-size:15px}
+.proposal-preview-side span{font-size:15px}
+.proposal-preview-side small{
+  display:block;
+  max-width:100%;
+  line-height:1.45;
+}
