@@ -187,3 +187,25 @@
   max-width:100%;
   line-height:1.45;
 }
+
+.proposals-custom-activity{display:flex;gap:8px;margin-top:10px}
+.proposals-custom-activity input{flex:1;min-width:0;height:40px;box-sizing:border-box;border:1px solid #d9dfe7;border-radius:9px;background:#fff;color:#1b2635;padding:0 11px;font:inherit;font-size:12px;outline:none}
+.proposals-custom-activity input:focus{border-color:#b88a32;box-shadow:0 0 0 3px rgba(214,180,106,.14)}
+.proposals-custom-activity button{height:40px;padding:0 14px;border:1px solid #071a33;border-radius:9px;background:#071a33;color:#d6b46a;font-size:11px;font-weight:800;cursor:pointer}
+.proposals-custom-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.proposals-custom-list button{border:1px solid #d6b46a;border-radius:999px;background:#fffaf0;color:#7a5b1c;padding:6px 9px;font-size:10px;font-weight:700;cursor:pointer}
+.proposals-preview-tools{display:flex;align-items:center;gap:7px}
+.proposals-preview-fullscreen{height:30px;padding:0 10px;border:1px solid #d6b46a;border-radius:7px;background:#fff;color:#071a33;font-size:9px;font-weight:800;cursor:pointer}
+.proposals-preview-panel.is-fullscreen{position:fixed;inset:0;z-index:9999;width:100vw;height:100vh;box-sizing:border-box;margin:0;border-radius:0;background:#eef1f5;padding:22px;overflow:hidden}
+.proposals-preview-panel.is-fullscreen .proposal-document-preview{height:calc(100vh - 82px);max-height:none;overflow:auto}
+.proposals-preview-panel.is-fullscreen .proposal-preview-page{width:794px;max-width:none;margin:0 auto}
+.proposals-preview-panel.is-fullscreen .proposal-preview-cover{min-height:1123px}
+@media(max-width:700px){
+  .proposals-custom-activity{flex-direction:column}
+  .proposals-custom-activity button{width:100%}
+  .proposals-preview-tools{gap:5px}
+  .proposals-preview-fullscreen{padding:0 8px;font-size:8px}
+  .proposals-preview-panel.is-fullscreen{padding:12px}
+  .proposals-preview-panel.is-fullscreen .proposal-document-preview{height:calc(100vh - 65px)}
+  .proposals-preview-panel.is-fullscreen .proposal-preview-page{width:794px}
+}
