@@ -17120,3 +17120,98 @@ body,
   border-radius:10px !important;
   background:#fff !important;
 }
+
+
+/* PAINEL LOSI — efeito dourado somente nos CARDS PRINCIPAIS.
+   Grupos internos de títulos, textos, parágrafos, controles e botões permanecem limpos. */
+.dashboard-page .dashboard-card,
+.dashboard-page .dashboard-status,
+.dashboard-page .dashboard-quotes-overview,
+.dashboard-page .dashboard-plan-card,
+.dashboard-page .dashboard-saved,
+.dashboard-page .dashboard-onboarding,
+.dashboard-page .dashboard-grid > button,
+.dashboard-page .dashboard-status-card,
+.dashboard-page .dashboard-commercial-card,
+.dashboard-page .dashboard-operation-card,
+.dashboard-page .personal-profile-card,
+.dashboard-page .business-services-card,
+.dashboard-page .quotes-dashboard-card,
+.dashboard-page .quotes-section,
+.dashboard-page .quote-builder,
+.dashboard-page .quotes-supplier-intro,
+.dashboard-page .proposals-form-card,
+.dashboard-page .proposals-preview-panel,
+.dashboard-page .receipts-form-card,
+.dashboard-page .receipts-preview-card,
+.dashboard-page .receipts-history-card{
+  border-color:rgba(214,180,106,.98) !important;
+  box-shadow:
+    0 0 0 1px rgba(214,180,106,.22),
+    0 0 9px rgba(214,180,106,.42),
+    0 0 22px rgba(214,180,106,.26),
+    0 14px 30px rgba(7,17,31,.14),
+    0 5px 10px rgba(7,17,31,.07) !important;
+}
+
+.dashboard-page .dashboard-card:hover,
+.dashboard-page .dashboard-status:hover,
+.dashboard-page .dashboard-quotes-overview:hover,
+.dashboard-page .dashboard-plan-card:hover,
+.dashboard-page .dashboard-saved:hover,
+.dashboard-page .dashboard-onboarding:hover,
+.dashboard-page .dashboard-grid > button:hover,
+.dashboard-page .dashboard-status-card:hover,
+.dashboard-page .dashboard-commercial-card:hover,
+.dashboard-page .dashboard-operation-card:hover,
+.dashboard-page .personal-profile-card:hover,
+.dashboard-page .business-services-card:hover,
+.dashboard-page .quotes-dashboard-card:hover,
+.dashboard-page .quotes-section:hover,
+.dashboard-page .quote-builder:hover,
+.dashboard-page .quotes-supplier-intro:hover,
+.dashboard-page .proposals-form-card:hover,
+.dashboard-page .proposals-preview-panel:hover,
+.dashboard-page .receipts-form-card:hover,
+.dashboard-page .receipts-preview-card:hover,
+.dashboard-page .receipts-history-card:hover{
+  border-color:rgba(231,202,126,1) !important;
+  box-shadow:
+    0 0 0 1px rgba(231,202,126,.28),
+    0 0 11px rgba(214,180,106,.55),
+    0 0 27px rgba(214,180,106,.34),
+    0 18px 38px rgba(7,17,31,.17),
+    0 6px 13px rgba(7,17,31,.08) !important;
+}
+
+/* Elementos internos: sem neon e sem profundidade. */
+.dashboard-page .proposals-group-card,
+.dashboard-page .proposals-card-head,
+.dashboard-page .proposals-cta-group,
+.dashboard-page .proposal-preview-text-section,
+.dashboard-page .receipts-card-head,
+.dashboard-page .receipts-signature-group,
+.dashboard-page .receipts-mode-card,
+.dashboard-page .receipt-paper,
+.dashboard-page .receipt-paper-section,
+.dashboard-page .dashboard-metric-card,
+.dashboard-page .dashboard-saved-card,
+.dashboard-page .dashboard-saved-provider-card,
+.dashboard-page .quotes-dashboard-card-button,
+.dashboard-page .quotes-metric-card{
+  border-color:initial !important;
+  box-shadow:none !important;
+}
+
+/* O grupo 03 da proposta/recibo não é um card visual independente. */
+.dashboard-page .proposals-group-card,
+.dashboard-page .receipts-signature-group{
+  border:0 !important;
+  background:transparent !important;
+}
+
+/* Fundo da área do painel permanece branco. */
+.dashboard-page,
+.dashboard-page .dashboard-main{
+  background:#fff !important;
+}
