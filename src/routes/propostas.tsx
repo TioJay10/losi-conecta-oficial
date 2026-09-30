@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
 import "../proposals.css";
@@ -32,6 +32,8 @@ type ProposalDraft = {
   proposalType: string;
   title: string;
   eventDate: string;
+  eventStart: string;
+  eventEnd: string;
   eventTime: string;
   duration: string;
   location: string;
@@ -68,17 +70,73 @@ const activityOptions = [
   "Atividades esportivas",
   "Passeio / excursão",
   "Ativação de marca",
+  "Caça ao tesouro",
+  "Dança e musicalização",
+  "Contação de histórias",
+  "Oficina de slime",
+  "Oficina de artes",
+  "Oficina de culinária",
+  "Jogos de integração",
+  "Circuito recreativo",
+  "Brincadeiras tradicionais",
+  "Camarim infantil",
+  "Modelagem com balões",
+  "Carrinho de pipoca",
+  "Carrinho de algodão-doce",
+  "Cabine / espaço de fotos",
+  "Ações de interação com a marca",
 ];
 
 const typeOptions = [
   "Atividade recreativa",
-  "Monitoria",
-  "Oficina",
+  "Festa infantil",
+  "Festa de aniversário",
   "Evento corporativo",
-  "Passeio / excursão",
+  "Confraternização empresarial",
+  "Evento de integração",
+  "Evento em condomínio",
+  "Evento escolar",
+  "Evento em colégio",
+  "Evento de férias",
+  "Evento de Dia das Crianças",
+  "Evento de Natal",
+  "Evento de Páscoa",
+  "Evento de Dia dos Pais",
+  "Evento de Dia das Mães",
+  "Evento de Halloween",
+  "Feira e exposição",
   "Ativação de marca",
+  "Ação promocional",
+  "Festival e evento aberto",
+  "Passeio / excursão",
+  "Oficina temática",
+  "Monitoria",
   "Proposta personalizada",
 ];
+
+function formatTime(value: string) {
+  if (!value) return "";
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
+function calculateDuration(start: string, end: string) {
+  if (!start || !end) return "";
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  if ([sh, sm, eh, em].some(Number.isNaN)) return "";
+  let startMinutes = sh * 60 + sm;
+  let endMinutes = eh * 60 + em;
+  if (endMinutes < startMinutes) endMinutes += 24 * 60;
+  const total = endMinutes - startMinutes;
+  if (total <= 0) return "";
+  const hours = Math.floor(total / 60);
+  const minutes = total % 60;
+  if (!minutes) return `${hours} ${hours === 1 ? "hora" : "horas"}`;
+  if (!hours) return `${minutes} min`;
+  return `${hours}h ${String(minutes).padStart(2, "0")}min`;
+}
 
 function dateBR(value: string) {
   if (!value) return "A definir";
@@ -496,6 +554,9 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
 function ProposalsPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [previewFullscreen, setPreviewFullscreen] = useState(false);
+  const [customActivity, setCustomActivity] = useState("");
+  const previewRef = useRef<HTMLElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [business, setBusiness] = useState<Business | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -507,6 +568,10 @@ function ProposalsPage() {
     proposalType: "Atividade recreativa",
     title: "Atividades recreativas",
     eventDate: "",
+    eventStart: "",
+    eventEnd: "",
+    eventStart: "",
+    eventEnd: "",
     eventTime: "",
     duration: "",
     location: "",
@@ -561,6 +626,41 @@ function ProposalsPage() {
         : [...current.activities, value],
     }));
   }
+
+  function addCustomActivity() {
+    const value = customActivity.trim();
+    if (!value) return;
+    setDraft(current => current.activities.includes(value)
+      ? current
+      : { ...current, activities: [...current.activities, value] });
+    setCustomActivity("");
+  }
+
+  function updateEventTime(start: string, end: string) {
+    setDraft(current => ({
+      ...current,
+      eventStart: start,
+      eventEnd: end,
+      eventTime: start && end ? `${start} às ${end}` : start || end,
+      duration: calculateDuration(start, end),
+    }));
+  }
+
+  async function togglePreviewFullscreen() {
+    const element = previewRef.current;
+    if (!element) return;
+    if (document.fullscreenElement) {
+      await document.exitFullscreen?.();
+    } else if (element.requestFullscreen) {
+      await element.requestFullscreen();
+    }
+  }
+
+  useEffect(() => {
+    const syncFullscreen = () => setPreviewFullscreen(document.fullscreenElement === previewRef.current);
+    document.addEventListener("fullscreenchange", syncFullscreen);
+    return () => document.removeEventListener("fullscreenchange", syncFullscreen);
+  }, []);
 
   function newProposal() {
     setDraft({
@@ -681,6 +781,11 @@ function ProposalsPage() {
               <div className="proposals-activities">
                 <div className="proposals-field-label">Atividades propostas</div>
                 <div className="proposals-check-grid">{activityOptions.map(item => <label key={item} className={draft.activities.includes(item) ? "selected" : ""}><input type="checkbox" checked={draft.activities.includes(item)} onChange={() => toggleActivity(item)} /><span>{item}</span></label>)}</div>
+                 <div className="proposals-custom-activity">
+                   <input value={customActivity} onChange={e => setCustomActivity(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addCustomActivity(); } }} placeholder="Adicionar outra atividade manualmente" />
+                   <button type="button" onClick={addCustomActivity}>Adicionar</button>
+                 </div>
+                 {draft.activities.some(item => !activityOptions.includes(item)) && <div className="proposals-custom-list">{draft.activities.filter(item => !activityOptions.includes(item)).map(item => <button type="button" key={item} onClick={() => toggleActivity(item)}>{item} ×</button>)}</div>}
               </div>
 
               <div className="proposals-form-grid">
@@ -716,8 +821,8 @@ function ProposalsPage() {
               <p className="proposals-note">A proposta não inclui valores. Ela funciona como apresentação inicial do trabalho; orçamento e condições comerciais podem ser tratados separadamente.</p>
             </section>
 
-            <aside className="proposals-preview-panel">
-              <div className="proposals-preview-head"><div><span className="proposals-kicker">VISUALIZAÇÃO</span><h2>Prévia da proposta</h2></div><span className="proposals-preview-status">A4 • PDF</span></div>
+            <aside ref={previewRef} className={"proposals-preview-panel" + (previewFullscreen ? " is-fullscreen" : "")}>
+              <div className="proposals-preview-head"><div><span className="proposals-kicker">VISUALIZAÇÃO</span><h2>Prévia da proposta</h2></div><div className="proposals-preview-tools"><span className="proposals-preview-status">A4 • PDF</span><button type="button" className="proposals-preview-fullscreen" onClick={() => void togglePreviewFullscreen()}>{previewFullscreen ? "Sair da tela inteira" : "Tela inteira"}</button></div></div>
               <div className="proposal-document-preview">
                 <div className="proposal-preview-page proposal-preview-cover">
                   <div className="proposal-cover-lines"></div>
