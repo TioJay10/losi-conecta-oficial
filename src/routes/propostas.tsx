@@ -749,16 +749,19 @@ function ProposalsPage() {
 
           <div className="proposals-layout">
             <section className="proposals-form-card">
-              <div className="proposals-card-head"><div><span className="proposals-kicker">GRUPO 01</span><h2>Destinatário</h2></div><span className="proposals-step">1</span></div>
+              <div className="proposals-group-card">
+                <div className="proposals-card-head"><div><span className="proposals-kicker">GRUPO 01</span><h2>Destinatário</h2></div><span className="proposals-step">1</span></div>
               <div className="proposals-form-grid">
                 <label><span>Empresa / condomínio *</span><input value={draft.recipient} onChange={e => update("recipient", e.target.value)} placeholder="Ex.: Condomínio Parque das Flores" /></label>
                 <label><span>Responsável</span><input value={draft.responsible} onChange={e => update("responsible", e.target.value)} placeholder="Nome do responsável" /></label>
                 <label className="wide"><span>Telefone / WhatsApp</span><input value={draft.recipientContact} onChange={e => update("recipientContact", e.target.value)} placeholder="(11) 99999-9999" /></label>
               </div>
 
+              </div>
               <div className="proposals-divider" />
 
-              <div className="proposals-card-head"><div><span className="proposals-kicker">GRUPO 02</span><h2>Projeto</h2></div><span className="proposals-step">2</span></div>
+              <div className="proposals-group-card">
+                <div className="proposals-card-head"><div><span className="proposals-kicker">GRUPO 02</span><h2>Projeto</h2></div><span className="proposals-step">2</span></div>
               <div className="proposals-form-grid">
                 <label><span>Tipo de proposta</span><select value={draft.proposalType} onChange={e => { const value = e.target.value; setDraft(current => ({ ...current, proposalType: value, objective: buildObjective(value), title: current.title === current.proposalType ? value : current.title })); }}><option value="">Selecione</option>{typeOptions.map(item => <option key={item}>{item}</option>)}</select></label>
                 <label><span>Título da proposta</span><input value={draft.title} onChange={e => update("title", e.target.value)} placeholder="Ex.: Férias no condomínio" /></label>
@@ -770,9 +773,11 @@ function ProposalsPage() {
                 <label><span>Faixa etária</span><input value={draft.ageRange} onChange={e => update("ageRange", e.target.value)} placeholder="Ex.: 4 a 12 anos" /></label>
               </div>
 
+              </div>
               <div className="proposals-divider" />
 
-              <div className="proposals-card-head"><div><span className="proposals-kicker">GRUPO 03</span><h2>Conteúdo da apresentação</h2></div><span className="proposals-step">3</span></div>
+              <div className="proposals-group-card">
+                <div className="proposals-card-head"><div><span className="proposals-kicker">GRUPO 03</span><h2>Conteúdo da apresentação</h2></div><span className="proposals-step">3</span></div>
               <div className="proposals-form-grid">
                 <label className="wide"><span>O que você pretende realizar? *</span><textarea rows={5} value={draft.description} onChange={e => update("description", e.target.value)} placeholder="Ex.: Quero realizar uma atividade recreativa para as crianças do condomínio durante as férias, com brincadeiras, gincanas e pintura facial." /></label>
                 <label className="wide"><span>Objetivo da atividade</span><textarea rows={4} value={draft.objective} onChange={e => update("objective", e.target.value)} /></label>
@@ -795,7 +800,8 @@ function ProposalsPage() {
                 <label className="wide"><span>Considerações finais</span><textarea rows={3} value={draft.notes} onChange={e => update("notes", e.target.value)} placeholder="Informações adicionais, condições do local ou próximos passos." /></label>
               </div>
 
-              <div className="proposals-cta-group">
+              </div>
+              <div className="proposals-cta-group proposals-group-card">
                 <div className="proposals-card-head">
                   <div><span className="proposals-kicker">GRUPO 04</span><h2>Chamada para ação</h2></div>
                   <span className="proposals-step">4</span>
