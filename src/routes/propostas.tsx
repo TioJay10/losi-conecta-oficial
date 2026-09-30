@@ -44,7 +44,19 @@ type ProposalDraft = {
   methodology: string;
   notes: string;
   validity: string;
+  cta: string;
+  ctaCustom: string;
 };
+
+
+const ctaOptions = [
+  { value: "whatsapp", label: "Falar pelo WhatsApp", text: "Gostou da proposta? Fale conosco pelo WhatsApp para alinharmos os próximos detalhes." },
+  { value: "reuniao", label: "Agendar uma conversa", text: "Vamos conversar sobre o projeto? Entre em contato para agendarmos uma conversa e alinharmos os próximos passos." },
+  { value: "visita", label: "Agendar visita técnica", text: "Podemos agendar uma visita técnica para conhecer o espaço e ajustar a proposta às características do local." },
+  { value: "aprovacao", label: "Solicitar aprovação", text: "Se a proposta estiver de acordo com o que você procura, entre em contato para confirmarmos os próximos passos." },
+  { value: "projeto", label: "Vamos realizar este projeto", text: "Estamos prontos para transformar esta ideia em uma experiência especial. Fale conosco para avançarmos com o projeto." },
+  { value: "custom", label: "CTA personalizado", text: "" },
+];
 
 const activityOptions = [
   "Recreação dirigida",
@@ -97,25 +109,33 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   const H = 297;
   const margin = 18;
   const contentW = W - margin * 2;
+  const footerLineY = 276;
+  const footerTextY = 284;
+  const contentBottom = 268;
   const navy = [7, 26, 51] as const;
   const gold = [214, 180, 106] as const;
   const ink = [27, 38, 53] as const;
   const muted = [104, 116, 132] as const;
   const pale = [246, 248, 251] as const;
-  const supplier = business?.business_name || profile?.full_name || "LOSI Gestão em Lazer";
+  const supplier = business?.business_name || profile?.full_name || "Sua empresa";
   const supplierLocation = [business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ");
   const contact = business?.whatsapp || business?.phone || "";
   const proposalTitle = draft.title.trim() || draft.proposalType;
+  const ctaText = draft.cta === "custom"
+    ? draft.ctaCustom.trim()
+    : ctaOptions.find(item => item.value === draft.cta)?.text || ctaOptions[0].text;
 
-  const addFooter = (pageNumber: number) => {
+  let pageNumber = 1;
+
+  const addFooter = () => {
     doc.setDrawColor(226, 230, 236);
-    doc.setLineWidth(0.3);
-    doc.line(margin, 279, W - margin, 279);
+    doc.setLineWidth(0.25);
+    doc.line(margin, footerLineY, W - margin, footerLineY);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
+    doc.setFontSize(6.5);
     doc.setTextColor(...muted);
-    doc.text("LOSI CONECTA  •  PROPOSTA COMERCIAL", margin, 285);
-    doc.text(String(pageNumber).padStart(2, "0"), W - margin, 285, { align: "right" });
+    doc.text("LOSI CONECTA  •  DOCUMENTO PROFISSIONAL", margin, footerTextY);
+    doc.text(String(pageNumber).padStart(2, "0"), W - margin, footerTextY, { align: "right" });
   };
 
   const geometric = () => {
@@ -131,6 +151,70 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     doc.line(25, 0, 25, 297);
   };
 
+  const addStandardPage = (title: string, subtitle = "") => {
+    doc.addPage();
+    pageNumber += 1;
+    doc.setFillColor(...pale);
+    doc.rect(0, 0, W, H, "F");
+    doc.setFillColor(...navy);
+    doc.rect(0, 0, W, 13, "F");
+    doc.setFillColor(...gold);
+    doc.rect(margin, 27, 3, 17, "F");
+    doc.setTextColor(...navy);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text(title, margin + 9, 39);
+    if (subtitle) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(...muted);
+      doc.text(subtitle, margin + 9, 46);
+    }
+    return 58;
+  };
+
+  const drawWrappedText = (text: string, x: number, y: number, width: number, fontSize: number, color = ink, maxLines = 6) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(fontSize);
+    doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(text || "Informação a definir.", width);
+    const visible = lines.slice(0, maxLines);
+    doc.text(visible, x, y, { lineHeightFactor: 1.35 });
+    return visible.length;
+  };
+
+  const drawTextCard = (heading: string, text: string, y: number, width = contentW, maxLines = 7) => {
+    const x = margin;
+    const lineH = 4.2;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.2);
+    const lines = doc.splitTextToSize(text || "Informação a definir.", width - 16);
+    const chunks: string[][] = [];
+    for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
+    let cursor = y;
+
+    chunks.forEach((chunk, index) => {
+      const height = 21 + chunk.length * lineH;
+      if (cursor + height > contentBottom) {
+        addFooter();
+        cursor = addStandardPage("APRESENTAÇÃO", "CONTINUAÇÃO");
+      }
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(226, 230, 236);
+      doc.roundedRect(x, cursor, width, height, 3, 3, "FD");
+      doc.setTextColor(...gold);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", x + 8, cursor + 11);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.2);
+      doc.setTextColor(...ink);
+      doc.text(chunk, x + 8, cursor + 22, { lineHeightFactor: 1.35 });
+      cursor += height + 8;
+    });
+    return cursor;
+  };
+
   // CAPA
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, H, "F");
@@ -139,16 +223,16 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   doc.rect(0, 0, 10, H, "F");
   doc.setFillColor(...gold);
   doc.rect(25, 24, 3, 22, "F");
+
   doc.setTextColor(...navy);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text("LOSI", 37, 32);
-  doc.setTextColor(...gold);
-  doc.text("CONECTA", 60, 32);
+  const supplierBrand = doc.splitTextToSize(supplier, 120).slice(0, 2);
+  doc.text(supplierBrand, 37, 33, { lineHeightFactor: 1.05 });
   doc.setTextColor(...muted);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.text("GESTÃO EM LAZER  •  APRESENTAÇÃO PROFISSIONAL", 37, 39);
+  doc.text("APRESENTAÇÃO COMERCIAL  •  PROPOSTA PROFISSIONAL", 37, 47);
 
   doc.setTextColor(...navy);
   doc.setFont("helvetica", "bold");
@@ -167,68 +251,60 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   doc.setTextColor(...ink);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
-  const coverTitle = doc.splitTextToSize(proposalTitle, 130).slice(0, 2);
-  doc.text(coverTitle, 37, 155);
+  const coverTitle = doc.splitTextToSize(proposalTitle, 128).slice(0, 2);
+  doc.text(coverTitle, 37, 155, { lineHeightFactor: 1.12 });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...muted);
-  doc.text("APRESENTADA PARA", 37, 178);
+  doc.text("APRESENTADA PARA", 37, 180);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(...navy);
-  doc.text(doc.splitTextToSize(draft.recipient || "Cliente / empresa", 125).slice(0, 2), 37, 187);
+  doc.text(doc.splitTextToSize(draft.recipient || "Cliente / empresa", 125).slice(0, 2), 37, 189, { lineHeightFactor: 1.15 });
 
   doc.setFillColor(...navy);
-  doc.roundedRect(37, 238, 136, 32, 2, 2, "F");
+  doc.roundedRect(37, 235, 136, 35, 2, 2, "F");
   doc.setTextColor(...gold);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.text("PREPARADA POR", 45, 248);
+  doc.text("PREPARADA POR", 45, 245);
   doc.setTextColor(255,255,255);
   doc.setFontSize(10);
-  doc.text(doc.splitTextToSize(supplier, 115).slice(0, 1), 45, 257);
+  doc.text(doc.splitTextToSize(supplier, 115).slice(0, 2), 45, 254, { lineHeightFactor: 1.05 });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...gold);
-  doc.text(supplierLocation || "LOSI Gestão em Lazer", 45, 264);
-  doc.setTextColor(...muted);
-  doc.text(todayBR(), W - margin, 285, { align: "right" });
+  doc.text(supplierLocation || "Prestador de serviços", 45, 265);
+  addFooter();
 
-  // PÁGINA 2
-  doc.addPage();
-  doc.setFillColor(...pale);
-  doc.rect(0, 0, W, H, "F");
-  doc.setFillColor(...navy);
-  doc.rect(0, 0, W, 13, "F");
-  doc.setFillColor(...gold);
-  doc.rect(margin, 27, 3, 17, "F");
-  doc.setTextColor(...navy);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.text("APRESENTAÇÃO", margin + 9, 39);
+  // PÁGINA DE APRESENTAÇÃO
+  let y = addStandardPage("APRESENTAÇÃO");
+  y = drawTextCard(
+    "Contexto da proposta",
+    draft.description || "Esta proposta apresenta uma solução de serviços desenvolvida de acordo com as características do projeto e do público informado.",
+    y,
+    contentW,
+    7
+  );
+  y = drawTextCard(
+    "Objetivo",
+    draft.objective || buildObjective(draft.proposalType),
+    y,
+    contentW,
+    6
+  );
 
-  const textBlock = (heading: string, text: string, yy: number, height = 62) => {
-    doc.setFillColor(255,255,255);
-    doc.setDrawColor(226,230,236);
-    doc.roundedRect(margin, yy, contentW, height, 3, 3, "FD");
-    doc.setTextColor(...gold);
+  if (y + 64 > contentBottom) {
+    addFooter();
+    y = addStandardPage("INFORMAÇÕES DO PROJETO", "DADOS DA PROPOSTA");
+  } else {
+    doc.setTextColor(...navy);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.text(heading.toUpperCase(), margin + 8, yy + 11);
-    doc.setTextColor(...ink);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const lines = doc.splitTextToSize(text || "Informação a definir.", contentW - 16);
-    doc.text(lines.slice(0, 7), margin + 8, yy + 23);
-  };
+    doc.setFontSize(12.5);
+    doc.text("INFORMAÇÕES DO PROJETO", margin, y + 2);
+    y += 13;
+  }
 
-  textBlock("Contexto da proposta", draft.description || "Esta proposta apresenta uma solução de serviços desenvolvida de acordo com as características do projeto e do público informado.", 53, 73);
-  textBlock("Objetivo", draft.objective || buildObjective(draft.proposalType), 134, 62);
-
-  doc.setTextColor(...navy);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("INFORMAÇÕES DO PROJETO", margin, 219);
   const info = [
     ["Tipo", draft.proposalType],
     ["Data", dateBR(draft.eventDate)],
@@ -237,141 +313,181 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     ["Local", draft.location || "A definir"],
     ["Público", draft.audience || "A definir"],
     ["Faixa etária", draft.ageRange || "A definir"],
+    ["Responsável", draft.responsible || "A definir"],
   ];
-  let ix = margin, iy = 229;
+  let infoY = y;
   info.forEach(([label, value], index) => {
     const col = index % 2;
     const row = Math.floor(index / 2);
-    ix = margin + col * 91;
-    iy = 229 + row * 15;
+    const ix = margin + col * 91;
+    const iy = infoY + row * 17;
     doc.setTextColor(...muted);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.5);
     doc.text(label.toUpperCase(), ix, iy);
     doc.setTextColor(...ink);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.text(doc.splitTextToSize(value, 78).slice(0,1), ix, iy + 6);
+    doc.setFontSize(8.3);
+    const valueLines = doc.splitTextToSize(value, 78).slice(0, 2);
+    doc.text(valueLines, ix, iy + 6, { lineHeightFactor: 1.15 });
   });
-  addFooter(2);
+  addFooter();
 
-  // PÁGINA 3
-  doc.addPage();
-  doc.setFillColor(255,255,255);
-  doc.rect(0, 0, W, H, "F");
-  doc.setFillColor(...navy);
-  doc.rect(0, 0, 55, H, "F");
-  doc.setTextColor(255,255,255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("ATIVIDADES", 14, 43);
-  doc.setTextColor(...gold);
-  doc.setFontSize(20);
-  doc.text("PROPOSTAS", 14, 54);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(225,231,239);
-  const sideText = doc.splitTextToSize("Uma programação pensada para promover participação, organização e uma experiência positiva para o público.", 35);
-  doc.text(sideText, 14, 72);
-  doc.setFillColor(...gold);
-  doc.rect(14, 111, 26, 2.5, "F");
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(7);
-  doc.text("LOSI GESTÃO EM LAZER", 14, 124);
-
-  doc.setTextColor(...navy);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text("O que será realizado", 70, 39);
-  const selected = draft.activities.length ? draft.activities : [draft.proposalType];
-  let ay = 55;
-  selected.slice(0, 9).forEach((item, index) => {
-    doc.setFillColor(index % 2 === 0 ? 247 : 252, index % 2 === 0 ? 249 : 252, index % 2 === 0 ? 252 : 255);
-    doc.roundedRect(70, ay, 122, 17, 2, 2, "F");
+  // PÁGINA DE ATIVIDADES — a barra lateral acompanha a página e nunca encobre o conteúdo.
+  const addActivitiesPage = (continuation = false) => {
+    doc.addPage();
+    pageNumber += 1;
+    doc.setFillColor(255,255,255);
+    doc.rect(0, 0, W, H, "F");
+    doc.setFillColor(...navy);
+    doc.rect(0, 0, 62, H, "F");
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(19);
+    doc.text("ATIVIDADES", 13, 40);
+    doc.setTextColor(...gold);
+    doc.setFontSize(19);
+    doc.text("PROPOSTAS", 13, 51);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.2);
+    doc.setTextColor(225,231,239);
+    const sideText = doc.splitTextToSize(
+      continuation
+        ? "Continuação das atividades previstas para o projeto."
+        : "Uma programação pensada para promover participação, organização e uma experiência positiva para o público.",
+      36
+    );
+    doc.text(sideText, 13, 69, { lineHeightFactor: 1.4 });
     doc.setFillColor(...gold);
-    doc.circle(78, ay + 8.5, 2.3, "F");
+    doc.rect(13, 112, 28, 2.5, "F");
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(6.5);
+    doc.text(supplier.toUpperCase().slice(0, 26), 13, 126);
+    return 56;
+  };
+
+  let activityY = addActivitiesPage();
+  const selected = draft.activities.length ? draft.activities : [draft.proposalType];
+  selected.forEach((item) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.7);
+    const itemLines = doc.splitTextToSize(item, 102).slice(0, 2);
+    const cardH = itemLines.length > 1 ? 22 : 17;
+    if (activityY + cardH > 245) {
+      addFooter();
+      activityY = addActivitiesPage(true);
+    }
+    doc.setFillColor(248,250,252);
+    doc.roundedRect(73, activityY, 119, cardH, 2, 2, "F");
+    doc.setFillColor(...gold);
+    doc.circle(81, activityY + cardH / 2, 2.1, "F");
     doc.setTextColor(...ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.text(item, 85, ay + 11.5);
-    ay += 21;
+    doc.setFontSize(8.7);
+    doc.text(itemLines, 88, activityY + (itemLines.length > 1 ? 8.2 : 10.7), { lineHeightFactor: 1.15 });
+    activityY += cardH + 5;
   });
 
+  if (activityY + 39 > contentBottom) {
+    addFooter();
+    activityY = addActivitiesPage(true);
+  }
   doc.setTextColor(...navy);
-  doc.setFontSize(12);
-  doc.text("DESENVOLVIMENTO", 70, 257);
-  doc.setTextColor(...muted);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11.5);
+  doc.text("DESENVOLVIMENTO", 73, activityY + 5);
   const method = draft.methodology || "As atividades serão conduzidas por profissionais responsáveis, com adaptação ao espaço, ao perfil do público e à dinâmica do evento. A programação poderá ser ajustada conforme as condições do local.";
-  doc.text(doc.splitTextToSize(method, 122).slice(0, 3), 70, 267);
-  addFooter(3);
-
-  // PÁGINA 4
-  doc.addPage();
-  doc.setFillColor(...pale);
-  doc.rect(0, 0, W, H, "F");
-  doc.setFillColor(...navy);
-  doc.rect(0, 0, W, 67, "F");
-  doc.setTextColor(255,255,255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(24);
-  doc.text("DETALHAMENTO", margin, 32);
-  doc.setTextColor(...gold);
-  doc.setFontSize(9);
-  doc.text("E CONSIDERAÇÕES FINAIS", margin, 44);
-
-  doc.setFillColor(255,255,255);
-  doc.roundedRect(margin, 82, contentW, 61, 3, 3, "F");
-  doc.setTextColor(...navy);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("EQUIPE E ESTRUTURA", margin + 8, 95);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.3);
   doc.setTextColor(...muted);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  const team = draft.team || "Equipe dimensionada de acordo com o público, duração e características do projeto.";
-  doc.text(doc.splitTextToSize(team, contentW - 16).slice(0, 5), margin + 8, 108);
+  const methodLines = doc.splitTextToSize(method, 119).slice(0, 5);
+  doc.text(methodLines, 73, activityY + 15, { lineHeightFactor: 1.35 });
+  addFooter();
 
-  doc.setFillColor(255,255,255);
-  doc.roundedRect(margin, 153, contentW, 66, 3, 3, "F");
+  // PÁGINA FINAL — os blocos são dimensionados pelo número real de linhas.
+  let finalY = addStandardPage("DETALHAMENTO", "E CONSIDERAÇÕES FINAIS");
+
+  const drawFinalCard = (heading: string, text: string, startY: number, maxLines = 6) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.8);
+    const lines = doc.splitTextToSize(text || "Informação a definir.", contentW - 16);
+    const chunks: string[][] = [];
+    for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
+    let cursor = startY;
+    chunks.forEach((chunk, index) => {
+      const h = 20 + chunk.length * 4.1;
+      if (cursor + h > 220) {
+        addFooter();
+        cursor = addStandardPage("DETALHAMENTO", "CONTINUAÇÃO");
+      }
+      doc.setFillColor(255,255,255);
+      doc.roundedRect(margin, cursor, contentW, h, 3, 3, "F");
+      doc.setTextColor(...gold);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.text(index === 0 ? heading : "CONTINUAÇÃO", margin + 8, cursor + 10);
+      doc.setTextColor(...ink);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.8);
+      doc.text(chunk, margin + 8, cursor + 20, { lineHeightFactor: 1.35 });
+      cursor += h + 8;
+    });
+    return cursor;
+  };
+
+  finalY = drawFinalCard(
+    "Equipe e estrutura",
+    draft.team || "Equipe dimensionada de acordo com o público, duração e características do projeto.",
+    finalY,
+    6
+  );
+  finalY = drawFinalCard(
+    "Considerações",
+    draft.notes || "A programação poderá ser ajustada em conjunto com o contratante após a análise das condições do local e das necessidades do público.",
+    finalY,
+    6
+  );
+
+  const drawCta = (startY: number) => {
+    if (startY + 40 > 255) {
+      addFooter();
+      startY = addStandardPage("PRÓXIMOS PASSOS", "ENCAMINHAMENTO");
+    }
+    const lines = doc.splitTextToSize(ctaText || ctaOptions[0].text, contentW - 28).slice(0, 4);
+    const h = Math.max(34, 22 + lines.length * 4.3);
+    doc.setFillColor(...gold);
+    doc.roundedRect(margin, startY, contentW, h, 3, 3, "F");
+    doc.setTextColor(...navy);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.text("PRÓXIMO PASSO", margin + 8, startY + 10);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text(lines, margin + 8, startY + 20, { lineHeightFactor: 1.25 });
+    return startY + h;
+  };
+
+  finalY = drawCta(finalY + 3);
+
+  const signatureY = Math.min(finalY + 13, 263);
   doc.setTextColor(...navy);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("CONSIDERAÇÕES", margin + 8, 166);
-  doc.setTextColor(...ink);
+  doc.setFontSize(12.5);
+  doc.text(supplier, margin, signatureY);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  const notes = draft.notes || "A programação poderá ser ajustada em conjunto com o contratante após a análise das condições do local e das necessidades do público.";
-  doc.text(doc.splitTextToSize(notes, contentW - 16).slice(0, 5), margin + 8, 179);
-
-  doc.setFillColor(...gold);
-  doc.roundedRect(margin, 231, contentW, 32, 3, 3, "F");
-  doc.setTextColor(...navy);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("PRÓXIMO PASSO", margin + 8, 243);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("Alinhamento dos detalhes da atividade e definição da programação final.", margin + 8, 253);
-
-  doc.setTextColor(...navy);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text(supplier, margin, 273);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...muted);
-  doc.text([supplierLocation, contact].filter(Boolean).join("  •  ") || "LOSI Gestão em Lazer", margin, 280);
-  addFooter(4);
+  doc.text([supplierLocation, contact].filter(Boolean).join("  •  ") || "Prestador de serviços", margin, signatureY + 7);
+  addFooter();
 
   doc.setProperties({
     title: `Proposta Comercial — ${proposalTitle}`,
-    subject: "Proposta comercial LOSI CONECTA",
+    subject: "Proposta comercial",
     author: supplier,
-    creator: "LOSI CONECTA",
+    creator: supplier,
+    keywords: "proposta comercial, apresentação, LOSI CONECTA",
   });
-  doc.save(`proposta-losi-${(draft.recipient || "cliente").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "cliente"}.pdf`);
+  doc.save(`proposta-${(supplier || "empresa").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "empresa"}-${(draft.recipient || "cliente").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "cliente"}.pdf`);
 }
 
 function ProposalsPage() {
@@ -400,6 +516,8 @@ function ProposalsPage() {
     methodology: "",
     notes: "",
     validity: "",
+      cta: "whatsapp",
+      ctaCustom: "",
   });
 
   useEffect(() => {
@@ -461,6 +579,8 @@ function ProposalsPage() {
       methodology: "",
       notes: "",
       validity: "",
+      cta: "whatsapp",
+      ctaCustom: "",
     });
     setMessage("");
   }
@@ -560,6 +680,26 @@ function ProposalsPage() {
                 <label className="wide"><span>Considerações finais</span><textarea rows={3} value={draft.notes} onChange={e => update("notes", e.target.value)} placeholder="Informações adicionais, condições do local ou próximos passos." /></label>
               </div>
 
+              <div className="proposals-cta-group">
+                <div className="proposals-card-head">
+                  <div><span className="proposals-kicker">GRUPO 04</span><h2>Chamada para ação</h2></div>
+                  <span className="proposals-step">4</span>
+                </div>
+                <div className="proposals-form-grid">
+                  <label className="wide"><span>CTA final do PDF</span>
+                    <select value={draft.cta} onChange={e => update("cta", e.target.value)}>
+                      {ctaOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
+                  </label>
+                  {draft.cta === "custom" && (
+                    <label className="wide"><span>Texto personalizado</span>
+                      <textarea rows={3} value={draft.ctaCustom} onChange={e => update("ctaCustom", e.target.value)} placeholder="Ex.: Vamos conversar e definir juntos os próximos passos deste projeto." />
+                    </label>
+                  )}
+                </div>
+                <p className="proposals-cta-help">A CTA será o encerramento comercial da proposta e aparecerá em destaque na última página do PDF.</p>
+              </div>
+
               <div className="proposals-actions">
                 <button type="button" className="proposals-secondary" onClick={newProposal}>Limpar</button>
                 <button type="button" className="proposals-primary" onClick={generate}>Gerar proposta em PDF</button>
@@ -594,7 +734,7 @@ function ProposalsPage() {
                   <div className="proposal-preview-final-head"><span>04</span><h3>DETALHAMENTO</h3><small>E CONSIDERAÇÕES FINAIS</small></div>
                   <div className="proposal-preview-final-box"><small>EQUIPE E ESTRUTURA</small><p>{preview.team || "Equipe dimensionada de acordo com o público, duração e características do projeto."}</p></div>
                   <div className="proposal-preview-final-box"><small>CONSIDERAÇÕES</small><p>{preview.notes || "A programação poderá ser ajustada em conjunto com o contratante após a análise do local e das necessidades do público."}</p></div>
-                  <div className="proposal-preview-next"><small>PRÓXIMO PASSO</small><strong>Alinhamento dos detalhes e definição da programação final.</strong></div>
+                  <div className="proposal-preview-next"><small>PRÓXIMO PASSO</small><strong>{(preview.cta === "custom" ? preview.ctaCustom : ctaOptions.find(item => item.value === preview.cta)?.text || ctaOptions[0].text) || "Fale conosco para alinharmos os próximos passos."}</strong></div>
                   <div className="proposal-preview-signature"><strong>{supplier}</strong><span>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ")}</span></div>
                 </div>
               </div>
