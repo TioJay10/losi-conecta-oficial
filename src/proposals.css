@@ -405,3 +405,237 @@
     font-size:16px;
   }
 }
+
+
+/* PRÉVIA DA PROPOSTA — responsividade mobile e fullscreen com fallback.
+   A API nativa de fullscreen tem suporte limitado em alguns navegadores móveis;
+   quando indisponível, a própria prévia ocupa a viewport. */
+@media(max-width:700px){
+  .proposals-preview-panel{
+    overflow:hidden;
+  }
+
+  .proposals-preview-head{
+    width:100%;
+    min-width:0;
+  }
+
+  .proposals-preview-head h2{
+    font-size:17px;
+    line-height:1.2;
+  }
+
+  .proposals-preview-tools{
+    min-width:0;
+  }
+
+  .proposal-document-preview{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    overflow-x:hidden;
+    overflow-y:auto;
+    padding:2px 1px 8px;
+    box-sizing:border-box;
+  }
+
+  .proposal-preview-page{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    min-height:0;
+    height:auto;
+    padding:24px 18px;
+    overflow:hidden;
+  }
+
+  .proposal-preview-cover{
+    min-height:560px;
+    padding:27px 22px;
+  }
+
+  .proposal-cover-title{
+    margin-top:58px;
+  }
+
+  .proposal-cover-title h3{
+    font-size:clamp(25px,8vw,31px);
+  }
+
+  .proposal-cover-title h4{
+    font-size:clamp(28px,9vw,34px);
+  }
+
+  .proposal-cover-title strong,
+  .proposal-cover-title b,
+  .proposal-cover-brand strong{
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  .proposal-cover-footer{
+    left:22px;
+    right:22px;
+    bottom:22px;
+  }
+
+  .proposal-preview-standard-head{
+    width:100%;
+    min-width:0;
+  }
+
+  .proposal-preview-standard-head h3{
+    min-width:0;
+    font-size:18px;
+  }
+
+  .proposal-preview-standard-head small{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+
+  .proposal-preview-text-section{
+    min-width:0;
+    width:100%;
+  }
+
+  .proposal-preview-text-section p{
+    width:100%;
+    max-width:100%;
+    font-size:9px;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  .proposal-preview-info{
+    width:100%;
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .proposal-preview-info div,
+  .proposal-preview-info strong{
+    min-width:0;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+
+  .proposal-preview-activities{
+    width:100%;
+    max-width:100%;
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .proposal-preview-side{
+    width:100%;
+    box-sizing:border-box;
+    padding:22px 18px;
+  }
+
+  .proposal-preview-activity-content{
+    width:100%;
+    box-sizing:border-box;
+    padding:22px 18px;
+  }
+
+  .proposal-preview-activity-content p,
+  .proposal-preview-activity-content span{
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  .proposal-preview-detail{
+    width:100%;
+    max-width:100%;
+  }
+
+  .proposal-preview-next strong{
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+
+  .proposals-preview-panel.is-fullscreen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    width:100vw;
+    height:100dvh;
+    max-width:none;
+    max-height:none;
+    margin:0;
+    padding:12px;
+    box-sizing:border-box;
+    border-radius:0;
+    overflow:hidden;
+    background:#eef1f5;
+  }
+
+  .proposals-preview-panel.is-fullscreen .proposals-preview-head{
+    flex:0 0 auto;
+  }
+
+  .proposals-preview-panel.is-fullscreen .proposal-document-preview{
+    width:100%;
+    max-width:100%;
+    height:calc(100dvh - 72px);
+    max-height:none;
+    overflow-x:hidden;
+    overflow-y:auto;
+    padding:2px 1px 20px;
+  }
+
+  .proposals-preview-panel.is-fullscreen .proposal-preview-page,
+  .proposals-preview-panel.is-fullscreen .proposal-preview-cover,
+  .proposals-preview-panel.is-fullscreen .proposal-preview-activities{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    min-height:0;
+    height:auto;
+  }
+
+  .proposals-preview-panel.is-fullscreen .proposal-preview-cover{
+    min-height:560px;
+  }
+
+  .proposals-preview-panel.is-fullscreen .proposal-preview-side{
+    width:100%;
+  }
+}
+
+@media(max-width:380px){
+  .proposals-preview-panel{
+    padding:8px;
+  }
+
+  .proposals-preview-head{
+    gap:6px;
+  }
+
+  .proposals-preview-tools{
+    gap:4px;
+  }
+
+  .proposals-preview-fullscreen{
+    max-width:none;
+    padding:0 8px;
+    font-size:8px;
+  }
+
+  .proposal-preview-page{
+    padding:20px 15px;
+  }
+
+  .proposal-preview-cover{
+    padding:24px 18px;
+    min-height:530px;
+  }
+
+  .proposal-cover-footer{
+    left:18px;
+    right:18px;
+    bottom:18px;
+  }
+}
