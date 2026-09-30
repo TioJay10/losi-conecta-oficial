@@ -649,15 +649,32 @@ function ProposalsPage() {
   async function togglePreviewFullscreen() {
     const element = previewRef.current;
     if (!element) return;
+
     if (document.fullscreenElement) {
       await document.exitFullscreen?.();
-    } else if (element.requestFullscreen) {
+      setPreviewFullscreen(false);
+      return;
+    }
+
+    // Alguns navegadores móveis, especialmente no iOS, não disponibilizam
+    // Element.requestFullscreen(). Nesses casos usamos o modo fullscreen
+    // visual da própria prévia, sem depender da API nativa.
+    if (!element.requestFullscreen || document.fullscreenEnabled === false) {
+      setPreviewFullscreen(true);
+      return;
+    }
+
+    try {
       await element.requestFullscreen();
+    } catch {
+      setPreviewFullscreen(true);
     }
   }
 
   useEffect(() => {
-    const syncFullscreen = () => setPreviewFullscreen(document.fullscreenElement === previewRef.current);
+    const syncFullscreen = () => {
+      setPreviewFullscreen(document.fullscreenElement === previewRef.current);
+    };
     document.addEventListener("fullscreenchange", syncFullscreen);
     return () => document.removeEventListener("fullscreenchange", syncFullscreen);
   }, []);
