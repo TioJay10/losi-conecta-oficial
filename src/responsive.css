@@ -16973,3 +16973,44 @@ body :where(label){
 .dashboard-page .dashboard-sidebar-nav .dashboard-nav-item span {
   text-decoration: none !important;
 }
+
+
+/* PAINEL DO FORNECEDOR — fundo mais claro, borda neon roxa e profundidade */
+.dashboard-page{
+  background:#f8f9fc !important;
+}
+.dashboard-page .dashboard-main{
+  background:#f8f9fc !important;
+}
+.dashboard-page .dashboard-card,
+.dashboard-page .dashboard-status,
+.dashboard-page .dashboard-quotes-overview,
+.dashboard-page .dashboard-metric-card,
+.dashboard-page .dashboard-plan-card,
+.dashboard-page .dashboard-saved,
+.dashboard-page .dashboard-saved-card,
+.dashboard-page .dashboard-onboarding,
+.dashboard-page .dashboard-grid > button,
+.dashboard-page .dashboard-status-card,
+.dashboard-page .dashboard-commercial-card,
+.dashboard-page .dashboard-operation-card{
+  border:1px solid rgba(154,72,255,.72) !important;
+  box-shadow:
+    0 0 0 1px rgba(154,72,255,.16),
+    0 0 12px rgba(154,72,255,.18),
+    0 16px 34px rgba(7,17,31,.13),
+    0 5px 10px rgba(7,17,31,.07),
+    inset 0 1px rgba(255,255,255,.96) !important;
+}
+.dashboard-page .dashboard-card:hover,
+.dashboard-page .dashboard-metric-card:hover,
+.dashboard-page .dashboard-plan-card:hover,
+.dashboard-page .dashboard-saved-card:hover,
+.dashboard-page .dashboard-grid > button:hover{
+  box-shadow:
+    0 0 0 1px rgba(154,72,255,.2),
+    0 0 18px rgba(154,72,255,.28),
+    0 20px 40px rgba(7,17,31,.16),
+    0 6px 12px rgba(7,17,31,.08),
+    inset 0 1px rgba(255,255,255,.98) !important;
+}
