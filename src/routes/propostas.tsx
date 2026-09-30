@@ -487,7 +487,17 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     creator: supplier,
     keywords: "proposta comercial, apresentação, LOSI CONECTA",
   });
-  doc.save(`proposta-${(supplier || "empresa").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "empresa"}-${(draft.recipient || "cliente").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "cliente"}.pdf`);
+  const filename = `proposta-${(supplier || "empresa").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "empresa"}-${(draft.recipient || "cliente").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "cliente"}.pdf`;
+  const pdfBlob = doc.output("blob");
+  const downloadUrl = URL.createObjectURL(pdfBlob);
+  const downloadLink = document.createElement("a");
+  downloadLink.href = downloadUrl;
+  downloadLink.download = filename;
+  downloadLink.style.display = "none";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
 }
 
 function ProposalsPage() {
@@ -594,8 +604,14 @@ function ProposalsPage() {
       setMessage("Descreva o que você pretende realizar para montarmos a apresentação.");
       return;
     }
-    setMessage("Proposta gerada com sucesso. O PDF premium está sendo preparado.");
-    ProposalPdf({ draft: preview, business, profile });
+
+    try {
+      ProposalPdf({ draft: preview, business, profile });
+      setMessage("Proposta gerada com sucesso. O PDF foi preparado para download.");
+    } catch (error) {
+      console.error("Erro ao gerar proposta em PDF:", error);
+      setMessage("Não foi possível gerar o PDF. Verifique os dados preenchidos e tente novamente.");
+    }
   }
 
   if (loading) return <main className="receipts-state">Carregando propostas...</main>;
