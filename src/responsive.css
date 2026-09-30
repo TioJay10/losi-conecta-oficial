@@ -17215,3 +17215,68 @@ body,
 .dashboard-page .dashboard-main{
   background:#fff !important;
 }
+
+
+/* PAINEL LOSI — regra final: nenhum card interno herda o neon dos cards principais. */
+.dashboard-page [class*="card"]{
+  box-shadow:none !important;
+}
+
+/* Reaplica o acabamento somente nos cards estruturais principais. */
+.dashboard-page .dashboard-card,
+.dashboard-page .dashboard-status,
+.dashboard-page .dashboard-quotes-overview,
+.dashboard-page .dashboard-plan-card,
+.dashboard-page .dashboard-saved,
+.dashboard-page .dashboard-onboarding,
+.dashboard-page .dashboard-grid > button,
+.dashboard-page .dashboard-status-card,
+.dashboard-page .dashboard-commercial-card,
+.dashboard-page .dashboard-operation-card,
+.dashboard-page .personal-profile-card,
+.dashboard-page .business-services-card,
+.dashboard-page .quotes-dashboard-card,
+.dashboard-page .quotes-section,
+.dashboard-page .quote-builder,
+.dashboard-page .quotes-supplier-intro,
+.dashboard-page .proposals-form-card,
+.dashboard-page .proposals-preview-panel,
+.dashboard-page .receipts-form-card,
+.dashboard-page .receipts-preview-card,
+.dashboard-page .receipts-history-card{
+  border-color:rgba(214,180,106,.98) !important;
+  box-shadow:
+    0 0 0 1px rgba(214,180,106,.22),
+    0 0 9px rgba(214,180,106,.42),
+    0 0 22px rgba(214,180,106,.26),
+    0 14px 30px rgba(7,17,31,.14),
+    0 5px 10px rgba(7,17,31,.07) !important;
+}
+
+/* Grupos, títulos, textos e componentes internos ficam sem neon/profundidade. */
+.dashboard-page .proposals-group-card,
+.dashboard-page .proposals-card-head,
+.dashboard-page .proposals-cta-group,
+.dashboard-page .proposal-preview-text-section,
+.dashboard-page .receipts-card-head,
+.dashboard-page .receipts-signature-group,
+.dashboard-page .receipts-mode-card,
+.dashboard-page .receipt-paper,
+.dashboard-page .receipt-paper-section,
+.dashboard-page .dashboard-metric-card,
+.dashboard-page .dashboard-saved-card,
+.dashboard-page .dashboard-saved-provider-card,
+.dashboard-page .quotes-dashboard-card-button,
+.dashboard-page .quotes-metric-card,
+.dashboard-page .auth-modal-card,
+.dashboard-page .dashboard-plan-modal,
+.dashboard-page .dashboard-golden-heart-modal{
+  box-shadow:none !important;
+}
+
+/* A moldura dos grupos internos não é um card visual. */
+.dashboard-page .proposals-group-card,
+.dashboard-page .receipts-signature-group{
+  border:0 !important;
+  background:transparent !important;
+}
