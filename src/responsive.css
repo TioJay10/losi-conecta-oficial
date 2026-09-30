@@ -17071,3 +17071,52 @@ body,
 .catalog-page{
   background:inherit;
 }
+
+
+/* PAINEL DO FORNECEDOR — neon dourado em todos os módulos, exceto Busca */
+.dashboard-page [class*="card"],
+.dashboard-page .proposals-group-card,
+.dashboard-page .receipts-signature-group,
+.dashboard-page .receipts-preview-card,
+.dashboard-page .receipts-history-card{
+  border-color:rgba(214,180,106,.98) !important;
+  box-shadow:
+    0 0 0 1px rgba(214,180,106,.28),
+    0 0 8px rgba(214,180,106,.52),
+    0 0 20px rgba(214,180,106,.34),
+    0 14px 30px rgba(7,17,31,.14),
+    0 5px 10px rgba(7,17,31,.07),
+    inset 0 1px rgba(255,255,255,.98) !important;
+}
+
+.dashboard-page [class*="card"]:hover,
+.dashboard-page .proposals-group-card:hover,
+.dashboard-page .receipts-signature-group:hover,
+.dashboard-page .receipts-preview-card:hover,
+.dashboard-page .receipts-history-card:hover{
+  border-color:rgba(231,202,126,1) !important;
+  box-shadow:
+    0 0 0 1px rgba(231,202,126,.34),
+    0 0 10px rgba(214,180,106,.68),
+    0 0 26px rgba(214,180,106,.44),
+    0 18px 38px rgba(7,17,31,.17),
+    0 6px 13px rgba(7,17,31,.08),
+    inset 0 1px rgba(255,255,255,1) !important;
+}
+
+/* Grupos 01–04 da proposta são cards independentes. */
+.dashboard-page .proposals-group-card{
+  border:1px solid rgba(214,180,106,.98) !important;
+  border-radius:10px !important;
+  padding:20px !important;
+  background:#fff !important;
+}
+
+/* Histórico, prévia e assinatura do recibo recebem o mesmo acabamento. */
+.dashboard-page .receipts-preview-card,
+.dashboard-page .receipts-history-card,
+.dashboard-page .receipts-signature-group{
+  border:1px solid rgba(214,180,106,.98) !important;
+  border-radius:10px !important;
+  background:#fff !important;
+}
