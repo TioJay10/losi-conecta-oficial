@@ -12,7 +12,7 @@ type ReviewSummary = { rating: number };
 type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
-  city: string | null; state: string | null; cep: string | null; bairro: string | null; logo_url: string | null; cover_url: string | null;
+  city: string | null; state: string | null; address: string | null; cep: string | null; bairro: string | null; logo_url: string | null; cover_url: string | null;
   verified: boolean; latitude: number | null; longitude: number | null; reputation_service_count: number; services: Service[]; reviews: ReviewSummary[]; plan?: { plan_slug: string; plan_name: string; plan_priority: number; ends_at: string | null } | null;
 };
 
@@ -48,7 +48,7 @@ function SearchPage() {
   const [city, setCity] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);\n  const [resolvedBusinessLocations, setResolvedBusinessLocations] = useState<Record<string, { latitude: number; longitude: number }>>({});\n  const [locationResolving, setLocationResolving] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState("");
   const [locationCep, setLocationCep] = useState("");
@@ -89,7 +89,7 @@ function SearchPage() {
       const [businessResult, categoryResult, planResult] = await Promise.all([
         supabase
           .from("business_profiles")
-          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count")
+          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count")
           .eq("active", true)
           .eq("approval_status", "approved")
           .order("business_name"),
@@ -205,6 +205,85 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
   throw new Error("Não foi possível encontrar coordenadas para este CEP. Tente novamente em alguns instantes.");
 }
 
+  async function resolveBusinessLocation(business: Business) {
+    if (business.latitude !== null && business.longitude !== null) {
+      return { latitude: Number(business.latitude), longitude: Number(business.longitude) };
+    }
+
+    const businessCep = (business.cep ?? "").replace(/\D/g, "");
+    if (businessCep && businessCep === locationCep.replace(/\D/g, "") && userLocation) {
+      return userLocation;
+    }
+
+    if (!businessCep) {
+      if (!business.address && !business.city) return null;
+    }
+
+    try {
+      if (businessCep) {
+        const response = await fetch("https://brasilapi.com.br/api/cep/v2/" + businessCep);
+        if (response.ok) {
+          const data = await response.json();
+          const latitude = Number(data.latitude ?? data.location?.coordinates?.latitude);
+          const longitude = Number(data.longitude ?? data.location?.coordinates?.longitude);
+          if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+            return { latitude, longitude };
+          }
+          const address = [data.street, data.neighborhood, data.city, data.state, "Brasil"].filter(Boolean).join(", ");
+          return await geocodeAddress(address, businessCep, data.city, data.state);
+        }
+      }
+
+      const address = [business.address, business.bairro, business.city, business.state, "Brasil"].filter(Boolean).join(", ");
+      return await geocodeAddress(address, businessCep, business.city ?? undefined, business.state ?? undefined);
+    } catch (error) {
+      console.warn("Não foi possível localizar o fornecedor para o filtro por distância:", business.business_name, error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    if (radiusKm === null || !userLocation || !businesses.length) return;
+
+    let cancelled = false;
+    async function resolveMissingLocations() {
+      const missing = businesses.filter(
+        (business) =>
+          business.latitude === null ||
+          business.longitude === null ||
+          !Number.isFinite(Number(business.latitude)) ||
+          !Number.isFinite(Number(business.longitude)),
+      );
+
+      if (!missing.length) return;
+
+      setLocationResolving(true);
+      const resolvedEntries = await Promise.all(
+        missing.map(async (business) => [business.id, await resolveBusinessLocation(business)] as const),
+      );
+
+      if (!cancelled) {
+        setResolvedBusinessLocations((current) => {
+          const next = { ...current };
+          for (const [businessId, coordinates] of resolvedEntries) {
+            if (coordinates) next[businessId] = coordinates;
+          }
+          return next;
+        });
+        setLocationResolving(false);
+      }
+    }
+
+    resolveMissingLocations().catch((error) => {
+      console.warn("Falha ao resolver localizações dos fornecedores:", error);
+      if (!cancelled) setLocationResolving(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [businesses, radiusKm, userLocation, locationCep]);
+
   function distanceInKm(latitude1: number, longitude1: number, latitude2: number, longitude2: number) {
     const earthRadiusKm = 6371;
     const dLat = (latitude2 - latitude1) * Math.PI / 180;
@@ -267,21 +346,32 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
     const normalizedSearch = submittedSearch.trim().toLocaleLowerCase("pt-BR");
     const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
     return businesses.filter((business) => {
-      const isOfficial = business.id === OFFICIAL_BUSINESS_ID;
-      if (isOfficial) return true;
       const searchable = [
         business.business_name, business.description ?? "", business.city ?? "", business.state ?? "",
         ...business.services.map((service) => service.name),
         ...business.services.map((service) => service.categories?.name ?? ""),
       ].join(" ").toLocaleLowerCase("pt-BR");
+
+      const latitude = business.latitude !== null ? Number(business.latitude) : resolvedBusinessLocations[business.id]?.latitude;
+      const longitude = business.longitude !== null ? Number(business.longitude) : resolvedBusinessLocations[business.id]?.longitude;
+      const withinRadius =
+        radiusKm === null
+          ? true
+          : Boolean(
+              userLocation &&
+              Number.isFinite(latitude) &&
+              Number.isFinite(longitude) &&
+              distanceInKm(userLocation.latitude, userLocation.longitude, latitude, longitude) <= radiusKm,
+            );
+
       return (
         (!normalizedSearch || searchable.includes(normalizedSearch)) &&
         (!normalizedCity || (business.city ?? "").toLocaleLowerCase("pt-BR").includes(normalizedCity)) &&
         (!categoryId || business.services.some((service) => service.category_id === categoryId)) &&
-        (radiusKm === null || Boolean(userLocation && business.latitude !== null && business.longitude !== null && distanceInKm(userLocation.latitude, userLocation.longitude, business.latitude, business.longitude) <= radiusKm))
+        withinRadius
       );
     });
-  }, [businesses, submittedSearch, city, categoryId, radiusKm, userLocation]);
+  }, [businesses, submittedSearch, city, categoryId, radiusKm, userLocation, resolvedBusinessLocations]);
 
   const scoredResults = useMemo(() => {
     const query = submittedSearch.trim().toLocaleLowerCase("pt-BR");
@@ -596,12 +686,9 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
               Informe o CEP do local de referência para calcular a distância dos fornecedores.
             </div>
           )}
-          {radiusKm !== null && !locationLoading && userLocation && businesses.length > 0 &&
-            businesses.every((business) => business.latitude === null || business.longitude === null) && (
-              <div className="marketplace-message">
-                Ainda não há fornecedores aprovados com localização cadastrada para o filtro por raio.
-              </div>
-            )}
+          {radiusKm !== null && !locationLoading && userLocation && locationResolving && (
+            <div className="marketplace-message">Calculando a distância dos fornecedores a partir do CEP informado...</div>
+          )}
 
           {(search || city || categoryId || radiusKm !== null) && (
             <div className="marketplace-active-filters" aria-label="Filtros ativos">
