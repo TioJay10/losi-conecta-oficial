@@ -120,6 +120,7 @@ function LosiAdsPage() {
   const [creditPackages, setCreditPackages] = useState<CreditPackage[]>([]);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [purchaseMessage, setPurchaseMessage] = useState("");
+  const [purchaseDocument, setPurchaseDocument] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
   const [myAds, setMyAds] = useState<MyAd[]>([]);
   const [adsLoading, setAdsLoading] = useState(true);
@@ -200,7 +201,7 @@ function LosiAdsPage() {
     setPurchaseUrl("");
 
     const { data, error } = await supabase.functions.invoke("asaas-create-ads-credit-purchase", {
-      body: { packageId: selected.id },
+      body: { packageId: selected.id, document: purchaseDocument },
     });
 
     if (error || !data?.success) {
@@ -418,6 +419,17 @@ function LosiAdsPage() {
 
                   <div className="losi-ads-purchase-footer">
                     <div className="losi-ads-purchase-copy">
+                      <label className="losi-ads-purchase-document">
+                        <span>Documento (CPF/CNPJ)</span>
+                        <input
+                          value={purchaseDocument}
+                          onChange={event => setPurchaseDocument(event.target.value)}
+                          inputMode="numeric"
+                          autoComplete="off"
+                          placeholder="Digite seu CPF ou CNPJ"
+                        />
+                        <small>Necessário somente na primeira compra, caso seu cadastro ainda não exista no Asaas.</small>
+                      </label>
                       <span>Você será direcionado para a cobrança do pacote escolhido. Os créditos só entram após a confirmação do pagamento.</span>
                       {purchaseMessage && <small role="status">{purchaseMessage}</small>}
                       {purchaseUrl && <a href={purchaseUrl} target="_blank" rel="noreferrer" className="losi-ads-payment-link">ABRIR PAGAMENTO</a>}
