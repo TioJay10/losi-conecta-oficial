@@ -17561,14 +17561,42 @@ body,
 .dashboard-page .dashboard-status,
 .dashboard-page .dashboard-onboarding {
   border-radius: 10px !important;
-  box-shadow: none !important;
+  border: 1px solid rgba(214, 180, 106, .22) !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .76), rgba(247, 244, 236, .58)) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(125%) !important;
+  backdrop-filter: blur(16px) saturate(125%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .72),
+    inset 0 -1px 0 rgba(214, 180, 106, .06) !important;
   transform: none !important;
+}
+
+.dashboard-page .dashboard-grid > button::after,
+.dashboard-page .dashboard-status::after,
+.dashboard-page .dashboard-onboarding::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, .34) 0%,
+      rgba(255, 255, 255, .08) 34%,
+      transparent 58%,
+      rgba(214, 180, 106, .025) 100%
+    );
 }
 
 .dashboard-page .dashboard-grid > button:hover,
 .dashboard-page .dashboard-status:hover,
 .dashboard-page .dashboard-onboarding:hover {
-  box-shadow: none !important;
+  border-color: rgba(174, 132, 57, .30) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .78),
+    inset 0 -1px 0 rgba(214, 180, 106, .08) !important;
   transform: none !important;
 }
 
@@ -17577,14 +17605,24 @@ body,
   .dashboard-page .dashboard-status,
   .dashboard-page .dashboard-onboarding {
     border-radius: 10px !important;
-    box-shadow: none !important;
+    border: 1px solid rgba(214, 180, 106, .22) !important;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, .76), rgba(247, 244, 236, .58)) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(120%) !important;
+    backdrop-filter: blur(14px) saturate(120%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .72),
+      inset 0 -1px 0 rgba(214, 180, 106, .06) !important;
     transform: none !important;
   }
 
   .dashboard-page .dashboard-grid > button:hover,
   .dashboard-page .dashboard-status:hover,
   .dashboard-page .dashboard-onboarding:hover {
-    box-shadow: none !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .78),
+      inset 0 -1px 0 rgba(214, 180, 106, .08) !important;
     transform: none !important;
   }
 }
+
