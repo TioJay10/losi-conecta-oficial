@@ -1,5 +1,5 @@
-/* LOSI ADS — superfície própria do produto, mantendo o sistema visual do painel */
-.losi-ads-page{min-height:100vh;background:#fff;color:#172033;font-family:"Montserrat",Arial,sans-serif;padding:32px 28px 60px;box-sizing:border-box}
+.losi-ads-dashboard{background:#fff !important}\n/* LOSI ADS — superfície própria do produto, mantendo o sistema visual do painel */
+.losi-ads-content{min-height:100vh;background:#fff;color:#172033;font-family:"Montserrat",Arial,sans-serif;padding:32px 28px 60px;box-sizing:border-box}
 .losi-ads-shell{width:min(1120px,100%);margin:0 auto}
 .losi-ads-header{display:flex;align-items:flex-start;justify-content:space-between;gap:28px;padding:8px 0 30px;border-bottom:1px solid #e7ebf0}
 .losi-ads-eyebrow,.losi-ads-section-label{font-size:11px;font-weight:800;letter-spacing:.16em;color:#9a762d}
@@ -36,7 +36,7 @@
 .losi-ads-publish-button{border:1px solid #d6b46a;border-radius:9px;background:#0b182a;color:#f0d99a;padding:12px 17px;font:800 12px/1 "Montserrat",Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
 .losi-ads-my-ads{margin-top:22px;padding:24px 26px;border:1px solid #e1e6ec;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px}
 @media(max-width:720px){
-  .losi-ads-page{padding:18px 12px 42px}
+  .losi-ads-content{padding:18px 12px 42px}
   .losi-ads-header{display:block;padding-bottom:22px}
   .losi-ads-header h1{font-size:28px}
   .losi-ads-balance{margin-top:18px;text-align:left}
