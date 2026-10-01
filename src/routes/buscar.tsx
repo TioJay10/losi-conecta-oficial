@@ -48,7 +48,9 @@ function SearchPage() {
   const [city, setCity] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);\n  const [resolvedBusinessLocations, setResolvedBusinessLocations] = useState<Record<string, { latitude: number; longitude: number }>>({});\n  const [locationResolving, setLocationResolving] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+const [resolvedBusinessLocations, setResolvedBusinessLocations] = useState<Record<string, { latitude: number; longitude: number }>>({});
+const [locationResolving, setLocationResolving] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState("");
   const [locationCep, setLocationCep] = useState("");
