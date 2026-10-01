@@ -35,7 +35,8 @@ function LosiAdsPage() {
   if (loading) return <main className="dashboard-loading">Carregando LOSI ADS...</main>;
 
   return (
-    <main className="dashboard-page losi-ads-dashboard">\n      {mobileMenuOpen && <button type="button" className="dashboard-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
+    <main className="dashboard-page losi-ads-dashboard">
+      {mobileMenuOpen && <button type="button" className="dashboard-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
       <aside className={"dashboard-sidebar" + (mobileMenuOpen ? " mobile-open" : "")}>
         <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
         <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
@@ -51,7 +52,14 @@ function LosiAdsPage() {
           <a className="dashboard-nav-item active" href="/losi-ads"><span className="dashboard-nav-mark">09</span><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></a>
         </nav>
         <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><button type="button" className="dashboard-sidebar-logout" onClick={() => void logout()}>Sair da conta</button></div>
-      </aside>\n      <div className="dashboard-main">\n        <header className="dashboard-header">\n          <button type="button" className="dashboard-mobile-menu-button" onClick={() => setMobileMenuOpen(v => !v)} aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileMenuOpen}><span></span><span></span><span></span></button>\n          <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>LOSI ADS</strong></div>\n          <button type="button" className="dashboard-logout" onClick={() => void logout()}>Sair</button>\n        </header>\n        <section className="dashboard-content losi-ads-content">
+      </aside>
+      <div className="dashboard-main">
+        <header className="dashboard-header">
+          <button type="button" className="dashboard-mobile-menu-button" onClick={() => setMobileMenuOpen(v => !v)} aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileMenuOpen}><span></span><span></span><span></span></button>
+          <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>LOSI ADS</strong></div>
+          <button type="button" className="dashboard-logout" onClick={() => void logout()}>Sair</button>
+        </header>
+        <section className="dashboard-content losi-ads-content">
       <section className="losi-ads-shell">
         <header className="losi-ads-header">
           <div>
@@ -132,7 +140,8 @@ function LosiAdsPage() {
           </div>
           <button type="button" onClick={() => navigate({ to: "/painel" })}>Voltar ao painel</button>
         </section>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }
