@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 import "../losi-ads.css";
 
 export const Route = createFileRoute("/losi-ads")({
@@ -11,6 +12,26 @@ type AdType = "event" | "opportunity";
 function LosiAdsPage() {
   const navigate = useNavigate();
   const [type, setType] = useState<AdType>("event");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (!supabase) { navigate({ to: "/entrar" }); return; }
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) { navigate({ to: "/entrar" }); return; }
+      if (mounted) setLoading(false);
+    }
+    void load();
+    return () => { mounted = false; };
+  }, [navigate]);
+
+  async function logout() {
+    if (supabase) await supabase.auth.signOut();
+    navigate({ to: "/entrar" });
+  }
+
+  if (loading) return <main className="dashboard-loading">Carregando LOSI ADS...</main>;
 
   return (
     <main className="losi-ads-page">
