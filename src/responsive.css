@@ -1838,8 +1838,8 @@ a {
 }
 
 
-/* LOSI CONECTA — busca em layout marketplace */
-.marketplace-page{min-height:100vh;background:#f4f5f8;color:#172033;font-family: "Montserrat", Arial, Helvetica, sans-serif}
+/* LOSI CONECTA — busca em layout marketplace */\nhtml:has(.marketplace-page),body:has(.marketplace-page){background:#fff !important;background-image:none !important;}
+.marketplace-page{min-height:100vh;background:#fff;color:#172033;font-family: "Montserrat", Arial, Helvetica, sans-serif}
 .marketplace-header{background:#fff;border-bottom:1px solid #e2e5eb;position:sticky;top:0;z-index:40}
 .marketplace-header-inner{max-width:1280px;margin:0 auto;min-height:72px;padding:0 24px;display:grid;grid-template-columns:190px minmax(320px,1fr) auto;align-items:center;gap:24px}
 .marketplace-logo{font-weight:800;letter-spacing:-.045em;font-size:23px;color:#2436a6;text-decoration:none;white-space:nowrap}
