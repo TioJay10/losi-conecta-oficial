@@ -15614,11 +15614,12 @@ button.availability-day {
 
 
 /* PATCH 2026-09-26 — OPÇÕES DO AUTOR EM CADA PUBLICAÇÃO */
-.feed-post-head{position:relative}
-.feed-post-menu-wrap{position:relative;display:flex;align-items:flex-start;flex:0 0 auto}
+.feed-post{position:relative}
+.feed-post-head{position:relative;padding-left:34px}
+.feed-post-menu-wrap{position:absolute;left:8px;top:8px;display:flex;align-items:flex-start;z-index:81}
 .feed-post-menu-button{border:0;background:transparent;color:#142744;font-size:21px;font-weight:800;line-height:1;padding:4px 7px;cursor:pointer;letter-spacing:1px}
 .feed-post-menu-button:hover{color:#b38a3c}
-.feed-post-menu{position:absolute;right:0;top:34px;z-index:80;min-width:190px;padding:6px;background:#fff;border:1px solid #d9dee7;border-radius:12px;box-shadow:0 16px 40px rgba(10,24,49,.18)}
+.feed-post-menu{position:absolute;left:0;top:34px;z-index:80;min-width:190px;padding:6px;background:#fff;border:1px solid #d9dee7;border-radius:12px;box-shadow:0 16px 40px rgba(10,24,49,.18)}
 .feed-post-menu button{display:block;width:100%;padding:10px 12px;border:0;border-radius:8px;background:#fff;color:#142744;text-align:left;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
 .feed-post-menu button:hover{background:#f4f6f9}
 .feed-post-menu button.danger{color:#b42318}
