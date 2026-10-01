@@ -1,3 +1,6 @@
+html:has(.feed-page),
+body:has(.feed-page),
 .feed-page{
-  background:#fbfbfb !important;
+  background-color:#fff !important;
+  background-image:none !important;
 }
