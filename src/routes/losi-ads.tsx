@@ -55,6 +55,8 @@ function LosiAdsPage() {
   const [eventDraft, setEventDraft] = useState<EventDraft>(emptyEvent);
   const [opportunityDraft, setOpportunityDraft] = useState<OpportunityDraft>(emptyOpportunity);
   const [message, setMessage] = useState("");
+  const [creditsOpen, setCreditsOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(1);
 
   useEffect(() => {
     let mounted = true;
@@ -125,9 +127,52 @@ function LosiAdsPage() {
               <div className="losi-ads-balance">
                 <span>CRÉDITOS ADS</span>
                 <strong>0</strong>
-                <button type="button">Comprar créditos</button>
+                <button type="button" onClick={() => setCreditsOpen(true)}>Comprar créditos</button>
               </div>
             </header>
+
+            {creditsOpen && (
+              <div className="losi-ads-modal-backdrop" role="presentation" onMouseDown={() => setCreditsOpen(false)}>
+                <section className="losi-ads-credit-modal" role="dialog" aria-modal="true" aria-labelledby="losi-ads-credit-title" onMouseDown={event => event.stopPropagation()}>
+                  <div className="losi-ads-modal-topline">
+                    <div>
+                      <div className="losi-ads-section-label">CRÉDITOS LOSI ADS</div>
+                      <h2 id="losi-ads-credit-title">Escolha seu pacote</h2>
+                      <p>Use créditos para publicar eventos e oportunidades dentro do LOSI CONECTA.</p>
+                    </div>
+                    <button type="button" className="losi-ads-modal-close" aria-label="Fechar compra de créditos" onClick={() => setCreditsOpen(false)}>×</button>
+                  </div>
+
+                  <div className="losi-ads-package-grid">
+                    {[
+                      { credits: 1, price: "R$ 9,90", unit: "R$ 9,90 por crédito" },
+                      { credits: 5, price: "R$ 39,90", unit: "R$ 7,98 por crédito" },
+                      { credits: 10, price: "R$ 69,90", unit: "R$ 6,99 por crédito" },
+                      { credits: 25, price: "R$ 149,90", unit: "R$ 6,00 por crédito" },
+                      { credits: 50, price: "R$ 249,90", unit: "R$ 5,00 por crédito" },
+                    ].map(pkg => (
+                      <button
+                        type="button"
+                        key={pkg.credits}
+                        className={"losi-ads-package-card" + (selectedPackage === pkg.credits ? " selected" : "")}
+                        onClick={() => setSelectedPackage(pkg.credits)}
+                        aria-pressed={selectedPackage === pkg.credits}
+                      >
+                        <span>{pkg.credits === 1 ? "1 CRÉDITO" : pkg.credits + " CRÉDITOS"}</span>
+                        <strong>{pkg.price}</strong>
+                        <small>{pkg.unit}</small>
+                        {pkg.credits === 10 && <em>MAIS ESCOLHIDO</em>}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="losi-ads-purchase-footer">
+                    <span>O pagamento será conectado na próxima etapa. Nenhum crédito será cobrado agora.</span>
+                    <button type="button" className="losi-ads-purchase-button" onClick={() => setCreditsOpen(false)}>CONTINUAR</button>
+                  </div>
+                </section>
+              </div>
+            )}
 
             <section className="losi-ads-choice-card">
               <div className="losi-ads-section-label">01 · TIPO DE ANÚNCIO</div>
