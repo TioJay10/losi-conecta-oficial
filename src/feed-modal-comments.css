@@ -40,15 +40,16 @@
 
 /* FEED — menu de ações do autor da publicação */
 .feed-post-head{
-  position:relative;
+  position:static;
 }
 
 .feed-post-menu-wrap{
-  position:relative;
+  position:absolute;
+  left:8px;
+  top:8px;
   display:flex;
   align-items:flex-start;
-  flex:0 0 auto;
-  z-index:20;
+  z-index:81;
 }
 
 .feed-post-menu-button{
@@ -76,8 +77,8 @@
 
 .feed-post-menu{
   position:absolute;
-  top:40px;
-  right:0;
+  top:34px;
+  left:0;
   z-index:100;
   width:210px;
   padding:6px;
