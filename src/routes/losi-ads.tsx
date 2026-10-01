@@ -9,6 +9,13 @@ export const Route = createFileRoute("/losi-ads")({
 
 type AdType = "event" | "opportunity";
 
+type CreditPackage = {
+  id: string;
+  credits: number;
+  price_cents: number;
+  featured: boolean;
+};
+
 type EventDraft = {
   name: string;
   category: string;
@@ -56,7 +63,9 @@ function LosiAdsPage() {
   const [opportunityDraft, setOpportunityDraft] = useState<OpportunityDraft>(emptyOpportunity);
   const [message, setMessage] = useState("");
   const [creditsOpen, setCreditsOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState(1);
+  const [selectedPackage, setSelectedPackage] = useState(10);
+  const [creditBalance, setCreditBalance] = useState(0);
+  const [creditPackages, setCreditPackages] = useState<CreditPackage[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -64,7 +73,16 @@ function LosiAdsPage() {
       if (!supabase) { navigate({ to: "/entrar" }); return; }
       const { data } = await supabase.auth.getUser();
       if (!data.user) { navigate({ to: "/entrar" }); return; }
-      if (mounted) setLoading(false);
+      if (mounted) {
+        const [{ data: wallet }, { data: packages }] = await Promise.all([
+          supabase.from("losi_ads_wallets").select("balance").eq("user_id", data.user.id).maybeSingle(),
+          supabase.from("losi_ads_credit_packages").select("id,credits,price_cents,featured").eq("active", true).order("credits"),
+        ]);
+        if (wallet) setCreditBalance(wallet.balance ?? 0);
+        setCreditPackages((packages ?? []) as CreditPackage[]);
+        if (packages?.length && !packages.some(pkg => pkg.credits === 10)) setSelectedPackage(packages[0].credits);
+        setLoading(false);
+      }
     }
     void load();
     return () => { mounted = false; };
@@ -126,7 +144,7 @@ function LosiAdsPage() {
               </div>
               <div className="losi-ads-balance">
                 <span>CRÉDITOS ADS</span>
-                <strong>0</strong>
+                <strong>{creditBalance}</strong>
                 <button type="button" onClick={() => setCreditsOpen(true)}>Comprar créditos</button>
               </div>
             </header>
@@ -144,13 +162,10 @@ function LosiAdsPage() {
                   </div>
 
                   <div className="losi-ads-package-grid">
-                    {[
-                      { credits: 1, price: "R$ 9,90", unit: "R$ 9,90 por crédito" },
-                      { credits: 5, price: "R$ 39,90", unit: "R$ 7,98 por crédito" },
-                      { credits: 10, price: "R$ 69,90", unit: "R$ 6,99 por crédito" },
-                      { credits: 25, price: "R$ 149,90", unit: "R$ 6,00 por crédito" },
-                      { credits: 50, price: "R$ 249,90", unit: "R$ 5,00 por crédito" },
-                    ].map(pkg => (
+                    {creditPackages.map(pkg => (
+                      (() => {
+                        const unit = pkg.price_cents / pkg.credits / 100;
+                        return (
                       <button
                         type="button"
                         key={pkg.credits}
@@ -161,7 +176,7 @@ function LosiAdsPage() {
                         <span>{pkg.credits === 1 ? "1 CRÉDITO" : pkg.credits + " CRÉDITOS"}</span>
                         <strong>{pkg.price}</strong>
                         <small>{pkg.unit}</small>
-                        {pkg.credits === 10 && <em>MAIS ESCOLHIDO</em>}
+                        {pkg.featured && <em>MAIS ESCOLHIDO</em>}
                       </button>
                     ))}
                   </div>
