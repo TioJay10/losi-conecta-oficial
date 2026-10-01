@@ -1115,7 +1115,6 @@ function QuotesPage() {
         supplierPhone,
         supplierEmail: userEmail,
         supplierProfileUrl,
-        supplierAvatarUrl: personalIdentity?.avatar_url || "",
       };
 
       // A entrega é independente do banco. Primeiro geramos/abrimos o material
