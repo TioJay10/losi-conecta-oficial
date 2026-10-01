@@ -77,6 +77,25 @@ type Application = {
   } | null;
 };
 
+type MyApplication = {
+  id: string;
+  ad_id: string;
+  message: string | null;
+  status: "pending" | "accepted" | "rejected" | "withdrawn";
+  created_at: string;
+  ad: {
+    title: string;
+    ad_type: AdType;
+    category: string | null;
+    event_date: string | null;
+    start_time: string | null;
+    end_time: string | null;
+    city: string | null;
+    state: string | null;
+    contact: string | null;
+  } | null;
+};
+
 const emptyEvent: EventDraft = {
   name: "", category: "", date: "", startTime: "", endTime: "",
   city: "", state: "", cep: "", description: "", contact: "",
@@ -107,6 +126,8 @@ function LosiAdsPage() {
   const [selectedMyAd, setSelectedMyAd] = useState<MyAd | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [myApplications, setMyApplications] = useState<MyApplication[]>([]);
+  const [myApplicationsLoading, setMyApplicationsLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -124,6 +145,30 @@ function LosiAdsPage() {
         setCreditPackages((packages ?? []) as CreditPackage[]);
         setMyAds((ownAds ?? []) as MyAd[]);
         setAdsLoading(false);
+
+        const { data: applicationRows } = await supabase
+          .from("losi_ads_applications")
+          .select("id,ad_id,message,status,created_at")
+          .eq("user_id", data.user.id)
+          .order("created_at", { ascending: false });
+
+        const rows = applicationRows ?? [];
+        if (rows.length) {
+          const adIds = [...new Set(rows.map(item => item.ad_id))];
+          const { data: adRows } = await supabase
+            .from("losi_ads")
+            .select("id,title,ad_type,category,event_date,start_time,end_time,city,state,contact")
+            .in("id", adIds);
+
+          const adMap = new Map((adRows ?? []).map(ad => [ad.id, ad]));
+          setMyApplications(rows.map(item => ({
+            ...item,
+            ad: adMap.get(item.ad_id) ?? null,
+          })) as MyApplication[]);
+        } else {
+          setMyApplications([]);
+        }
+        setMyApplicationsLoading(false);
         if (packages?.length && !packages.some(pkg => pkg.credits === 10)) setSelectedPackage(packages[0].credits);
         setLoading(false);
       }
@@ -448,6 +493,75 @@ function LosiAdsPage() {
                           <span>Publicação ativa no LOSI CONECTA</span>
                         )}
                         <span>{ad.published_at ? "Publicado em " + new Date(ad.published_at).toLocaleDateString("pt-BR") : "Ainda não publicado"}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="losi-ads-my-applications">
+              <div className="losi-ads-my-applications-header">
+                <div>
+                  <div className="losi-ads-section-label">04 · MINHAS CANDIDATURAS</div>
+                  <h2>Minhas candidaturas</h2>
+                  <p>Acompanhe as oportunidades em que você demonstrou interesse e veja quando o anunciante responder.</p>
+                </div>
+                <span className="losi-ads-my-ads-count">{myApplications.length} {myApplications.length === 1 ? "CANDIDATURA" : "CANDIDATURAS"}</span>
+              </div>
+
+              {myApplicationsLoading ? (
+                <div className="losi-ads-empty">Carregando suas candidaturas...</div>
+              ) : myApplications.length === 0 ? (
+                <div className="losi-ads-empty">
+                  <strong>Você ainda não se candidatou a nenhuma oportunidade.</strong>
+                  <span>Quando demonstrar interesse em uma oportunidade, ela aparecerá aqui.</span>
+                  <button type="button" onClick={() => navigate({ to: "/buscar" })}>VER OPORTUNIDADES</button>
+                </div>
+              ) : (
+                <div className="losi-ads-my-applications-list">
+                  {myApplications.map(application => (
+                    <article className="losi-ads-my-application-card" key={application.id}>
+                      <div className="losi-ads-my-application-top">
+                        <span className={"losi-ads-own-type " + (application.ad?.ad_type ?? "opportunity")}>
+                          {application.ad?.ad_type === "event" ? "EVENTO" : "OPORTUNIDADE"}
+                        </span>
+                        <span className={"losi-ads-my-application-status " + application.status}>
+                          {application.status === "pending" ? "PENDENTE" :
+                           application.status === "accepted" ? "ACEITA" :
+                           application.status === "rejected" ? "RECUSADA" : "CANCELADA"}
+                        </span>
+                      </div>
+
+                      <h3>{application.ad?.title ?? "Oportunidade indisponível"}</h3>
+
+                      {application.ad && (
+                        <div className="losi-ads-my-application-meta">
+                          {application.ad.city && <span>{application.ad.city}{application.ad.state ? " · " + application.ad.state : ""}</span>}
+                          {application.ad.event_date && <span>{new Date(application.ad.event_date + "T12:00:00").toLocaleDateString("pt-BR")}</span>}
+                          {application.ad.start_time && application.ad.end_time && <span>{application.ad.start_time.slice(0, 5)} às {application.ad.end_time.slice(0, 5)}</span>}
+                        </div>
+                      )}
+
+                      {application.message && (
+                        <p className="losi-ads-my-application-message">Sua mensagem: “{application.message}”</p>
+                      )}
+
+                      <div className="losi-ads-my-application-footer">
+                        <span>Enviada em {new Date(application.created_at).toLocaleDateString("pt-BR")}</span>
+                        {application.status === "accepted" && application.ad?.contact ? (
+                          <a
+                            href={application.ad.contact.startsWith("http") ? application.ad.contact : "https://wa.me/" + application.ad.contact.replace(/\D/g, "")}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            CONTATO DO ANUNCIANTE
+                          </a>
+                        ) : application.status === "pending" ? (
+                          <span className="losi-ads-my-application-waiting">Aguardando resposta</span>
+                        ) : application.status === "rejected" ? (
+                          <span className="losi-ads-my-application-waiting">O anunciante recusou esta candidatura</span>
+                        ) : null}
                       </div>
                     </article>
                   ))}
