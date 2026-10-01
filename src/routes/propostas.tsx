@@ -570,8 +570,6 @@ function ProposalsPage() {
     eventDate: "",
     eventStart: "",
     eventEnd: "",
-    eventStart: "",
-    eventEnd: "",
     eventTime: "",
     duration: "",
     location: "",
