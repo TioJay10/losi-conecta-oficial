@@ -277,3 +277,46 @@
     line-height:1.2 !important;
   }
 }
+
+
+/* FEED — menu e perfil posicionados diretamente no card */
+.feed-post{
+  position:relative !important;
+}
+
+.feed-post > .feed-post-menu-wrap{
+  position:absolute !important;
+  top:8px !important;
+  right:8px !important;
+  left:auto !important;
+  margin:0 !important;
+  z-index:120 !important;
+}
+
+.feed-post > .feed-profile-link{
+  position:absolute !important;
+  top:50px !important;
+  right:8px !important;
+  left:auto !important;
+  margin:0 !important;
+  display:block !important;
+  width:max-content !important;
+  max-width:calc(100% - 16px) !important;
+  z-index:115 !important;
+  text-align:right !important;
+}
+
+@media(max-width:700px){
+  .feed-post > .feed-post-menu-wrap{
+    top:6px !important;
+    right:6px !important;
+  }
+
+  .feed-post > .feed-profile-link{
+    top:43px !important;
+    right:6px !important;
+    max-width:calc(100% - 12px) !important;
+    font-size:10px !important;
+    line-height:1.2 !important;
+  }
+}
