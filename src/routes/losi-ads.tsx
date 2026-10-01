@@ -500,7 +500,7 @@ function LosiAdsPage() {
               )}
             </section>
 
-            <section className="losi-ads-my-applications">
+            <section id="minhas-candidaturas" className="losi-ads-my-applications">
               <div className="losi-ads-my-applications-header">
                 <div>
                   <div className="losi-ads-section-label">04 · MINHAS CANDIDATURAS</div>
