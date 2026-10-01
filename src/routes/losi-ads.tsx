@@ -66,6 +66,9 @@ function LosiAdsPage() {
   const [selectedPackage, setSelectedPackage] = useState(10);
   const [creditBalance, setCreditBalance] = useState(0);
   const [creditPackages, setCreditPackages] = useState<CreditPackage[]>([]);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [purchaseMessage, setPurchaseMessage] = useState("");
+  const [purchaseUrl, setPurchaseUrl] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -98,10 +101,40 @@ function LosiAdsPage() {
     setMessage("");
   }
 
+  async function startCreditPurchase() {
+    if (!supabase) return;
+    const selected = creditPackages.find(pkg => pkg.credits === selectedPackage);
+    if (!selected) {
+      setPurchaseMessage("Selecione um pacote disponível.");
+      return;
+    }
+
+    setPurchaseLoading(true);
+    setPurchaseMessage("");
+    setPurchaseUrl("");
+
+    const { data, error } = await supabase.functions.invoke("asaas-create-ads-credit-purchase", {
+      body: { packageId: selected.id },
+    });
+
+    if (error || !data?.success) {
+      setPurchaseMessage(data?.error ?? error?.message ?? "Não foi possível iniciar o pagamento.");
+      setPurchaseLoading(false);
+      return;
+    }
+
+    const url = data.payment?.invoiceUrl ?? data.payment?.bankSlipUrl ?? "";
+    setPurchaseUrl(url);
+    setPurchaseMessage(
+      "Cobrança criada. Conclua o pagamento pela página do Asaas. Os créditos entram automaticamente após a confirmação."
+    );
+    setPurchaseLoading(false);
+  }
+
   function publish(event: FormEvent) {
     event.preventDefault();
     setMessage(
-      "O anúncio ainda não foi publicado. Primeiro vamos conectar os créditos ADS e o banco de anúncios."
+      "O anúncio ainda não foi publicado. Primeiro vamos concluir o fluxo de créditos e publicação."
     );
   }
 
@@ -182,8 +215,14 @@ function LosiAdsPage() {
                   </div>
 
                   <div className="losi-ads-purchase-footer">
-                    <span>O pagamento será conectado na próxima etapa. Nenhum crédito será cobrado agora.</span>
-                    <button type="button" className="losi-ads-purchase-button" onClick={() => setCreditsOpen(false)}>CONTINUAR</button>
+                    <div className="losi-ads-purchase-copy">
+                      <span>Você será direcionado para a cobrança do pacote escolhido. Os créditos só entram após a confirmação do pagamento.</span>
+                      {purchaseMessage && <small role="status">{purchaseMessage}</small>}
+                      {purchaseUrl && <a href={purchaseUrl} target="_blank" rel="noreferrer" className="losi-ads-payment-link">ABRIR PAGAMENTO</a>}
+                    </div>
+                    <button type="button" className="losi-ads-purchase-button" onClick={() => void startCreditPurchase()} disabled={purchaseLoading}>
+                      {purchaseLoading ? "CRIANDO COBRANÇA..." : "CONTINUAR"}
+                    </button>
                   </div>
                 </section>
               </div>
