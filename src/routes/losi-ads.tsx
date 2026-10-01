@@ -44,6 +44,39 @@ type OpportunityDraft = {
   requirements: string;
 };
 
+type MyAd = {
+  id: string;
+  ad_type: AdType;
+  status: string;
+  title: string;
+  category: string | null;
+  event_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  city: string | null;
+  state: string | null;
+  quantity: number | null;
+  value_cents: number | null;
+  published_at: string | null;
+  expires_at: string | null;
+};
+
+type Application = {
+  id: string;
+  ad_id: string;
+  user_id: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+  profile?: {
+    full_name: string | null;
+    phone: string | null;
+    avatar_url: string | null;
+    city: string | null;
+    state: string | null;
+  } | null;
+};
+
 const emptyEvent: EventDraft = {
   name: "", category: "", date: "", startTime: "", endTime: "",
   city: "", state: "", cep: "", description: "", contact: "",
@@ -69,6 +102,11 @@ function LosiAdsPage() {
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [purchaseMessage, setPurchaseMessage] = useState("");
   const [purchaseUrl, setPurchaseUrl] = useState("");
+  const [myAds, setMyAds] = useState<MyAd[]>([]);
+  const [adsLoading, setAdsLoading] = useState(true);
+  const [selectedMyAd, setSelectedMyAd] = useState<MyAd | null>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -77,12 +115,15 @@ function LosiAdsPage() {
       const { data } = await supabase.auth.getUser();
       if (!data.user) { navigate({ to: "/entrar" }); return; }
       if (mounted) {
-        const [{ data: wallet }, { data: packages }] = await Promise.all([
+        const [{ data: wallet }, { data: packages }, { data: ownAds }] = await Promise.all([
           supabase.from("losi_ads_wallets").select("balance").eq("user_id", data.user.id).maybeSingle(),
           supabase.from("losi_ads_credit_packages").select("id,credits,price_cents,featured").eq("active", true).order("credits"),
+          supabase.from("losi_ads").select("id,ad_type,status,title,category,event_date,start_time,end_time,city,state,quantity,value_cents,published_at,expires_at").eq("user_id", data.user.id).order("created_at", { ascending: false }),
         ]);
         if (wallet) setCreditBalance(wallet.balance ?? 0);
         setCreditPackages((packages ?? []) as CreditPackage[]);
+        setMyAds((ownAds ?? []) as MyAd[]);
+        setAdsLoading(false);
         if (packages?.length && !packages.some(pkg => pkg.credits === 10)) setSelectedPackage(packages[0].credits);
         setLoading(false);
       }
@@ -131,6 +172,33 @@ function LosiAdsPage() {
     setPurchaseLoading(false);
   }
 
+  async function openApplications(ad: MyAd) {
+    setSelectedMyAd(ad);
+    setApplications([]);
+    if (ad.ad_type !== "opportunity") return;
+    setApplicationsLoading(true);
+    const { data, error } = await supabase
+      .from("losi_ads_applications")
+      .select("id,ad_id,user_id,message,status,created_at")
+      .eq("ad_id", ad.id)
+      .order("created_at", { ascending: false });
+    if (!error && data) {
+      const userIds = [...new Set(data.map(item => item.user_id))];
+      let profiles: Array<{ id: string; full_name: string | null; phone: string | null; avatar_url: string | null; city: string | null; state: string | null }> = [];
+      if (userIds.length) {
+        const { data: profileRows } = await supabase
+          .from("profiles")
+          .select("id,full_name,phone,avatar_url,city,state")
+          .in("id", userIds);
+        profiles = profileRows ?? [];
+      }
+      setApplications(data.map(item => ({
+        ...item,
+        profile: profiles.find(profile => profile.id === item.user_id) ?? null,
+      })) as Application[]);
+    }
+    setApplicationsLoading(false);
+  }
   async function publish(event: FormEvent) {
     event.preventDefault();
     setMessage("");
@@ -186,6 +254,12 @@ function LosiAdsPage() {
     setMessage("Anúncio publicado com sucesso. 1 crédito ADS foi utilizado.");
     if (type === "event") setEventDraft(emptyEvent);
     else setOpportunityDraft(emptyOpportunity);
+    const { data: refreshedAds } = await supabase
+      .from("losi_ads")
+      .select("id,ad_type,status,title,category,event_date,start_time,end_time,city,state,quantity,value_cents,published_at,expires_at")
+      .eq("user_id", (await supabase.auth.getUser()).data.user?.id ?? "")
+      .order("created_at", { ascending: false });
+    setMyAds((refreshedAds ?? []) as MyAd[]);
   }
 
   if (loading) return <main className="dashboard-loading">Carregando LOSI ADS...</main>;
@@ -326,13 +400,87 @@ function LosiAdsPage() {
             </form>
 
             <section className="losi-ads-my-ads">
-              <div>
-                <div className="losi-ads-section-label">03 · MINHAS PUBLICAÇÕES</div>
-                <h2>Seus anúncios aparecerão aqui</h2>
-                <p>Acompanhe publicações, visualizações e candidaturas em um único lugar.</p>
+              <div className="losi-ads-my-ads-header">
+                <div>
+                  <div className="losi-ads-section-label">03 · MINHAS PUBLICAÇÕES</div>
+                  <h2>Meus anúncios</h2>
+                  <p>Acompanhe o status das publicações e veja quem demonstrou interesse nas oportunidades.</p>
+                </div>
+                <span className="losi-ads-my-ads-count">{myAds.length} {myAds.length === 1 ? "ANÚNCIO" : "ANÚNCIOS"}</span>
               </div>
-              <button type="button" onClick={() => navigate({ to: "/painel" })}>Voltar ao painel</button>
+
+              {adsLoading ? (
+                <div className="losi-ads-empty">Carregando seus anúncios...</div>
+              ) : myAds.length === 0 ? (
+                <div className="losi-ads-empty"><strong>Você ainda não publicou nenhum anúncio.</strong><span>Escolha EVENTO ou OPORTUNIDADE acima para começar.</span></div>
+              ) : (
+                <div className="losi-ads-own-grid">
+                  {myAds.map(ad => (
+                    <article className="losi-ads-own-card" key={ad.id}>
+                      <div className="losi-ads-own-card-top">
+                        <span className={"losi-ads-own-type " + ad.ad_type}>{ad.ad_type === "event" ? "EVENTO" : "OPORTUNIDADE"}</span>
+                        <span className={"losi-ads-own-status " + ad.status}>{ad.status === "published" ? "PUBLICADO" : ad.status.toUpperCase()}</span>
+                      </div>
+                      <h3>{ad.title}</h3>
+                      <div className="losi-ads-own-meta">
+                        {ad.city && <span>{ad.city}{ad.state ? " · " + ad.state : ""}</span>}
+                        {ad.event_date && <span>{new Date(ad.event_date + "T12:00:00").toLocaleDateString("pt-BR")}</span>}
+                        {ad.ad_type === "opportunity" && ad.quantity && <span>{ad.quantity} vaga{ad.quantity === 1 ? "" : "s"}</span>}
+                        {ad.ad_type === "opportunity" && ad.value_cents && <span>R$ {(ad.value_cents / 100).toFixed(2).replace(".", ",")}</span>}
+                      </div>
+                      <div className="losi-ads-own-footer">
+                        {ad.ad_type === "opportunity" ? (
+                          <button type="button" onClick={() => void openApplications(ad)}>VER CANDIDATURAS</button>
+                        ) : (
+                          <span>Publicação ativa no LOSI CONECTA</span>
+                        )}
+                        <span>{ad.published_at ? "Publicado em " + new Date(ad.published_at).toLocaleDateString("pt-BR") : "Ainda não publicado"}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </section>
+
+            {selectedMyAd && (
+              <div className="losi-ads-applications-backdrop" role="presentation" onMouseDown={() => setSelectedMyAd(null)}>
+                <section className="losi-ads-applications-modal" role="dialog" aria-modal="true" aria-labelledby="losi-ads-applications-title" onMouseDown={event => event.stopPropagation()}>
+                  <div className="losi-ads-modal-topline">
+                    <div>
+                      <div className="losi-ads-section-label">CANDIDATURAS</div>
+                      <h2 id="losi-ads-applications-title">{selectedMyAd.title}</h2>
+                      <p>Profissionais que demonstraram interesse nesta oportunidade.</p>
+                    </div>
+                    <button type="button" className="losi-ads-modal-close" aria-label="Fechar candidaturas" onClick={() => setSelectedMyAd(null)}>×</button>
+                  </div>
+                  {applicationsLoading ? (
+                    <div className="losi-ads-empty">Carregando candidaturas...</div>
+                  ) : applications.length === 0 ? (
+                    <div className="losi-ads-empty"><strong>Nenhuma candidatura ainda.</strong><span>Quando um profissional demonstrar interesse, ela aparecerá aqui.</span></div>
+                  ) : (
+                    <div className="losi-ads-applications-list">
+                      {applications.map(application => (
+                        <article className="losi-ads-application-card" key={application.id}>
+                          <div className="losi-ads-application-avatar">
+                            {application.profile?.avatar_url ? <img src={application.profile.avatar_url} alt="" /> : <span>{(application.profile?.full_name ?? "P").slice(0, 1).toUpperCase()}</span>}
+                          </div>
+                          <div className="losi-ads-application-main">
+                            <strong>{application.profile?.full_name ?? "Profissional"}</strong>
+                            <span>{[application.profile?.city, application.profile?.state].filter(Boolean).join(" · ") || "Localização não informada"}</span>
+                            {application.message && <p>“{application.message}”</p>}
+                            <small>{new Date(application.created_at).toLocaleDateString("pt-BR")}</small>
+                          </div>
+                          <div className="losi-ads-application-actions">
+                            <span className={"losi-ads-application-status " + application.status}>{application.status === "pending" ? "PENDENTE" : application.status.toUpperCase()}</span>
+                            {application.profile?.phone && <a href={"https://wa.me/" + application.profile.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer">WHATSAPP</a>}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              </div>
+            )}
           </section>
         </section>
       </div>
