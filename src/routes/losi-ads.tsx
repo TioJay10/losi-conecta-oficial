@@ -131,11 +131,61 @@ function LosiAdsPage() {
     setPurchaseLoading(false);
   }
 
-  function publish(event: FormEvent) {
+  async function publish(event: FormEvent) {
     event.preventDefault();
-    setMessage(
-      "O anúncio ainda não foi publicado. Primeiro vamos concluir o fluxo de créditos e publicação."
-    );
+    setMessage("");
+
+    if (creditBalance < 1) {
+      setMessage("Você precisa de pelo menos 1 crédito ADS para publicar.");
+      return;
+    }
+
+    const draft = type === "event" ? eventDraft : opportunityDraft;
+    const payload = type === "event"
+      ? {
+          p_ad_type: "event",
+          p_title: eventDraft.name,
+          p_category: eventDraft.category,
+          p_event_date: eventDraft.date || null,
+          p_start_time: eventDraft.startTime || null,
+          p_end_time: eventDraft.endTime || null,
+          p_city: eventDraft.city,
+          p_state: eventDraft.state,
+          p_cep: eventDraft.cep,
+          p_description: eventDraft.description,
+          p_contact: eventDraft.contact,
+        }
+      : {
+          p_ad_type: "opportunity",
+          p_title: opportunityDraft.title,
+          p_role: opportunityDraft.role,
+          p_quantity: opportunityDraft.quantity ? Number(opportunityDraft.quantity) : null,
+          p_event_date: opportunityDraft.date || null,
+          p_start_time: opportunityDraft.startTime || null,
+          p_end_time: opportunityDraft.endTime || null,
+          p_city: opportunityDraft.city,
+          p_state: opportunityDraft.state,
+          p_cep: opportunityDraft.cep,
+          p_value_cents: opportunityDraft.value
+            ? Math.round(Number(opportunityDraft.value.replace(",", ".")) * 100)
+            : null,
+          p_description: opportunityDraft.description,
+          p_requirements: opportunityDraft.requirements,
+        };
+
+    if (!draft) return;
+
+    const { data, error } = await supabase.rpc("publish_losi_ad", payload);
+
+    if (error || !data) {
+      setMessage(error?.message ?? "Não foi possível publicar o anúncio.");
+      return;
+    }
+
+    setCreditBalance((value) => Math.max(0, value - 1));
+    setMessage("Anúncio publicado com sucesso. 1 crédito ADS foi utilizado.");
+    if (type === "event") setEventDraft(emptyEvent);
+    else setOpportunityDraft(emptyOpportunity);
   }
 
   if (loading) return <main className="dashboard-loading">Carregando LOSI ADS...</main>;
