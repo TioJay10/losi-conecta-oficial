@@ -15059,7 +15059,7 @@ button.availability-day {
 
 
 /* FEED LOSI CONECTA — grupos independentes, desktop e mobile */
-.feed-page{min-height:100vh;background:#f4f6f9;color:#172033;font-family:"Montserrat",Arial,sans-serif}
+.feed-page{min-height:100vh;background:#fff;color:#172033;font-family:"Montserrat",Arial,sans-serif}
 .feed-header{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #e3e7ee}
 .feed-header-inner{width:min(1180px,calc(100% - 36px));min-height:68px;margin:0 auto;display:flex;align-items:center;gap:24px}
 .feed-brand{color:#0b182a;text-decoration:none;font-size:19px;font-weight:800;letter-spacing:.04em;white-space:nowrap}.feed-brand span{color:#b38a3c}
