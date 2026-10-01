@@ -1198,9 +1198,9 @@ function DashboardPage() {
                   }}
                 >×</button>
                 <div style={{ fontSize: 21, fontWeight: 800, letterSpacing: ".08em", color: "#fff" }}>LOSI <span>CONECTA</span></div>
-                <div style={{ marginTop: 24, fontSize: 11, fontWeight: 800, letterSpacing: ".16em", color: "#f0d99a" }}>NOVA NOTIFICAÇÃO</div>
+                <div style={{ marginTop: 24, fontSize: 11, fontWeight: 800, letterSpacing: ".16em", color: "#f0d99a" }}>{notificationPopup.type.startsWith("losi_ads_application_") ? "LOSI ADS" : "NOVA NOTIFICAÇÃO"}</div>
                 <h2 id="notification-popup-title" style={{ fontSize: 28, lineHeight: 1.15, margin: "14px 0 8px", color: "#fff" }}>{notificationPopup.title}</h2>
-                <p style={{ color: "#c4cbd7", lineHeight: 1.5, margin: 0, fontSize: 14 }}>Você recebeu uma nova mensagem no LOSI CONECTA.</p>
+                <p style={{ color: "#c4cbd7", lineHeight: 1.5, margin: 0, fontSize: 14 }}>{notificationPopup.type === "losi_ads_application_accepted" ? "O anunciante aceitou sua candidatura." : notificationPopup.type === "losi_ads_application_rejected" ? "O anunciante respondeu à sua candidatura." : "Você recebeu uma nova mensagem no LOSI CONECTA."}</p>
               </div>
               <div style={{ padding: "30px 34px 32px", background: "#fff", boxSizing: "border-box" }}>
                 <p style={{ margin: "0 0 22px", color: "#172033", fontSize: 15, lineHeight: 1.6, whiteSpace: "pre-line" }}>{notificationPopup.message}</p>
@@ -1221,7 +1221,7 @@ function DashboardPage() {
                       boxShadow: "0 8px 18px rgba(7,17,31,.16)",
                     }}
                   >
-                    {notificationPopup.type.startsWith("feed_") ? "Ver publicação" : notificationPopup.link ? "Ver benefício" : "Ver notificação"}
+                    {notificationPopup.type === "losi_ads_application_accepted" || notificationPopup.type === "losi_ads_application_rejected" ? "Ver candidatura" : notificationPopup.type.startsWith("feed_") ? "Ver publicação" : notificationPopup.link ? "Ver benefício" : "Ver notificação"}
                   </button>
                   <button
                     type="button"
