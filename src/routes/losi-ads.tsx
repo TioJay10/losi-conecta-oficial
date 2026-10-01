@@ -35,7 +35,23 @@ function LosiAdsPage() {
   if (loading) return <main className="dashboard-loading">Carregando LOSI ADS...</main>;
 
   return (
-    <main className="losi-ads-page">
+    <main className="dashboard-page losi-ads-dashboard">\n      {mobileMenuOpen && <button type="button" className="dashboard-mobile-menu-overlay" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
+      <aside className={"dashboard-sidebar" + (mobileMenuOpen ? " mobile-open" : "")}>
+        <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
+        <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
+        <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
+          <a className="dashboard-nav-item" href="/painel"><span className="dashboard-nav-mark">01</span><span><strong>Visão geral</strong><small>Resumo da conta</small></span></a>
+          <a className="dashboard-nav-item" href="/buscar"><span className="dashboard-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span></a>
+          <a className="dashboard-nav-item" href="/meu-perfil"><span className="dashboard-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span></a>
+          <a className="dashboard-nav-item" href="/meus-servicos"><span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span></a>
+          <a className="dashboard-nav-item" href="/notificar-inconsistencia"><span className="dashboard-nav-mark">05</span><span><strong>Notificar Inconsistências</strong><small>Falar com o administrador</small></span></a>
+          <a className="dashboard-nav-item" href="/orcamentos"><span className="dashboard-nav-mark">06</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></a>
+          <a className="dashboard-nav-item" href="/recibos"><span className="dashboard-nav-mark">07</span><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></a>
+          <a className="dashboard-nav-item" href="/propostas"><span className="dashboard-nav-mark">08</span><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></a>
+          <a className="dashboard-nav-item active" href="/losi-ads"><span className="dashboard-nav-mark">09</span><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></a>
+        </nav>
+        <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><button type="button" className="dashboard-sidebar-logout" onClick={() => void logout()}>Sair da conta</button></div>
+      </aside>\n      <div className="dashboard-main">\n        <header className="dashboard-header">\n          <button type="button" className="dashboard-mobile-menu-button" onClick={() => setMobileMenuOpen(v => !v)} aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={mobileMenuOpen}><span></span><span></span><span></span></button>\n          <div className="dashboard-header-context"><span>ÁREA EXCLUSIVA</span><strong>LOSI ADS</strong></div>\n          <button type="button" className="dashboard-logout" onClick={() => void logout()}>Sair</button>\n        </header>\n        <section className="dashboard-content losi-ads-content">
       <section className="losi-ads-shell">
         <header className="losi-ads-header">
           <div>
