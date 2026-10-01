@@ -4258,7 +4258,7 @@ a {
   --losi-muted: #697386;
   --losi-border: #e7e9f0;
   --losi-surface: #ffffff;
-  --losi-background: #f4f5f8;
+  --losi-background: #ffffff;
 }
 
 /* Fundo e textos principais */
@@ -10010,7 +10010,7 @@ button,input,textarea,select{max-width:100%;font:inherit}
 
 /* BUSCA — organização premium e alinhamento */
 .marketplace-page {
-  background: #f7f9fd !important;
+  background: #ffffff !important;
 }
 .marketplace-page .marketplace-content {
   width: min(1180px, calc(100% - 48px)) !important;
