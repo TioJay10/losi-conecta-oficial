@@ -17554,3 +17554,37 @@ body,
   .marketplace-ad-modal h2{font-size:21px}
   .marketplace-ad-modal-meta{grid-template-columns:1fr;gap:8px;padding:12px}
 }
+
+
+/* PAINEL PROFISSIONAL — acabamento final dos cards (desktop + mobile) */
+.dashboard-page .dashboard-grid > button,
+.dashboard-page .dashboard-status,
+.dashboard-page .dashboard-onboarding {
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.dashboard-page .dashboard-grid > button:hover,
+.dashboard-page .dashboard-status:hover,
+.dashboard-page .dashboard-onboarding:hover {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+@media only screen and (max-width: 600px) {
+  .dashboard-page .dashboard-grid > button,
+  .dashboard-page .dashboard-status,
+  .dashboard-page .dashboard-onboarding {
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .dashboard-page .dashboard-grid > button:hover,
+  .dashboard-page .dashboard-status:hover,
+  .dashboard-page .dashboard-onboarding:hover {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
