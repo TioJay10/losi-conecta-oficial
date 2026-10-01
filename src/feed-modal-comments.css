@@ -232,3 +232,48 @@
     font-size:19px !important;
   }
 }
+
+
+/* FEED — composição do cabeçalho da publicação */
+.feed-post > .feed-post-head{
+  position:relative !important;
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+
+.feed-post > .feed-post-menu-wrap{
+  top:10px !important;
+  right:10px !important;
+  left:auto !important;
+}
+
+.feed-post > .feed-profile-link{
+  position:absolute !important;
+  top:52px !important;
+  right:10px !important;
+  margin:0 !important;
+  z-index:85 !important;
+}
+
+@media(max-width:700px){
+  .feed-post{
+    padding:12px !important;
+  }
+
+  .feed-post > .feed-post-head{
+    gap:8px !important;
+    padding-left:0 !important;
+  }
+
+  .feed-post > .feed-post-menu-wrap{
+    top:6px !important;
+    right:6px !important;
+  }
+
+  .feed-post > .feed-profile-link{
+    top:43px !important;
+    right:6px !important;
+    font-size:10px !important;
+    line-height:1.2 !important;
+  }
+}
