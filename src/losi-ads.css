@@ -1,0 +1,52 @@
+/* LOSI ADS — superfície própria do produto, mantendo o sistema visual do painel */
+.losi-ads-page{min-height:100vh;background:#fff;color:#172033;font-family:"Montserrat",Arial,sans-serif;padding:32px 28px 60px;box-sizing:border-box}
+.losi-ads-shell{width:min(1120px,100%);margin:0 auto}
+.losi-ads-header{display:flex;align-items:flex-start;justify-content:space-between;gap:28px;padding:8px 0 30px;border-bottom:1px solid #e7ebf0}
+.losi-ads-eyebrow,.losi-ads-section-label{font-size:11px;font-weight:800;letter-spacing:.16em;color:#9a762d}
+.losi-ads-header h1{margin:8px 0 8px;font-size:34px;line-height:1.12;color:#0b182a;letter-spacing:-.025em}
+.losi-ads-header p,.losi-ads-section-copy,.losi-ads-my-ads p{margin:0;color:#687386;font-size:14px;line-height:1.55}
+.losi-ads-balance{min-width:180px;padding:16px 18px;border:1px solid rgba(214,180,106,.65);border-radius:14px;background:#fff;text-align:right}
+.losi-ads-balance span{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;color:#7b8492}
+.losi-ads-balance strong{display:block;margin:4px 0 8px;font-size:28px;line-height:1;color:#0b182a}
+.losi-ads-balance button,.losi-ads-my-ads button{border:0;background:transparent;color:#916c27;font-size:12px;font-weight:800;padding:0;cursor:pointer}
+.losi-ads-choice-card,.losi-ads-form-card{margin-top:22px;border:1px solid #e1e6ec;border-radius:16px;background:#fff;padding:26px}
+.losi-ads-choice-card{box-shadow:0 0 0 1px rgba(214,180,106,.12),0 0 9px rgba(214,180,106,.20)}
+.losi-ads-choice-card h2,.losi-ads-form-card h2,.losi-ads-my-ads h2{margin:7px 0 6px;color:#0b182a;font-size:22px;line-height:1.2}
+.losi-ads-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+.losi-ads-type-card{position:relative;text-align:left;min-height:190px;padding:22px;border:1px solid #dfe5ec;border-radius:13px;background:#fff;color:#172033;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;transition:border-color .18s ease,background .18s ease}
+.losi-ads-type-card:hover,.losi-ads-type-card.selected{border-color:#c6a45b;background:#fffdf7}
+.losi-ads-type-card.selected{box-shadow:inset 0 0 0 1px rgba(198,164,91,.2)}
+.losi-ads-type-number{font-size:10px;font-weight:800;letter-spacing:.12em;color:#a27d35}
+.losi-ads-type-icon{position:absolute;top:20px;right:20px;width:34px;height:34px;border-radius:9px;background:#0b182a;color:#e3c879;display:grid;place-items:center;font-size:18px;font-weight:700}
+.losi-ads-type-card strong{margin-top:30px;font-size:16px;letter-spacing:.06em;color:#0b182a}
+.losi-ads-type-card span:not(.losi-ads-type-number):not(.losi-ads-type-icon){margin-top:9px;color:#687386;font-size:13px;line-height:1.5;max-width:470px}
+.losi-ads-type-card em{margin-top:auto;padding-top:16px;font-style:normal;color:#9a762d;font-size:11px;font-weight:800;letter-spacing:.06em}
+.losi-ads-form-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.losi-ads-form-heading p{margin:0;color:#687386;font-size:13px;line-height:1.5}
+.losi-ads-credit-badge{flex:none;border:1px solid rgba(214,180,106,.65);border-radius:999px;padding:7px 10px;color:#9a762d;font-size:10px;font-weight:800;letter-spacing:.1em}
+.losi-ads-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:24px}
+.losi-ads-form-grid label{display:grid;gap:7px;min-width:0}
+.losi-ads-form-grid label.full{grid-column:1/-1}
+.losi-ads-form-grid label span{font-size:11px;font-weight:700;color:#465267}
+.losi-ads-form-grid input,.losi-ads-form-grid select,.losi-ads-form-grid textarea{width:100%;box-sizing:border-box;border:1px solid #dce2e9;border-radius:9px;background:#fff;color:#172033;padding:12px 13px;font:500 13px/1.4 "Montserrat",Arial,sans-serif;outline:none}
+.losi-ads-form-grid input:focus,.losi-ads-form-grid select:focus,.losi-ads-form-grid textarea:focus{border-color:#c5a15a;box-shadow:0 0 0 3px rgba(214,180,106,.13)}
+.losi-ads-form-grid textarea{resize:vertical;min-height:110px}
+.losi-ads-form-footer{margin-top:24px;padding-top:20px;border-top:1px solid #e8ecf1;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.losi-ads-form-footer span{font-size:12px;color:#778294;line-height:1.45}
+.losi-ads-publish-button{border:1px solid #d6b46a;border-radius:9px;background:#0b182a;color:#f0d99a;padding:12px 17px;font:800 12px/1 "Montserrat",Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
+.losi-ads-my-ads{margin-top:22px;padding:24px 26px;border:1px solid #e1e6ec;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px}
+@media(max-width:720px){
+  .losi-ads-page{padding:18px 12px 42px}
+  .losi-ads-header{display:block;padding-bottom:22px}
+  .losi-ads-header h1{font-size:28px}
+  .losi-ads-balance{margin-top:18px;text-align:left}
+  .losi-ads-choice-card,.losi-ads-form-card{padding:18px;border-radius:13px}
+  .losi-ads-type-grid,.losi-ads-form-grid{grid-template-columns:1fr}
+  .losi-ads-type-card{min-height:170px}
+  .losi-ads-form-heading{display:block}
+  .losi-ads-credit-badge{display:inline-block;margin-top:12px}
+  .losi-ads-form-grid label.full{grid-column:auto}
+  .losi-ads-form-footer,.losi-ads-my-ads{display:block}
+  .losi-ads-publish-button{width:100%;margin-top:15px;min-height:46px}
+  .losi-ads-my-ads button{margin-top:16px}
+}
