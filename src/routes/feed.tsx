@@ -1599,6 +1599,8 @@ function FeedPage() {
                         <span>{[post.city, post.state].filter(Boolean).join(" — ") || "LOSI CONECTA"} · {formatDate(post.created_at)}</span>
                         {post.main_category && <span className="feed-category">{post.main_category}</span>}
                       </div>
+
+                        </div>
                       {userId === post.author_user_id && (
                         <div className="feed-post-menu-wrap">
                           <button type="button" className="feed-post-menu-button" aria-label="Opções da publicação" aria-expanded={postMenuId === post.id} onClick={() => setPostMenuId(postMenuId === post.id ? null : post.id)}>•••</button>
@@ -1609,7 +1611,6 @@ function FeedPage() {
                               <button type="button" className="danger" onClick={() => void deletePost(post)}>Excluir conteúdo</button>
                             </div>
                           )}
-                        </div>
                       )}
                     </div>
                     <Link to="/fornecedor/$slug" params={{ slug: post.slug }} className="feed-profile-link">Ver perfil público</Link>
@@ -1712,6 +1713,8 @@ function FeedPage() {
                         <span>{[modalPost.city, modalPost.state].filter(Boolean).join(" — ") || "LOSI CONECTA"} · {formatDate(modalPost.created_at)}</span>
                         {modalPost.main_category && <span className="feed-category">{modalPost.main_category}</span>}
                       </div>
+
+                        </div>
                       {userId === modalPost.author_user_id && (
                         <div className="feed-post-menu-wrap">
                           <button type="button" className="feed-post-menu-button" aria-label="Opções da publicação" aria-expanded={postMenuId === modalPost.id} onClick={() => setPostMenuId(postMenuId === modalPost.id ? null : modalPost.id)}>•••</button>
@@ -1722,7 +1725,6 @@ function FeedPage() {
                               <button type="button" className="danger" onClick={() => void deletePost(modalPost)}>Excluir conteúdo</button>
                             </div>
                           )}
-                        </div>
                       )}
                     </div>
                     <Link to="/fornecedor/$slug" params={{ slug: modalPost.slug }} className="feed-profile-link">Ver perfil público</Link>
