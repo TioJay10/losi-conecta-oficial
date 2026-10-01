@@ -234,7 +234,140 @@
   letter-spacing:.04em;
   cursor:pointer;
 }
-.losi-ads-form-message{\n  margin-top:14px;\n  padding:12px 14px;\n  border:1px solid rgba(214,180,106,.55);\n  border-radius:9px;\n  background:#fffaf0;\n  color:#76591f;\n  font-size:12px;\n  line-height:1.5;\n}\n.losi-ads-my-ads{
+
+.losi-ads-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:3000;
+  display:grid;
+  place-items:center;
+  padding:22px;
+  background:rgba(7,18,32,.42);
+}
+.losi-ads-credit-modal{
+  width:min(760px,100%);
+  max-height:min(88vh,760px);
+  overflow:auto;
+  box-sizing:border-box;
+  padding:26px;
+  border:1px solid rgba(214,180,106,.72);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 0 0 1px rgba(214,180,106,.12),0 0 18px rgba(214,180,106,.22);
+}
+.losi-ads-modal-topline{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:22px;
+}
+.losi-ads-modal-topline h2{
+  margin:7px 0 6px;
+  color:#0b182a;
+  font-size:24px;
+  line-height:1.2;
+}
+.losi-ads-modal-topline p{
+  margin:0;
+  max-width:570px;
+  color:#687386;
+  font-size:13px;
+  line-height:1.5;
+}
+.losi-ads-modal-close{
+  flex:none;
+  width:36px;
+  height:36px;
+  border:1px solid #dfe5ec;
+  border-radius:9px;
+  background:#fff;
+  color:#687386;
+  font-size:24px;
+  line-height:1;
+  cursor:pointer;
+}
+.losi-ads-package-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  margin-top:24px;
+}
+.losi-ads-package-card{
+  position:relative;
+  min-width:0;
+  min-height:145px;
+  padding:16px 12px;
+  border:1px solid #dfe5ec;
+  border-radius:12px;
+  background:#fff;
+  color:#172033;
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+.losi-ads-package-card:hover,.losi-ads-package-card.selected{
+  border-color:#c6a45b;
+  background:#fffdf7;
+}
+.losi-ads-package-card.selected{
+  box-shadow:inset 0 0 0 1px rgba(198,164,91,.2);
+}
+.losi-ads-package-card > span{
+  color:#9a762d;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.09em;
+}
+.losi-ads-package-card strong{
+  margin-top:17px;
+  color:#0b182a;
+  font-size:18px;
+  line-height:1;
+}
+.losi-ads-package-card small{
+  margin-top:8px;
+  color:#778294;
+  font-size:10px;
+  line-height:1.35;
+}
+.losi-ads-package-card em{
+  margin-top:auto;
+  padding-top:10px;
+  color:#9a762d;
+  font-style:normal;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.losi-ads-purchase-footer{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid #e8ecf1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+}
+.losi-ads-purchase-footer span{
+  color:#778294;
+  font-size:11px;
+  line-height:1.45;
+}
+.losi-ads-purchase-button{
+  flex:none;
+  min-height:44px;
+  padding:0 18px;
+  border:1px solid #d6b46a;
+  border-radius:9px;
+  background:#0b182a;
+  color:#f0d99a;
+  font:800 11px/1 "Montserrat",Arial,sans-serif;
+  letter-spacing:.06em;
+  cursor:pointer;
+}
+\n.losi-ads-my-ads{
   margin-top:22px;
   padding:24px 26px;
   border:1px solid #e1e6ec;
@@ -275,7 +408,16 @@
   .losi-ads-my-ads button{margin-top:16px}
 }
 
-@media(max-width:420px){
+@media(max-width:720px){\n
+  .losi-ads-modal-backdrop{padding:10px;align-items:end}
+  .losi-ads-credit-modal{max-height:92dvh;padding:18px;border-radius:15px}
+  .losi-ads-modal-topline h2{font-size:21px}
+  .losi-ads-package-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .losi-ads-package-card{min-height:132px;padding:14px 12px}
+  .losi-ads-package-card strong{margin-top:14px}
+  .losi-ads-purchase-footer{display:block}
+  .losi-ads-purchase-button{width:100%;margin-top:14px}
+}\n\n@media(max-width:420px){
   .losi-ads-content{padding-left:10px;padding-right:10px}
   .losi-ads-header h1{font-size:26px}
   .losi-ads-choice-card,.losi-ads-form-card{padding:16px}
