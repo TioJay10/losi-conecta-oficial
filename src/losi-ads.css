@@ -763,3 +763,9 @@
   .losi-ads-my-applications-list{grid-template-columns:1fr}
   .losi-ads-my-application-footer{align-items:flex-start;flex-direction:column}
 }
+@media(max-width:720px){
+  /* LOSI ADS: o botão Sair permanece encostado à direita no cabeçalho mobile. */
+  .losi-ads-dashboard .dashboard-header .dashboard-logout{
+    margin-left:auto !important;
+  }
+}
