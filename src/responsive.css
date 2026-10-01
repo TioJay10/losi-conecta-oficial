@@ -2291,12 +2291,8 @@ a {
   border: 1px solid rgba(214,180,106,.17);
   background:
     linear-gradient(145deg, rgba(255,255,255,.96), rgba(249,247,241,.88));
-  border-radius: 18px;
-  box-shadow:
-    inset 0 1px rgba(255,255,255,.95),
-    inset 0 -1px rgba(197,180,145,.18),
-    0 14px 34px rgba(23,32,51,.055),
-    0 2px 0 rgba(214,180,106,.045);
+  border-radius: 10px;
+  box-shadow: none;
 }
 .dashboard-main .dashboard-grid > button::after,
 .dashboard-main .dashboard-status::after,
@@ -2311,15 +2307,12 @@ a {
 .dashboard-main .dashboard-grid > button {
   min-height: 142px;
   padding: 25px;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  transition: border-color .2s ease;
 }
 .dashboard-main .dashboard-grid > button:hover {
   border-color: rgba(174,132,57,.34);
-  transform: translateY(-3px);
-  box-shadow:
-    inset 0 1px rgba(255,255,255,.98),
-    0 18px 40px rgba(23,32,51,.075),
-    0 3px 0 rgba(214,180,106,.08);
+  transform: none;
+  box-shadow: none;
 }
 .dashboard-main .dashboard-grid > button strong { position: relative; z-index: 1; color: #182235; }
 .dashboard-main .dashboard-grid > button span { position: relative; z-index: 1; color: #70798a; }
