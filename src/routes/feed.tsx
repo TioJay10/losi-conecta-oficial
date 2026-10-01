@@ -1611,8 +1611,8 @@ function FeedPage() {
                           )}
                         </div>
                       )}
-                      <Link to="/fornecedor/$slug" params={{ slug: post.slug }} className="feed-profile-link">Ver perfil público</Link>
                     </div>
+                    <Link to="/fornecedor/$slug" params={{ slug: post.slug }} className="feed-profile-link">Ver perfil público</Link>
 
                     {!post.active && userId === post.author_user_id && <div className="feed-hidden-notice">Conteúdo oculto — somente você pode visualizar.</div>}
                     {editingPostId === post.id ? (
@@ -1724,8 +1724,8 @@ function FeedPage() {
                           )}
                         </div>
                       )}
-                      <Link to="/fornecedor/$slug" params={{ slug: modalPost.slug }} className="feed-profile-link">Ver perfil público</Link>
                     </div>
+                    <Link to="/fornecedor/$slug" params={{ slug: modalPost.slug }} className="feed-profile-link">Ver perfil público</Link>
 
                     {!modalPost.active && userId === modalPost.author_user_id && <div className="feed-hidden-notice">Conteúdo oculto — somente você pode visualizar.</div>}
                     {editingPostId === modalPost.id ? (
