@@ -13,6 +13,7 @@ function LosiAdsPage() {
   const navigate = useNavigate();
   const [type, setType] = useState<AdType>("event");
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
