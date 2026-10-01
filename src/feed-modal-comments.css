@@ -43,9 +43,9 @@
   position:static;
 }
 
-.feed-post-menu-wrap{
+ .feed-post-menu-wrap{
   position:absolute;
-  left:8px;
+  right:8px;
   top:8px;
   display:flex;
   align-items:flex-start;
@@ -75,10 +75,10 @@
   outline:none;
 }
 
-.feed-post-menu{
+ .feed-post-menu{
   position:absolute;
   top:34px;
-  left:0;
+  right:0;
   z-index:100;
   width:210px;
   padding:6px;
