@@ -9,6 +9,27 @@ import { calculateReputation } from "../lib/reputation";
 type Category = { id: string; name: string; slug: string };
 type Service = { id: string; name: string; category_id: string; categories: { name: string } | null };
 type ReviewSummary = { rating: number };
+type LosiAd = {
+  id: string;
+  ad_type: "event" | "opportunity";
+  title: string;
+  category: string | null;
+  event_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  city: string | null;
+  state: string | null;
+  cep: string | null;
+  description: string;
+  contact: string | null;
+  role: string | null;
+  quantity: number | null;
+  value_cents: number | null;
+  requirements: string | null;
+  published_at: string | null;
+  expires_at: string | null;
+};
+
 type Business = {
   id: string; business_name: string; slug: string; description: string | null;
   whatsapp: string | null; phone: string | null; instagram: string | null; website: string | null;
@@ -42,6 +63,8 @@ const OFFICIAL_BUSINESS_ID = "333ccf56-324f-4e4f-99e3-1ebc9ade0140";
 
 function SearchPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [ads, setAds] = useState<LosiAd[]>([]);
+  const [resultType, setResultType] = useState<"all" | "providers" | "opportunities" | "events">("all");
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
   const [submittedSearch, setSubmittedSearch] = useState("");
@@ -88,7 +111,7 @@ const [locationResolving, setLocationResolving] = useState(false);
       if (mounted) setAuthLoading(false);
       // Carregamos cada fonte de dados de forma independente. Um problema
       // pontual no ranking/planos não pode impedir a exibição dos fornecedores.
-      const [businessResult, categoryResult, planResult] = await Promise.all([
+      const [businessResult, categoryResult, planResult, adsResult] = await Promise.all([
         supabase
           .from("business_profiles")
           .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count")
@@ -97,6 +120,12 @@ const [locationResolving, setLocationResolving] = useState(false);
           .order("business_name"),
         supabase.from("categories").select("id,name,slug").eq("active", true).order("name"),
         supabase.from("supplier_plan_visibility").select("business_id,plan_slug,plan_name,plan_priority,ends_at"),
+        supabase
+          .from("losi_ads")
+          .select("id,ad_type,title,category,event_date,start_time,end_time,city,state,cep,description,contact,role,quantity,value_cents,requirements,published_at,expires_at")
+          .eq("status", "published")
+          .or("expires_at.is.null,expires_at.gt." + new Date().toISOString())
+          .order("published_at", { ascending: false }),
       ]);
       if (!mounted) return;
 
@@ -136,6 +165,8 @@ const [locationResolving, setLocationResolving] = useState(false);
       if (serviceResult.error) console.warn("Não foi possível carregar serviços dos fornecedores:", serviceResult.error);
       if (reviewResult.error) console.warn("Não foi possível carregar avaliações dos fornecedores:", reviewResult.error);
       if (planResult.error) console.warn("Não foi possível carregar planos dos fornecedores:", planResult.error);
+      if (adsResult.error) console.warn("Não foi possível carregar anúncios LOSI ADS:", adsResult.error);
+      setAds((adsResult.data ?? []) as LosiAd[]);
 
       const servicesByBusiness = new Map<string, Service[]>();
       for (const service of (serviceResult.data ?? []) as Array<Service & { business_id: string }>) {
@@ -409,7 +440,33 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
     }));
   }, [results, submittedSearch]);
 
-  const sortedResults = useMemo(() => {
+  const filteredAds = useMemo(() => {
+    const normalizedCity = city.trim().toLocaleLowerCase("pt-BR");
+    const normalizedSearch = submittedSearch.trim().toLocaleLowerCase("pt-BR");
+
+    return ads.filter((ad) => {
+      if (resultType === "providers") return false;
+      if (resultType === "opportunities" && ad.ad_type !== "opportunity") return false;
+      if (resultType === "events" && ad.ad_type !== "event") return false;
+
+      const searchable = [
+        ad.title,
+        ad.category ?? "",
+        ad.description,
+        ad.role ?? "",
+        ad.city ?? "",
+        ad.state ?? "",
+        ad.requirements ?? "",
+      ].join(" ").toLocaleLowerCase("pt-BR");
+
+      return (
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedCity || (ad.city ?? "").toLocaleLowerCase("pt-BR").includes(normalizedCity))
+      );
+    });
+  }, [ads, city, submittedSearch, resultType]);
+
+  const sortedProviderResults = useMemo(() => {
     const copy = [...scoredResults];
     const rating = (business: Business) =>
       business.reviews.length
@@ -664,6 +721,13 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
         </aside>
 
         <section className="marketplace-results">
+          <div className="marketplace-result-type-tabs" role="tablist" aria-label="Tipo de resultado">
+            <button type="button" className={resultType === "all" ? "active" : ""} onClick={() => setResultType("all")}>Todos <span>{results.length + filteredAds.length}</span></button>
+            <button type="button" className={resultType === "providers" ? "active" : ""} onClick={() => setResultType("providers")}>Fornecedores <span>{results.length}</span></button>
+            <button type="button" className={resultType === "opportunities" ? "active" : ""} onClick={() => setResultType("opportunities")}>Oportunidades <span>{filteredAds.filter((ad) => ad.ad_type === "opportunity").length}</span></button>
+            <button type="button" className={resultType === "events" ? "active" : ""} onClick={() => setResultType("events")}>Eventos <span>{filteredAds.filter((ad) => ad.ad_type === "event").length}</span></button>
+          </div>
+
           <div className="marketplace-results-top">
             <div>
               <div className="marketplace-results-context">{loading ? "CARREGANDO" : results.length + " RESULTADO" + (results.length === 1 ? "" : "S")}</div>
@@ -709,8 +773,49 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
             </div>
           )}
 
+          {filteredAds.length > 0 && resultType !== "providers" && (
+            <div className="marketplace-ads-section">
+              <div className="marketplace-ads-heading">
+                <div>
+                  <span>LOSI ADS</span>
+                  <h3>{resultType === "events" ? "Eventos publicados" : resultType === "opportunities" ? "Oportunidades abertas" : "Eventos e oportunidades"}</h3>
+                </div>
+                <p>Anúncios publicados por fornecedores da plataforma.</p>
+              </div>
+              <div className="marketplace-ads-grid">
+                {filteredAds.map((ad) => (
+                  <article className={"marketplace-ad-card " + ad.ad_type} key={ad.id}>
+                    <div className="marketplace-ad-topline">
+                      <span className="marketplace-ad-badge">{ad.ad_type === "event" ? "EVENTO" : "OPORTUNIDADE"}</span>
+                      {ad.category && <span className="marketplace-ad-category">{ad.category}</span>}
+                    </div>
+                    <h3>{ad.title}</h3>
+                    {(ad.city || ad.state) && <div className="marketplace-ad-location">{ad.city}{ad.city && ad.state ? " — " : ""}{ad.state}</div>}
+                    <div className="marketplace-ad-meta">
+                      {ad.event_date && <span>Data: {new Date(ad.event_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>}
+                      {(ad.start_time || ad.end_time) && <span>Horário: {ad.start_time?.slice(0,5) ?? ""}{ad.end_time ? " às " + ad.end_time.slice(0,5) : ""}</span>}
+                      {ad.ad_type === "opportunity" && ad.role && <span>Função: {ad.role}</span>}
+                      {ad.ad_type === "opportunity" && ad.quantity && <span>Vagas: {ad.quantity}</span>}
+                      {ad.ad_type === "opportunity" && ad.value_cents !== null && <span>Valor: R$ {(ad.value_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>}
+                    </div>
+                    <p>{ad.description}</p>
+                    {ad.ad_type === "opportunity" && ad.requirements && (
+                      <div className="marketplace-ad-requirements"><strong>Requisitos</strong><span>{ad.requirements}</span></div>
+                    )}
+                    {ad.contact && (
+                      <div className="marketplace-ad-contact">
+                        <span>Contato</span>
+                        <strong>{ad.contact}</strong>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="marketplace-grid">
-            {sortedResults.map((business) => {
+            {resultType !== "opportunities" && resultType !== "events" && sortedProviderResults.map((business) => {
               const whatsapp = whatsappUrl(business);
               const serviceNames = business.services.map((service) => service.name).filter(Boolean).slice(0, 3);
               const isOfficial = business.id === OFFICIAL_BUSINESS_ID;
