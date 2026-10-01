@@ -86,6 +86,10 @@ const [locationResolving, setLocationResolving] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [favoriteBusy, setFavoriteBusy] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedAd, setSelectedAd] = useState<LosiAd | null>(null);
+  const [applicationMessage, setApplicationMessage] = useState("");
+  const [applicationSending, setApplicationSending] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingAuthAction, setPendingAuthAction] = useState<
     { type: "favorite"; businessId: string } | { type: "whatsapp"; url: string } | { type: "menu"; path: string } | null
@@ -491,6 +495,33 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
     ).map((item) => item.business);
   }, [scoredResults, sortBy, favoriteIds]);
 
+  async function applyToAd() {
+    if (!selectedAd || selectedAd.ad_type !== "opportunity") return;
+    if (!userId) {
+      setPendingAuthAction({ type: "menu", path: "/buscar" });
+      setAuthModalOpen(true);
+      return;
+    }
+    setApplicationSending(true);
+    setApplicationStatus("");
+    const { error } = await supabase.from("losi_ads_applications").insert({
+      ad_id: selectedAd.id,
+      user_id: userId,
+      message: applicationMessage.trim() || null,
+    });
+    if (error) {
+      setApplicationStatus(
+        error.code === "23505"
+          ? "Você já demonstrou interesse nesta oportunidade."
+          : "Não foi possível enviar seu interesse agora. Tente novamente."
+      );
+    } else {
+      setApplicationStatus("Interesse enviado. O fornecedor poderá entrar em contato com você.");
+      setApplicationMessage("");
+    }
+    setApplicationSending(false);
+  }
+
   async function saveFavoriteForUser(businessId: string, currentUserId: string) {
     setFavoriteBusy(businessId);
     const isFavorite = favoriteIds.includes(businessId);
@@ -635,6 +666,52 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
           </Link>
         </div>
       </nav>
+
+      {selectedAd && (
+        <div className="marketplace-ad-modal-backdrop" role="presentation" onClick={() => { setSelectedAd(null); setApplicationStatus(""); }}>
+          <section className="marketplace-ad-modal" role="dialog" aria-modal="true" aria-labelledby="marketplace-ad-modal-title" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="marketplace-ad-modal-close" aria-label="Fechar anúncio" onClick={() => { setSelectedAd(null); setApplicationStatus(""); }}>×</button>
+            <div className="marketplace-ad-topline">
+              <span className="marketplace-ad-badge">{selectedAd.ad_type === "event" ? "EVENTO" : "OPORTUNIDADE"}</span>
+              {selectedAd.category && <span className="marketplace-ad-category">{selectedAd.category}</span>}
+            </div>
+            <h2 id="marketplace-ad-modal-title">{selectedAd.title}</h2>
+            {(selectedAd.city || selectedAd.state) && <div className="marketplace-ad-location">{selectedAd.city}{selectedAd.city && selectedAd.state ? " — " : ""}{selectedAd.state}</div>}
+            <div className="marketplace-ad-modal-meta">
+              {selectedAd.event_date && <span><strong>Data</strong>{new Date(selectedAd.event_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>}
+              {(selectedAd.start_time || selectedAd.end_time) && <span><strong>Horário</strong>{selectedAd.start_time?.slice(0,5) ?? ""}{selectedAd.end_time ? " às " + selectedAd.end_time.slice(0,5) : ""}</span>}
+              {selectedAd.ad_type === "opportunity" && selectedAd.role && <span><strong>Função</strong>{selectedAd.role}</span>}
+              {selectedAd.ad_type === "opportunity" && selectedAd.quantity && <span><strong>Vagas</strong>{selectedAd.quantity}</span>}
+              {selectedAd.ad_type === "opportunity" && selectedAd.value_cents !== null && <span><strong>Valor</strong>R$ {(selectedAd.value_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>}
+            </div>
+            <div className="marketplace-ad-modal-description">
+              <span>DESCRIÇÃO</span>
+              <p>{selectedAd.description}</p>
+            </div>
+            {selectedAd.ad_type === "opportunity" && selectedAd.requirements && (
+              <div className="marketplace-ad-modal-description">
+                <span>REQUISITOS</span>
+                <p>{selectedAd.requirements}</p>
+              </div>
+            )}
+            {selectedAd.ad_type === "opportunity" ? (
+              <div className="marketplace-ad-modal-application">
+                <label htmlFor="marketplace-ad-application-message">Mensagem para o fornecedor <small>(opcional)</small></label>
+                <textarea id="marketplace-ad-application-message" value={applicationMessage} onChange={(event) => setApplicationMessage(event.target.value)} placeholder="Conte brevemente por que você tem interesse nesta oportunidade." rows={4} />
+                <button type="button" className="marketplace-ad-apply-button" onClick={applyToAd} disabled={applicationSending}>
+                  {applicationSending ? "ENVIANDO..." : userId ? "TENHO INTERESSE" : "ENTRAR E DEMONSTRAR INTERESSE"}
+                </button>
+                {applicationStatus && <div className="marketplace-ad-application-status">{applicationStatus}</div>}
+              </div>
+            ) : selectedAd.contact ? (
+              <div className="marketplace-ad-modal-contact">
+                <span>CONTATO DO EVENTO</span>
+                <strong>{selectedAd.contact}</strong>
+              </div>
+            ) : null}
+          </section>
+        </div>
+      )}
 
       {authModalOpen && (
         <AuthModal
@@ -796,7 +873,7 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
               </div>
               <div className="marketplace-ads-grid">
                 {filteredAds.map((ad) => (
-                  <article className={"marketplace-ad-card " + ad.ad_type} key={ad.id}>
+                  <article className={"marketplace-ad-card " + ad.ad_type} key={ad.id} role="button" tabIndex={0} onClick={() => { setSelectedAd(ad); setApplicationStatus(""); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedAd(ad); setApplicationStatus(""); } }}>
                     <div className="marketplace-ad-topline">
                       <span className="marketplace-ad-badge">{ad.ad_type === "event" ? "EVENTO" : "OPORTUNIDADE"}</span>
                       {ad.category && <span className="marketplace-ad-category">{ad.category}</span>}
