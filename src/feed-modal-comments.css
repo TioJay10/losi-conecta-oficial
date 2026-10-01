@@ -43,7 +43,7 @@
   position:static;
 }
 
- .feed-post-menu-wrap{
+.feed-post-menu-wrap{
   position:absolute;
   right:8px;
   top:8px;
@@ -75,7 +75,7 @@
   outline:none;
 }
 
- .feed-post-menu{
+.feed-post-menu{
   position:absolute;
   top:34px;
   right:0;
