@@ -189,3 +189,14 @@
     flex:1 1 120px;
   }
 }
+
+
+/* Posicionamento definitivo do menu: relativo ao card inteiro da publicação */
+.feed-post > .feed-post-head > .feed-post-menu-wrap{
+  position:absolute !important;
+  top:10px !important;
+  right:10px !important;
+  left:auto !important;
+  margin:0 !important;
+  z-index:90 !important;
+}
