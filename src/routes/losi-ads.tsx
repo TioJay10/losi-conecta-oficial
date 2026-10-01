@@ -204,7 +204,27 @@ function LosiAdsPage() {
     });
 
     if (error || !data?.success) {
-      setPurchaseMessage(data?.error ?? error?.message ?? "Não foi possível iniciar o pagamento.");
+      let detail = data?.error ?? "";
+
+      if (!detail && error) {
+        const context = (error as { context?: Response }).context;
+        if (context) {
+          try {
+            const body = await context.clone().json();
+            detail = body?.error ?? body?.message ?? "";
+            if (body?.details?.errors?.length) {
+              detail += " " + body.details.errors
+                .map((item: { description?: string }) => item.description)
+                .filter(Boolean)
+                .join(" ");
+            }
+          } catch {
+            // Keep the SDK error message when the response is not JSON.
+          }
+        }
+      }
+
+      setPurchaseMessage(detail || error?.message || "Não foi possível iniciar o pagamento.");
       setPurchaseLoading(false);
       return;
     }
