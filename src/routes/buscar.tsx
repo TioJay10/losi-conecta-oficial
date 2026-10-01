@@ -730,8 +730,18 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
 
           <div className="marketplace-results-top">
             <div>
-              <div className="marketplace-results-context">{loading ? "CARREGANDO" : results.length + " RESULTADO" + (results.length === 1 ? "" : "S")}</div>
-              <h2>{submittedSearch ? `Fornecedores para "${submittedSearch}"` : "Fornecedores em destaque"}</h2>
+              <div className="marketplace-results-context">{loading ? "CARREGANDO" : (resultType === "providers" ? results.length : resultType === "opportunities" || resultType === "events" ? filteredAds.length : results.length + filteredAds.length) + " RESULTADO" + ((resultType === "providers" ? results.length : resultType === "opportunities" || resultType === "events" ? filteredAds.length : results.length + filteredAds.length) === 1 ? "" : "S")}</div>
+              <h2>{
+                resultType === "opportunities"
+                  ? "Oportunidades para profissionais"
+                  : resultType === "events"
+                    ? "Eventos publicados"
+                    : submittedSearch
+                      ? `Resultados para "${submittedSearch}"`
+                      : resultType === "providers"
+                        ? "Fornecedores em destaque"
+                        : "Fornecedores, eventos e oportunidades"
+              }</h2>
             </div>
             <label className="marketplace-sort">
               <span>Ordenar por</span>
@@ -766,11 +776,13 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
             </div>
           )}
 
-          {!loading && !error && results.length === 0 && (
+          {!loading && !error && (
+            (resultType === "providers" ? results.length === 0 : resultType === "opportunities" || resultType === "events" ? filteredAds.length === 0 : results.length + filteredAds.length === 0) && (
             <div className="marketplace-empty">
               <strong>{sortBy === "saved" ? "Você ainda não tem fornecedores salvos." : "Nenhum fornecedor encontrado."}</strong>
-              <p>{sortBy === "saved" ? "Salve fornecedores durante sua pesquisa para encontrá-los novamente." : "Tente remover um filtro ou pesquisar por outro serviço ou cidade."}</p>
+              <p>{sortBy === "saved" && resultType === "providers" ? "Salve fornecedores durante sua pesquisa para encontrá-los novamente." : resultType === "opportunities" ? "No momento não há oportunidades que correspondam aos filtros informados." : resultType === "events" ? "No momento não há eventos que correspondam aos filtros informados." : "Tente remover um filtro ou pesquisar por outro serviço, cidade ou tipo de resultado."}</p>
             </div>
+            )
           )}
 
           {filteredAds.length > 0 && resultType !== "providers" && (
