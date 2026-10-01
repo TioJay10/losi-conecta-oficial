@@ -162,23 +162,23 @@ function LosiAdsPage() {
                   </div>
 
                   <div className="losi-ads-package-grid">
-                    {creditPackages.map(pkg => (
-                      (() => {
-                        const unit = pkg.price_cents / pkg.credits / 100;
-                        return (
-                      <button
-                        type="button"
-                        key={pkg.credits}
-                        className={"losi-ads-package-card" + (selectedPackage === pkg.credits ? " selected" : "")}
-                        onClick={() => setSelectedPackage(pkg.credits)}
-                        aria-pressed={selectedPackage === pkg.credits}
-                      >
-                        <span>{pkg.credits === 1 ? "1 CRÉDITO" : pkg.credits + " CRÉDITOS"}</span>
-                        <strong>{pkg.price}</strong>
-                        <small>{pkg.unit}</small>
-                        {pkg.featured && <em>MAIS ESCOLHIDO</em>}
-                      </button>
-                    ))}
+                    {creditPackages.map(pkg => {
+                      const unit = pkg.price_cents / pkg.credits / 100;
+                      return (
+                        <button
+                          type="button"
+                          key={pkg.credits}
+                          className={"losi-ads-package-card" + (selectedPackage === pkg.credits ? " selected" : "")}
+                          onClick={() => setSelectedPackage(pkg.credits)}
+                          aria-pressed={selectedPackage === pkg.credits}
+                        >
+                          <span>{pkg.credits === 1 ? "1 CRÉDITO" : pkg.credits + " CRÉDITOS"}</span>
+                          <strong>R$ {(pkg.price_cents / 100).toFixed(2).replace(".", ",")}</strong>
+                          <small>R$ {unit.toFixed(2).replace(".", ",")} por crédito</small>
+                          {pkg.featured && <em>MAIS ESCOLHIDO</em>}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   <div className="losi-ads-purchase-footer">
