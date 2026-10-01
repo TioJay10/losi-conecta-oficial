@@ -199,6 +199,19 @@ function LosiAdsPage() {
     }
     setApplicationsLoading(false);
   }
+  async function updateApplicationStatus(applicationId: string, status: "accepted" | "rejected") {
+    if (!supabase || !selectedMyAd) return;
+    const { error } = await supabase
+      .from("losi_ads_applications")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", applicationId)
+      .eq("ad_id", selectedMyAd.id);
+    if (error) return;
+    setApplications(current => current.map(item =>
+      item.id === applicationId ? { ...item, status } : item
+    ));
+  }
+
   async function publish(event: FormEvent) {
     event.preventDefault();
     setMessage("");
@@ -473,6 +486,12 @@ function LosiAdsPage() {
                           <div className="losi-ads-application-actions">
                             <span className={"losi-ads-application-status " + application.status}>{application.status === "pending" ? "PENDENTE" : application.status.toUpperCase()}</span>
                             {application.profile?.phone && <a href={"https://wa.me/" + application.profile.phone.replace(/\D/g, "")} target="_blank" rel="noreferrer">WHATSAPP</a>}
+                            {application.status === "pending" && (
+                              <>
+                                <button type="button" className="losi-ads-application-accept" onClick={() => void updateApplicationStatus(application.id, "accepted")}>ACEITAR</button>
+                                <button type="button" className="losi-ads-application-reject" onClick={() => void updateApplicationStatus(application.id, "rejected")}>RECUSAR</button>
+                              </>
+                            )}
                           </div>
                         </article>
                       ))}
