@@ -94,6 +94,8 @@ const [locationResolving, setLocationResolving] = useState(false);
   const [pendingAuthAction, setPendingAuthAction] = useState<
     { type: "favorite"; businessId: string } | { type: "whatsapp"; url: string } | { type: "menu"; path: string } | null
   >(null);
+  const [adCarouselIndex, setAdCarouselIndex] = useState(0);
+  const [adCarouselPaused, setAdCarouselPaused] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -469,6 +471,18 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
       );
     });
   }, [ads, city, submittedSearch, resultType]);
+
+  useEffect(() => {
+    if (filteredAds.length <= 1 || adCarouselPaused) return;
+    const timer = window.setInterval(() => {
+      setAdCarouselIndex((current) => (current + 1) % filteredAds.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [filteredAds.length, adCarouselPaused]);
+
+  useEffect(() => {
+    setAdCarouselIndex(0);
+  }, [submittedSearch, city, resultType]);
 
   const sortedProviderResults = useMemo(() => {
     const copy = [...scoredResults];
@@ -862,46 +876,74 @@ async function geocodeAddress(address: string, cep: string, city?: string, state
             )
           )}
 
-          {filteredAds.length > 0 && resultType !== "providers" && (
-            <div className="marketplace-ads-section">
-              <div className="marketplace-ads-heading">
-                <div>
-                  <span>LOSI ADS</span>
-                  <h3>{resultType === "events" ? "Eventos publicados" : resultType === "opportunities" ? "Oportunidades abertas" : "Eventos e oportunidades"}</h3>
+          {filteredAds.length > 0 && resultType !== "providers" && (() => {
+            const activeAd = filteredAds[adCarouselIndex] ?? filteredAds[0];
+            if (!activeAd) return null;
+            const previousAd = () => setAdCarouselIndex((current) => (current - 1 + filteredAds.length) % filteredAds.length);
+            const nextAd = () => setAdCarouselIndex((current) => (current + 1) % filteredAds.length);
+            return (
+              <div
+                className="marketplace-ads-section"
+                onMouseEnter={() => setAdCarouselPaused(true)}
+                onMouseLeave={() => setAdCarouselPaused(false)}
+                onFocus={() => setAdCarouselPaused(true)}
+                onBlur={() => setAdCarouselPaused(false)}
+              >
+                <div className="marketplace-ads-heading">
+                  <div>
+                    <span>LOSI ADS</span>
+                    <h3>{resultType === "events" ? "Eventos publicados" : resultType === "opportunities" ? "Oportunidades abertas" : "Eventos e oportunidades"}</h3>
+                  </div>
+                  <p>{filteredAds.length === 1 ? "1 anúncio publicado." : filteredAds.length + " anúncios em rotação automática."}</p>
                 </div>
-                <p>Anúncios publicados por fornecedores da plataforma.</p>
-              </div>
-              <div className="marketplace-ads-grid">
-                {filteredAds.map((ad) => (
-                  <article className={"marketplace-ad-card " + ad.ad_type} key={ad.id} role="button" tabIndex={0} onClick={() => { setSelectedAd(ad); setApplicationStatus(""); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedAd(ad); setApplicationStatus(""); } }}>
+                <div className="marketplace-ads-carousel" aria-roledescription="carrossel" aria-label="Anúncios LOSI ADS">
+                  <button type="button" className="marketplace-ads-carousel-arrow prev" onClick={previousAd} aria-label="Anúncio anterior">‹</button>
+                  <article
+                    className={"marketplace-ad-card marketplace-ad-carousel-card " + activeAd.ad_type}
+                    key={activeAd.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-roledescription="slide"
+                    aria-label={(adCarouselIndex + 1) + " de " + filteredAds.length + ": " + activeAd.title}
+                    onClick={() => { setSelectedAd(activeAd); setApplicationStatus(""); }}
+                    onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedAd(activeAd); setApplicationStatus(""); } }}
+                  >
                     <div className="marketplace-ad-topline">
-                      <span className="marketplace-ad-badge">{ad.ad_type === "event" ? "EVENTO" : "OPORTUNIDADE"}</span>
-                      {ad.category && <span className="marketplace-ad-category">{ad.category}</span>}
+                      <span className="marketplace-ad-badge">{activeAd.ad_type === "event" ? "EVENTO" : "OPORTUNIDADE"}</span>
+                      {activeAd.category && <span className="marketplace-ad-category">{activeAd.category}</span>}
                     </div>
-                    <h3>{ad.title}</h3>
-                    {(ad.city || ad.state) && <div className="marketplace-ad-location">{ad.city}{ad.city && ad.state ? " — " : ""}{ad.state}</div>}
+                    <h3>{activeAd.title}</h3>
+                    {(activeAd.city || activeAd.state) && <div className="marketplace-ad-location">{activeAd.city}{activeAd.city && activeAd.state ? " — " : ""}{activeAd.state}</div>}
                     <div className="marketplace-ad-meta">
-                      {ad.event_date && <span>Data: {new Date(ad.event_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>}
-                      {(ad.start_time || ad.end_time) && <span>Horário: {ad.start_time?.slice(0,5) ?? ""}{ad.end_time ? " às " + ad.end_time.slice(0,5) : ""}</span>}
-                      {ad.ad_type === "opportunity" && ad.role && <span>Função: {ad.role}</span>}
-                      {ad.ad_type === "opportunity" && ad.quantity && <span>Vagas: {ad.quantity}</span>}
-                      {ad.ad_type === "opportunity" && ad.value_cents !== null && <span>Valor: R$ {(ad.value_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>}
+                      {activeAd.event_date && <span>Data: {new Date(activeAd.event_date + "T00:00:00").toLocaleDateString("pt-BR")}</span>}
+                      {(activeAd.start_time || activeAd.end_time) && <span>Horário: {activeAd.start_time?.slice(0,5) ?? ""}{activeAd.end_time ? " às " + activeAd.end_time.slice(0,5) : ""}</span>}
+                      {activeAd.ad_type === "opportunity" && activeAd.role && <span>Função: {activeAd.role}</span>}
+                      {activeAd.ad_type === "opportunity" && activeAd.quantity && <span>Vagas: {activeAd.quantity}</span>}
+                      {activeAd.ad_type === "opportunity" && activeAd.value_cents !== null && <span>Valor: R$ {(activeAd.value_cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>}
                     </div>
-                    <p>{ad.description}</p>
-                    {ad.ad_type === "opportunity" && ad.requirements && (
-                      <div className="marketplace-ad-requirements"><strong>Requisitos</strong><span>{ad.requirements}</span></div>
+                    <p>{activeAd.description}</p>
+                    {activeAd.ad_type === "opportunity" && activeAd.requirements && (
+                      <div className="marketplace-ad-requirements"><strong>Requisitos</strong><span>{activeAd.requirements}</span></div>
                     )}
-                    {ad.contact && (
-                      <div className="marketplace-ad-contact">
-                        <span>Contato</span>
-                        <strong>{ad.contact}</strong>
-                      </div>
+                    {activeAd.contact && (
+                      <div className="marketplace-ad-contact"><span>Contato</span><strong>{activeAd.contact}</strong></div>
                     )}
                   </article>
-                ))}
+                  <button type="button" className="marketplace-ads-carousel-arrow next" onClick={nextAd} aria-label="Próximo anúncio">›</button>
+                </div>
+                {filteredAds.length > 1 && (
+                  <div className="marketplace-ads-carousel-footer">
+                    <div className="marketplace-ads-carousel-dots" aria-label="Selecionar anúncio">
+                      {filteredAds.map((ad, index) => (
+                        <button key={ad.id} type="button" className={index === adCarouselIndex ? "active" : ""} onClick={() => setAdCarouselIndex(index)} aria-label={"Ver anúncio " + (index + 1)} />
+                      ))}
+                    </div>
+                    <span>{adCarouselPaused ? "Pausado" : "Avanço automático"}</span>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           <div className="marketplace-grid">
             {resultType !== "opportunities" && resultType !== "events" && sortedProviderResults.map((business) => {
