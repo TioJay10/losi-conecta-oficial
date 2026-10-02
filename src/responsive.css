@@ -17477,6 +17477,73 @@ body,
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:12px;
 }
+.marketplace-ads-carousel{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) 42px;
+  align-items:stretch;
+  gap:10px;
+}
+.marketplace-ads-carousel-arrow{
+  align-self:center;
+  width:42px;
+  height:42px;
+  border:1px solid rgba(214,180,106,.55);
+  border-radius:50%;
+  background:#fff;
+  color:#8a6725;
+  font:400 28px/1 Arial,sans-serif;
+  cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease;
+}
+.marketplace-ads-carousel-arrow:hover{
+  background:#fffaf0;
+  border-color:#d6b46a;
+  transform:scale(1.04);
+}
+.marketplace-ad-carousel-card{
+  width:100%;
+  box-sizing:border-box;
+  animation:marketplaceAdCarouselIn .28s ease;
+}
+@keyframes marketplaceAdCarouselIn{
+  from{opacity:.55;transform:translateX(8px)}
+  to{opacity:1;transform:translateX(0)}
+}
+.marketplace-ads-carousel-footer{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin-top:10px;
+  min-height:18px;
+}
+.marketplace-ads-carousel-footer > span{
+  color:#8a94a3;
+  font:600 9px/1.2 "Montserrat",Arial,sans-serif;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.marketplace-ads-carousel-dots{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+.marketplace-ads-carousel-dots button{
+  width:6px;
+  height:6px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:#d9dee6;
+  cursor:pointer;
+  transition:width .18s ease,background .18s ease;
+}
+.marketplace-ads-carousel-dots button.active{
+  width:18px;
+  border-radius:999px;
+  background:#c39a4a;
+}
 .marketplace-ad-card{
   min-width:0;
   padding:18px;
@@ -17512,6 +17579,23 @@ body,
 .marketplace-ad-contact{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;padding-top:10px;border-top:1px solid #edf0f3}
 .marketplace-ad-contact span{color:#8a94a3;font:600 10px/1.2 "Montserrat",Arial,sans-serif}
 .marketplace-ad-contact strong{min-width:0;color:#8a6725;font:700 11px/1.3 "Montserrat",Arial,sans-serif;text-align:right;overflow-wrap:anywhere}
+@media(max-width:720px){
+  .marketplace-ads-carousel{
+    grid-template-columns:34px minmax(0,1fr) 34px;
+    gap:5px;
+  }
+  .marketplace-ads-carousel-arrow{
+    width:34px;
+    height:34px;
+    font-size:23px;
+  }
+  .marketplace-ad-carousel-card{
+    padding:16px;
+  }
+  .marketplace-ads-carousel-footer{
+    flex-wrap:wrap;
+  }
+}
 @media(max-width:720px){
   .marketplace-result-type-tabs{margin-bottom:17px}
   .marketplace-result-type-tabs button{padding:9px 9px 10px;font-size:10px}
