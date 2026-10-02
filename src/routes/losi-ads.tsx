@@ -129,6 +129,9 @@ function LosiAdsPage() {
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [myApplications, setMyApplications] = useState<MyApplication[]>([]);
   const [myApplicationsLoading, setMyApplicationsLoading] = useState(true);
+  const [pendingInvoices, setPendingInvoices] = useState<Array<{id:string;status:string|null;dueDate:string|null;invoiceUrl:string|null;bankSlipUrl:string|null;billingType:string|null;value:number|null;description:string|null;type:"ads"|"subscription"|"other";title:string}>>([]);
+  const [pendingInvoicesOpen, setPendingInvoicesOpen] = useState(false);
+  const [pendingInvoicesLoading, setPendingInvoicesLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -177,6 +180,25 @@ function LosiAdsPage() {
     void load();
     return () => { mounted = false; };
   }, [navigate]);
+
+  async function loadPendingInvoices() {
+    if (!supabase) return;
+    setPendingInvoicesLoading(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) return;
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-manage-pending-subscription", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: JSON.stringify({ action: "invoices" }) });
+      const result = await response.json();
+      if (response.ok && result?.success) setPendingInvoices(Array.isArray(result.invoices) ? result.invoices : []);
+    } catch (error) { console.error("Erro ao carregar faturas pendentes:", error); }
+    finally { setPendingInvoicesLoading(false); }
+  }
+
+  function openPendingInvoice(invoice: typeof pendingInvoices[number]) {
+    const url = invoice.invoiceUrl || invoice.bankSlipUrl;
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  }
 
   async function logout() {
     if (supabase) await supabase.auth.signOut();
@@ -236,6 +258,18 @@ function LosiAdsPage() {
       "Cobrança criada. Conclua o pagamento pela página do Asaas. Os créditos entram automaticamente após a confirmação."
     );
     setPurchaseLoading(false);
+  }
+
+  async function removeMyAd(ad: MyAd) {
+    if (!supabase) return;
+    const confirmed = window.confirm(`Deseja remover o anúncio "${ad.title}"? Ele deixará de aparecer no LOSI CONECTA. O crédito utilizado na publicação não será devolvido.`);
+    if (!confirmed) return;
+    const { data: userData } = await supabase.auth.getUser();
+    const { error } = await supabase.from("losi_ads").delete().eq("id", ad.id).eq("user_id", userData.user?.id ?? "");
+    if (error) { setMessage("Não foi possível remover o anúncio."); console.error("Erro ao remover anúncio:", error); return; }
+    setMyAds(current => current.filter(item => item.id !== ad.id));
+    if (selectedMyAd?.id === ad.id) setSelectedMyAd(null);
+    setMessage("Anúncio removido com sucesso.");
   }
 
   async function openApplications(ad: MyAd) {
@@ -382,6 +416,7 @@ function LosiAdsPage() {
                 <span>CRÉDITOS ADS</span>
                 <strong>{creditBalance}</strong>
                 <button type="button" onClick={() => setCreditsOpen(true)}>Comprar créditos</button>
+                 <button type="button" className="losi-ads-invoices-button" onClick={() => { void loadPendingInvoices(); setPendingInvoicesOpen(true); }}>{pendingInvoices.length ? "Faturas pendentes (" + pendingInvoices.length + ")" : "Ver faturas pendentes"}</button>
               </div>
             </header>
 
@@ -525,6 +560,7 @@ function LosiAdsPage() {
                           <span>Publicação ativa no LOSI CONECTA</span>
                         )}
                         <span>{ad.published_at ? "Publicado em " + new Date(ad.published_at).toLocaleDateString("pt-BR") : "Ainda não publicado"}</span>
+                        <button type="button" className="losi-ads-remove-button" onClick={() => void removeMyAd(ad)}>REMOVER ANÚNCIO</button>
                       </div>
                     </article>
                   ))}
