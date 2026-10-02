@@ -17840,3 +17840,42 @@ body,
     line-height:1.6 !important;
   }
 }
+
+
+/* LOSI ADS — correção do container real da candidatura */
+.marketplace-ad-modal-application{
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+.marketplace-ad-modal-application > label{
+  display:block !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+.marketplace-ad-modal-application > textarea#marketplace-ad-application-message{
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:100% !important;
+  box-sizing:border-box !important;
+  min-height:140px !important;
+  height:140px !important;
+  margin:0 !important;
+  padding:14px 15px !important;
+  resize:vertical !important;
+}
+.marketplace-ad-modal-application > .marketplace-ad-apply-button{
+  display:block !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+@media(max-width:720px){
+  .marketplace-ad-modal-application > textarea#marketplace-ad-application-message{
+    width:100% !important;
+    min-width:100% !important;
+    min-height:132px !important;
+    height:132px !important;
+  }
+}
