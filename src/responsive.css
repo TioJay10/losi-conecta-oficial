@@ -17710,3 +17710,79 @@ body,
   }
 }
 
+
+
+/* Financeiro — faturas pendentes */
+.dashboard-pending-invoices {
+  margin: 0 0 24px;
+  border: 1px solid rgba(214,180,106,.38);
+  border-radius: 14px;
+  background: linear-gradient(145deg,#121f32,#07111f);
+  overflow: hidden;
+}
+.dashboard-pending-invoices-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:20px 22px;
+  border-bottom:1px solid rgba(214,180,106,.24);
+}
+.dashboard-pending-invoices-header h2 { margin:4px 0 6px; color:#fff; font-size:20px; }
+.dashboard-pending-invoices-header p { margin:0; color:#f0d99a; }
+.dashboard-pending-invoices-count {
+  min-width:38px; height:38px; padding:0 10px; border-radius:10px;
+  display:grid; place-items:center; background:#d6b46a; color:#07111f; font-weight:900;
+}
+.dashboard-pending-invoices-list { display:grid; gap:10px; padding:14px; }
+.dashboard-pending-invoice {
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  padding:15px 16px; border:1px solid #dbe2ea; border-radius:10px; background:#fff;
+}
+.dashboard-pending-invoice > div:first-child { display:grid; gap:4px; min-width:0; }
+.dashboard-pending-invoice > div:first-child strong { color:#0b182a; font-size:14px; }
+.dashboard-pending-invoice > div:first-child span,
+.dashboard-pending-invoice > div:first-child small { color:#64748b; font-size:12px; }
+.dashboard-pending-invoice-side { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.dashboard-pending-invoice-side > strong { color:#0b182a; white-space:nowrap; }
+.dashboard-pending-invoice-side button,
+.losi-ads-invoice-card button {
+  min-height:40px; padding:0 15px; border:0; border-radius:9px;
+  background:#d6b46a; color:#07111f; font-weight:900; letter-spacing:.04em; cursor:pointer;
+}
+.dashboard-pending-invoice-side button:disabled,
+.losi-ads-invoice-card button:disabled { opacity:.55; cursor:not-allowed; }
+
+.losi-ads-balance { gap:8px; }
+.losi-ads-invoices-button {
+  min-height:36px; padding:0 12px; border:1px solid rgba(214,180,106,.55);
+  border-radius:9px; background:transparent; color:#f0d99a; font-weight:800; cursor:pointer;
+}
+.losi-ads-invoices-modal { width:min(720px,calc(100vw - 28px)); }
+.losi-ads-invoices-list { display:grid; gap:10px; max-height:55vh; overflow:auto; padding-right:2px; }
+.losi-ads-invoice-card {
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:15px; border:1px solid #e2e8f0; border-radius:11px; background:#fff;
+}
+.losi-ads-invoice-card > div:first-child { display:grid; gap:4px; min-width:0; }
+.losi-ads-invoice-card > div:first-child strong { color:#0b182a; font-size:14px; }
+.losi-ads-invoice-card > div:first-child span,
+.losi-ads-invoice-card > div:first-child small { color:#64748b; font-size:12px; }
+.losi-ads-invoice-card > div:last-child { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.losi-ads-invoice-card > div:last-child > strong { color:#0b182a; white-space:nowrap; }
+.losi-ads-remove-button {
+  border:1px solid rgba(170,44,44,.35) !important;
+  background:#fff !important; color:#9b2c2c !important;
+  min-height:34px; padding:0 10px; border-radius:8px; font-size:11px; font-weight:900; cursor:pointer;
+}
+@media (max-width: 720px) {
+  .dashboard-pending-invoices-header { align-items:flex-start; }
+  .dashboard-pending-invoice { align-items:flex-start; flex-direction:column; }
+  .dashboard-pending-invoice-side { width:100%; justify-content:space-between; }
+  .dashboard-pending-invoice-side button { flex:1; }
+  .losi-ads-balance { align-items:stretch; }
+  .losi-ads-invoices-button { width:100%; }
+  .losi-ads-invoice-card { align-items:stretch; flex-direction:column; }
+  .losi-ads-invoice-card > div:last-child { justify-content:space-between; }
+  .losi-ads-invoice-card > div:last-child button { flex:1; }
+}
