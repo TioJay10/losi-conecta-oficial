@@ -29,6 +29,9 @@ function DashboardPage() {
   const [notifications, setNotifications] = useState<Array<{ id: string; type: string; title: string; message: string; link: string | null; read_at: string | null; created_at: string }>>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationFilter, setNotificationFilter] = useState<"all" | "unread" | "read">("all");
+  const [notificationDeleteMode, setNotificationDeleteMode] = useState(false);
+  const [selectedNotificationIds, setSelectedNotificationIds] = useState<string[]>([]);
+  const [notificationDeleting, setNotificationDeleting] = useState(false);
   const [notificationPopup, setNotificationPopup] = useState<typeof notifications[number] | null>(null);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   const [goldenHeartOpen, setGoldenHeartOpen] = useState(false);
@@ -660,6 +663,63 @@ function DashboardPage() {
     );
   }
 
+  async function deleteSelectedNotifications() {
+    if (!supabase || !user || selectedNotificationIds.length === 0 || notificationDeleting) return;
+    setNotificationDeleting(true);
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .in("id", selectedNotificationIds)
+      .eq("user_id", user.id);
+    if (error) {
+      console.error("Erro ao excluir notificações:", error);
+      setNotificationDeleting(false);
+      return;
+    }
+    setNotifications(current => current.filter(notification => !selectedNotificationIds.includes(notification.id)));
+    setSelectedNotificationIds([]);
+    setNotificationDeleteMode(false);
+    setNotificationDeleting(false);
+  }
+
+  async function deleteAllNotifications() {
+    if (!supabase || !user || notifications.length === 0 || notificationDeleting) return;
+    const confirmed = window.confirm("Deseja excluir todas as notificações?");
+    if (!confirmed) return;
+    setNotificationDeleting(true);
+    const { error } = await supabase.from("notifications").delete().eq("user_id", user.id);
+    if (error) {
+      console.error("Erro ao excluir todas as notificações:", error);
+      setNotificationDeleting(false);
+      return;
+    }
+    setNotifications([]);
+    setSelectedNotificationIds([]);
+    setNotificationDeleteMode(false);
+    setNotificationDeleting(false);
+  }
+
+  function toggleNotificationSelection(id: string) {
+    setSelectedNotificationIds(current =>
+      current.includes(id) ? current.filter(item => item !== id) : [...current, id],
+    );
+  }
+
+  function toggleAllVisibleNotifications() {
+    const visibleIds = notifications
+      .filter(notification =>
+        notificationFilter === "all" ||
+        (notificationFilter === "unread" && !notification.read_at) ||
+        (notificationFilter === "read" && Boolean(notification.read_at)),
+      )
+      .map(notification => notification.id);
+    setSelectedNotificationIds(current =>
+      visibleIds.every(id => current.includes(id))
+        ? current.filter(id => !visibleIds.includes(id))
+        : [...new Set([...current, ...visibleIds])],
+    );
+  }
+
   async function markAllNotificationsAsRead() {
     if (!supabase || !user) return;
 
@@ -932,7 +992,8 @@ function DashboardPage() {
                     </div>
                     <button type="button" onClick={() => setNotificationsOpen(false)} aria-label="Fechar notificações">×</button>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "10px 12px", borderBottom: "1px solid #e8edf3", flexWrap: "wrap" }}>
+                  <div className="dashboard-notification-toolbar">
+                    <div className="dashboard-notification-filters">
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }} role="group" aria-label="Filtrar notificações">
                       {([
                         ["all", "Todas"],
@@ -958,7 +1019,12 @@ function DashboardPage() {
                         </button>
                       ))}
                     </div>
-                    <button
+                    </div>
+                    <div className="dashboard-notification-actions">
+                      <button type="button" className="dashboard-notification-delete-toggle" onClick={() => { setNotificationDeleteMode(value => !value); setSelectedNotificationIds([]); }}>
+                        🗑️ {notificationDeleteMode ? "Cancelar exclusão" : "Excluir"}
+                      </button>
+                      <button
                       type="button"
                       onClick={() => void markAllNotificationsAsRead()}
                       disabled={!notifications.some((notification) => !notification.read_at)}
@@ -974,7 +1040,13 @@ function DashboardPage() {
                       }}
                     >
                       Marcar todas como lidas
-                    </button>
+                      </button>
+                      {notificationDeleteMode && (
+                        <button type="button" className="dashboard-notification-delete-all" onClick={() => void deleteAllNotifications()} disabled={notificationDeleting || notifications.length === 0}>
+                          Excluir todas
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="dashboard-notification-list">
                     {(() => {
@@ -1001,8 +1073,18 @@ function DashboardPage() {
                           key={notification.id}
                           type="button"
                           className={"dashboard-notification-item" + (notification.read_at ? "" : " unread")}
-                          onClick={() => void openNotification(notification)}
+                          onClick={() => { if (notificationDeleteMode) { toggleNotificationSelection(notification.id); return; } void openNotification(notification); }}
                         >
+                          {notificationDeleteMode && (
+                            <input
+                              className="dashboard-notification-checkbox"
+                              type="checkbox"
+                              checked={selectedNotificationIds.includes(notification.id)}
+                              onChange={() => toggleNotificationSelection(notification.id)}
+                              onClick={(event) => event.stopPropagation()}
+                              aria-label={"Selecionar " + notification.title}
+                            />
+                          )}
                           <span className="dashboard-notification-dot" aria-hidden="true"></span>
                           <span>
                             <strong>{notification.title}</strong>
