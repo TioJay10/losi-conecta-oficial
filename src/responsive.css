@@ -17805,3 +17805,38 @@ body,
 .dashboard-notification-select-all{align-items:flex-start;flex-direction:column}
 .dashboard-notification-select-all button{padding:2px 0}
 }
+
+
+/* LOSI ADS — ajuste final do campo de mensagem no popup */
+.marketplace-ad-application{display:flex;flex-direction:column;width:100%;align-items:stretch;gap:0}
+.marketplace-ad-application textarea#marketplace-ad-application-message{
+  display:block;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:140px !important;
+  height:140px;
+  box-sizing:border-box !important;
+  margin:0 !important;
+  padding:14px 15px !important;
+  border:1px solid #dce2e9 !important;
+  border-radius:10px !important;
+  background:#fff !important;
+  color:#172033 !important;
+  font:400 13px/1.6 "Montserrat",Arial,sans-serif !important;
+  text-align:left !important;
+  vertical-align:top !important;
+  resize:vertical !important;
+}
+.marketplace-ad-application textarea#marketplace-ad-application-message::placeholder{color:#9aa4b2;opacity:1}
+.marketplace-ad-application textarea#marketplace-ad-application-message:focus{border-color:#d6b46a !important;box-shadow:0 0 0 2px rgba(214,180,106,.12) !important;outline:none !important}
+@media(max-width:720px){
+  .marketplace-ad-modal{width:100%;box-sizing:border-box}
+  .marketplace-ad-application textarea#marketplace-ad-application-message{
+    width:100% !important;
+    min-height:132px !important;
+    height:132px;
+    padding:13px 14px !important;
+    font-size:13px !important;
+    line-height:1.6 !important;
+  }
+}
