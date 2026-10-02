@@ -56,6 +56,9 @@ function DashboardPage() {
   } | null>(null);
   const [pendingSubscriptionAction, setPendingSubscriptionAction] = useState<"resume" | "cancel" | null>(null);
   const [pendingSubscriptionMessage, setPendingSubscriptionMessage] = useState("");
+  const [pendingInvoices, setPendingInvoices] = useState<Array<{id:string;status:string|null;dueDate:string|null;invoiceUrl:string|null;bankSlipUrl:string|null;billingType:string|null;value:number|null;description:string|null;type:"ads"|"subscription"|"other";title:string}>>([]);
+  const [pendingInvoicesLoading, setPendingInvoicesLoading] = useState(false);
+  const [pendingInvoiceAction, setPendingInvoiceAction] = useState<string | null>(null);
 
   async function loadPendingSubscription() {
     if (!supabase || !user) return;
@@ -76,6 +79,28 @@ function DashboardPage() {
     } catch (error) {
       console.error("Erro ao carregar contratação pendente:", error);
     }
+  }
+
+  async function loadPendingInvoices() {
+    if (!supabase || !user) return;
+    setPendingInvoicesLoading(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) return;
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-manage-pending-subscription", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: JSON.stringify({ action: "invoices" }) });
+      const result = await response.json();
+      if (response.ok && result?.success) setPendingInvoices(Array.isArray(result.invoices) ? result.invoices : []);
+    } catch (error) { console.error("Erro ao carregar faturas pendentes:", error); }
+    finally { setPendingInvoicesLoading(false); }
+  }
+
+  async function openPendingInvoice(invoice: typeof pendingInvoices[number]) {
+    const url = invoice.invoiceUrl || invoice.bankSlipUrl;
+    if (!url || pendingInvoiceAction) return;
+    setPendingInvoiceAction(invoice.id);
+    window.open(url, "_blank", "noopener,noreferrer");
+    setPendingInvoiceAction(null);
   }
 
   async function resumePendingSubscription() {
@@ -346,6 +371,7 @@ function DashboardPage() {
       if (document.visibilityState === "visible") {
         void load();
         void loadPendingSubscription();
+        void loadPendingInvoices();
       }
     };
     window.addEventListener("focus", handleRefresh);
@@ -367,6 +393,7 @@ function DashboardPage() {
   useEffect(() => {
     if (!user || !supabase) return;
     void loadPendingSubscription();
+    void loadPendingInvoices();
   }, [user]);
 
   useEffect(() => {
@@ -1073,6 +1100,18 @@ function DashboardPage() {
                 <button type="button" className="auth-modal-submit" style={{ minWidth: 180 }} onClick={() => void resumePendingSubscription()} disabled={pendingSubscriptionAction !== null || !pendingSubscription.invoiceUrl}>{pendingSubscriptionAction === "resume" ? "Abrindo pagamento..." : "Continuar pagamento"}</button>
                 <button type="button" className="auth-modal-link" style={{ minHeight: 46, padding: "0 18px", borderRadius: 10, border: "1px solid #e5e7eb", background: "#fff", textDecoration: "none" }} onClick={() => void cancelPendingSubscription()} disabled={pendingSubscriptionAction !== null}>{pendingSubscriptionAction === "cancel" ? "Cancelando..." : "Cancelar contratação"}</button>
               </div>
+            </div>
+          </section>
+        )}
+
+        {pendingInvoices.length > 0 && (
+          <section className="dashboard-pending-invoices">
+            <div className="dashboard-pending-invoices-header"><div><div className="dashboard-badge">FINANCEIRO</div><h2>Faturas pendentes</h2><p className="dashboard-text">Cobranças de planos e créditos LOSI ADS que ainda podem ser pagas.</p></div><span className="dashboard-pending-invoices-count">{pendingInvoices.length}</span></div>
+            <div className="dashboard-pending-invoices-list">
+              {pendingInvoices.map(invoice => <article className="dashboard-pending-invoice" key={invoice.id}>
+                <div><strong>{invoice.title}</strong><span>{invoice.type === "ads" ? "LOSI ADS" : invoice.type === "subscription" ? "Plano" : "LOSI CONECTA"} · {invoice.status === "OVERDUE" ? "Vencida" : "Pendente"}</span>{invoice.dueDate && <small>Vencimento: {new Date(invoice.dueDate + "T00:00:00").toLocaleDateString("pt-BR")}</small>}</div>
+                <div className="dashboard-pending-invoice-side">{typeof invoice.value === "number" && <strong>R$ {invoice.value.toFixed(2).replace(".", ",")}</strong>}<button type="button" onClick={() => void openPendingInvoice(invoice)} disabled={(!invoice.invoiceUrl && !invoice.bankSlipUrl) || pendingInvoiceAction === invoice.id}>{pendingInvoiceAction === invoice.id ? "ABRINDO..." : "VER FATURA"}</button></div>
+              </article>)}
             </div>
           </section>
         )}
