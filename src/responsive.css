@@ -17786,3 +17786,22 @@ body,
   .losi-ads-invoice-card > div:last-child { justify-content:space-between; }
   .losi-ads-invoice-card > div:last-child button { flex:1; }
 }
+
+.dashboard-notification-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid #e8edf3;flex-wrap:wrap}
+.dashboard-notification-filters,.dashboard-notification-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dashboard-notification-delete-toggle,.dashboard-notification-delete-all{border:1px solid #dbe2ea;background:#fff;color:#475569;border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800;cursor:pointer}
+.dashboard-notification-delete-toggle{color:#9b2c2c;border-color:rgba(155,44,44,.28)}
+.dashboard-notification-delete-all{color:#fff;background:#9b2c2c;border-color:#9b2c2c}
+.dashboard-notification-delete-all:disabled{opacity:.5;cursor:default}
+.dashboard-notification-select-all{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;margin-bottom:4px;border:1px solid #e5eaf0;border-radius:8px;background:#f8fafc}
+.dashboard-notification-select-all label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#334155}
+.dashboard-notification-select-all button{border:0;background:transparent;color:#9b2c2c;font-size:11px;font-weight:900;cursor:pointer}
+.dashboard-notification-select-all button:disabled{color:#94a3b8;cursor:default}
+.dashboard-notification-checkbox{width:17px;height:17px;flex:0 0 auto;accent-color:#d6b46a;cursor:pointer}
+@media(max-width:600px){
+.dashboard-notification-toolbar{align-items:stretch}
+.dashboard-notification-filters,.dashboard-notification-actions{width:100%}
+.dashboard-notification-actions>*{flex:1}
+.dashboard-notification-select-all{align-items:flex-start;flex-direction:column}
+.dashboard-notification-select-all button{padding:2px 0}
+}
