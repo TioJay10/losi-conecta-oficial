@@ -18941,3 +18941,81 @@ body,
 .home-apple-inspired .home-market-card-organizers .home-market-card-content p {
   color: #ffffff !important;
 }
+
+
+/* HOME — correção unificada dos cards Para Organizadores / Para Fornecedores */
+.home-apple-inspired .home-market-grid > .home-market-card {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  height: 300px !important;
+  min-height: 300px !important;
+  padding: 0 !important;
+  border-radius: 18px !important;
+  background: #0b182a !important;
+}
+
+.home-apple-inspired .home-market-grid > .home-market-card .home-market-card-media {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  z-index: 0 !important;
+  overflow: hidden !important;
+  border-radius: inherit !important;
+}
+
+.home-apple-inspired .home-market-grid > .home-market-card .home-market-card-media img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 0 !important;
+}
+
+.home-apple-inspired .home-market-grid > .home-market-card .home-market-card-media::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  display: block !important;
+  background: rgba(11, 24, 42, .76) !important;
+  pointer-events: none !important;
+}
+
+.home-apple-inspired .home-market-grid > .home-market-card .home-market-card-content {
+  position: relative !important;
+  z-index: 2 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 34px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-end !important;
+  align-items: flex-start !important;
+}
+
+.home-apple-inspired .home-market-grid > .home-market-card .home-market-card-content span,
+.home-apple-inspired .home-market-grid > .home-market-card .home-market-card-content h3,
+.home-apple-inspired .home-market-grid > .home-market-card .home-market-card-content p {
+  position: relative !important;
+  z-index: 3 !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 800px) {
+  .home-apple-inspired .home-market-grid > .home-market-card {
+    height: 270px !important;
+    min-height: 270px !important;
+  }
+  .home-apple-inspired .home-market-grid > .home-market-card .home-market-card-content {
+    padding: 26px !important;
+  }
+}
