@@ -967,6 +967,9 @@ function DashboardPage() {
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/losi-ads" }); }}>
             <span className="dashboard-nav-mark">09</span><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span>
           </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/equipe-escalas" }); }}>
+            <span className="dashboard-nav-mark">10</span><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span>
+          </button>
         </nav>
         <div className="dashboard-sidebar-footer">
           <div className="dashboard-sidebar-status"><span></span> Conta profissional</div>
