@@ -420,6 +420,45 @@ function LosiAdsPage() {
               </div>
             </header>
 
+            {pendingInvoicesOpen && (
+              <div className="losi-ads-modal-backdrop" role="presentation" onMouseDown={() => setPendingInvoicesOpen(false)}>
+                <section className="losi-ads-credit-modal losi-ads-invoices-modal" role="dialog" aria-modal="true" aria-labelledby="losi-ads-invoices-title" onMouseDown={event => event.stopPropagation()}>
+                  <div className="losi-ads-modal-topline">
+                    <div>
+                      <div className="losi-ads-section-label">COBRANÇAS</div>
+                      <h2 id="losi-ads-invoices-title">Faturas pendentes</h2>
+                      <p>Acesse suas cobranças em aberto e conclua o pagamento pelo Asaas.</p>
+                    </div>
+                    <button type="button" className="losi-ads-modal-close" aria-label="Fechar faturas pendentes" onClick={() => setPendingInvoicesOpen(false)}>×</button>
+                  </div>
+
+                  <div className="losi-ads-pending-invoices-list">
+                    {pendingInvoicesLoading ? (
+                      <p className="losi-ads-invoices-empty">Carregando faturas...</p>
+                    ) : pendingInvoices.length ? (
+                      pendingInvoices.map(invoice => (
+                        <article className="losi-ads-pending-invoice" key={invoice.id}>
+                          <div>
+                            <span>{invoice.type === "ads" ? "CRÉDITOS ADS" : invoice.type === "subscription" ? "ASSINATURA" : "COBRANÇA"}</span>
+                            <strong>{invoice.title || invoice.description || "Fatura pendente"}</strong>
+                            <small>
+                              {typeof invoice.value === "number" ? "R$ " + invoice.value.toFixed(2).replace(".", ",") : ""}
+                              {invoice.dueDate ? " · Vencimento " + new Date(invoice.dueDate + "T12:00:00").toLocaleDateString("pt-BR") : ""}
+                            </small>
+                          </div>
+                          <button type="button" onClick={() => openPendingInvoice(invoice)} disabled={!invoice.invoiceUrl && !invoice.bankSlipUrl}>
+                            ABRIR FATURA
+                          </button>
+                        </article>
+                      ))
+                    ) : (
+                      <p className="losi-ads-invoices-empty">Você não possui faturas pendentes no momento.</p>
+                    )}
+                  </div>
+                </section>
+              </div>
+            )}
+
             {creditsOpen && (
               <div className="losi-ads-modal-backdrop" role="presentation" onMouseDown={() => setCreditsOpen(false)}>
                 <section className="losi-ads-credit-modal" role="dialog" aria-modal="true" aria-labelledby="losi-ads-credit-title" onMouseDown={event => event.stopPropagation()}>
