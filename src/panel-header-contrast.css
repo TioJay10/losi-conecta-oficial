@@ -100,3 +100,13 @@ main.dashboard-page > .dashboard-main > header.dashboard-header > .dashboard-hea
     z-index: 1 !important;
   }
 }
+
+/* MOBILE — oculta somente o rótulo ÁREA EXCLUSIVA */
+@media (max-width: 720px) {
+  main.dashboard-page > .dashboard-main > header.dashboard-header > .dashboard-header-context > span {
+    display: none !important;
+  }
+  main.dashboard-page > .dashboard-main > header.dashboard-header > .dashboard-header-context > strong {
+    margin-top: 0 !important;
+  }
+}
