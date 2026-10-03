@@ -2,525 +2,234 @@ import { Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import { AppLogo } from "./AppLogo";
-import { ParticleButton } from "./ParticleButton";
 import { supabase } from "../lib/supabase";
 
-export type HomeCustomization = { hero_title: string; hero_subtitle: string; hero_button_text: string; color_background: string; color_primary: string; color_secondary: string; color_text: string; color_button: string; color_button_text: string };
+export type HomeCustomization = {
+  hero_title: string;
+  hero_subtitle: string;
+  hero_button_text: string;
+  color_background: string;
+  color_primary: string;
+  color_secondary: string;
+  color_text: string;
+  color_button: string;
+  color_button_text: string;
+};
 
-export const DEFAULT_HOME_CUSTOMIZATION: HomeCustomization = { hero_title: "", hero_subtitle: "", hero_button_text: "", color_background: "#f4f5f8", color_primary: "#8a6d2f", color_secondary: "#d6b46a", color_text: "#172033", color_button: "#0b182a", color_button_text: "#ffffff" };
+export const DEFAULT_HOME_CUSTOMIZATION: HomeCustomization = {
+  hero_title: "",
+  hero_subtitle: "",
+  hero_button_text: "",
+  color_background: "#f5f5f7",
+  color_primary: "#8a6d2f",
+  color_secondary: "#d6b46a",
+  color_text: "#1d1d1f",
+  color_button: "#0b182a",
+  color_button_text: "#ffffff",
+};
 
-export function HomePage({ customizationOverride, preview = false }: { customizationOverride?: Partial<HomeCustomization>; preview?: boolean }) {
+export function HomePage({
+  customizationOverride,
+  preview = false,
+}: {
+  customizationOverride?: Partial<HomeCustomization>;
+  preview?: boolean;
+}) {
   const [customization, setCustomization] = useState<HomeCustomization>(DEFAULT_HOME_CUSTOMIZATION);
 
   useEffect(() => {
     if (customizationOverride) return;
     let mounted = true;
-    const loadCustomization = async () => {
+
+    async function loadCustomization() {
       const { data } = await supabase.from("home_customization_settings").select("key,value");
       if (!mounted) return;
-      const values = Object.fromEntries((data ?? []).map(item => [item.key, item.value]));
-      setCustomization({
+
+      const values = Object.fromEntries((data ?? []).map((item) => [item.key, item.value]));
+      setCustomization((current) => ({
+        ...current,
         hero_title: values.hero_title ?? "",
         hero_subtitle: values.hero_subtitle ?? "",
         hero_button_text: values.hero_button_text ?? "",
-      });
-    };
+      }));
+    }
+
     void loadCustomization();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [customizationOverride]);
 
-  const activeCustomization = { ...customization, ...customizationOverride };
+  const active = { ...customization, ...customizationOverride };
+
   const themeStyle = {
-    "--home-color-background": activeCustomization.color_background || DEFAULT_HOME_CUSTOMIZATION.color_background,
-    "--home-color-primary": activeCustomization.color_primary || DEFAULT_HOME_CUSTOMIZATION.color_primary,
-    "--home-color-secondary": activeCustomization.color_secondary || DEFAULT_HOME_CUSTOMIZATION.color_secondary,
-    "--home-color-text": activeCustomization.color_text || DEFAULT_HOME_CUSTOMIZATION.color_text,
-    "--home-color-button": activeCustomization.color_button || DEFAULT_HOME_CUSTOMIZATION.color_button,
-    "--home-color-button-text": activeCustomization.color_button_text || DEFAULT_HOME_CUSTOMIZATION.color_button_text,
+    "--home-bg": active.color_background || DEFAULT_HOME_CUSTOMIZATION.color_background,
+    "--home-gold": active.color_primary || DEFAULT_HOME_CUSTOMIZATION.color_primary,
+    "--home-gold-light": active.color_secondary || DEFAULT_HOME_CUSTOMIZATION.color_secondary,
+    "--home-text": active.color_text || DEFAULT_HOME_CUSTOMIZATION.color_text,
+    "--home-navy": active.color_button || DEFAULT_HOME_CUSTOMIZATION.color_button,
+    "--home-button-text": active.color_button_text || DEFAULT_HOME_CUSTOMIZATION.color_button_text,
   } as CSSProperties;
 
   return (
-    <main className={`home-page${preview ? " home-page-preview" : ""}`} style={{ ...styles.page, ...themeStyle }}>
-      <header className="home-header" style={styles.header}>
-        <AppLogo className="mobile-centered-brand" style={styles.logo}>
-          LOSI <span>CONECTA</span>
-        </AppLogo>
+    <main className={`home-page home-apple-inspired${preview ? " home-page-preview" : ""}`} style={themeStyle}>
+      <header className="home-header home-apple-header">
+        <Link to="/" className="home-brand-link" aria-label="LOSI CONECTA">
+          <AppLogo className="home-brand" style={{}} />
+        </Link>
 
-        <nav className="home-nav" style={styles.nav}>
-          <a href="#como-funciona" style={styles.navLink}>Como funciona</a>
-          <a href="#para-quem" style={styles.navLink}>Para quem é</a>
-          <a href="#categorias" style={styles.navLink}>Categorias</a>
+        <nav className="home-nav home-apple-nav" aria-label="Navegação principal">
+          <a href="#como-funciona">Como funciona</a>
+          <a href="#para-quem">Para quem é</a>
+          <a href="#categorias">Categorias</a>
         </nav>
 
-        <ParticleButton><Link to="/entrar" style={styles.headerButton}>Entrar</Link></ParticleButton>
+        <div className="home-header-actions">
+          <Link to="/buscar" className="home-header-search">Buscar</Link>
+          <Link to="/entrar" className="home-header-login">Entrar</Link>
+        </div>
       </header>
 
-      <section className="home-hero" style={styles.hero}>
-        <div style={styles.heroGlow} />
-        <div style={styles.eyebrow}>A REDE DE PROFISSIONAIS PARA EVENTOS</div>
-        <h1 style={styles.heroTitle}>
-          {activeCustomization.hero_title || "Encontre quem você precisa para realizar seu evento."}
-        </h1>
-        <p style={styles.heroText}>
-          {activeCustomization.hero_subtitle || "O LOSI CONECTA aproxima quem organiza eventos de profissionais, empresas e fornecedores especializados — tudo em um só lugar."}
-        </p>
-
-        <div style={styles.heroActions}>
-          <ParticleButton><Link to="/buscar" style={styles.primaryButton}>{activeCustomization.hero_button_text || "Encontrar fornecedores"}</Link></ParticleButton>
-          <ParticleButton><a href="#como-funciona" style={styles.secondaryButton}>Entender como funciona</a></ParticleButton>
+      <section className="home-apple-hero">
+        <div className="home-hero-copy">
+          <p className="home-eyebrow">LOSI CONECTA</p>
+          <h1>{active.hero_title || "Tudo para o seu evento. Em um só lugar."}</h1>
+          <p className="home-hero-lead">
+            {active.hero_subtitle ||
+              "Encontre profissionais, empresas e fornecedores para transformar ideias em experiências."}
+          </p>
+          <div className="home-hero-links">
+            <Link to="/buscar" className="home-blue-link">
+              {active.hero_button_text || "Encontrar fornecedores"} <span>›</span>
+            </Link>
+            <a href="#como-funciona" className="home-blue-link">
+              Como funciona <span>›</span>
+            </a>
+          </div>
         </div>
 
-        <div style={styles.heroNote}>
-          <span style={styles.dot} /> Encontre • Conheça • Conecte
+        <div className="home-hero-panel">
+          <div>
+            <span>ENCONTRE</span>
+            <strong>Profissionais para o seu próximo evento.</strong>
+            <p>Recreação, monitoria, música, decoração, buffet, atrações e muito mais.</p>
+          </div>
+          <Link to="/buscar" className="home-panel-link">Explorar fornecedores <span>›</span></Link>
         </div>
       </section>
 
-      <section id="como-funciona" className="home-section" style={styles.section}>
-        <div style={styles.sectionIntro}>
-          <div style={styles.sectionKicker}>COMO FUNCIONA</div>
-          <h2 style={styles.sectionTitle}>Do que você precisa ao contato com o fornecedor.</h2>
-          <p style={styles.sectionText}>
-            O LOSI CONECTA foi pensado para deixar a busca por profissionais de eventos
-            mais simples, organizada e objetiva.
-          </p>
+      <section id="como-funciona" className="home-feature-grid">
+        <article className="home-feature-card home-feature-card-dark">
+          <span>01 — ENCONTRE</span>
+          <h2>Pesquise pelo que seu evento precisa.</h2>
+          <p>Filtre por serviço, categoria e localização e encontre profissionais disponíveis para atender seu projeto.</p>
+          <Link to="/buscar" className="home-card-link">Buscar fornecedores <span>›</span></Link>
+        </article>
+
+        <article className="home-feature-card home-feature-card-light">
+          <span>02 — CONHEÇA</span>
+          <h2>Veja quem está por trás do serviço.</h2>
+          <p>Conheça o perfil público, serviços, informações e presença profissional antes de entrar em contato.</p>
+          <a href="#categorias" className="home-card-link">Ver categorias <span>›</span></a>
+        </article>
+
+        <article className="home-feature-card home-feature-card-gold">
+          <span>03 — CONECTE</span>
+          <h2>Converse diretamente com o fornecedor.</h2>
+          <p>Depois de encontrar o profissional certo, a negociação continua de forma simples pelo WhatsApp.</p>
+          <Link to="/entrar" className="home-card-link">Criar minha conta <span>›</span></Link>
+        </article>
+      </section>
+
+      <section id="para-quem" className="home-market-section">
+        <div className="home-section-heading">
+          <p className="home-eyebrow">PARA QUEM É</p>
+          <h2>Um só lugar para quem procura e para quem oferece.</h2>
         </div>
 
-        <div className="home-steps" style={styles.steps}>
-          <Step number="01" title="Encontre" text="Pesquise por serviço, categoria e localização para descobrir profissionais que atendem ao que seu evento precisa." />
-          <Step number="02" title="Conheça" text="Veja o perfil profissional, serviços oferecidos, descrição, portfólio, localização e informações de contato." />
-          <Step number="03" title="Conecte" text="Quando encontrar o profissional ideal, entre em contato diretamente pelo WhatsApp e avance para a negociação." />
+        <div className="home-market-grid">
+          <article>
+            <span>PARA ORGANIZADORES</span>
+            <h3>Encontre as pessoas certas.</h3>
+            <p>Descubra fornecedores para festas, eventos corporativos, ativações, passeios, oficinas e experiências.</p>
+            <Link to="/buscar" className="home-blue-link">Procurar fornecedores <span>›</span></Link>
+          </article>
+
+          <article>
+            <span>PARA FORNECEDORES</span>
+            <h3>Mostre o que você faz.</h3>
+            <p>Tenha uma presença profissional no LOSI CONECTA e seja encontrado por quem está procurando soluções.</p>
+            <Link to="/entrar" className="home-blue-link">Entrar no LOSI CONECTA <span>›</span></Link>
+          </article>
         </div>
       </section>
 
-      <section id="para-quem" className="home-dark-section" style={styles.darkSection}>
-        <div style={styles.darkIntro}>
-          <div style={styles.sectionKickerLight}>PARA QUEM É</div>
-          <h2 style={styles.darkTitle}>Um ponto de encontro para o mercado de eventos.</h2>
-          <p style={styles.darkText}>
-            Seja para organizar um evento ou para divulgar seus serviços,
-            o LOSI CONECTA cria uma ponte entre quem procura e quem oferece.
-          </p>
+      <section id="categorias" className="home-categories-section">
+        <div className="home-section-heading home-section-heading-row">
+          <div>
+            <p className="home-eyebrow">CATEGORIAS</p>
+            <h2>Serviços para diferentes momentos do evento.</h2>
+          </div>
+          <Link to="/buscar" className="home-blue-link">Ver fornecedores <span>›</span></Link>
         </div>
 
-        <div className="home-audience-grid" style={styles.audienceGrid}>
-          <Audience
-            title="Quem organiza"
-            text="Encontre fornecedores e profissionais para festas, eventos corporativos, ativações, passeios e outras experiências."
-            label="PROCURAR FORNECEDORES"
-          />
-          <Audience
-            title="Quem fornece"
-            text="Crie sua presença profissional, apresente seus serviços e seja encontrado por pessoas que estão procurando soluções para eventos."
-            label="DIVULGAR SERVIÇOS"
-          />
-        </div>
-      </section>
-
-      <section id="categorias" className="home-section home-categories-section" style={styles.section}>
-        <div style={styles.sectionIntro}>
-          <div style={styles.sectionKicker}>O QUE VOCÊ PODE ENCONTRAR</div>
-          <h2 style={styles.sectionTitle}>Profissionais de diferentes áreas do evento.</h2>
-          <p style={styles.sectionText}>
-            A plataforma pode reunir desde serviços essenciais até atrações e soluções
-            especializadas para diferentes formatos de evento.
-          </p>
-        </div>
-
-        <div className="home-category-grid" style={styles.categoryGrid}>
+        <div className="home-category-grid">
           {[
             "Recreação e entretenimento",
+            "Monitoria",
             "Fotografia e vídeo",
             "DJ e música",
             "Decoração",
             "Buffet e alimentação",
             "Atrações",
             "Estruturas e equipamentos",
-            "Outros serviços para eventos",
-          ].map((category) => (
-            <div key={category} style={styles.categoryCard}>
-              <span style={styles.categoryMark}>+</span>
-              <span>{category}</span>
-            </div>
+          ].map((category, index) => (
+            <Link key={category} to="/buscar" className="home-category-card">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{category}</strong>
+              <b>›</b>
+            </Link>
           ))}
         </div>
       </section>
 
-      <section className="home-cta-section" style={styles.ctaSection}>
-        <div className="home-cta-card" style={styles.ctaCard}>
-          <div>
-            <div style={styles.sectionKickerLight}>LOSI CONECTA</div>
-            <h2 style={styles.ctaTitle}>Seu próximo evento começa com as conexões certas.</h2>
-            <p style={styles.ctaText}>
-              Crie sua conta e faça parte de uma plataforma criada para aproximar
-              profissionais e oportunidades no mercado de eventos.
-            </p>
-          </div>
-          <ParticleButton><Link to="/entrar" style={styles.ctaButton}>Criar minha conta</Link></ParticleButton>
+      <section className="home-final-cta">
+        <div>
+          <p className="home-eyebrow home-eyebrow-light">LOSI CONECTA</p>
+          <h2>Seu próximo evento começa com uma boa conexão.</h2>
         </div>
+        <Link to="/entrar" className="home-final-button">Criar minha conta</Link>
       </section>
 
-      <footer className="home-footer" style={styles.footer}>
-        <div style={styles.footerMain}>
-          <div style={styles.footerBrandBlock}>
-            <div style={styles.footerBrand}>LOSI CONECTA</div>
-            <p style={styles.footerDescription}>
-              Encontre profissionais, empresas e fornecedores para o seu próximo evento.
-            </p>
+      <footer className="home-footer home-apple-footer">
+        <div className="home-footer-top">
+          <div className="home-footer-brand">
+            <Link to="/" aria-label="LOSI CONECTA">
+              <AppLogo className="home-footer-logo" style={{}} />
+            </Link>
+            <p>Uma plataforma para aproximar eventos, profissionais e oportunidades.</p>
           </div>
 
-          <nav aria-label="Links do rodapé" style={styles.footerNav}>
-            <Link to="/buscar" style={styles.footerLink}>Encontrar fornecedores</Link>
-            <Link to="/faq" style={styles.footerLink}>Perguntas frequentes</Link>
-            <Link to="/entrar" style={styles.footerLink}>Entrar</Link>
-          </nav>
+          <div className="home-footer-column">
+            <strong>LOSI CONECTA</strong>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#para-quem">Para quem é</a>
+            <a href="#categorias">Categorias</a>
+          </div>
+
+          <div className="home-footer-column">
+            <strong>ACESSO</strong>
+            <Link to="/buscar">Encontrar fornecedores</Link>
+            <Link to="/faq">Perguntas frequentes</Link>
+            <Link to="/entrar">Entrar</Link>
+          </div>
         </div>
 
-        <div style={styles.footerBottom}>
-          <span style={styles.footerText}>Encontre. Conheça. Conecte.</span>
-          <span style={styles.footerCopyright}>© {new Date().getFullYear()} LOSI CONECTA. Todos os direitos reservados.</span>
+        <div className="home-footer-bottom">
+          <span>Encontre. Conheça. Conecte.</span>
+          <span>© {new Date().getFullYear()} LOSI CONECTA. Todos os direitos reservados.</span>
         </div>
       </footer>
     </main>
   );
 }
-
-function Step({ number, title, text }: { number: string; title: string; text: string }) {
-  return (
-    <article style={styles.stepCard}>
-      <div style={styles.stepNumber}>{number}</div>
-      <h3 style={styles.cardTitle}>{title}</h3>
-      <p style={styles.cardText}>{text}</p>
-    </article>
-  );
-}
-
-function Audience({ title, text, label }: { title: string; text: string; label: string }) {
-  return (
-    <article style={styles.audienceCard}>
-      <div style={styles.audienceLabel}>{label}</div>
-      <h3 style={styles.audienceTitle}>{title}</h3>
-      <p style={styles.audienceText}>{text}</p>
-    </article>
-  );
-}
-
-const styles: Record<string, CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    background: "var(--home-color-background)",
-    color: "var(--home-color-text)",
-    fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  },
-  header: {
-    position: "sticky",
-    top: 0,
-    zIndex: 10,
-    height: 68,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 24,
-    padding: "0 5vw",
-    background: "rgba(255,255,255,.96)",
-    backdropFilter: "blur(16px)",
-    borderBottom: "1px solid #e8eaf0",
-  },
-  logo: {
-    textDecoration: "none",
-    color: "var(--home-color-button)",
-    fontSize: 18,
-    fontWeight: 900,
-    letterSpacing: ".08em",
-    whiteSpace: "nowrap",
-  },
-  logoSpan: {},
-  nav: { display: "flex", gap: 28, alignItems: "center" },
-  navLink: {
-    color: "#697386",
-    textDecoration: "none",
-    fontSize: 14,
-    fontWeight: 600,
-  },
-  headerButton: {
-    textDecoration: "none",
-    color: "#fff",
-    background: "var(--home-color-button)",
-    borderRadius: 9,
-    padding: "10px 17px",
-    fontSize: 14,
-    fontWeight: 800,
-  },
-  hero: {
-    position: "relative",
-    overflow: "hidden",
-    textAlign: "center",
-    padding: "78px 24px 68px",
-    background: "linear-gradient(180deg, #ffffff 0%, var(--home-color-background) 100%)",
-  },
-  heroGlow: {
-    position: "absolute",
-    width: 520,
-    height: 520,
-    borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(214,180,106,.13) 0%, rgba(214,180,106,0) 68%)",
-    top: -260,
-    left: "50%",
-    transform: "translateX(-50%)",
-    pointerEvents: "none",
-  },
-  eyebrow: {
-    position: "relative",
-    color: "#8a6d2f",
-    fontSize: 11,
-    fontWeight: 900,
-    letterSpacing: ".18em",
-    marginBottom: 22,
-  },
-  heroTitle: {
-    position: "relative",
-    maxWidth: 900,
-    margin: "0 auto",
-    fontSize: "clamp(42px, 7vw, 76px)",
-    lineHeight: 1.02,
-    letterSpacing: "-.055em",
-    fontWeight: 900,
-  },
-  gradientText: {
-    background: "linear-gradient(100deg, #d6b46a, #f0d99a)",
-    WebkitBackgroundClip: "text",
-    color: "transparent",
-  },
-  heroText: {
-    maxWidth: 700,
-    margin: "26px auto 0",
-    color: "#697386",
-    fontSize: 18,
-    lineHeight: 1.65,
-  },
-  heroActions: {
-    display: "flex",
-    justifyContent: "center",
-    gap: 12,
-    flexWrap: "wrap",
-    marginTop: 34,
-  },
-  primaryButton: {
-    textDecoration: "none",
-    background: "var(--home-color-button)",
-    color: "#fff",
-    padding: "14px 23px",
-    borderRadius: 10,
-    fontWeight: 800,
-    fontSize: 15,
-    boxShadow: "0 12px 30px rgba(79,70,199,.2)",
-  },
-  secondaryButton: {
-    textDecoration: "none",
-    background: "#fff",
-    color: "#343b4d",
-    padding: "14px 23px",
-    borderRadius: 10,
-    fontWeight: 750,
-    fontSize: 15,
-    border: "1px solid #dfe2ea",
-  },
-  heroNote: {
-    marginTop: 28,
-    color: "#7f8795",
-    fontSize: 12,
-    fontWeight: 700,
-    letterSpacing: ".08em",
-  },
-  dot: {
-    display: "inline-block",
-    width: 7,
-    height: 7,
-    borderRadius: "50%",
-    background: "#d6b46a",
-    marginRight: 8,
-  },
-  section: {
-    maxWidth: 1180,
-    margin: "0 auto",
-    padding: "72px 5vw",
-    boxSizing: "border-box",
-  },
-  sectionIntro: { maxWidth: 720, marginBottom: 38 },
-  sectionKicker: {
-    color: "#8a6d2f",
-    fontSize: 11,
-    fontWeight: 900,
-    letterSpacing: ".16em",
-    marginBottom: 14,
-  },
-  sectionKickerLight: {
-    color: "#f0d99a",
-    fontSize: 11,
-    fontWeight: 900,
-    letterSpacing: ".16em",
-    marginBottom: 14,
-  },
-  sectionTitle: {
-    margin: 0,
-    fontSize: "clamp(30px, 4vw, 48px)",
-    lineHeight: 1.08,
-    letterSpacing: "-.035em",
-  },
-  sectionText: {
-    margin: "17px 0 0",
-    color: "#70798b",
-    fontSize: 17,
-    lineHeight: 1.65,
-  },
-  steps: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-    gap: 18,
-  },
-  stepCard: {
-    background: "#fff",
-    border: "1px solid #e7e9ef",
-    borderRadius: 18,
-    padding: 24,
-    minHeight: 190,
-    boxSizing: "border-box",
-    boxShadow: "0 10px 35px rgba(27,35,58,.04)",
-  },
-  stepNumber: {
-    color: "#8a6d2f",
-    fontSize: 13,
-    fontWeight: 900,
-    letterSpacing: ".1em",
-    marginBottom: 40,
-  },
-  cardTitle: { margin: 0, fontSize: 25, letterSpacing: "-.02em" },
-  cardText: { margin: "12px 0 0", color: "#70798b", lineHeight: 1.6, fontSize: 15 },
-  darkSection: {
-    background: "var(--home-color-button)",
-    color: "#fff",
-    padding: "72px 5vw",
-  },
-  darkIntro: { maxWidth: 1180, margin: "0 auto 38px" },
-  darkTitle: {
-    margin: 0,
-    maxWidth: 700,
-    fontSize: "clamp(32px, 5vw, 55px)",
-    lineHeight: 1.05,
-    letterSpacing: "-.04em",
-  },
-  darkText: { maxWidth: 650, color: "#c4cbd7", fontSize: 17, lineHeight: 1.65, marginTop: 18 },
-  audienceGrid: {
-    maxWidth: 1180,
-    margin: "0 auto",
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: 18,
-  },
-  audienceCard: {
-    border: "1px solid rgba(214,180,106,.25)",
-    background: "#111f31",
-    borderRadius: 18,
-    padding: 30,
-  },
-  audienceLabel: { color: "#f0d99a", fontSize: 10, fontWeight: 900, letterSpacing: ".13em" },
-  audienceTitle: { margin: "15px 0 0", fontSize: 29, letterSpacing: "-.025em" },
-  audienceText: { color: "#c4cbd7", lineHeight: 1.65, fontSize: 15, margin: "12px 0 0", maxWidth: 500 },
-  categoryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-    gap: 12,
-  },
-  categoryCard: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    minHeight: 76,
-    padding: "0 18px",
-    background: "#fff",
-    border: "1px solid #e5e8ef",
-    borderRadius: 13,
-    color: "#343b4d",
-    fontWeight: 750,
-    fontSize: 14,
-  },
-  categoryMark: { color: "#8a6d2f", fontSize: 20, fontWeight: 300 },
-  ctaSection: { padding: "16px 5vw 64px" },
-  ctaCard: {
-    maxWidth: 1060,
-    margin: "0 auto",
-    borderRadius: 24,
-    padding: "48px 52px",
-    background: "linear-gradient(125deg, var(--home-color-button), #07111f)",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 35,
-    boxSizing: "border-box",
-    boxShadow: "0 20px 50px rgba(7,17,31,.16)",
-  },
-  ctaTitle: { margin: 0, maxWidth: 650, fontSize: "clamp(28px, 4vw, 43px)", lineHeight: 1.08, letterSpacing: "-.035em" },
-  ctaText: { maxWidth: 620, color: "#c4cbd7", lineHeight: 1.6, margin: "14px 0 0", fontSize: 15 },
-  ctaButton: {
-    flexShrink: 0,
-    textDecoration: "none",
-    background: "#fff",
-    color: "var(--home-color-button)",
-    padding: "14px 20px",
-    borderRadius: 10,
-    fontWeight: 900,
-    fontSize: 14,
-  },
-  footer: {
-    marginTop: 0,
-    padding: "42px 5vw 24px",
-    background: "var(--home-color-button)",
-    color: "#fff",
-    borderTop: "1px solid rgba(214,180,106,.28)",
-    boxSizing: "border-box",
-  },
-  footerMain: {
-    maxWidth: 1180,
-    margin: "0 auto",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    gap: 24,
-    paddingBottom: 32,
-    borderBottom: "1px solid rgba(255,255,255,.12)",
-  },
-  footerBrandBlock: { maxWidth: 430 },
-  footerBrand: { fontWeight: 900, letterSpacing: ".12em", color: "#f0d99a", fontSize: 17 },
-  footerDescription: {
-    margin: "12px 0 0",
-    color: "#c4cbd7",
-    fontSize: 14,
-    lineHeight: 1.6,
-    maxWidth: 390,
-  },
-  footerNav: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    flexDirection: "column",
-    flexWrap: "nowrap",
-    gap: 12,
-    paddingTop: 2,
-    minWidth: 220,
-  },
-  footerLink: { color: "#f0d99a", fontWeight: 800, textDecoration: "none", fontSize: 13 },
-  footerBottom: {
-    maxWidth: 1180,
-    margin: "20px auto 0",
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    gap: 8,
-    flexDirection: "column",
-    flexWrap: "nowrap",
-  },
-  footerText: { color: "#c4cbd7", fontWeight: 600, fontSize: 12, textAlign: "left" },
-  footerCopyright: { color: "#8f9aaa", fontSize: 11, fontWeight: 600, textAlign: "left" },
-};
-
