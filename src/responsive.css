@@ -18554,3 +18554,65 @@ body,
   color: #ffffff !important;
   border-color: #000000 !important;
 }
+
+
+/* HOME — contraste dos CTAs por tipo de card
+   Card azul escuro: dourado.
+   Cards branco/cinza: preto.
+*/
+.home-apple-inspired .home-feature-card-dark .home-card-link,
+.home-apple-inspired .home-hero-panel .home-panel-link,
+.home-apple-inspired .home-final-cta .home-final-button {
+  background: #d6b46a !important;
+  color: #0b182a !important;
+  border-color: #8a6d2f !important;
+}
+
+.home-apple-inspired .home-feature-card-dark .home-card-link span,
+.home-apple-inspired .home-hero-panel .home-panel-link span,
+.home-apple-inspired .home-final-cta .home-final-button span {
+  color: #0b182a !important;
+}
+
+.home-apple-inspired .home-feature-card-dark .home-card-link:hover,
+.home-apple-inspired .home-hero-panel .home-panel-link:hover,
+.home-apple-inspired .home-final-cta .home-final-button:hover {
+  background: #e2c37c !important;
+  color: #0b182a !important;
+  border-color: #8a6d2f !important;
+}
+
+.home-apple-inspired .home-feature-card-dark .home-card-link:active,
+.home-apple-inspired .home-hero-panel .home-panel-link:active,
+.home-apple-inspired .home-final-cta .home-final-button:active {
+  background: #d6b46a !important;
+  color: #0b182a !important;
+  border-color: #8a6d2f !important;
+}
+
+/* Cards brancos/cinza: preto com escrita branca */
+.home-apple-inspired .home-feature-card-light .home-card-link,
+.home-apple-inspired .home-market-grid article .home-blue-link {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+.home-apple-inspired .home-feature-card-light .home-card-link span,
+.home-apple-inspired .home-market-grid article .home-blue-link span {
+  color: #ffffff !important;
+}
+
+.home-apple-inspired .home-feature-card-light .home-card-link:hover,
+.home-apple-inspired .home-market-grid article .home-blue-link:hover {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #1a1a1a !important;
+}
+
+.home-apple-inspired .home-feature-card-light .home-card-link:active,
+.home-apple-inspired .home-market-grid article .home-blue-link:active {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
