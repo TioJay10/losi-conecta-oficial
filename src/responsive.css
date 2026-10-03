@@ -18903,3 +18903,41 @@ body,
 .home-apple-inspired .home-market-card-suppliers .home-market-card-content p {
   color: #ffffff !important;
 }
+
+
+/* HOME — card Para Organizadores com a mesma película azul-marinho */
+.home-apple-inspired .home-market-card-organizers {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  min-height: 320px !important;
+  color: #ffffff !important;
+}
+.home-apple-inspired .home-market-card-organizers .home-market-card-media {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+}
+.home-apple-inspired .home-market-card-organizers .home-market-card-media::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(11, 24, 42, .78) !important;
+  pointer-events: none !important;
+}
+.home-apple-inspired .home-market-card-organizers .home-market-card-media img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+.home-apple-inspired .home-market-card-organizers .home-market-card-content {
+  position: relative !important;
+  z-index: 1 !important;
+}
+.home-apple-inspired .home-market-card-organizers .home-market-card-content span,
+.home-apple-inspired .home-market-card-organizers .home-market-card-content h3,
+.home-apple-inspired .home-market-card-organizers .home-market-card-content p {
+  color: #ffffff !important;
+}
