@@ -526,7 +526,10 @@ function ReceiptsPage() {
               </div>
 
               <div className="receipts-provider">
-                <div><span>PRESTADOR</span><strong>{supplierName}</strong></div>
+                <div>
+                  {business?.logo_url || profile?.avatar_url ? <img className="receipts-provider-photo" src={business?.logo_url || profile?.avatar_url || ""} alt="Foto do perfil público do prestador" /> : null}
+                  <span>PRESTADOR</span><strong>{supplierName}</strong>
+                </div>
                 <div><span>DOCUMENTO</span><strong>{supplierDocument}</strong></div>
               </div>
 
@@ -541,7 +544,7 @@ function ReceiptsPage() {
                 <div className="receipt-paper-title">Comprovante de recebimento</div>
                 <p>Declaro que recebi de <strong>{clientName || "Nome do contratante"}</strong> a importância abaixo referente ao serviço descrito.</p>
                 <div className="receipt-paper-value"><small>VALOR RECEBIDO</small><strong>{money(amountNumber)}</strong><span>{paymentMethod}</span></div>
-                <div className="receipt-paper-section"><small>PRESTADOR</small><strong>{supplierName}</strong><small>CONTRATANTE / PAGADOR</small><strong>{clientName || "—"}</strong></div>
+                <div className="receipt-paper-section"><small>PRESTADOR</small>{(business?.logo_url || profile?.avatar_url) ? <img className="receipt-paper-provider-photo" src={business?.logo_url || profile?.avatar_url || ""} alt="" /> : null}<strong>{supplierName}</strong><small>CONTRATANTE / PAGADOR</small><strong>{clientName || "—"}</strong></div>
                 <div className="receipt-paper-section"><small>SERVIÇO</small><strong>{service || "Prestação de serviços"}</strong><span>{dateBR(serviceDate)}</span></div>
                 <div className="receipt-paper-signature">{signatureData ? <img src={signatureData} alt="Assinatura do prestador" /> : null}<span>Assinatura do prestador</span></div><div className="receipt-paper-footer">Documento profissional LOSI CONECTA</div>
               </div>
