@@ -934,3 +934,29 @@
 .losi-ads-pending-invoice-actions .losi-ads-cancel-invoice{background:#fff;color:#0b182a;border:1px solid #cfd4dc}
 .losi-ads-invoices-message{margin:18px 0 0;padding:12px 14px;border-radius:10px;background:#f5f5f7;color:#0b182a;font-size:13px;font-weight:700}
 @media (max-width:720px){.losi-ads-pending-invoice-actions{width:100%;flex-direction:column}.losi-ads-pending-invoice-actions button{width:100%}}
+
+
+/* LOSI ADS MOBILE — hambúrguer e contexto ocupam áreas separadas */
+@media (max-width: 720px) {
+  .losi-ads-dashboard .dashboard-header {
+    position: relative !important;
+    padding-left: 68px !important;
+    padding-right: 12px !important;
+  }
+  .losi-ads-dashboard .dashboard-header .dashboard-mobile-menu-button {
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 30 !important;
+    margin: 0 !important;
+  }
+  .losi-ads-dashboard .dashboard-header .dashboard-header-context {
+    position: relative !important;
+    left: auto !important;
+    transform: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+}
