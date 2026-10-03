@@ -960,3 +960,13 @@
     padding-left: 0 !important;
   }
 }
+
+/* MOBILE — oculta somente o rótulo ÁREA EXCLUSIVA */
+@media (max-width: 720px) {
+  .losi-ads-dashboard .dashboard-header .dashboard-header-context > span {
+    display: none !important;
+  }
+  .losi-ads-dashboard .dashboard-header .dashboard-header-context > strong {
+    margin-top: 0 !important;
+  }
+}
