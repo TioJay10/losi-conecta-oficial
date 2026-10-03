@@ -150,8 +150,8 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-light">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1769839271487-c6a191548749?auto=format&fit=crop&fm=jpg&q=85&w=1600"
-              alt="Profissionais conversando durante um evento"
+              src="https://images.unsplash.com/photo-1758873272345-40f377c21e7f?auto=format&fit=crop&fm=jpg&q=85&w=1600"
+              alt="Profissional se comunicando com um cliente por telefone"
               loading="lazy"
               decoding="async"
             />
@@ -164,8 +164,8 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-gold">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1758873272345-40f377c21e7f?auto=format&fit=crop&fm=jpg&q=85&w=1600"
-              alt="Profissional conversando pelo celular enquanto trabalha"
+              src="https://images.unsplash.com/photo-1768508665663-fa483a0cb208?auto=format&fit=crop&w=1800&q=85"
+              alt="Profissionais e participantes reunidos em um evento"
               loading="lazy"
               decoding="async"
             />
