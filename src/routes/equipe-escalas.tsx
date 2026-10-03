@@ -3,7 +3,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 import "../equipe-escalas.css";
 
-type EventRow={id:string;title:string;event_date:string;status:string;city:string|null};
+type EventRow={id:string;title:string;event_date:string;status:string;city:string|null;public_token:string};
+type Opening={id:string;event_id:string;title:string;slots:number;advertised_value:number|null};
 type Collaborator={id:string;name:string;city:string|null;network_status:string};
 
 export const Route=createFileRoute("/equipe-escalas")({component:EquipeEscalasPage});
@@ -16,6 +17,9 @@ function EquipeEscalasPage(){
  const [people,setPeople]=useState<Collaborator[]>([]);
  const [loading,setLoading]=useState(true);
  const [creating,setCreating]=useState(false);
+ const [selectedEventId,setSelectedEventId]=useState("");
+ const [openings,setOpenings]=useState<Opening[]>([]);
+ const [openingForm,setOpeningForm]=useState({title:"Recreador",slots:"1",advertised_value:""});
  const [form,setForm]=useState({title:"",description:"",event_date:"",starts_at:"",ends_at:"",location_name:"",address:"",city:"",state:""});
 
  async function load(){
@@ -25,12 +29,13 @@ function EquipeEscalasPage(){
   if(!b){setLoading(false);return}
   setBusinessId(b.id);setBusinessName(b.business_name);
   const [{data:e},{data:p}]=await Promise.all([
-   supabase.from("team_events").select("id,title,event_date,status,city").eq("business_id",b.id).order("event_date",{ascending:true}),
+   supabase.from("team_events").select("id,title,event_date,status,city,public_token").eq("business_id",b.id).order("event_date",{ascending:true}),
    supabase.from("team_collaborators").select("id,name,city,network_status").eq("business_id",b.id).order("name")
   ]);
-  setEvents((e||[]) as EventRow[]);setPeople((p||[]) as Collaborator[]);setLoading(false);
+  setEvents((e||[]) as EventRow[]);setPeople((p||[]) as Collaborator[]); if(!selectedEventId&&e?.[0]?.id)setSelectedEventId(e[0].id); setLoading(false);
  }
  useEffect(()=>{void load()},[]);
+ useEffect(()=>{if(!selectedEventId){setOpenings([]);return} void supabase.from("team_event_openings").select("id,event_id,title,slots,advertised_value").eq("event_id",selectedEventId).order("created_at").then(({data})=>setOpenings((data||[]) as Opening[]))},[selectedEventId]);
  const upcoming=useMemo(()=>events.filter(e=>e.status!=="cancelled"&&e.status!=="completed"),[events]);
 
  async function createEvent(ev:FormEvent){
@@ -43,6 +48,10 @@ function EquipeEscalasPage(){
   setForm({title:"",description:"",event_date:"",starts_at:"",ends_at:"",location_name:"",address:"",city:"",state:""});
   await load();
  }
+ async function addOpening(ev:FormEvent){ev.preventDefault();if(!selectedEventId)return;const {error}=await supabase.from("team_event_openings").insert({event_id:selectedEventId,title:openingForm.title.trim(),slots:Number(openingForm.slots),advertised_value:openingForm.advertised_value?Number(openingForm.advertised_value):null});if(error){alert(error.message);return}const {data}=await supabase.from("team_event_openings").select("id,event_id,title,slots,advertised_value").eq("event_id",selectedEventId).order("created_at");setOpenings((data||[]) as Opening[]);setOpeningForm({title:"Recreador",slots:"1",advertised_value:""})}
+ async function publishEvent(){if(!selectedEventId||!openings.length){alert("Adicione pelo menos uma vaga antes de publicar.");return}const {error}=await supabase.from("team_events").update({status:"open"}).eq("id",selectedEventId);if(error){alert(error.message);return}await load()}
+ async function copyPublicLink(){const e=events.find(x=>x.id===selectedEventId);if(!e)return;const link=`${window.location.origin}/oportunidade/${e.public_token}`;await navigator.clipboard.writeText(link);alert("Link de candidatura copiado.")}
+ const selectedEvent=events.find(e=>e.id===selectedEventId);
  if(loading)return <main className="team-page team-loading">Carregando Equipe & Escalas...</main>;
  return <main className="team-page">
   <header className="team-topbar"><button onClick={()=>navigate({to:"/painel"})}>← Painel</button><div><span>LOSI CONECTA</span><strong>Equipe & Escalas</strong></div></header>
@@ -52,8 +61,13 @@ function EquipeEscalasPage(){
   </section>
   <section className="team-grid">
    <div className="team-section"><div className="team-section-head"><div><span>ESCALAS</span><h2>Próximos eventos</h2></div><b>{upcoming.length}</b></div>
-    <div className="team-events">{upcoming.length?upcoming.map(e=><article key={e.id}><time>{new Date(e.event_date+"T12:00:00").toLocaleDateString("pt-BR")}</time><div><strong>{e.title}</strong><small>{e.city||"Local a definir"} · {e.status==="draft"?"Rascunho":e.status}</small></div></article>):<div className="team-empty">Nenhum evento criado ainda.</div>}</div>
+    <div className="team-events">{upcoming.length?upcoming.map(e=><article key={e.id} className={selectedEventId===e.id?"selected":""} onClick={()=>setSelectedEventId(e.id)}><time>{new Date(e.event_date+"T12:00:00").toLocaleDateString("pt-BR")}</time><div><strong>{e.title}</strong><small>{e.city||"Local a definir"} · {e.status==="draft"?"Rascunho":e.status}</small></div></article>):<div className="team-empty">Nenhum evento criado ainda.</div>}</div>
    </div>
+   {selectedEvent&&<div className="team-section team-opening-manager"><div className="team-section-head"><div><span>VAGAS DO EVENTO</span><h2>{selectedEvent.title}</h2></div><b>{selectedEvent.status==="open"?"Publicado":"Rascunho"}</b></div>
+    <div className="team-opening-list">{openings.map(o=><article key={o.id}><div><strong>{o.title}</strong><small>{o.slots} {o.slots===1?"vaga":"vagas"}</small></div><b>{o.advertised_value!=null?o.advertised_value.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}):"Valor a combinar"}</b></article>)}</div>
+    <form className="team-opening-form" onSubmit={addOpening}><label>Vaga<select value={openingForm.title} onChange={e=>setOpeningForm({...openingForm,title:e.target.value})}><option>Apoio</option><option>Monitor</option><option>Recreador</option><option>Coordenador</option><option>Outro</option></select></label><label>Quantidade<input type="number" min="1" required value={openingForm.slots} onChange={e=>setOpeningForm({...openingForm,slots:e.target.value})}/></label><label>Valor anunciado<input type="number" min="0" step="0.01" value={openingForm.advertised_value} onChange={e=>setOpeningForm({...openingForm,advertised_value:e.target.value})} placeholder="R$"/></label><button className="team-secondary">ADICIONAR VAGA</button></form>
+    <div className="team-publish-actions"><button className="team-primary" onClick={publishEvent} disabled={selectedEvent.status==="open"}>{selectedEvent.status==="open"?"OPORTUNIDADE PUBLICADA":"PUBLICAR OPORTUNIDADE"}</button>{selectedEvent.status==="open"&&<button className="team-secondary" onClick={copyPublicLink}>COPIAR LINK DE CANDIDATURA</button>}</div>
+   </div>}
    <form className="team-section team-form" onSubmit={createEvent}><div className="team-section-head"><div><span>NOVA ESCALA</span><h2>Criar evento</h2></div></div>
     <label>Nome do evento<input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ex.: Festa infantil — Aniversário da Laura"/></label>
     <label>Descrição<textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Descreva o evento, orientações e informações importantes."/></label>
