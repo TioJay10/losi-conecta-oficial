@@ -108,7 +108,7 @@ export function HomePage({
             <Link to="/buscar" className="home-blue-link">
               {active.hero_button_text || "Encontrar fornecedores"} <span>›</span>
             </Link>
-            <a href="#como-funciona" className="home-blue-link">
+            <a href="#como-funciona" className="home-hero-text-link">
               Como funciona <span>›</span>
             </a>
           </div>
@@ -120,7 +120,7 @@ export function HomePage({
             <strong>Profissionais para o seu próximo evento.</strong>
             <p>Recreação, monitoria, música, decoração, buffet, atrações e muito mais.</p>
           </div>
-          <Link to="/buscar" className="home-panel-link">Explorar fornecedores <span>›</span></Link>
+          <Link to="/buscar" className="home-panel-text-link">Explorar fornecedores <span>›</span></Link>
         </div>
       </section>
 
@@ -129,21 +129,18 @@ export function HomePage({
           <span>01 — ENCONTRE</span>
           <h2>Pesquise pelo que seu evento precisa.</h2>
           <p>Filtre por serviço, categoria e localização e encontre profissionais disponíveis para atender seu projeto.</p>
-          <Link to="/buscar" className="home-card-link">Buscar fornecedores <span>›</span></Link>
         </article>
 
         <article className="home-feature-card home-feature-card-light">
           <span>02 — CONHEÇA</span>
           <h2>Veja quem está por trás do serviço.</h2>
           <p>Conheça o perfil público, serviços, informações e presença profissional antes de entrar em contato.</p>
-          <a href="#categorias" className="home-card-link">Ver categorias <span>›</span></a>
         </article>
 
         <article className="home-feature-card home-feature-card-gold">
           <span>03 — CONECTE</span>
           <h2>Converse diretamente com o fornecedor.</h2>
           <p>Depois de encontrar o profissional certo, a negociação continua de forma simples pelo WhatsApp.</p>
-          <Link to="/entrar" className="home-card-link">Criar minha conta <span>›</span></Link>
         </article>
       </section>
 
@@ -158,14 +155,12 @@ export function HomePage({
             <span>PARA ORGANIZADORES</span>
             <h3>Encontre as pessoas certas.</h3>
             <p>Descubra fornecedores para festas, eventos corporativos, ativações, passeios, oficinas e experiências.</p>
-            <Link to="/buscar" className="home-blue-link">Procurar fornecedores <span>›</span></Link>
           </article>
 
           <article>
             <span>PARA FORNECEDORES</span>
             <h3>Mostre o que você faz.</h3>
             <p>Tenha uma presença profissional no LOSI CONECTA e seja encontrado por quem está procurando soluções.</p>
-            <Link to="/entrar" className="home-blue-link">Entrar no LOSI CONECTA <span>›</span></Link>
           </article>
         </div>
       </section>
@@ -176,7 +171,6 @@ export function HomePage({
             <p className="home-eyebrow">CATEGORIAS</p>
             <h2>Serviços para diferentes momentos do evento.</h2>
           </div>
-          <Link to="/buscar" className="home-blue-link">Ver fornecedores <span>›</span></Link>
         </div>
 
         <div className="home-category-grid">
