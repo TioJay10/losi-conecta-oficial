@@ -136,8 +136,8 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-dark">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1712904124132-857e6577aab9?auto=format&fit=crop&fm=jpg&q=85&w=1600"
-              alt="Pessoa participando de um evento virtual usando um computador"
+              src="https://images.unsplash.com/photo-1530023367847-a683933f4172?auto=format&fit=crop&fm=jpg&q=85&w=1600"
+              alt="Mesa preparada para um evento"
               loading="lazy"
               decoding="async"
             />
@@ -150,8 +150,8 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-light">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1771681228863-4cb8ecfe0265?auto=format&fit=crop&fm=jpg&q=85&w=1600"
-              alt="Profissional de eventos em atividade durante uma experiência recreativa"
+              src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&fm=jpg&q=85&w=1600"
+              alt="Profissional apresentando uma reunião para uma equipe"
               loading="lazy"
               decoding="async"
             />
@@ -164,8 +164,8 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-gold">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1762312670082-3df0ac443dc9?auto=format&fit=crop&fm=jpg&q=85&w=1600"
-              alt="Profissionais e participantes reunidos em um evento"
+              src="https://media.istockphoto.com/id/2254719375/photo/arms-crossed-portrait-and-smile-of-designer-man-at-desk-in-office-for-complete-task.jpg"
+              alt="Profissional sorrindo em seu ambiente de trabalho"
               loading="lazy"
               decoding="async"
             />
