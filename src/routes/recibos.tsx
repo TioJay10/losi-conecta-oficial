@@ -17,7 +17,7 @@ type Profile = {
   city: string | null; state: string | null; cep: string | null;
 };
 type ReceiptData = {
-  id: string; number: string; clientName: string; clientDocument: string; clientAddress: string;
+  id: string; number: string; profilePhotoUrl?: string | null; clientName: string; clientDocument: string; clientAddress: string;
   service: string; serviceDate: string; amount: number; paymentMethod: string;
   description: string; city: string; signatureData: string | null; createdAt: string;
 };
@@ -300,6 +300,7 @@ function ReceiptsPage() {
   const [city, setCity] = useState("");
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [history, setHistory] = useState<ReceiptData[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -315,6 +316,7 @@ function ReceiptsPage() {
           return;
         }
 
+        setUserId(user.id);
         const [businessResult, profileResult] = await Promise.all([
           supabase.from("business_profiles").select("business_name,owner_id,address,bairro,city,state,cep,phone,whatsapp").eq("owner_id", user.id).maybeSingle(),
           supabase.from("profiles").select("full_name,address,city,state,cep").eq("id", user.id).maybeSingle(),
@@ -331,20 +333,46 @@ function ReceiptsPage() {
               ...loadedBusiness,
               business_name: supplierIdentity.businessName || loadedBusiness.business_name,
               document: supplierIdentity.document || null,
+              logo_url: supplierIdentity.logoUrl || loadedBusiness.logo_url || null,
             };
           }
         } catch (identityError) {
           console.warn("Não foi possível carregar a identificação do fornecedor:", identityError);
         }
 
-        setStorageKey(`losi-recibos-${user.id}`);
+        const loadedProfile = (profileResult.data as Profile | null) ?? null;
         setBusiness(loadedBusiness);
-        setProfile((profileResult.data as Profile | null) ?? null);
-        setCity(loadedBusiness?.city || profileResult.data?.city || "");
-        try {
-          const saved = localStorage.getItem(`losi-recibos-${user.id}`);
-          if (saved) setHistory(JSON.parse(saved) as ReceiptData[]);
-        } catch {}
+        setProfile(loadedProfile);
+        setCity(loadedBusiness?.city || loadedProfile?.city || "");
+
+        const { data: savedReceipts, error: savedReceiptsError } = await supabase
+          .from("issued_receipts")
+          .select("id,receipt_number,client_name,client_document,client_address,service,service_date,amount_cents,payment_method,description,city,issuer_photo_url,signature_data,created_at")
+          .eq("issuer_user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(100);
+
+        if (savedReceiptsError) {
+          console.error("Erro ao carregar recibos salvos:", savedReceiptsError);
+          setMessage("Não foi possível carregar o histórico salvo.");
+        } else {
+          setHistory((savedReceipts ?? []).map((item) => ({
+            id: item.id,
+            number: item.receipt_number,
+            profilePhotoUrl: item.issuer_photo_url,
+            clientName: item.client_name,
+            clientDocument: item.client_document || "",
+            clientAddress: item.client_address || "",
+            service: item.service,
+            serviceDate: item.service_date || "",
+            amount: Number(item.amount_cents || 0) / 100,
+            paymentMethod: item.payment_method || "",
+            description: item.description || "",
+            city: item.city || "",
+            signatureData: item.signature_data || null,
+            createdAt: item.created_at,
+          })));
+        }
       } catch (error) {
         console.error("Erro ao carregar recibos:", error);
         if (active) setMessage("Não foi possível carregar os recibos. Verifique sua sessão e tente novamente.");
@@ -362,6 +390,7 @@ function ReceiptsPage() {
   const preview = useMemo<ReceiptData>(() => ({
     id: "preview",
     number: "PREVIEW",
+    profilePhotoUrl: business?.logo_url || profile?.avatar_url || null,
     clientName, clientDocument, clientAddress, service, serviceDate,
     amount: amountNumber, paymentMethod, description, signatureData,
     city: city || business?.city || profile?.city || "",
@@ -374,23 +403,58 @@ function ReceiptsPage() {
     setPaymentMethod("PIX"); setDescription(""); setSignatureData(null);
   }
 
-  function generate() {
+  async function generate() {
     if (!clientName.trim() || !service.trim() || amountNumber <= 0) {
       setMessage("Preencha contratante, serviço e um valor maior que zero.");
       return;
     }
+    if (!userId) {
+      setMessage("Sua sessão não está disponível. Entre novamente.");
+      return;
+    }
+
     const receipt: ReceiptData = {
       ...preview,
       id: crypto.randomUUID(),
       number: `RC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
       createdAt: new Date().toISOString(),
     };
-    const next = [receipt, ...history].slice(0, 30);
-    setHistory(next);
-    try {
-      localStorage.setItem(storageKey || `losi-recibos-${business?.owner_id || "local"}`, JSON.stringify(next));
-    } catch {}
-    setMessage(`Recibo ${receipt.number} gerado com sucesso.`);
+
+    const issuerDocument = supplierDocument !== "Não informado" ? supplierDocument : null;
+    const issuerPhotoUrl = business?.logo_url || profile?.avatar_url || null;
+    const issuerPhone = business?.phone || business?.whatsapp || null;
+    const issuerAddress = [business?.address, business?.bairro, business?.city, business?.state, business?.cep].filter(Boolean).join(", ") || null;
+
+    const { error: saveError } = await supabase.from("issued_receipts").insert({
+      issuer_user_id: userId,
+      business_id: business?.id || null,
+      receipt_number: receipt.number,
+      client_name: receipt.clientName,
+      client_document: receipt.clientDocument || null,
+      client_address: receipt.clientAddress || null,
+      service: receipt.service,
+      service_date: receipt.serviceDate || null,
+      amount_cents: Math.round(receipt.amount * 100),
+      payment_method: receipt.paymentMethod || null,
+      description: receipt.description || null,
+      city: receipt.city || null,
+      issuer_name: supplierName,
+      issuer_document: issuerDocument,
+      issuer_phone: issuerPhone,
+      issuer_address: issuerAddress,
+      issuer_photo_url: issuerPhotoUrl,
+      signature_data: receipt.signatureData || null,
+      created_at: receipt.createdAt,
+    });
+
+    if (saveError) {
+      console.error("Erro ao salvar recibo:", saveError);
+      setMessage("Não foi possível salvar o recibo. Verifique sua sessão e tente novamente.");
+      return;
+    }
+
+    setHistory((current) => [receipt, ...current].slice(0, 100));
+    setMessage(`Recibo ${receipt.number} salvo e gerado com sucesso.`);
     openReceiptPdf(receipt, business, profile);
   }
 
@@ -485,7 +549,7 @@ function ReceiptsPage() {
           </div>
 
           <section className="receipts-history-card">
-            <div className="receipts-card-head"><div><span className="receipts-kicker">HISTÓRICO</span><h2>Recibos gerados neste dispositivo</h2></div><span className="receipts-count">{history.length}</span></div>
+            <div className="receipts-card-head"><div><span className="receipts-kicker">HISTÓRICO</span><h2>Recibos gerados</h2></div><span className="receipts-count">{history.length}</span></div>
             {history.length === 0 ? <div className="receipts-empty"><strong>Nenhum recibo gerado ainda</strong><span>Os recibos criados por este navegador aparecerão aqui para consulta rápida.</span></div> : (
               <div className="receipts-history-list">
                 {history.map(item => <article key={item.id}><div><strong>{item.number}</strong><span>{item.clientName} · {item.service}</span></div><div className="receipts-history-meta"><b>{money(item.amount)}</b><span>{dateBR(item.serviceDate)}</span><button type="button" onClick={()=>openReceiptPdf(item,business,profile)}>Baixar PDF</button></div></article>)}
