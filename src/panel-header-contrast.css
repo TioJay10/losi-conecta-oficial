@@ -110,3 +110,11 @@ main.dashboard-page > .dashboard-main > header.dashboard-header > .dashboard-hea
     margin-top: 0 !important;
   }
 }
+
+
+/* MOBILE — no painel profissional, o contexto textual do cabeçalho fica oculto */
+@media (max-width: 720px) {
+  main.dashboard-page > .dashboard-main > header.dashboard-header > .dashboard-header-context {
+    display: none !important;
+  }
+}
