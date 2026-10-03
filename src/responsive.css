@@ -18724,3 +18724,57 @@ body,
     border-color: #000000 !important;
   }
 }
+
+
+/* HOME — reduzir a poluição visual: ações secundárias voltam a ser links de texto */
+.home-apple-inspired .home-hero-text-link,
+.home-apple-inspired .home-panel-text-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  align-self: flex-start !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #0b182a !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  box-shadow: none !important;
+}
+
+.home-apple-inspired .home-hero-text-link span,
+.home-apple-inspired .home-panel-text-link span {
+  margin-left: 5px !important;
+  font-size: 18px !important;
+  color: inherit !important;
+}
+
+.home-apple-inspired .home-hero-text-link:hover,
+.home-apple-inspired .home-hero-text-link:focus-visible {
+  color: #8a6d2f !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+  transform: none !important;
+}
+
+.home-apple-inspired .home-panel-text-link {
+  margin-top: 38px !important;
+  color: #f0d99a !important;
+}
+
+.home-apple-inspired .home-panel-text-link:hover,
+.home-apple-inspired .home-panel-text-link:focus-visible {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+}
+
+@media (max-width: 430px) {
+  .home-apple-inspired .home-hero-text-link {
+    min-height: 44px !important;
+    align-self: center !important;
+  }
+}
