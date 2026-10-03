@@ -22,3 +22,27 @@
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+
+/* PAINEL PROFISSIONAL — ações permanecem à direita e centralizadas verticalmente */
+.dashboard-page .dashboard-header > .dashboard-header-right {
+  align-self: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.dashboard-page .dashboard-header-right > .dashboard-notifications,
+.dashboard-page .dashboard-header-right > .dashboard-header-user,
+.dashboard-page .dashboard-header-right > .dashboard-logout {
+  align-self: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.dashboard-page .dashboard-header-user {
+  display: flex !important;
+  align-items: center !important;
+}
