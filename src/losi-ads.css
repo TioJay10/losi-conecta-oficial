@@ -818,3 +818,37 @@
     justify-self: end !important;
   }
 }
+
+
+/* LOSI ADS — correção estrutural do cabeçalho desktop */
+@media (min-width: 721px) {
+  .losi-ads-dashboard .dashboard-main {
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .losi-ads-dashboard .dashboard-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .losi-ads-dashboard .dashboard-header .dashboard-mobile-menu-button {
+    display: none !important;
+  }
+
+  .losi-ads-dashboard .dashboard-header .dashboard-header-context {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    min-width: 0 !important;
+  }
+
+  .losi-ads-dashboard .dashboard-header .dashboard-logout {
+    grid-column: 2 !important;
+    justify-self: end !important;
+    margin: 0 !important;
+  }
+}
