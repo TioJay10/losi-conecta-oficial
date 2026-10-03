@@ -46,3 +46,11 @@
   display: flex !important;
   align-items: center !important;
 }
+
+
+/* PAINEL PROFISSIONAL — mais altura para acomodar e alinhar o conteúdo do cabeçalho */
+.dashboard-page .dashboard-header {
+  min-height: 82px !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+}
