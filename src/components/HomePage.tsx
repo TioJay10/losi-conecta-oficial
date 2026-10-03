@@ -133,7 +133,7 @@ export function HomePage({
 
         <article className="home-feature-card home-feature-card-gold">
           <div className="home-feature-image">
-            <img src="https://images.unsplash.com/photo-1762312670082-3df0ac443dc9?auto=format&fit=crop&fm=jpg&q=85&w=1600" alt="Profissionais e participantes reunidos em um evento" loading="lazy" decoding="async" />
+            <img src="https://plus.unsplash.com/premium_photo-1723867236011-6099f308dab0?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Profissional usando o celular para se comunicar com um fornecedor" loading="lazy" decoding="async" />
           </div>
           <span>03 — CONECTE</span>
           <h2>Converse diretamente com o fornecedor.</h2>
