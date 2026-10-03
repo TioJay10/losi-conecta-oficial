@@ -18051,3 +18051,45 @@ body,
   .home-hero-panel strong{font-size:34px}
   .home-category-grid{grid-template-columns:1fr}
 }
+
+
+/* HOME — cabeçalho: marca à esquerda, entrar à direita */
+.home-apple-header {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  justify-content: initial !important;
+}
+.home-apple-header .home-brand-link {
+  grid-column: 1 !important;
+  justify-self: start !important;
+  margin: 0 !important;
+}
+.home-apple-header .home-apple-nav {
+  grid-column: 2 !important;
+  justify-self: center !important;
+  position: static !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+.home-apple-header .home-header-actions {
+  grid-column: 3 !important;
+  justify-self: end !important;
+  margin: 0 !important;
+}
+.home-apple-header .home-header-login {
+  margin: 0 !important;
+}
+@media (max-width: 800px) {
+  .home-apple-header {
+    grid-template-columns: 1fr auto !important;
+  }
+  .home-apple-header .home-brand-link {
+    grid-column: 1 !important;
+    justify-self: start !important;
+  }
+  .home-apple-header .home-header-actions {
+    grid-column: 2 !important;
+    justify-self: end !important;
+  }
+}
