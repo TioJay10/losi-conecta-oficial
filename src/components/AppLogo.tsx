@@ -50,7 +50,8 @@ export function AppLogo({ className, children, style, "aria-label": ariaLabel = 
       aria-label={ariaLabel}
       onClick={handleClick}
     >
-      {children ?? <>LOSI <span>CONECTA</span></>}
+      <span className="app-logo-symbol" aria-hidden="true" />
+      <span className="app-logo-wordmark">{children ?? <>LOSI <span>CONECTA</span></>}</span>
     </a>
   );
 }
