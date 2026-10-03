@@ -1130,22 +1130,7 @@ function DashboardPage() {
               Criar perfil da empresa →
             </button>
           </section>
-        ) : (
-          <div className="dashboard-grid">
-            <button type="button" onClick={() => navigate({ to: "/buscar" })}>
-              <strong>Encontrar fornecedores</strong>
-              <span>Pesquise profissionais e empresas para seus eventos.</span>
-            </button>
-            <button type="button" onClick={() => navigate({ to: "/meu-perfil" })}>
-              <strong>Meu perfil</strong>
-              <span>Atualize somente suas informações pessoais e dados da sua conta.</span>
-            </button>
-            <button type="button" onClick={() => navigate({ to: "/meus-servicos" })}>
-              <strong>Meus serviços</strong>
-              <span>Atualize sua empresa, apresentação, serviços, imagens e localização.</span>
-            </button>
-          </div>
-        )}
+        ) : null}
 
         {hasBusinessProfile && businessStatus && (
           <section className="dashboard-status">
