@@ -100,7 +100,7 @@ function BusinessServicesPage() {
 
       const currentUser = sessionData.session.user;
       const [businessResult, categoryResult] = await Promise.all([
-        supabase.from("business_profiles").select("*").eq("owner_id", currentUser.id).maybeSingle(),
+        supabase.from("business_profiles").select("id,business_name,description,phone,whatsapp,website,instagram,city,state,cep,bairro,address,logo_url,cover_url,slug,approval_status,portfolio_urls,latitude,longitude,show_availability").eq("owner_id", currentUser.id).maybeSingle(),
         supabase.from("categories").select("id,name").eq("active", true).order("name"),
       ]);
 
@@ -483,8 +483,8 @@ async function lookupViaCep(cep: string) {
     };
 
     const result = business
-      ? await supabase.from("business_profiles").update(payload).eq("id", business.id).select("*").single()
-      : await supabase.from("business_profiles").insert(payload).select("*").single();
+      ? await supabase.from("business_profiles").update(payload).eq("id", business.id).select("id,business_name,description,phone,whatsapp,website,instagram,city,state,cep,bairro,address,logo_url,cover_url,slug,approval_status,portfolio_urls,latitude,longitude,show_availability").single()
+      : await supabase.from("business_profiles").insert(payload).select("id,business_name,description,phone,whatsapp,website,instagram,city,state,cep,bairro,address,logo_url,cover_url,slug,approval_status,portfolio_urls,latitude,longitude,show_availability").single();
 
     if (result.error) {
       console.error("Erro ao salvar perfil da empresa:", result.error);
