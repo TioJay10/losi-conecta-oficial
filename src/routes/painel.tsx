@@ -836,8 +836,9 @@ function DashboardPage() {
     setPaymentError("");
     try {
       const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
-      if (!accessToken) throw new Error("Sua sessão expirou. Entre novamente para continuar.");
+      if (!sessionData.session?.access_token) {
+        throw new Error("Sua sessão expirou. Entre novamente para continuar.");
+      }
 
       const nextDueDate = new Date();
       nextDueDate.setDate(nextDueDate.getDate() + 1);
@@ -847,32 +848,28 @@ function DashboardPage() {
         String(nextDueDate.getDate()).padStart(2, "0"),
       ].join("-");
 
-      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-create-subscription", {
-        method: "POST",
-        headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
-        body: JSON.stringify({ planSlug: paymentPlan.slug, billingType: paymentBillingType, cpfCnpj: cleanCpfCnpj, nextDueDate: nextDueDateText, couponCode: appliedCoupon?.code || null }),
-      });
-      const result = await response.json();
-      if (!response.ok || !result?.success) {
-        const details = result?.details;
-        const detailMessage = Array.isArray(details?.errors)
-          ? details.errors
-              .map((item: { description?: string; code?: string }) =>
-                [item.code, item.description].filter(Boolean).join(": "),
-              )
-              .filter(Boolean)
-              .join(" | ")
-          : typeof details?.message === "string"
-            ? details.message
-            : typeof details === "string"
-              ? details
-              : "";
+      const { data: result, error: functionError } = await supabase.functions.invoke(
+        "asaas-create-subscription",
+        {
+          body: {
+            planSlug: paymentPlan.slug,
+            billingType: paymentBillingType,
+            cpfCnpj: cleanCpfCnpj,
+            nextDueDate: nextDueDateText,
+            couponCode: appliedCoupon?.code || null,
+          },
+        },
+      );
 
+      if (functionError) {
+        console.error("Erro ao iniciar contratação:", functionError);
+        throw new Error("Não foi possível conectar ao serviço de pagamento. Tente novamente.");
+      }
+
+      if (!result?.success) {
         const statusText = result?.status ? " (HTTP " + result.status + ")" : "";
         throw new Error(
-          [result?.error || "Não foi possível iniciar a contratação." + statusText, detailMessage]
-            .filter(Boolean)
-            .join(" — "),
+          (result?.error || "Não foi possível iniciar a contratação.") + statusText,
         );
       }
 
