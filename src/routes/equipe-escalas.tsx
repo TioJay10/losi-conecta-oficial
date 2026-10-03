@@ -26,6 +26,7 @@ function EquipeEscalasPage(){
  const [assignment,setAssignment]=useState<Record<string,{role:string;value:string}>>({});
  const [selectedPerson,setSelectedPerson]=useState<Collaborator|null>(null);
  const [personJobs,setPersonJobs]=useState<CollaboratorJob[]>([]);
+ const [dashboardStats,setDashboardStats]=useState({openSlots:0,pending:0,waiting:0,unavailable:0});
  const [form,setForm]=useState({title:"",description:"",event_date:"",starts_at:"",ends_at:"",location_name:"",address:"",city:"",state:""});
 
  async function load(){
@@ -38,7 +39,10 @@ function EquipeEscalasPage(){
    supabase.from("team_events").select("id,title,event_date,status,city,public_token").eq("business_id",b.id).order("event_date",{ascending:true}),
    supabase.from("team_collaborators").select("id,name,whatsapp,city,state,notes,network_status,calendar_token").eq("business_id",b.id).order("name")
   ]);
-  setEvents((e||[]) as EventRow[]);setPeople((p||[]) as Collaborator[]); if(!selectedEventId&&e?.[0]?.id)setSelectedEventId(e[0].id); setLoading(false);
+  setEvents((e||[]) as EventRow[]);setPeople((p||[]) as Collaborator[]);
+  const activeIds=(e||[]).filter(x=>x.status!=="completed"&&x.status!=="cancelled").map(x=>x.id);
+  if(activeIds.length){const [{data:allOpenings},{data:allApps}]=await Promise.all([supabase.from("team_event_openings").select("event_id,slots").in("event_id",activeIds),supabase.from("team_applications").select("event_id,status,attendance_status").in("event_id",activeIds)]);const slots=(allOpenings||[]).reduce((n,x)=>n+Number(x.slots||0),0);const confirmed=(allApps||[]).filter(x=>x.status==="confirmed").length;setDashboardStats({openSlots:Math.max(0,slots-confirmed),pending:(allApps||[]).filter(x=>x.status==="pending").length,waiting:(allApps||[]).filter(x=>x.status==="confirmed"&&!x.attendance_status).length,unavailable:(allApps||[]).filter(x=>x.status==="confirmed"&&x.attendance_status==="unavailable").length})}else setDashboardStats({openSlots:0,pending:0,waiting:0,unavailable:0});
+  if(!selectedEventId&&e?.[0]?.id)setSelectedEventId(e[0].id); setLoading(false);
  }
  useEffect(()=>{void load()},[]);
  useEffect(()=>{if(!selectedEventId){setOpenings([]);setApplications([]);return} void Promise.all([
@@ -76,6 +80,7 @@ function EquipeEscalasPage(){
  return <main className="team-page">
   <header className="team-topbar"><button onClick={()=>navigate({to:"/painel"})}>← Painel</button><div><span>LOSI CONECTA</span><strong>Equipe & Escalas</strong></div></header>
   <section className="team-hero"><div><span>OPERAÇÃO PROFISSIONAL</span><h1>Sua rede. Seus eventos. Sua escala.</h1><p>Organize colaboradores em rede, publique oportunidades e monte cada escala mantendo função e valor final sob seu controle.</p></div><strong>{businessName}</strong></section>
+  <section className="team-dashboard"><div className="team-dashboard-title"><div><span>VISÃO OPERACIONAL</span><h2>O que precisa da sua atenção</h2></div><p>Resumo dos eventos ativos e da sua equipe.</p></div><div className="team-dashboard-cards"><article><small>EVENTOS ATIVOS</small><strong>{upcoming.length}</strong><span>Próximas operações</span></article><article className={dashboardStats.openSlots?"attention":""}><small>POSIÇÕES EM ABERTO</small><strong>{dashboardStats.openSlots}</strong><span>Ainda precisam ser preenchidas</span></article><article className={dashboardStats.pending?"attention":""}><small>CANDIDATURAS PENDENTES</small><strong>{dashboardStats.pending}</strong><span>Aguardando sua análise</span></article><article className={dashboardStats.waiting?"attention":""}><small>AGUARDANDO PRESENÇA</small><strong>{dashboardStats.waiting}</strong><span>Sem resposta no calendário</span></article><article className={dashboardStats.unavailable?"danger":""}><small>NÃO PODEM COMPARECER</small><strong>{dashboardStats.unavailable}</strong><span>Exigem ajuste na escala</span></article></div></section>
   <section className="team-section"><div className="team-section-head"><div><span>MINHA EQUIPE</span><h2>Rede de colaboradores</h2></div><b>{people.length} na rede</b></div>
    <div className="team-flow"><div className="team-flow-owner"><small>FORNECEDOR</small><strong>{businessName||"Sua empresa"}</strong></div><div className="team-flow-line"/><div className="team-flow-people">{people.length?people.map(p=><article key={p.id} role="button" tabIndex={0} onClick={()=>void openPerson(p)} onKeyDown={e=>{if(e.key==="Enter")void openPerson(p)}} className={p.network_status!=="active"?"inactive":""}><span>{p.name.slice(0,1).toUpperCase()}</span><strong>{p.name}</strong><small>{p.city||"Cidade não informada"}</small></article>):<div className="team-empty">Sua rede começa aqui. Os candidatos aprovados aparecerão neste fluxograma.</div>}</div></div>
   </section>
