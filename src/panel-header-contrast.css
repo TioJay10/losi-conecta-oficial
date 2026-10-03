@@ -10,3 +10,15 @@
 .dashboard-page .dashboard-header-user > div > strong {
   color: #D4AF37 !important;
 }
+
+
+/* PAINEL PROFISSIONAL — contexto permanece à esquerda, centralizado verticalmente no header */
+.dashboard-page .dashboard-header > .dashboard-header-context {
+  align-self: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  text-align: left !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
