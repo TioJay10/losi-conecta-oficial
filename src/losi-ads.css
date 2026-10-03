@@ -852,3 +852,11 @@
     margin: 0 !important;
   }
 }
+
+
+/* LOSI ADS — respiro entre ações do card de créditos no desktop */
+@media (min-width: 721px) {
+  .losi-ads-dashboard .losi-ads-balance > button + button {
+    margin-left: 18px !important;
+  }
+}
