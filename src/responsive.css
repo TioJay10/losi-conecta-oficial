@@ -18848,7 +18848,7 @@ body,
 @media (max-width: 800px) {
   .home-apple-inspired .home-feature-image {
     width: calc(100% + 52px) !important;
-    height: 138px !important;
+    height: 190px !important;
     margin: -26px -26px 24px !important;
   }
 
@@ -18860,6 +18860,6 @@ body,
 
 @media (max-width: 430px) {
   .home-apple-inspired .home-feature-image {
-    height: 128px !important;
+    height: 175px !important;
   }
 }
