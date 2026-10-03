@@ -18823,7 +18823,7 @@ body,
 
 .home-apple-inspired .home-feature-image {
   width: calc(100% + 64px) !important;
-  height: 154px !important;
+  height: clamp(190px, 18vw, 230px) !important;
   margin: -32px -32px 28px !important;
   overflow: hidden !important;
   border-radius: 12px !important;
@@ -18848,7 +18848,7 @@ body,
 @media (max-width: 800px) {
   .home-apple-inspired .home-feature-image {
     width: calc(100% + 52px) !important;
-    height: 190px !important;
+    height: clamp(190px, 42vw, 220px) !important;
     margin: -26px -26px 24px !important;
   }
 
@@ -18860,6 +18860,6 @@ body,
 
 @media (max-width: 430px) {
   .home-apple-inspired .home-feature-image {
-    height: 175px !important;
+    height: 200px !important;
   }
 }
