@@ -5,7 +5,8 @@ import "../equipe-escalas.css";
 
 type EventRow={id:string;title:string;event_date:string;status:string;city:string|null;public_token:string};
 type Opening={id:string;event_id:string;title:string;slots:number;advertised_value:number|null};
-type Collaborator={id:string;name:string;city:string|null;network_status:string};
+type Collaborator={id:string;name:string;city:string|null;network_status:string;calendar_token:string};
+type Application={id:string;status:string;candidate_name:string;candidate_whatsapp:string;candidate_city:string|null;candidate_notes:string|null;assigned_role:string|null;agreed_value:number|null;collaborator_id:string|null;opening_id:string;team_event_openings:{title:string}|null};
 
 export const Route=createFileRoute("/equipe-escalas")({component:EquipeEscalasPage});
 
@@ -20,6 +21,8 @@ function EquipeEscalasPage(){
  const [selectedEventId,setSelectedEventId]=useState("");
  const [openings,setOpenings]=useState<Opening[]>([]);
  const [openingForm,setOpeningForm]=useState({title:"Recreador",slots:"1",advertised_value:""});
+ const [applications,setApplications]=useState<Application[]>([]);
+ const [assignment,setAssignment]=useState<Record<string,{role:string;value:string}>>({});
  const [form,setForm]=useState({title:"",description:"",event_date:"",starts_at:"",ends_at:"",location_name:"",address:"",city:"",state:""});
 
  async function load(){
@@ -30,12 +33,15 @@ function EquipeEscalasPage(){
   setBusinessId(b.id);setBusinessName(b.business_name);
   const [{data:e},{data:p}]=await Promise.all([
    supabase.from("team_events").select("id,title,event_date,status,city,public_token").eq("business_id",b.id).order("event_date",{ascending:true}),
-   supabase.from("team_collaborators").select("id,name,city,network_status").eq("business_id",b.id).order("name")
+   supabase.from("team_collaborators").select("id,name,city,network_status,calendar_token").eq("business_id",b.id).order("name")
   ]);
   setEvents((e||[]) as EventRow[]);setPeople((p||[]) as Collaborator[]); if(!selectedEventId&&e?.[0]?.id)setSelectedEventId(e[0].id); setLoading(false);
  }
  useEffect(()=>{void load()},[]);
- useEffect(()=>{if(!selectedEventId){setOpenings([]);return} void supabase.from("team_event_openings").select("id,event_id,title,slots,advertised_value").eq("event_id",selectedEventId).order("created_at").then(({data})=>setOpenings((data||[]) as Opening[]))},[selectedEventId]);
+ useEffect(()=>{if(!selectedEventId){setOpenings([]);setApplications([]);return} void Promise.all([
+ supabase.from("team_event_openings").select("id,event_id,title,slots,advertised_value").eq("event_id",selectedEventId).order("created_at"),
+ supabase.from("team_applications").select("id,status,candidate_name,candidate_whatsapp,candidate_city,candidate_notes,assigned_role,agreed_value,collaborator_id,opening_id,team_event_openings(title)").eq("event_id",selectedEventId).order("created_at",{ascending:false})
+ ]).then(([o,a])=>{setOpenings((o.data||[]) as Opening[]);setApplications((a.data||[]) as unknown as Application[])})},[selectedEventId]);
  const upcoming=useMemo(()=>events.filter(e=>e.status!=="cancelled"&&e.status!=="completed"),[events]);
 
  async function createEvent(ev:FormEvent){
@@ -51,6 +57,9 @@ function EquipeEscalasPage(){
  async function addOpening(ev:FormEvent){ev.preventDefault();if(!selectedEventId)return;const {error}=await supabase.from("team_event_openings").insert({event_id:selectedEventId,title:openingForm.title.trim(),slots:Number(openingForm.slots),advertised_value:openingForm.advertised_value?Number(openingForm.advertised_value):null});if(error){alert(error.message);return}const {data}=await supabase.from("team_event_openings").select("id,event_id,title,slots,advertised_value").eq("event_id",selectedEventId).order("created_at");setOpenings((data||[]) as Opening[]);setOpeningForm({title:"Recreador",slots:"1",advertised_value:""})}
  async function publishEvent(){if(!selectedEventId||!openings.length){alert("Adicione pelo menos uma vaga antes de publicar.");return}const {error}=await supabase.from("team_events").update({status:"open"}).eq("id",selectedEventId);if(error){alert(error.message);return}await load()}
  async function copyPublicLink(){const e=events.find(x=>x.id===selectedEventId);if(!e)return;const link=`${window.location.origin}/oportunidade/${e.public_token}`;await navigator.clipboard.writeText(link);alert("Link de candidatura copiado.")}
+ async function manageApplication(id:string,action:"approve"|"reject"|"confirm"){const values=assignment[id];const {error}=await supabase.rpc("manage_team_application",{p_application_id:id,p_action:action,p_assigned_role:values?.role||null,p_agreed_value:values?.value?Number(values.value):null});if(error){alert(error.message);return}await load();const {data}=await supabase.from("team_applications").select("id,status,candidate_name,candidate_whatsapp,candidate_city,candidate_notes,assigned_role,agreed_value,collaborator_id,opening_id,team_event_openings(title)").eq("event_id",selectedEventId).order("created_at",{ascending:false});setApplications((data||[]) as unknown as Application[])}
+ function openWhatsApp(phone:string,name:string){const n=phone.replace(/\D/g,"");window.open(`https://wa.me/${n}?text=${encodeURIComponent(`Olá, ${name}! Estou entrando em contato sobre sua candidatura pelo LOSI Conecta.`)}`,"_blank","noopener,noreferrer")}
+ async function copyCalendar(collaboratorId:string|null){const p=people.find(x=>x.id===collaboratorId);if(!p)return;await navigator.clipboard.writeText(`${window.location.origin}/calendario/${p.calendar_token}`);alert("Link exclusivo do Calendário copiado.")}
  const selectedEvent=events.find(e=>e.id===selectedEventId);
  if(loading)return <main className="team-page team-loading">Carregando Equipe & Escalas...</main>;
  return <main className="team-page">
@@ -68,6 +77,12 @@ function EquipeEscalasPage(){
     <form className="team-opening-form" onSubmit={addOpening}><label>Vaga<select value={openingForm.title} onChange={e=>setOpeningForm({...openingForm,title:e.target.value})}><option>Apoio</option><option>Monitor</option><option>Recreador</option><option>Coordenador</option><option>Outro</option></select></label><label>Quantidade<input type="number" min="1" required value={openingForm.slots} onChange={e=>setOpeningForm({...openingForm,slots:e.target.value})}/></label><label>Valor anunciado<input type="number" min="0" step="0.01" value={openingForm.advertised_value} onChange={e=>setOpeningForm({...openingForm,advertised_value:e.target.value})} placeholder="R$"/></label><button className="team-secondary">ADICIONAR VAGA</button></form>
     <div className="team-publish-actions"><button className="team-primary" onClick={publishEvent} disabled={selectedEvent.status==="open"}>{selectedEvent.status==="open"?"OPORTUNIDADE PUBLICADA":"PUBLICAR OPORTUNIDADE"}</button>{selectedEvent.status==="open"&&<button className="team-secondary" onClick={copyPublicLink}>COPIAR LINK DE CANDIDATURA</button>}</div>
    </div>}
+   {selectedEvent&&<section className="team-section team-candidates"><div className="team-section-head"><div><span>CANDIDATOS</span><h2>Central de candidaturas</h2></div><b>{applications.length} recebidas</b></div>
+    <div className="team-candidate-list">{applications.length?applications.map(a=><article key={a.id}><div className="team-candidate-main"><span>{a.candidate_name.slice(0,1).toUpperCase()}</span><div><strong>{a.candidate_name}</strong><small>{a.team_event_openings?.title||"Vaga"} · {a.candidate_city||"Cidade não informada"}</small><small>{a.candidate_whatsapp}</small></div><b className={`status-${a.status}`}>{a.status==="pending"?"Pendente":a.status==="approved"?"Aprovado":a.status==="rejected"?"Recusado":"Confirmado"}</b></div>{a.candidate_notes&&<p>{a.candidate_notes}</p>}
+     {a.status==="pending"&&<div className="team-candidate-actions"><button className="team-primary" onClick={()=>void manageApplication(a.id,"approve")}>APROVAR E ADICIONAR À REDE</button><button className="team-secondary" onClick={()=>void manageApplication(a.id,"reject")}>RECUSAR</button></div>}
+     {a.status==="approved"&&<><div className="team-candidate-actions"><button className="team-secondary" onClick={()=>openWhatsApp(a.candidate_whatsapp,a.candidate_name)}>CONVERSAR NO WHATSAPP</button><button className="team-secondary" onClick={()=>void copyCalendar(a.collaborator_id)}>COPIAR CALENDÁRIO</button></div><div className="team-assignment"><label>Função final<input value={assignment[a.id]?.role||""} onChange={e=>setAssignment({...assignment,[a.id]:{role:e.target.value,value:assignment[a.id]?.value||""}})} placeholder="Ex.: Recreador"/></label><label>Valor acordado<input type="number" min="0" step=".01" value={assignment[a.id]?.value||""} onChange={e=>setAssignment({...assignment,[a.id]:{role:assignment[a.id]?.role||"",value:e.target.value}})} placeholder="R$"/></label><button className="team-primary" onClick={()=>void manageApplication(a.id,"confirm")}>CONFIRMAR NA ESCALA</button></div></>}
+     {a.status==="confirmed"&&<div className="team-confirmed-row"><strong>{a.assigned_role}</strong><span>{a.agreed_value!=null?a.agreed_value.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}):"Valor não registrado"}</span><button className="team-secondary" onClick={()=>void copyCalendar(a.collaborator_id)}>COPIAR CALENDÁRIO</button></div>}</article>):<div className="team-empty">As candidaturas enviadas pelo link aparecerão aqui.</div>}</div>
+   </section>}
    <form className="team-section team-form" onSubmit={createEvent}><div className="team-section-head"><div><span>NOVA ESCALA</span><h2>Criar evento</h2></div></div>
     <label>Nome do evento<input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ex.: Festa infantil — Aniversário da Laura"/></label>
     <label>Descrição<textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})} placeholder="Descreva o evento, orientações e informações importantes."/></label>
