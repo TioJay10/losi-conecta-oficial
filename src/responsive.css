@@ -18933,3 +18933,79 @@ body,
     align-items: center !important;
   }
 }
+
+
+/* LOSI CONECTA — identidade de marca aplicada de forma estrutural aos cabeçalhos */
+.app-logo-symbol {
+  display: inline-block !important;
+  width: 24px !important;
+  height: 27px !important;
+  flex: 0 0 24px !important;
+  margin-right: 8px !important;
+  background: url("/losi-conecta-symbol.svg") center / contain no-repeat !important;
+  vertical-align: middle !important;
+}
+
+.app-logo-wordmark {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  line-height: 1 !important;
+}
+
+.catalog-logo,
+.marketplace-logo,
+.feed-brand,
+.presentation-header > .app-logo-symbol {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.catalog-logo::before,
+.marketplace-logo::before,
+.feed-brand::before {
+  display: none !important;
+}
+
+.dashboard-sidebar-brand,
+.feed-sidebar-brand {
+  gap: 0 !important;
+}
+
+.auth-brand,
+.auth-modal-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.auth-brand-symbol,
+.auth-modal-brand-symbol {
+  width: 24px !important;
+  height: 27px !important;
+  flex: 0 0 24px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.presentation-header > a,
+.losi-faq-header > a,
+.quotes-header > a,
+.catalog-header > a,
+.marketplace-header-inner > a {
+  min-width: 0 !important;
+}
+
+@media (max-width: 800px) {
+  .app-logo-symbol,
+  .auth-brand-symbol,
+  .auth-modal-brand-symbol {
+    width: 22px !important;
+    height: 25px !important;
+    flex-basis: 22px !important;
+  }
+
+  .app-logo-wordmark {
+    white-space: nowrap !important;
+  }
+}
