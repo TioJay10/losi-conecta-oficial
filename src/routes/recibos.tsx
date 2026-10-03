@@ -261,7 +261,22 @@ function buildReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData;
   doc.setTextColor(145,150,158);
   doc.setFontSize(7);
   doc.text("Este documento registra o recebimento informado pelo prestador.", pageW/2, 282, { align: "center" });
-  doc.save(`recibo-${receipt.number}.pdf`);
+  return doc;
+}
+
+function openReceiptPdf(receipt: ReceiptData, business: Business | null, profile: Profile | null) {
+  const doc = buildReceiptPdf({ receipt, business, profile });
+  const url = URL.createObjectURL(doc.output("blob"));
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+  if (!opened) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `recibo-${receipt.number}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+  window.setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 function ReceiptsPage() {
@@ -294,7 +309,8 @@ function ReceiptsPage() {
         supabase.from("profiles").select("full_name,document,address,city,state,cep").eq("id", user.id).maybeSingle(),
       ]);
       if (!active) return;
-      setStorageKey(`losi-recibos-${user.id}`);\n      setBusiness((businessData as Business | null) ?? null);
+      setStorageKey(`losi-recibos-${user.id}`);
+      setBusiness((businessData as Business | null) ?? null);
       setProfile((profileData as Profile | null) ?? null);
       setCity(businessData?.city || profileData?.city || "");
       try {
