@@ -18863,3 +18863,73 @@ body,
     height: 200px !important;
   }
 }
+
+
+/* IDENTIDADE GLOBAL — símbolo LOSI CONECTA em todos os cabeçalhos e menus */
+.home-page .home-header .mobile-centered-brand::before,
+.dashboard-page .dashboard-header .mobile-centered-brand::before,
+.profile-page .profile-header .mobile-centered-brand::before,
+.quotes-page .quotes-header .catalog-logo::before,
+.catalog-page .catalog-header .catalog-logo::before,
+.provider-page .catalog-header .catalog-logo::before,
+.marketplace-page .marketplace-header .marketplace-logo::before,
+.admin-page .admin-header .mobile-centered-brand::before,
+.admin-profile-header-brand::before,
+.feed-header .feed-brand::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 24px !important;
+  height: 27px !important;
+  flex: 0 0 24px !important;
+  margin-right: 8px !important;
+  background: url("/losi-conecta-symbol.svg") center / contain no-repeat !important;
+  vertical-align: middle !important;
+}
+
+.dashboard-sidebar-brand::before,
+.feed-sidebar-brand::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 22px !important;
+  height: 25px !important;
+  flex: 0 0 22px !important;
+  margin-right: 8px !important;
+  background: url("/losi-conecta-symbol-light.svg") center / contain no-repeat !important;
+  vertical-align: middle !important;
+}
+
+/* Quando a marca estiver dentro do menu mobile, o símbolo permanece junto do nome. */
+.marketplace-page .marketplace-mobile-menu .marketplace-logo::before,
+.dashboard-page .dashboard-mobile-menu-overlay .dashboard-sidebar-brand::before,
+.feed-mobile-menu-overlay .feed-sidebar-brand::before,
+.admin-page .admin-mobile-menu-overlay .mobile-centered-brand::before {
+  display: inline-block !important;
+}
+
+/* Não deixa o símbolo competir com a marca customizada da home, que já possui o asset explícito. */
+.home-apple-header .home-brand-link.home-brand::before {
+  display: none !important;
+}
+
+@media (max-width: 800px) {
+  .home-page .home-header .mobile-centered-brand,
+  .dashboard-page .dashboard-header .mobile-centered-brand,
+  .profile-page .profile-header .mobile-centered-brand,
+  .quotes-page .quotes-header .catalog-logo,
+  .catalog-page .catalog-header .catalog-logo,
+  .provider-page .catalog-header .catalog-logo,
+  .marketplace-page .marketplace-header .marketplace-logo,
+  .admin-page .admin-header .mobile-centered-brand,
+  .admin-profile-header-brand,
+  .feed-header .feed-brand {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+
+  .dashboard-sidebar-brand,
+  .feed-sidebar-brand {
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+}
