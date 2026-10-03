@@ -18093,3 +18093,157 @@ body,
     justify-self: end !important;
   }
 }
+
+
+/* HOME — ajuste definitivo de alinhamento no iPhone e respiro interno dos cards */
+.home-apple-header {
+  position: sticky !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  justify-content: initial !important;
+}
+
+.home-apple-header .home-brand-link {
+  grid-column: 1 !important;
+  justify-self: start !important;
+  align-self: center !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+.home-apple-header .home-header-actions {
+  grid-column: 3 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+.home-apple-header .home-header-login {
+  margin: 0 !important;
+}
+
+.home-feature-card,
+.home-market-grid article,
+.home-hero-panel,
+.home-final-cta,
+.home-category-card {
+  box-sizing: border-box !important;
+}
+
+.home-feature-card {
+  align-items: flex-start !important;
+  padding: 34px !important;
+}
+
+.home-feature-card > span,
+.home-feature-card > h2,
+.home-feature-card > p,
+.home-feature-card > a {
+  max-width: 100% !important;
+}
+
+.home-feature-card h2 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.home-feature-card p {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.home-feature-card .home-card-link {
+  align-self: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.home-market-grid article {
+  align-items: flex-start !important;
+  padding: 38px !important;
+}
+
+.home-market-grid article > * {
+  max-width: 100% !important;
+}
+
+@media (max-width: 800px) {
+  .home-apple-header {
+    position: sticky !important;
+    display: block !important;
+    height: 54px !important;
+    padding: 0 16px !important;
+  }
+
+  .home-apple-header .home-brand-link {
+    position: absolute !important;
+    left: 16px !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    width: auto !important;
+    max-width: calc(100% - 120px) !important;
+    margin: 0 !important;
+    z-index: 60 !important;
+  }
+
+  .home-apple-header .home-header-actions {
+    position: absolute !important;
+    left: auto !important;
+    right: 16px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    width: auto !important;
+    margin: 0 !important;
+    z-index: 61 !important;
+  }
+
+  .home-apple-header .home-header-search {
+    display: none !important;
+  }
+
+  .home-apple-header .home-header-login {
+    display: inline-flex !important;
+    margin: 0 !important;
+  }
+
+  .home-feature-card {
+    padding: 28px !important;
+  }
+
+  .home-market-grid article {
+    padding: 28px !important;
+  }
+
+  .home-category-card {
+    padding: 18px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .home-apple-header {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .home-apple-header .home-brand-link {
+    left: 16px !important;
+  }
+
+  .home-apple-header .home-header-actions {
+    right: 16px !important;
+  }
+
+  .home-apple-header .home-brand {
+    font-size: 14px !important;
+  }
+
+  .home-feature-card,
+  .home-market-grid article {
+    padding: 26px !important;
+  }
+}
