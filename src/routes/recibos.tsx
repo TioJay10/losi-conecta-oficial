@@ -106,7 +106,7 @@ function SignaturePad({ value, onChange }: { value: string | null; onChange: (va
   );
 }
 
-function ReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData; business: Business | null; profile: Profile | null }) {
+function buildReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData; business: Business | null; profile: Profile | null }) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = 210;
   const margin = 18;
@@ -290,8 +290,8 @@ function ReceiptsPage() {
       if (!user) { navigate({ to: "/entrar" }); return; }
 
       const [{ data: businessData }, { data: profileData }] = await Promise.all([
-        supabase.from("business_profiles").select("business_name,owner_id,address,bairro,city,state,cep,phone,whatsapp").eq("owner_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("full_name,address,city,state,cep").eq("id", user.id).maybeSingle(),
+        supabase.from("business_profiles").select("business_name,owner_id,document,address,bairro,city,state,cep,phone,whatsapp").eq("owner_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name,document,address,city,state,cep").eq("id", user.id).maybeSingle(),
       ]);
       if (!active) return;
       setBusiness((businessData as Business | null) ?? null);
@@ -339,10 +339,10 @@ function ReceiptsPage() {
     const next = [receipt, ...history].slice(0, 30);
     setHistory(next);
     try {
-      localStorage.setItem(`losi-recibos-${business?.owner_id || profile?.full_name || "local"}`, JSON.stringify(next));
+      localStorage.setItem(`losi-recibos-${business?.owner_id || user?.id || "local"}`, JSON.stringify(next));
     } catch {}
     setMessage(`Recibo ${receipt.number} gerado com sucesso.`);
-    ReceiptPdf({ receipt, business, profile });
+    openReceiptPdf(receipt, business, profile);
   }
 
   if (loading) return <main className="receipts-state">Carregando recibos...</main>;
@@ -439,7 +439,7 @@ function ReceiptsPage() {
             <div className="receipts-card-head"><div><span className="receipts-kicker">HISTÓRICO</span><h2>Recibos gerados neste dispositivo</h2></div><span className="receipts-count">{history.length}</span></div>
             {history.length === 0 ? <div className="receipts-empty"><strong>Nenhum recibo gerado ainda</strong><span>Os recibos criados por este navegador aparecerão aqui para consulta rápida.</span></div> : (
               <div className="receipts-history-list">
-                {history.map(item => <article key={item.id}><div><strong>{item.number}</strong><span>{item.clientName} · {item.service}</span></div><div className="receipts-history-meta"><b>{money(item.amount)}</b><span>{dateBR(item.serviceDate)}</span><button type="button" onClick={()=>ReceiptPdf({receipt:item,business,profile})}>Baixar PDF</button></div></article>)}
+                {history.map(item => <article key={item.id}><div><strong>{item.number}</strong><span>{item.clientName} · {item.service}</span></div><div className="receipts-history-meta"><b>{money(item.amount)}</b><span>{dateBR(item.serviceDate)}</span><button type="button" onClick={()=>openReceiptPdf(item,business,profile)}>Baixar PDF</button></div></article>)}
               </div>
             )}
           </section>
