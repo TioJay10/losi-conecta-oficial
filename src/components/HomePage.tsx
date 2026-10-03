@@ -148,7 +148,7 @@ export function HomePage({
         </div>
         <div className="home-market-grid">
           <article><span>PARA ORGANIZADORES</span><h3>Encontre as pessoas certas.</h3><p>Descubra fornecedores para festas, eventos corporativos, ativações, passeios, oficinas e experiências.</p></article>
-          <article><span>PARA FORNECEDORES</span><h3>Mostre o que você faz.</h3><p>Tenha uma presença profissional no LOSI CONECTA e seja encontrado por quem está procurando soluções.</p></article>
+          <article className="home-market-card home-market-card-suppliers"><div className="home-market-card-media" aria-hidden="true"><img src="https://images.unsplash.com/photo-1629822908853-b1d2a39ece98?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="" loading="lazy" decoding="async" /></div><div className="home-market-card-content"><span>PARA FORNECEDORES</span><h3>Mostre o que você faz.</h3><p>Tenha uma presença profissional no LOSI CONECTA e seja encontrado por quem está procurando soluções.</p></div></article>
         </div>
       </section>
 
