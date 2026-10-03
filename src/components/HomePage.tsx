@@ -136,8 +136,8 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-dark">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1771648166240-c59072f3a964?auto=format&fit=crop&w=1200&q=85"
-              alt="Crianças participando de uma atividade recreativa em um evento"
+              src="https://images.unsplash.com/photo-1771681228863-4cb8ecfe0265?auto=format&fit=crop&fm=jpg&q=85&w=1600"
+              alt="Crianças participando de atividades recreativas em um evento"
               loading="lazy"
               decoding="async"
             />
