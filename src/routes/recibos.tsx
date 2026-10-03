@@ -305,24 +305,38 @@ function ReceiptsPage() {
   useEffect(() => {
     let active = true;
     async function load() {
-      const { data } = await supabase.auth.getSession();
-      const user = data.session?.user;
-      if (!user) { navigate({ to: "/entrar" }); return; }
-
-      const [{ data: businessData }, { data: profileData }] = await Promise.all([
-        supabase.from("business_profiles").select("business_name,owner_id,document,address,bairro,city,state,cep,phone,whatsapp").eq("owner_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("full_name,document,address,city,state,cep").eq("id", user.id).maybeSingle(),
-      ]);
-      if (!active) return;
-      setStorageKey(`losi-recibos-${user.id}`);
-      setBusiness((businessData as Business | null) ?? null);
-      setProfile((profileData as Profile | null) ?? null);
-      setCity(businessData?.city || profileData?.city || "");
       try {
-        const saved = localStorage.getItem(`losi-recibos-${user.id}`);
-        if (saved) setHistory(JSON.parse(saved) as ReceiptData[]);
-      } catch {}
-      setLoading(false);
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        const user = sessionData.session?.user;
+        if (!user) {
+          if (active) setLoading(false);
+          navigate({ to: "/entrar" });
+          return;
+        }
+
+        const [businessResult, profileResult] = await Promise.all([
+          supabase.from("business_profiles").select("business_name,owner_id,document,address,bairro,city,state,cep,phone,whatsapp").eq("owner_id", user.id).maybeSingle(),
+          supabase.from("profiles").select("full_name,document,address,city,state,cep").eq("id", user.id).maybeSingle(),
+        ]);
+        if (businessResult.error) throw businessResult.error;
+        if (profileResult.error) throw profileResult.error;
+        if (!active) return;
+
+        setStorageKey(`losi-recibos-${user.id}`);
+        setBusiness((businessResult.data as Business | null) ?? null);
+        setProfile((profileResult.data as Profile | null) ?? null);
+        setCity(businessResult.data?.city || profileResult.data?.city || "");
+        try {
+          const saved = localStorage.getItem(`losi-recibos-${user.id}`);
+          if (saved) setHistory(JSON.parse(saved) as ReceiptData[]);
+        } catch {}
+      } catch (error) {
+        console.error("Erro ao carregar recibos:", error);
+        if (active) setMessage("Não foi possível carregar os recibos. Verifique sua sessão e tente novamente.");
+      } finally {
+        if (active) setLoading(false);
+      }
     }
     void load();
     return () => { active = false; };
