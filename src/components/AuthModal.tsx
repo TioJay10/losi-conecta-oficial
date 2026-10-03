@@ -139,8 +139,7 @@ export function AuthModal({ onClose, onAuthenticated }: AuthModalProps) {
         <button type="button" className="auth-modal-close" onClick={onClose} disabled={loading} aria-label="Fechar">×</button>
         <div className="auth-modal-brand-panel">
           <div className="auth-modal-brand">
-            <img className="auth-modal-brand-symbol" src="/losi-conecta-symbol.svg" alt="" aria-hidden="true" />
-            <span>LOSI <span>CONECTA</span></span>
+            LOSI <span>CONECTA</span>
           </div>
           <div className="auth-modal-eyebrow">PROFISSIONAIS DE EVENTOS</div>
           <h1 id="auth-modal-title">{title}</h1>
