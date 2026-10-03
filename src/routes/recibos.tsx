@@ -8,7 +8,7 @@ import "../receipts.css";
 export const Route = createFileRoute("/recibos")({ component: ReceiptsPage });
 
 type Business = {
-  business_name: string | null; owner_id: string; document: string | null;
+  business_name: string | null; owner_id: string; document?: string | null;
   address: string | null; bairro: string | null; city: string | null; state: string | null;
   cep: string | null; phone: string | null; whatsapp: string | null;
 };
@@ -323,10 +323,24 @@ function ReceiptsPage() {
         if (profileResult.error) throw profileResult.error;
         if (!active) return;
 
+        let loadedBusiness = (businessResult.data as Business | null) ?? null;
+        try {
+          const { data: supplierIdentity } = await supabase.functions.invoke("get-supplier-receipt-profile");
+          if (supplierIdentity && loadedBusiness) {
+            loadedBusiness = {
+              ...loadedBusiness,
+              business_name: supplierIdentity.businessName || loadedBusiness.business_name,
+              document: supplierIdentity.document || null,
+            };
+          }
+        } catch (identityError) {
+          console.warn("Não foi possível carregar a identificação do fornecedor:", identityError);
+        }
+
         setStorageKey(`losi-recibos-${user.id}`);
-        setBusiness((businessResult.data as Business | null) ?? null);
+        setBusiness(loadedBusiness);
         setProfile((profileResult.data as Profile | null) ?? null);
-        setCity(businessResult.data?.city || profileResult.data?.city || "");
+        setCity(loadedBusiness?.city || profileResult.data?.city || "");
         try {
           const saved = localStorage.getItem(`losi-recibos-${user.id}`);
           if (saved) setHistory(JSON.parse(saved) as ReceiptData[]);
