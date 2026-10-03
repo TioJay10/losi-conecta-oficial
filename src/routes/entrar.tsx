@@ -205,7 +205,10 @@ function AuthPage() {
     <main className="auth-page" style={styles.page}>
       <section className="auth-card" style={styles.card}>
         <div className="auth-brand-panel" style={styles.brandPanel}>
-          <div style={styles.brand}>LOSI <span>CONECTA</span></div>
+          <div className="auth-brand" style={styles.brand}>
+            <img className="auth-brand-symbol" src="/losi-conecta-symbol.svg" alt="" aria-hidden="true" />
+            <span>LOSI <span>CONECTA</span></span>
+          </div>
           <div style={styles.eyebrow}>PROFISSIONAIS DE EVENTOS</div>
           <h1 style={styles.title}>{title}</h1>
           <p style={styles.subtitle}>
