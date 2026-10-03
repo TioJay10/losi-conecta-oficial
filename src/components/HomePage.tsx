@@ -133,7 +133,7 @@ export function HomePage({
 
         <article className="home-feature-card home-feature-card-gold">
           <div className="home-feature-image">
-            <img src="/conecte-rede.png" alt="Rede digital representando conexão entre profissionais e fornecedores" loading="lazy" decoding="async" />
+            <img src="https://images.unsplash.com/photo-1762312670082-3df0ac443dc9?auto=format&fit=crop&fm=jpg&q=85&w=1600" alt="Profissionais e participantes reunidos em um evento" loading="lazy" decoding="async" />
           </div>
           <span>03 — CONECTE</span>
           <h2>Converse diretamente com o fornecedor.</h2>
