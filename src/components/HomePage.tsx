@@ -75,21 +75,14 @@ export function HomePage({
     <main className={`home-page home-apple-inspired${preview ? " home-page-preview" : ""}`} style={themeStyle}>
       <header className="home-header home-apple-header">
         <AppLogo className="home-brand-link home-brand" aria-label="LOSI CONECTA">
-          <img
-            className="home-brand-symbol"
-            src="/losi-conecta-symbol.svg"
-            alt=""
-            aria-hidden="true"
-          />
+          <img className="home-brand-symbol" src="/losi-conecta-symbol.svg" alt="" aria-hidden="true" />
           <span className="home-brand-name">LOSI CONECTA</span>
         </AppLogo>
-
         <nav className="home-nav home-apple-nav" aria-label="Navegação principal">
           <a href="#como-funciona">Como funciona</a>
           <a href="#para-quem">Para quem é</a>
           <a href="#categorias">Categorias</a>
         </nav>
-
         <div className="home-header-actions">
           <Link to="/buscar" className="home-header-search">Buscar</Link>
           <Link to="/entrar" className="home-header-login">Entrar</Link>
@@ -100,28 +93,15 @@ export function HomePage({
         <div className="home-hero-copy">
           <p className="home-eyebrow">LOSI CONECTA</p>
           <h1>{active.hero_title || "Tudo para o seu evento. Em um só lugar."}</h1>
-          <p className="home-hero-lead">
-            {active.hero_subtitle ||
-              "Encontre profissionais, empresas e fornecedores para transformar ideias em experiências."}
-          </p>
+          <p className="home-hero-lead">{active.hero_subtitle || "Encontre profissionais, empresas e fornecedores para transformar ideias em experiências."}</p>
           <div className="home-hero-links">
-            <Link to="/buscar" className="home-blue-link">
-              {active.hero_button_text || "Encontrar fornecedores"} <span>›</span>
-            </Link>
-            <a href="#como-funciona" className="home-hero-text-link">
-              Como funciona <span>›</span>
-            </a>
+            <Link to="/buscar" className="home-blue-link">{active.hero_button_text || "Encontrar fornecedores"} <span>›</span></Link>
+            <a href="#como-funciona" className="home-hero-text-link">Como funciona <span>›</span></a>
           </div>
         </div>
-
         <div className="home-hero-panel">
           <div className="home-hero-panel-media" aria-hidden="true">
-            <img
-              src="https://images.unsplash.com/photo-1768508665663-fa483a0cb208?auto=format&fit=crop&w=1800&q=85"
-              alt=""
-              loading="eager"
-              decoding="async"
-            />
+            <img src="https://images.unsplash.com/photo-1768508665663-fa483a0cb208?auto=format&fit=crop&w=1800&q=85" alt="" loading="eager" decoding="async" />
           </div>
           <div className="home-hero-panel-content">
             <span>ENCONTRE</span>
@@ -135,12 +115,7 @@ export function HomePage({
       <section id="como-funciona" className="home-feature-grid">
         <article className="home-feature-card home-feature-card-dark">
           <div className="home-feature-image">
-            <img
-              src="https://images.unsplash.com/photo-1530023367847-a683933f4172?auto=format&fit=crop&fm=jpg&q=85&w=1600"
-              alt="Mesa preparada para um evento"
-              loading="lazy"
-              decoding="async"
-            />
+            <img src="https://images.unsplash.com/photo-1530023367847-a683933f4172?auto=format&fit=crop&fm=jpg&q=85&w=1600" alt="Mesa preparada para um evento" loading="lazy" decoding="async" />
           </div>
           <span>01 — ENCONTRE</span>
           <h2>Pesquise pelo que seu evento precisa.</h2>
@@ -149,12 +124,7 @@ export function HomePage({
 
         <article className="home-feature-card home-feature-card-light">
           <div className="home-feature-image">
-            <img
-              src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&fm=jpg&q=85&w=1600"
-              alt="Profissional apresentando uma reunião para uma equipe"
-              loading="lazy"
-              decoding="async"
-            />
+            <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&fm=jpg&q=85&w=1600" alt="Profissional apresentando uma reunião para uma equipe" loading="lazy" decoding="async" />
           </div>
           <span>02 — CONHEÇA</span>
           <h2>Veja quem está por trás do serviço.</h2>
@@ -163,12 +133,7 @@ export function HomePage({
 
         <article className="home-feature-card home-feature-card-gold">
           <div className="home-feature-image">
-            <img
-              src="https://media.istockphoto.com/id/2254719375/photo/arms-crossed-portrait-and-smile-of-designer-man-at-desk-in-office-for-complete-task.jpg"
-              alt="Profissional sorrindo em seu ambiente de trabalho"
-              loading="lazy"
-              decoding="async"
-            />
+            <img src="https://images.unsplash.com/photo-1658499960738-3b3a6b014b25?auto=format&fit=crop&fm=jpg&q=85&w=1600" alt="Pessoa usando o celular para se comunicar" loading="lazy" decoding="async" />
           </div>
           <span>03 — CONECTE</span>
           <h2>Converse diretamente com o fornecedor.</h2>
@@ -181,84 +146,35 @@ export function HomePage({
           <p className="home-eyebrow">PARA QUEM É</p>
           <h2>Um só lugar para quem procura e para quem oferece.</h2>
         </div>
-
         <div className="home-market-grid">
-          <article>
-            <span>PARA ORGANIZADORES</span>
-            <h3>Encontre as pessoas certas.</h3>
-            <p>Descubra fornecedores para festas, eventos corporativos, ativações, passeios, oficinas e experiências.</p>
-          </article>
-
-          <article>
-            <span>PARA FORNECEDORES</span>
-            <h3>Mostre o que você faz.</h3>
-            <p>Tenha uma presença profissional no LOSI CONECTA e seja encontrado por quem está procurando soluções.</p>
-          </article>
+          <article><span>PARA ORGANIZADORES</span><h3>Encontre as pessoas certas.</h3><p>Descubra fornecedores para festas, eventos corporativos, ativações, passeios, oficinas e experiências.</p></article>
+          <article><span>PARA FORNECEDORES</span><h3>Mostre o que você faz.</h3><p>Tenha uma presença profissional no LOSI CONECTA e seja encontrado por quem está procurando soluções.</p></article>
         </div>
       </section>
 
       <section id="categorias" className="home-categories-section">
         <div className="home-section-heading home-section-heading-row">
-          <div>
-            <p className="home-eyebrow">CATEGORIAS</p>
-            <h2>Serviços para diferentes momentos do evento.</h2>
-          </div>
+          <div><p className="home-eyebrow">CATEGORIAS</p><h2>Serviços para diferentes momentos do evento.</h2></div>
         </div>
-
         <div className="home-category-grid">
-          {[
-            "Recreação e entretenimento",
-            "Monitoria",
-            "Fotografia e vídeo",
-            "DJ e música",
-            "Decoração",
-            "Buffet e alimentação",
-            "Atrações",
-            "Estruturas e equipamentos",
-          ].map((category, index) => (
-            <Link key={category} to="/buscar" className="home-category-card">
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{category}</strong>
-              <b>›</b>
-            </Link>
+          {["Recreação e entretenimento","Monitoria","Fotografia e vídeo","DJ e música","Decoração","Buffet e alimentação","Atrações","Estruturas e equipamentos"].map((category, index) => (
+            <Link key={category} to="/buscar" className="home-category-card"><span>{String(index + 1).padStart(2, "0")}</span><strong>{category}</strong><b>›</b></Link>
           ))}
         </div>
       </section>
 
       <section className="home-final-cta">
-        <div>
-          <p className="home-eyebrow home-eyebrow-light">LOSI CONECTA</p>
-          <h2>Seu próximo evento começa com uma boa conexão.</h2>
-        </div>
+        <div><p className="home-eyebrow home-eyebrow-light">LOSI CONECTA</p><h2>Seu próximo evento começa com uma boa conexão.</h2></div>
         <Link to="/entrar" className="home-final-button">Criar minha conta</Link>
       </section>
 
       <footer className="home-footer home-apple-footer">
         <div className="home-footer-top">
-          <div className="home-footer-brand">
-            <AppLogo className="home-footer-logo" aria-label="LOSI CONECTA" />
-            <p>Uma plataforma para aproximar eventos, profissionais e oportunidades.</p>
-          </div>
-
-          <div className="home-footer-column">
-            <strong>LOSI CONECTA</strong>
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#para-quem">Para quem é</a>
-            <a href="#categorias">Categorias</a>
-          </div>
-
-          <div className="home-footer-column">
-            <strong>ACESSO</strong>
-            <Link to="/buscar">Encontrar fornecedores</Link>
-            <Link to="/faq">Perguntas frequentes</Link>
-            <Link to="/entrar">Entrar</Link>
-          </div>
+          <div className="home-footer-brand"><AppLogo className="home-footer-logo" aria-label="LOSI CONECTA" /><p>Uma plataforma para aproximar eventos, profissionais e oportunidades.</p></div>
+          <div className="home-footer-column"><strong>LOSI CONECTA</strong><a href="#como-funciona">Como funciona</a><a href="#para-quem">Para quem é</a><a href="#categorias">Categorias</a></div>
+          <div className="home-footer-column"><strong>ACESSO</strong><Link to="/buscar">Encontrar fornecedores</Link><Link to="/faq">Perguntas frequentes</Link><Link to="/entrar">Entrar</Link></div>
         </div>
-
-        <div className="home-footer-bottom">
-          <span>Encontre. Conheça. Conecte.</span>
-          <span>© {new Date().getFullYear()} LOSI CONECTA. Todos os direitos reservados.</span>
-        </div>
+        <div className="home-footer-bottom"><span>Encontre. Conheça. Conecte.</span><span>© {new Date().getFullYear()} LOSI CONECTA. Todos os direitos reservados.</span></div>
       </footer>
     </main>
   );
