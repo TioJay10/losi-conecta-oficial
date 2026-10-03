@@ -132,6 +132,8 @@ function LosiAdsPage() {
   const [pendingInvoices, setPendingInvoices] = useState<Array<{id:string;status:string|null;dueDate:string|null;invoiceUrl:string|null;bankSlipUrl:string|null;billingType:string|null;value:number|null;description:string|null;type:"ads"|"subscription"|"other";title:string}>>([]);
   const [pendingInvoicesOpen, setPendingInvoicesOpen] = useState(false);
   const [pendingInvoicesLoading, setPendingInvoicesLoading] = useState(false);
+  const [cancellingInvoiceId, setCancellingInvoiceId] = useState<string | null>(null);
+  const [pendingInvoicesMessage, setPendingInvoicesMessage] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -193,6 +195,31 @@ function LosiAdsPage() {
       if (response.ok && result?.success) setPendingInvoices(Array.isArray(result.invoices) ? result.invoices : []);
     } catch (error) { console.error("Erro ao carregar faturas pendentes:", error); }
     finally { setPendingInvoicesLoading(false); }
+  }
+
+  async function cancelAdsInvoice(invoice: typeof pendingInvoices[number]) {
+    if (!supabase || invoice.type !== "ads" || cancellingInvoiceId) return;
+    if (!window.confirm("Deseja cancelar esta fatura de créditos ADS? Esta ação cancela a cobrança pendente no Asaas.")) return;
+    setCancellingInvoiceId(invoice.id);
+    setPendingInvoicesMessage("");
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Sua sessão expirou. Entre novamente para continuar.");
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-manage-pending-subscription", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel_ads_invoice", paymentId: invoice.id }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.success) throw new Error(result?.error || "Não foi possível cancelar a fatura ADS.");
+      setPendingInvoices(current => current.filter(item => item.id !== invoice.id));
+      setPendingInvoicesMessage("Fatura ADS cancelada com sucesso.");
+    } catch (error) {
+      setPendingInvoicesMessage(error instanceof Error ? error.message : "Não foi possível cancelar a fatura ADS.");
+    } finally {
+      setCancellingInvoiceId(null);
+    }
   }
 
   function openPendingInvoice(invoice: typeof pendingInvoices[number]) {
@@ -432,6 +459,7 @@ function LosiAdsPage() {
                     <button type="button" className="losi-ads-modal-close" aria-label="Fechar faturas pendentes" onClick={() => setPendingInvoicesOpen(false)}>×</button>
                   </div>
 
+                  {pendingInvoicesMessage && <p className="losi-ads-invoices-message" role="status">{pendingInvoicesMessage}</p>}
                   <div className="losi-ads-pending-invoices-list">
                     {pendingInvoicesLoading ? (
                       <p className="losi-ads-invoices-empty">Carregando faturas...</p>
@@ -446,9 +474,16 @@ function LosiAdsPage() {
                               {invoice.dueDate ? " · Vencimento " + new Date(invoice.dueDate + "T12:00:00").toLocaleDateString("pt-BR") : ""}
                             </small>
                           </div>
-                          <button type="button" onClick={() => openPendingInvoice(invoice)} disabled={!invoice.invoiceUrl && !invoice.bankSlipUrl}>
-                            ABRIR FATURA
-                          </button>
+                          <div className="losi-ads-pending-invoice-actions">
+                            <button type="button" onClick={() => openPendingInvoice(invoice)} disabled={!invoice.invoiceUrl && !invoice.bankSlipUrl}>
+                              ABRIR FATURA
+                            </button>
+                            {invoice.type === "ads" && (
+                              <button type="button" className="losi-ads-cancel-invoice" onClick={() => void cancelAdsInvoice(invoice)} disabled={cancellingInvoiceId !== null}>
+                                {cancellingInvoiceId === invoice.id ? "CANCELANDO..." : "CANCELAR FATURA"}
+                              </button>
+                            )}
+                          </div>
                         </article>
                       ))
                     ) : (
