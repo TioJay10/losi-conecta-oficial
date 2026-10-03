@@ -115,7 +115,15 @@ export function HomePage({
         </div>
 
         <div className="home-hero-panel">
-          <div>
+          <div className="home-hero-panel-media" aria-hidden="true">
+            <img
+              src="https://images.unsplash.com/photo-1768508665663-fa483a0cb208?auto=format&fit=crop&w=1800&q=85"
+              alt=""
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+          <div className="home-hero-panel-content">
             <span>ENCONTRE</span>
             <strong>Profissionais para o seu próximo evento.</strong>
             <p>Recreação, monitoria, música, decoração, buffet, atrações e muito mais.</p>
@@ -126,12 +134,28 @@ export function HomePage({
 
       <section id="como-funciona" className="home-feature-grid">
         <article className="home-feature-card home-feature-card-dark">
+          <div className="home-feature-image">
+            <img
+              src="https://images.unsplash.com/photo-1771648166240-c59072f3a964?auto=format&fit=crop&w=1200&q=85"
+              alt="Crianças participando de uma atividade recreativa em um evento"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           <span>01 — ENCONTRE</span>
           <h2>Pesquise pelo que seu evento precisa.</h2>
           <p>Filtre por serviço, categoria e localização e encontre profissionais disponíveis para atender seu projeto.</p>
         </article>
 
         <article className="home-feature-card home-feature-card-light">
+          <div className="home-feature-image">
+            <img
+              src="https://images.unsplash.com/photo-1762505190639-68f3701839f0?auto=format&fit=crop&w=1200&q=85"
+              alt="DJ trabalhando em um evento"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           <span>02 — CONHEÇA</span>
           <h2>Veja quem está por trás do serviço.</h2>
           <p>Conheça o perfil público, serviços, informações e presença profissional antes de entrar em contato.</p>
