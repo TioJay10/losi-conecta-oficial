@@ -18778,3 +18778,88 @@ body,
     align-self: center !important;
   }
 }
+
+
+/* HOME — fotografias reais e coerentes com o ecossistema de eventos */
+.home-apple-inspired .home-hero-panel {
+  isolation: isolate !important;
+}
+
+.home-apple-inspired .home-hero-panel-media {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  overflow: hidden !important;
+}
+
+.home-apple-inspired .home-hero-panel-media::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background:
+    linear-gradient(90deg, rgba(11,24,42,.94) 0%, rgba(11,24,42,.76) 45%, rgba(11,24,42,.34) 100%) !important;
+  pointer-events: none !important;
+}
+
+.home-apple-inspired .home-hero-panel-media img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: saturate(.82) contrast(1.02) !important;
+  transform: scale(1.015) !important;
+}
+
+.home-apple-inspired .home-hero-panel-content {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.home-apple-inspired .home-hero-panel-content > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.home-apple-inspired .home-feature-image {
+  width: calc(100% + 64px) !important;
+  height: 154px !important;
+  margin: -32px -32px 28px !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  background: #e8e8e8 !important;
+  flex: 0 0 auto !important;
+}
+
+.home-apple-inspired .home-feature-image img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: saturate(.88) contrast(1.02) !important;
+  transition: transform .35s ease !important;
+}
+
+.home-apple-inspired .home-feature-card:hover .home-feature-image img {
+  transform: scale(1.025) !important;
+}
+
+@media (max-width: 800px) {
+  .home-apple-inspired .home-feature-image {
+    width: calc(100% + 52px) !important;
+    height: 138px !important;
+    margin: -26px -26px 24px !important;
+  }
+
+  .home-apple-inspired .home-hero-panel-media::after {
+    background:
+      linear-gradient(180deg, rgba(11,24,42,.72) 0%, rgba(11,24,42,.88) 100%) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .home-apple-inspired .home-feature-image {
+    height: 128px !important;
+  }
+}
