@@ -58,7 +58,7 @@ function PublicReceiptPage(){
   const [name,setName]=useState(""),[document,setDocument]=useState(""),[phone,setPhone]=useState(""),[address,setAddress]=useState(""),[service,setService]=useState(""),[date,setDate]=useState(new Date().toISOString().slice(0,10)),[amount,setAmount]=useState(""),[payment,setPayment]=useState("PIX"),[description,setDescription]=useState(""),[city,setCity]=useState(""),[signature,setSignature]=useState<string|null>(null);
   useEffect(()=>{fetch(API+"?token="+encodeURIComponent(token)).then(async x=>{const j=await x.json();if(!x.ok)throw Error(j.error);setBusiness(j.business);setReceipt(j.receipt)}).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[token]);
   async function send(){
-    setError(""); const cents=Math.round(Number(amount.replace(/\\./g,"").replace(",","."))*100);
+    setError(""); const cents=Math.round(Number(amount.replace(/\./g,"").replace(",","."))*100);
     if(!name.trim()||!service.trim()||!Number.isFinite(cents)||cents<=0){setError("Preencha nome, serviço e valor.");return}
     setSending(true);
     try{const x=await fetch(API+"?token="+encodeURIComponent(token),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({issuerName:name,issuerDocument:document,issuerPhone:phone,issuerAddress:address,service,serviceDate:date,amountCents:cents,paymentMethod:payment,description,city,signatureData:signature})});const j=await x.json();if(!x.ok)throw Error(j.error);setReceipt(j.receipt)}catch(e){setError(e instanceof Error?e.message:"Não foi possível enviar o recibo.")}finally{setSending(false)}
