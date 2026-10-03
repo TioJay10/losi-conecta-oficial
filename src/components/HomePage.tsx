@@ -150,8 +150,8 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-light">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1762505190639-68f3701839f0?auto=format&fit=crop&w=1200&q=85"
-              alt="DJ trabalhando em um evento"
+              src="https://images.unsplash.com/photo-1769839271487-c6a191548749?auto=format&fit=crop&fm=jpg&q=85&w=1600"
+              alt="Profissionais conversando durante um evento"
               loading="lazy"
               decoding="async"
             />
@@ -162,6 +162,14 @@ export function HomePage({
         </article>
 
         <article className="home-feature-card home-feature-card-gold">
+          <div className="home-feature-image">
+            <img
+              src="https://images.unsplash.com/photo-1758873272345-40f377c21e7f?auto=format&fit=crop&fm=jpg&q=85&w=1600"
+              alt="Profissional conversando pelo celular enquanto trabalha"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           <span>03 — CONECTE</span>
           <h2>Converse diretamente com o fornecedor.</h2>
           <p>Depois de encontrar o profissional certo, a negociação continua de forma simples pelo WhatsApp.</p>
