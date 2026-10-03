@@ -106,7 +106,7 @@ const [locationResolving, setLocationResolving] = useState(false);
         setUserId(currentUserId);
         const [{ data: favoriteData }, { data: ownBusiness }] = await Promise.all([
           supabase.from("favorites").select("business_id").eq("user_id", currentUserId),
-          supabase.from("business_profiles").select("slug").eq("owner_id", currentUserId).maybeSingle(),
+          supabase.from("my_business_slug").select("slug").eq("owner_id", currentUserId).maybeSingle(),
         ]);
         if (mounted) {
           setFavoriteIds((favoriteData ?? []).map((item) => item.business_id));
@@ -119,8 +119,8 @@ const [locationResolving, setLocationResolving] = useState(false);
       // pontual no ranking/planos não pode impedir a exibição dos fornecedores.
       const [businessResult, categoryResult, planResult, adsResult] = await Promise.all([
         supabase
-          .from("business_profiles")
-          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count")
+          .from("business_profiles_public")
+          .select("id,business_name,slug,description,whatsapp,phone,instagram,website,city,state,address,cep,bairro,logo_url,cover_url,verified,latitude,longitude,reputation_service_count,active,approval_status")
           .eq("active", true)
           .eq("approval_status", "approved")
           .order("business_name"),
