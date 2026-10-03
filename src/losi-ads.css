@@ -804,3 +804,17 @@
   font-size:9px;
   line-height:1.45;
 }
+
+
+/* LOSI ADS — desktop: Sair na extrema direita do cabeçalho */
+@media (min-width: 721px) {
+  .losi-ads-dashboard .dashboard-header {
+    width: 100% !important;
+  }
+
+  .losi-ads-dashboard .dashboard-header .dashboard-logout {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    justify-self: end !important;
+  }
+}
