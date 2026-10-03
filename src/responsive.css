@@ -18526,3 +18526,31 @@ body,
     color: #ffffff !important;
   }
 }
+
+
+/* HOME — cards claros: botões pretos com texto branco */
+.home-apple-inspired .home-feature-card .home-card-link,
+.home-apple-inspired .home-market-grid article .home-blue-link {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+.home-apple-inspired .home-feature-card .home-card-link span,
+.home-apple-inspired .home-market-grid article .home-blue-link span {
+  color: #ffffff !important;
+}
+
+.home-apple-inspired .home-feature-card .home-card-link:hover,
+.home-apple-inspired .home-market-grid article .home-blue-link:hover {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #1a1a1a !important;
+}
+
+.home-apple-inspired .home-feature-card .home-card-link:active,
+.home-apple-inspired .home-market-grid article .home-blue-link:active {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
