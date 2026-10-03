@@ -294,7 +294,7 @@ function ReceiptsPage() {
         supabase.from("profiles").select("full_name,document,address,city,state,cep").eq("id", user.id).maybeSingle(),
       ]);
       if (!active) return;
-      setBusiness((businessData as Business | null) ?? null);
+      setStorageKey(`losi-recibos-${user.id}`);\n      setBusiness((businessData as Business | null) ?? null);
       setProfile((profileData as Profile | null) ?? null);
       setCity(businessData?.city || profileData?.city || "");
       try {
@@ -339,7 +339,7 @@ function ReceiptsPage() {
     const next = [receipt, ...history].slice(0, 30);
     setHistory(next);
     try {
-      localStorage.setItem(`losi-recibos-${business?.owner_id || user?.id || "local"}`, JSON.stringify(next));
+      localStorage.setItem(storageKey || `losi-recibos-${business?.owner_id || "local"}`, JSON.stringify(next));
     } catch {}
     setMessage(`Recibo ${receipt.number} gerado com sucesso.`);
     openReceiptPdf(receipt, business, profile);
