@@ -54,3 +54,19 @@
   box-sizing: border-box !important;
   align-items: center !important;
 }
+
+
+/* PAINEL DO FORNECEDOR — força altura real do cabeçalho */
+main.dashboard-page > .dashboard-main > header.dashboard-header {
+  height: 96px !important;
+  min-height: 96px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+main.dashboard-page > .dashboard-main > header.dashboard-header > .dashboard-header-context,
+main.dashboard-page > .dashboard-main > header.dashboard-header > .dashboard-header-right {
+  align-self: center !important;
+}
