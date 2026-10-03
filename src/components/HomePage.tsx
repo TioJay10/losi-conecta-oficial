@@ -164,7 +164,7 @@ export function HomePage({
         <article className="home-feature-card home-feature-card-gold">
           <div className="home-feature-image">
             <img
-              src="https://images.unsplash.com/photo-1768508665663-fa483a0cb208?auto=format&fit=crop&w=1800&q=85"
+              src="https://images.unsplash.com/photo-1762312670082-3df0ac443dc9?auto=format&fit=crop&fm=jpg&q=85&w=1600"
               alt="Profissionais e participantes reunidos em um evento"
               loading="lazy"
               decoding="async"
