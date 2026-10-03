@@ -253,6 +253,11 @@ function buildReceiptPdf({ receipt, business, profile }: { receipt: ReceiptData;
 
   line(y);
   y += 16;
+  if (receipt.signatureData) {
+    try {
+      doc.addImage(receipt.signatureData, "PNG", pageW / 2 - 28, y - 14, 56, 16);
+    } catch {}
+  }
   doc.setDrawColor(80,90,105);
   doc.line(pageW/2 - 35, y, pageW/2 + 35, y);
   doc.setTextColor(80,90,105);
@@ -330,7 +335,7 @@ function ReceiptsPage() {
     id: "preview",
     number: "PREVIEW",
     clientName, clientDocument, clientAddress, service, serviceDate,
-    amount: amountNumber, paymentMethod, description,
+    amount: amountNumber, paymentMethod, description, signatureData,
     city: city || business?.city || profile?.city || "",
     createdAt: new Date().toISOString(),
   }), [clientName,clientDocument,clientAddress,service,serviceDate,amountNumber,paymentMethod,description,city,signatureData,business,profile]);
