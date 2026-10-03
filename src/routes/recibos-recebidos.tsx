@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";\nimport { jsPDF } from "jspdf";
+import { useEffect, useState } from "react";
+import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
 import "../receipts.css";
 
@@ -9,7 +10,37 @@ const APP_ORIGIN = typeof window !== "undefined" ? window.location.origin : "htt
 type Request={id:string;public_token:string;status:string;created_at:string;submitted_at:string|null};
 type Receipt={id:string;request_id:string;issuer_name:string;issuer_document:string|null;issuer_phone:string|null;issuer_address:string|null;service:string;service_date:string|null;amount_cents:number;payment_method:string|null;description:string|null;city:string|null;signature_data:string|null;created_at:string};
 
-const money=(v:number)=>(v/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});\nfunction openReceivedReceiptPdf(r:Receipt,businessName:string){\n  const d=new jsPDF({unit:"mm",format:"a4"});\n  const W=210,M=18,C=W-M*2; let y=18;\n  d.setFillColor(7,26,51); d.rect(0,0,W,48,"F");\n  d.setTextColor(255,255,255); d.setFont("helvetica","bold"); d.setFontSize(20); d.text("LOSI",M,20);\n  d.setTextColor(240,217,154); d.setFontSize(12); d.text("CONECTA",M+18,20);\n  d.setTextColor(255,255,255); d.setFont("helvetica","normal"); d.setFontSize(9); d.text("RECIBO DE PRESTAÇÃO DE SERVIÇOS",M,31);\n  d.setFont("helvetica","bold"); d.setFontSize(11); d.text("RECIBO RECEBIDO",W-M,20,{align:"right"});\n  y=61; d.setTextColor(7,26,51); d.setFontSize(14); d.text("Comprovante de recebimento",M,y); y+=9;\n  d.setFont("helvetica","normal"); d.setFontSize(9); d.setTextColor(95,105,120);\n  const intro=d.splitTextToSize("Declaro que recebi de "+(businessName||"contratante")+" a importância referente ao serviço informado.",C); d.text(intro,M,y); y+=intro.length*4.2+8;\n  d.setFillColor(248,250,252); d.setDrawColor(225,229,236); d.roundedRect(M,y,C,29,3,3,"FD");\n  d.setTextColor(105,115,130); d.setFontSize(8); d.text("VALOR RECEBIDO",M+7,y+8);\n  d.setTextColor(7,26,51); d.setFont("helvetica","bold"); d.setFontSize(20); d.text(money(r.amount_cents),M+7,y+19);\n  d.setFont("helvetica","normal"); d.setFontSize(8); d.setTextColor(95,105,120); d.text("Pagamento: "+(r.payment_method||"Não informado"),W-M-7,y+17,{align:"right"}); y+=39;\n  d.setFillColor(255,255,255); d.roundedRect(M,y,C,58,3,3,"FD"); d.setTextColor(7,26,51); d.setFont("helvetica","bold"); d.setFontSize(10); d.text("EMITENTE",M+7,y+9);\n  d.setFont("helvetica","normal"); d.setFontSize(9); d.setTextColor(35,45,60); d.text(d.splitTextToSize(r.issuer_name,C-14).slice(0,1),M+7,y+19);\n  d.setFontSize(8); d.setTextColor(95,105,120); d.text("Documento: "+(r.issuer_document||"Não informado"),M+7,y+27); d.text("Telefone: "+(r.issuer_phone||"Não informado"),M+7,y+34);\n  d.text(d.splitTextToSize(r.issuer_address||"Endereço não informado",C-14).slice(0,2),M+7,y+41); y+=67;\n  d.setFillColor(255,255,255); d.roundedRect(M,y,C,55,3,3,"FD"); d.setTextColor(7,26,51); d.setFont("helvetica","bold"); d.setFontSize(10); d.text("SERVIÇO",M+7,y+9);\n  d.setTextColor(35,45,60); d.setFontSize(11); d.text(d.splitTextToSize(r.service,C-14).slice(0,2),M+7,y+19); d.setFont("helvetica","normal"); d.setFontSize(8); d.setTextColor(95,105,120);\n  d.text("Data: "+(r.service_date?r.service_date.split("-").reverse().join("/"):"—"),M+7,y+32); d.text("Local: "+(r.city||"—"),M+7,y+39); d.text(d.splitTextToSize(r.description||"Sem observações adicionais.",C-14).slice(0,2),M+7,y+47); y+=65;\n  if(r.signature_data){try{d.addImage(r.signature_data,"PNG",W/2-28,y-10,56,16)}catch{}}\n  d.setDrawColor(80,90,105); d.line(W/2-35,y+5,W/2+35,y+5); d.setTextColor(80,90,105); d.setFontSize(8); d.text("Assinatura do prestador",W/2,y+11,{align:"center"});\n  d.setTextColor(145,150,158); d.setFontSize(7); d.text("Documento recebido através do LOSI CONECTA.",W/2,282,{align:"center"});\n  const url=URL.createObjectURL(d.output("blob")); const opened=window.open(url,"_blank","noopener,noreferrer");\n  if(!opened){const a=document.createElement("a");a.href=url;a.download="recibo-recebido-"+r.id.slice(0,8)+".pdf";document.body.appendChild(a);a.click();a.remove();}\n  window.setTimeout(()=>URL.revokeObjectURL(url),60000);\n}\n
+const money=(v:number)=>(v/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function openReceivedReceiptPdf(r:Receipt,businessName:string){
+  const d=new jsPDF({unit:"mm",format:"a4"});
+  const W=210,M=18,C=W-M*2; let y=18;
+  d.setFillColor(7,26,51); d.rect(0,0,W,48,"F");
+  d.setTextColor(255,255,255); d.setFont("helvetica","bold"); d.setFontSize(20); d.text("LOSI",M,20);
+  d.setTextColor(240,217,154); d.setFontSize(12); d.text("CONECTA",M+18,20);
+  d.setTextColor(255,255,255); d.setFont("helvetica","normal"); d.setFontSize(9); d.text("RECIBO DE PRESTAÇÃO DE SERVIÇOS",M,31);
+  d.setFont("helvetica","bold"); d.setFontSize(11); d.text("RECIBO RECEBIDO",W-M,20,{align:"right"});
+  y=61; d.setTextColor(7,26,51); d.setFontSize(14); d.text("Comprovante de recebimento",M,y); y+=9;
+  d.setFont("helvetica","normal"); d.setFontSize(9); d.setTextColor(95,105,120);
+  const intro=d.splitTextToSize("Declaro que recebi de "+(businessName||"contratante")+" a importância referente ao serviço informado.",C); d.text(intro,M,y); y+=intro.length*4.2+8;
+  d.setFillColor(248,250,252); d.setDrawColor(225,229,236); d.roundedRect(M,y,C,29,3,3,"FD");
+  d.setTextColor(105,115,130); d.setFontSize(8); d.text("VALOR RECEBIDO",M+7,y+8);
+  d.setTextColor(7,26,51); d.setFont("helvetica","bold"); d.setFontSize(20); d.text(money(r.amount_cents),M+7,y+19);
+  d.setFont("helvetica","normal"); d.setFontSize(8); d.setTextColor(95,105,120); d.text("Pagamento: "+(r.payment_method||"Não informado"),W-M-7,y+17,{align:"right"}); y+=39;
+  d.setFillColor(255,255,255); d.roundedRect(M,y,C,58,3,3,"FD"); d.setTextColor(7,26,51); d.setFont("helvetica","bold"); d.setFontSize(10); d.text("EMITENTE",M+7,y+9);
+  d.setFont("helvetica","normal"); d.setFontSize(9); d.setTextColor(35,45,60); d.text(d.splitTextToSize(r.issuer_name,C-14).slice(0,1),M+7,y+19);
+  d.setFontSize(8); d.setTextColor(95,105,120); d.text("Documento: "+(r.issuer_document||"Não informado"),M+7,y+27); d.text("Telefone: "+(r.issuer_phone||"Não informado"),M+7,y+34);
+  d.text(d.splitTextToSize(r.issuer_address||"Endereço não informado",C-14).slice(0,2),M+7,y+41); y+=67;
+  d.setFillColor(255,255,255); d.roundedRect(M,y,C,55,3,3,"FD"); d.setTextColor(7,26,51); d.setFont("helvetica","bold"); d.setFontSize(10); d.text("SERVIÇO",M+7,y+9);
+  d.setTextColor(35,45,60); d.setFontSize(11); d.text(d.splitTextToSize(r.service,C-14).slice(0,2),M+7,y+19); d.setFont("helvetica","normal"); d.setFontSize(8); d.setTextColor(95,105,120);
+  d.text("Data: "+(r.service_date?r.service_date.split("-").reverse().join("/"):"—"),M+7,y+32); d.text("Local: "+(r.city||"—"),M+7,y+39); d.text(d.splitTextToSize(r.description||"Sem observações adicionais.",C-14).slice(0,2),M+7,y+47); y+=65;
+  if(r.signature_data){try{d.addImage(r.signature_data,"PNG",W/2-28,y-10,56,16)}catch{}}
+  d.setDrawColor(80,90,105); d.line(W/2-35,y+5,W/2+35,y+5); d.setTextColor(80,90,105); d.setFontSize(8); d.text("Assinatura do prestador",W/2,y+11,{align:"center"});
+  d.setTextColor(145,150,158); d.setFontSize(7); d.text("Documento recebido através do LOSI CONECTA.",W/2,282,{align:"center"});
+  const url=URL.createObjectURL(d.output("blob")); const opened=window.open(url,"_blank","noopener,noreferrer");
+  if(!opened){const a=document.createElement("a");a.href=url;a.download="recibo-recebido-"+r.id.slice(0,8)+".pdf";document.body.appendChild(a);a.click();a.remove();}
+  window.setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+
 
 function ReceivedReceiptsPage(){
   const navigate=useNavigate(); const [mobileMenuOpen,setMobileMenuOpen]=useState(false); const [user,setUser]=useState<string|null>(null),[requests,setRequests]=useState<Request[]>([]),[receipts,setReceipts]=useState<Record<string,Receipt>>({}),[loading,setLoading]=useState(true),[message,setMessage]=useState("");
