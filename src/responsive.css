@@ -18616,3 +18616,27 @@ body,
   color: #ffffff !important;
   border-color: #000000 !important;
 }
+
+
+/* HOME — CTA da seção CATEGORIAS: preto com texto branco */
+.home-apple-inspired .home-categories-section .home-section-heading-row > .home-blue-link {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+.home-apple-inspired .home-categories-section .home-section-heading-row > .home-blue-link span {
+  color: #ffffff !important;
+}
+
+.home-apple-inspired .home-categories-section .home-section-heading-row > .home-blue-link:hover {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #1a1a1a !important;
+}
+
+.home-apple-inspired .home-categories-section .home-section-heading-row > .home-blue-link:active {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
