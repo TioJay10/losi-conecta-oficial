@@ -863,7 +863,23 @@ function DashboardPage() {
 
       if (functionError) {
         console.error("Erro ao iniciar contratação:", functionError);
-        throw new Error("Não foi possível conectar ao serviço de pagamento. Tente novamente.");
+        let detail = "";
+        const context = (functionError as { context?: Response }).context;
+        if (context) {
+          try {
+            const errorBody = await context.clone().json();
+            detail = errorBody?.error || errorBody?.message || "";
+            if (!detail && Array.isArray(errorBody?.details?.errors)) {
+              detail = errorBody.details.errors
+                .map((item: { description?: string }) => item.description)
+                .filter(Boolean)
+                .join(" ");
+            }
+          } catch {
+            // Mantém a mensagem padrão somente quando a resposta não puder ser lida.
+          }
+        }
+        throw new Error(detail || "Não foi possível conectar ao serviço de pagamento. Tente novamente.");
       }
 
       if (!result?.success) {
