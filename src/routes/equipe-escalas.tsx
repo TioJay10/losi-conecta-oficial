@@ -5,7 +5,8 @@ import "../equipe-escalas.css";
 
 type EventRow={id:string;title:string;event_date:string;status:string;city:string|null;public_token:string};
 type Opening={id:string;event_id:string;title:string;slots:number;advertised_value:number|null};
-type Collaborator={id:string;name:string;city:string|null;network_status:string;calendar_token:string};
+type Collaborator={id:string;name:string;whatsapp:string;city:string|null;state:string|null;notes:string|null;network_status:string;calendar_token:string};
+type CollaboratorJob={id:string;status:string;assigned_role:string|null;agreed_value:number|null;team_events:{title:string;event_date:string;starts_at:string|null;location_name:string|null;city:string|null}|null};
 type Application={id:string;status:string;candidate_name:string;candidate_whatsapp:string;candidate_city:string|null;candidate_notes:string|null;assigned_role:string|null;agreed_value:number|null;collaborator_id:string|null;opening_id:string;team_event_openings:{title:string}|null};
 
 export const Route=createFileRoute("/equipe-escalas")({component:EquipeEscalasPage});
@@ -23,6 +24,8 @@ function EquipeEscalasPage(){
  const [openingForm,setOpeningForm]=useState({title:"Recreador",slots:"1",advertised_value:""});
  const [applications,setApplications]=useState<Application[]>([]);
  const [assignment,setAssignment]=useState<Record<string,{role:string;value:string}>>({});
+ const [selectedPerson,setSelectedPerson]=useState<Collaborator|null>(null);
+ const [personJobs,setPersonJobs]=useState<CollaboratorJob[]>([]);
  const [form,setForm]=useState({title:"",description:"",event_date:"",starts_at:"",ends_at:"",location_name:"",address:"",city:"",state:""});
 
  async function load(){
@@ -33,7 +36,7 @@ function EquipeEscalasPage(){
   setBusinessId(b.id);setBusinessName(b.business_name);
   const [{data:e},{data:p}]=await Promise.all([
    supabase.from("team_events").select("id,title,event_date,status,city,public_token").eq("business_id",b.id).order("event_date",{ascending:true}),
-   supabase.from("team_collaborators").select("id,name,city,network_status,calendar_token").eq("business_id",b.id).order("name")
+   supabase.from("team_collaborators").select("id,name,whatsapp,city,state,notes,network_status,calendar_token").eq("business_id",b.id).order("name")
   ]);
   setEvents((e||[]) as EventRow[]);setPeople((p||[]) as Collaborator[]); if(!selectedEventId&&e?.[0]?.id)setSelectedEventId(e[0].id); setLoading(false);
  }
@@ -60,14 +63,23 @@ function EquipeEscalasPage(){
  async function manageApplication(id:string,action:"approve"|"reject"|"confirm"){const values=assignment[id];const {error}=await supabase.rpc("manage_team_application",{p_application_id:id,p_action:action,p_assigned_role:values?.role||null,p_agreed_value:values?.value?Number(values.value):null});if(error){alert(error.message);return}await load();const {data}=await supabase.from("team_applications").select("id,status,candidate_name,candidate_whatsapp,candidate_city,candidate_notes,assigned_role,agreed_value,collaborator_id,opening_id,team_event_openings(title)").eq("event_id",selectedEventId).order("created_at",{ascending:false});setApplications((data||[]) as unknown as Application[])}
  function openWhatsApp(phone:string,name:string){const n=phone.replace(/\D/g,"");window.open(`https://wa.me/${n}?text=${encodeURIComponent(`Olá, ${name}! Estou entrando em contato sobre sua candidatura pelo LOSI Conecta.`)}`,"_blank","noopener,noreferrer")}
  async function copyCalendar(collaboratorId:string|null){const p=people.find(x=>x.id===collaboratorId);if(!p)return;await navigator.clipboard.writeText(`${window.location.origin}/calendario/${p.calendar_token}`);alert("Link exclusivo do Calendário copiado.")}
+ async function openPerson(person:Collaborator){setSelectedPerson(person);const {data}=await supabase.from("team_applications").select("id,status,assigned_role,agreed_value,team_events(title,event_date,starts_at,location_name,city)").eq("collaborator_id",person.id).in("status",["approved","confirmed"]).order("created_at",{ascending:false});setPersonJobs((data||[]) as unknown as CollaboratorJob[])}
+ async function togglePerson(){if(!selectedPerson)return;const next=selectedPerson.network_status==="active"?"inactive":"active";const {error}=await supabase.from("team_collaborators").update({network_status:next}).eq("id",selectedPerson.id);if(error){alert(error.message);return}setSelectedPerson({...selectedPerson,network_status:next});await load()}
+ async function copyPersonCalendar(){if(!selectedPerson)return;await navigator.clipboard.writeText(`${window.location.origin}/calendario/${selectedPerson.calendar_token}`);alert("Link exclusivo do Calendário copiado.")}
  const selectedEvent=events.find(e=>e.id===selectedEventId);
  if(loading)return <main className="team-page team-loading">Carregando Equipe & Escalas...</main>;
  return <main className="team-page">
   <header className="team-topbar"><button onClick={()=>navigate({to:"/painel"})}>← Painel</button><div><span>LOSI CONECTA</span><strong>Equipe & Escalas</strong></div></header>
   <section className="team-hero"><div><span>OPERAÇÃO PROFISSIONAL</span><h1>Sua rede. Seus eventos. Sua escala.</h1><p>Organize colaboradores em rede, publique oportunidades e monte cada escala mantendo função e valor final sob seu controle.</p></div><strong>{businessName}</strong></section>
   <section className="team-section"><div className="team-section-head"><div><span>MINHA EQUIPE</span><h2>Rede de colaboradores</h2></div><b>{people.length} na rede</b></div>
-   <div className="team-flow"><div className="team-flow-owner"><small>FORNECEDOR</small><strong>{businessName||"Sua empresa"}</strong></div><div className="team-flow-line"/><div className="team-flow-people">{people.length?people.map(p=><article key={p.id}><span>{p.name.slice(0,1).toUpperCase()}</span><strong>{p.name}</strong><small>{p.city||"Cidade não informada"}</small></article>):<div className="team-empty">Sua rede começa aqui. Os candidatos aprovados aparecerão neste fluxograma.</div>}</div></div>
+   <div className="team-flow"><div className="team-flow-owner"><small>FORNECEDOR</small><strong>{businessName||"Sua empresa"}</strong></div><div className="team-flow-line"/><div className="team-flow-people">{people.length?people.map(p=><article key={p.id} role="button" tabIndex={0} onClick={()=>void openPerson(p)} onKeyDown={e=>{if(e.key==="Enter")void openPerson(p)}} className={p.network_status!=="active"?"inactive":""}><span>{p.name.slice(0,1).toUpperCase()}</span><strong>{p.name}</strong><small>{p.city||"Cidade não informada"}</small></article>):<div className="team-empty">Sua rede começa aqui. Os candidatos aprovados aparecerão neste fluxograma.</div>}</div></div>
   </section>
+  {selectedPerson&&<div className="team-person-overlay" onClick={()=>setSelectedPerson(null)}><section className="team-person-panel" onClick={e=>e.stopPropagation()}><header><div><span>COLABORADOR DA REDE</span><h2>{selectedPerson.name}</h2><p>{selectedPerson.city||"Cidade não informada"}{selectedPerson.state?` · ${selectedPerson.state}`:""}</p></div><button onClick={()=>setSelectedPerson(null)} aria-label="Fechar">×</button></header>
+   <div className="team-person-contact"><div><small>WHATSAPP</small><strong>{selectedPerson.whatsapp}</strong></div><button className="team-secondary" onClick={()=>openWhatsApp(selectedPerson.whatsapp,selectedPerson.name)}>CHAMAR NO WHATSAPP</button></div>
+   {selectedPerson.notes&&<div className="team-person-notes"><small>ANOTAÇÕES / APRESENTAÇÃO</small><p>{selectedPerson.notes}</p></div>}
+   <div className="team-person-actions"><button className="team-primary" onClick={copyPersonCalendar}>COPIAR LINK DO CALENDÁRIO</button><button className="team-secondary" onClick={togglePerson}>{selectedPerson.network_status==="active"?"DESATIVAR DA REDE":"REATIVAR NA REDE"}</button></div>
+   <div className="team-person-history"><span>HISTÓRICO COM O FORNECEDOR</span><h3>Datas e trabalhos</h3>{personJobs.length?personJobs.map(j=><article key={j.id}><time>{j.team_events?new Date(j.team_events.event_date+"T12:00:00").toLocaleDateString("pt-BR"):"—"}</time><div><strong>{j.team_events?.title||"Evento"}</strong><small>{j.assigned_role||"Função ainda não definida"} · {j.team_events?.location_name||j.team_events?.city||"Local a definir"}</small></div><b>{j.agreed_value!=null?Number(j.agreed_value).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}):j.status==="approved"?"Em conversa":"Valor não informado"}</b></article>):<div className="team-empty">Nenhum trabalho registrado ainda.</div>}</div>
+  </section></div>}
   <section className="team-grid">
    <div className="team-section"><div className="team-section-head"><div><span>ESCALAS</span><h2>Próximos eventos</h2></div><b>{upcoming.length}</b></div>
     <div className="team-events">{upcoming.length?upcoming.map(e=><article key={e.id} className={selectedEventId===e.id?"selected":""} onClick={()=>setSelectedEventId(e.id)}><time>{new Date(e.event_date+"T12:00:00").toLocaleDateString("pt-BR")}</time><div><strong>{e.title}</strong><small>{e.city||"Local a definir"} · {e.status==="draft"?"Rascunho":e.status}</small></div></article>):<div className="team-empty">Nenhum evento criado ainda.</div>}</div>
