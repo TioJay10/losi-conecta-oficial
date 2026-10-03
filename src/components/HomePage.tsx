@@ -74,9 +74,15 @@ export function HomePage({
   return (
     <main className={`home-page home-apple-inspired${preview ? " home-page-preview" : ""}`} style={themeStyle}>
       <header className="home-header home-apple-header">
-        <Link to="/" className="home-brand-link" aria-label="LOSI CONECTA">
-          <AppLogo className="home-brand" style={{}} />
-        </Link>
+        <AppLogo className="home-brand-link home-brand" aria-label="LOSI CONECTA">
+          <img
+            className="home-brand-symbol"
+            src="/losi-conecta-symbol.svg"
+            alt=""
+            aria-hidden="true"
+          />
+          <span className="home-brand-name">LOSI CONECTA</span>
+        </AppLogo>
 
         <nav className="home-nav home-apple-nav" aria-label="Navegação principal">
           <a href="#como-funciona">Como funciona</a>
@@ -204,9 +210,7 @@ export function HomePage({
       <footer className="home-footer home-apple-footer">
         <div className="home-footer-top">
           <div className="home-footer-brand">
-            <Link to="/" aria-label="LOSI CONECTA">
-              <AppLogo className="home-footer-logo" style={{}} />
-            </Link>
+            <AppLogo className="home-footer-logo" aria-label="LOSI CONECTA" />
             <p>Uma plataforma para aproximar eventos, profissionais e oportunidades.</p>
           </div>
 
