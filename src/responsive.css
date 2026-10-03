@@ -18363,3 +18363,121 @@ body,
     font-size: 13px !important;
   }
 }
+
+
+/* HOME — textos externos com margem confortável + CTAs em botões dourados */
+.home-section-heading {
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+}
+
+.home-categories-section > .home-section-heading {
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+}
+
+.home-apple-inspired .home-blue-link,
+.home-apple-inspired .home-card-link,
+.home-apple-inspired .home-panel-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: flex-start !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  background: #d6b46a !important;
+  color: #0b182a !important;
+  text-decoration: none !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  border: 1px solid rgba(138,109,47,.35) !important;
+  transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease !important;
+  box-shadow: none !important;
+}
+
+.home-apple-inspired .home-blue-link:hover,
+.home-apple-inspired .home-card-link:hover,
+.home-apple-inspired .home-panel-link:hover {
+  background: #e2c37c !important;
+  color: #0b182a !important;
+  transform: translateY(-1px);
+}
+
+.home-apple-inspired .home-blue-link:active,
+.home-apple-inspired .home-card-link:active,
+.home-apple-inspired .home-panel-link:active {
+  transform: translateY(0);
+}
+
+.home-apple-inspired .home-blue-link span,
+.home-apple-inspired .home-card-link span,
+.home-apple-inspired .home-panel-link span {
+  color: inherit !important;
+  margin-left: 7px !important;
+  font-size: 18px !important;
+}
+
+.home-apple-inspired .home-hero-links {
+  gap: 12px !important;
+}
+
+.home-apple-inspired .home-market-grid article .home-blue-link,
+.home-apple-inspired .home-feature-card .home-card-link {
+  margin-top: auto !important;
+}
+
+.home-apple-inspired .home-section-heading-row {
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+}
+
+.home-apple-inspired .home-final-button {
+  background: #d6b46a !important;
+  color: #0b182a !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
+
+@media (max-width: 800px) {
+  .home-section-heading,
+  .home-categories-section > .home-section-heading,
+  .home-apple-inspired .home-section-heading-row {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .home-apple-inspired .home-hero-links {
+    justify-content: flex-start !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
+  .home-apple-inspired .home-blue-link,
+  .home-apple-inspired .home-card-link,
+  .home-apple-inspired .home-panel-link {
+    min-height: 44px !important;
+    padding: 0 17px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .home-section-heading,
+  .home-categories-section > .home-section-heading,
+  .home-apple-inspired .home-section-heading-row {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .home-apple-inspired .home-hero-links {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
