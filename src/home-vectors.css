@@ -51,7 +51,7 @@
   z-index:1;
   pointer-events:none;
   border-radius:0;
-  background:rgba(30,100,200,.22);
+  background:rgba(30,100,200,.08);
 }
 .home-apple-inspired .home-feature-card:hover .home-feature-vector img {transform:none!important}
 @media (max-width:800px) {
