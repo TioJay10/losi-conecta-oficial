@@ -1,0 +1,176 @@
+/* LOSI — papel acetinado, contornos precisos e hierarquia de trabalho.
+   Seletores explícitos preservam documentos, fotos e estados semânticos. */
+:root {
+  --executive-ink: #142238;
+  --executive-muted: #526174;
+  --executive-line: #dce1e6;
+  --executive-radius: 6px;
+  --executive-paper: url("data:image/png;base64,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");
+}
+
+@media screen {
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] {
+    background: #fff !important;
+    color: var(--executive-ink);
+    font-size: 14px;
+    line-height: 1.5;
+    accent-color: #8a6d2f;
+    caret-color: var(--executive-ink);
+  }
+
+  /* Cards estruturais, sem alterar o papel das prévias/PDFs. */
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(
+    .dashboard-card,.dashboard-status,.dashboard-onboarding,.dashboard-plan-card,
+    .dashboard-pending-invoices,.dashboard-saved,.dashboard-saved-provider-card,
+    .dashboard-quotes-overview,.dashboard-commercial-card,.dashboard-operation-card,
+    .personal-profile-card,.business-services-card,.quotes-dashboard-card,
+    .quotes-section,.quote-builder,.quotes-supplier-intro,.quote-modal-card,
+    .proposals-form-card,.proposals-preview-panel,.receipts-form-card,
+    .receipts-preview-card,.receipts-history-card,.losi-ads-choice-card,
+    .losi-ads-form-card,.losi-ads-own-card,.losi-ads-my-ads,.losi-ads-my-applications,
+    .losi-ads-my-application-card,.losi-ads-credit-modal,.losi-ads-applications-modal,
+    .inconsistency-card,.inconsistency-history,.inconsistency-chat,
+    .team-section,.team-dashboard-cards>article
+  ) {
+    border: 1px solid var(--executive-line) !important;
+    border-radius: var(--executive-radius) !important;
+    background-color: #fff !important;
+    background-image: var(--executive-paper) !important;
+    background-size: 96px 96px !important;
+    background-repeat: repeat !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    text-shadow: none !important;
+    transform: none !important;
+    transition: border-color 160ms ease, background-color 160ms ease !important;
+  }
+
+  /* A interação muda o contorno; o card não salta nem emite halo. */
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(
+    .dashboard-card,.dashboard-status,.dashboard-onboarding,.dashboard-plan-card,
+    .dashboard-pending-invoices,.dashboard-saved,.dashboard-saved-provider-card,
+    .personal-profile-card,.business-services-card,.quotes-dashboard-card,
+    .quotes-section,.quote-builder,.proposals-form-card,.proposals-preview-panel,
+    .receipts-form-card,.receipts-preview-card,.receipts-history-card,
+    .losi-ads-choice-card,.losi-ads-form-card,.losi-ads-own-card,
+    .losi-ads-my-application-card,.team-section,.team-dashboard-cards>article
+  ):hover {
+    box-shadow: none !important;
+    transform: none !important;
+    border-color: #c1c9d2 !important;
+  }
+
+  body .dashboard-page[class] :is(.dashboard-status,.dashboard-onboarding,.dashboard-grid>button)::after {
+    content: none !important;
+  }
+
+  /* Informação de estado continua distinta do acabamento material. */
+  body .team-page[class] .team-dashboard-cards>article.danger {
+    background-color: #fffafa !important;
+    border-color: #e7c0bb !important;
+  }
+  body .team-page[class] .team-dashboard-cards>article.attention,
+  body .dashboard-page[class] .losi-ads-choice-card.selected {
+    border-color: #a78a50 !important;
+    background-color: #fcfaf5 !important;
+  }
+
+  /* Grupos internos: linhas de organização, sem novas caixas decorativas. */
+  body .dashboard-page[class] :is(.proposals-group-card,.receipts-signature-group) {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  body .dashboard-page[class] .proposals-group-card + .proposals-group-card {
+    border-top: 1px solid var(--executive-line) !important;
+    padding-top: 24px !important;
+  }
+
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(
+    .dashboard-content>h1,.proposals-hero h1,.receipts-hero h1,
+    .losi-ads-section-copy h1,.personal-profile-heading h1,
+    .business-services-heading h1,.quotes-content h1,.inconsistency-card-header h1
+  ) {
+    font-size: clamp(26px,2.5vw,34px) !important;
+    font-weight: 600 !important;
+    line-height: 1.22 !important;
+    letter-spacing: -.025em !important;
+    color: var(--executive-ink) !important;
+    -webkit-text-fill-color: currentColor !important;
+    background: none !important;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(
+    .dashboard-status-title,.dashboard-onboarding-title,.dashboard-commercial h2,
+    .dashboard-plan-card h3,.dashboard-saved h2,.dashboard-pending-invoices h2,
+    .personal-profile-card h2,.business-section-title,.proposals-card-head h2,
+    .proposals-preview-head h2,.receipts-card-head h2,.losi-ads-section-copy h2,
+    .losi-ads-form-heading h2,.losi-ads-choice-card h3,.quotes-dashboard-head h2,
+    .team-section-head h2
+  ) {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+    letter-spacing: -.015em !important;
+    text-shadow: none !important;
+    overflow-wrap: break-word;
+  }
+
+  body .dashboard-page[class] .dashboard-nav-item {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  body .dashboard-page[class] .dashboard-nav-item strong {font-weight:600 !important;letter-spacing:0 !important}
+  body .dashboard-page[class] .dashboard-nav-item small {line-height:1.4 !important;letter-spacing:0 !important}
+
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(
+    .dashboard-primary,.dashboard-secondary,.dashboard-plan-contract,
+    .profile-primary,.profile-secondary,.personal-profile-primary,.business-primary,
+    .business-small-button,.business-location-button,.team-primary,.team-secondary,
+    .losi-ads-primary,.losi-ads-secondary,.receipts-primary,.proposals-primary,.proposals-secondary
+  ) {
+    border-radius: 5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-shadow: none !important;
+  }
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(input:not([type="radio"]):not([type="checkbox"]):not([type="range"]):not([type="file"]),select,textarea) {
+    border-radius: 5px !important;
+    box-shadow: none !important;
+  }
+  /* Restaura foco visível, inclusive onde regras legadas removem outline. */
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(a,button,input,textarea,select):focus-visible {
+    outline: 2px solid #8a6d2f !important;
+    outline-offset: 3px !important;
+  }
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] ::selection {
+    background: #e8dfca;
+    color: #142238;
+  }
+
+  /* Home mantém as imagens e a película azul uniforme. */
+  body .home-apple-inspired .home-feature-card {
+    border: 1px solid var(--executive-line) !important;
+    border-radius: var(--executive-radius) !important;
+    background-color: #fff !important;
+    background-image: var(--executive-paper) !important;
+    background-size: 96px 96px !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  body .home-apple-inspired .home-feature-card h2 {font-weight:600 !important;letter-spacing:-.02em !important}
+
+  @media (max-width:768px) {
+    body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page)[class] :is(
+      .dashboard-content>h1,.proposals-hero h1,.receipts-hero h1,
+      .losi-ads-section-copy h1,.personal-profile-heading h1,
+      .business-services-heading h1,.quotes-content h1
+    ) {font-size:25px !important}
+    body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page)[class] :is(
+      .dashboard-text,.dashboard-plan-card p,.dashboard-onboarding-text,
+      .profile-page-text,.personal-profile-hint,.business-hint,
+      .proposals-hero p,.receipts-hero p,.losi-ads-section-copy p
+    ) {font-size:14px !important;line-height:1.55 !important}
+  }
+}
