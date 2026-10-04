@@ -47,3 +47,9 @@
 .opportunity-form button:disabled,.collaborator-access-card button:disabled{opacity:.6;cursor:wait}
 .opportunity-calendar-link:focus-visible,.opportunity-form button:focus-visible,.collaborator-access-card button:focus-visible{outline:2px solid #8a6d2f;outline-offset:3px}
 @media(max-width:600px){.opportunity-identity .opportunity-calendar-link{width:100%}.opportunity-id-switch button{font-size:11px;padding:8px}}
+
+.team-individual-value{margin:18px 0;padding:16px;background:#f8fafc;border-radius:12px;align-items:end}
+.team-individual-value>div{display:flex;flex-direction:column;gap:6px;grid-column:1/-1}
+.team-individual-value small{color:#475569;font-size:12px;line-height:1.5}
+.team-replacement-overlay input{box-sizing:border-box;width:100%;min-height:44px;padding:11px;border:1px solid #d8dde5;border-radius:10px;background:#fff;font:inherit}
+.team-replacement-overlay label{display:flex;flex-direction:column;gap:8px;margin:16px 0}
