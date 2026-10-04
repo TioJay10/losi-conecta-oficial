@@ -31,8 +31,8 @@ export const Route = createRootRoute({
     links: [
       {
         rel: "icon",
-        href: "https://bpvaftobiosjesdbaany.supabase.co/storage/v1/object/public/provider-media/628003ac-1ed5-4e25-a725-b12b742f9bde/logo-53aa0fd9-1cec-4321-912d-8c8903e71a53.png",
-        type: "image/png",
+        href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Ccircle cx='128' cy='128' r='120' fill='%23fff' stroke='%238C5900' stroke-width='10'/%3E%3Cg transform='translate(31 23) scale(.84)'%3E%3Cpath fill='%23000' d='M0 17h47v167h153v49H0V17Z'/%3E%3Cpath fill='%238C5900' d='M67 3h157v36H103v112H67V3Z'/%3E%3C/g%3E%3C/svg%3E",
+        type: "image/svg+xml",
       },
       {
         rel: "apple-touch-icon",
