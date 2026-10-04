@@ -55,3 +55,96 @@
 .team-replacement-overlay label{display:flex;flex-direction:column;gap:8px;margin:16px 0}
 
 .team-opening-manager{scroll-margin-top:24px}.team-opening-manager:focus-visible,.team-events article:focus-visible,.team-event-history article:focus-visible{outline:2px solid #a8d62a;outline-offset:4px}.team-event-link{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:20px 0}.team-event-link label{display:grid;gap:8px;flex:1 1 240px;min-width:0}.team-event-link input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dbe1e8;border-radius:10px;font:inherit}.team-event-link small{flex-basis:100%;color:#64748b}
+
+/* Equipe & Escalas: conteúdo e ações sem compressão nos cards. */
+.team-page .team-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+.team-page :is(.team-section,.team-section-head>div,.team-head-actions,.team-events article>div,.team-event-history article>div,.team-opening-list article>div,.team-candidate-main>div,.scale-members>div>div,.scale-roles>article>header>div,.team-person-history article>div){min-width:0}
+.team-page :is(.team-opening-form,.team-assignment,.team-manual-person,.team-event-edit,.team-form-row) :is(input,select,textarea){width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.team-page :is(.team-section-head h2,.team-events strong,.team-event-history strong,.team-candidate-main strong,.scale-members strong,.team-flow-people strong,.team-person-panel h2,.team-person-history strong){overflow-wrap:break-word;word-break:normal}
+.team-page :is(.team-primary,.team-secondary,.team-danger,.team-edit-link,.team-edit-opening,.scale-replace,.scale-remove){box-sizing:border-box;max-width:100%;line-height:1.4;white-space:normal;word-break:normal;overflow-wrap:normal;hyphens:none;writing-mode:horizontal-tb}
+.team-page .team-candidate-main>span{flex-shrink:0}
+.team-page :is(.team-candidate-main>b,.team-events time,.team-event-history time){flex-shrink:0;white-space:nowrap}
+.team-page .team-publish-actions{flex-wrap:wrap}
+.team-page .team-head-actions{flex-wrap:wrap}
+.team-page .team-head-actions>b{white-space:nowrap}
+.team-page .team-opening-list article{gap:12px;flex-wrap:wrap}
+.team-page .team-opening-list article>div{flex:1 1 150px}
+.team-page .team-opening-list article>b{white-space:nowrap}
+.team-page .team-person-panel>header>button{flex-shrink:0}
+@media (min-width:761px) and (max-width:1100px){
+ .team-page .scale-roles{grid-template-columns:minmax(0,1fr)}
+ .team-page .team-opening-form{grid-template-columns:minmax(0,1.2fr) minmax(0,.6fr) minmax(0,.8fr)}
+ .team-page .team-opening-form>button{grid-column:1/-1}
+ .team-page .team-assignment{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .team-page .team-assignment>button{grid-column:1/-1}
+ .team-page .team-candidate-actions{flex-wrap:wrap}
+}
+@media (max-width:760px){
+ .team-page{font-size:13px;line-height:1.5}
+ .team-page .team-section{margin:14px 12px;padding:18px 16px}
+ .team-page .team-section-head{gap:10px;flex-wrap:wrap;align-items:flex-start;margin-bottom:18px}
+ .team-page .team-section-head>div:first-child{flex:1 1 180px}
+ .team-page .team-section-head h2{font-size:20px;line-height:1.25;margin-top:4px}
+ .team-page .team-section-head>b{font-size:11px;white-space:nowrap}
+ .team-page .team-head-actions{gap:8px;justify-content:space-between;width:100%}
+ .team-page .team-head-actions>b{font-size:11px}
+ .team-page :is(.team-primary,.team-secondary,.team-danger,.team-edit-link,.team-edit-opening,.scale-replace,.scale-remove){min-height:44px;padding:10px 12px;font-size:11px;letter-spacing:.02em;text-align:center;display:inline-flex;align-items:center;justify-content:center}
+ .team-page :is(.team-publish-actions,.team-candidate-actions,.team-person-actions){gap:10px}
+ .team-page .team-publish-actions>button{width:100%}
+ .team-page .team-opening-form{padding:14px;gap:14px}
+ .team-page :is(.team-form,.team-opening-form,.team-assignment,.team-replacement-overlay) label{font-size:11px;line-height:1.4}
+ .team-page :is(.team-form,.team-opening-form,.team-assignment,.team-manual-person,.team-event-edit,.team-replacement-overlay,.team-event-link) :is(input,select,textarea){font-size:16px;line-height:1.4;min-height:44px}
+ .team-page .team-events article{gap:10px;padding:12px;align-items:flex-start}
+ .team-page .team-events time{font-size:10px;padding-top:2px}
+ .team-page :is(.team-events,.team-event-history) article>div{flex:1}
+ .team-page :is(.team-events,.team-event-history) strong{font-size:13px;line-height:1.4}
+ .team-page :is(.team-events,.team-event-history,.team-opening-list) small{font-size:11px;line-height:1.4}
+ .team-page .team-event-link{gap:10px}
+ .team-page .team-event-link label{flex-basis:100%;font-size:11px;font-weight:800}
+ .team-page .team-event-link button{width:100%}
+ .team-page .team-opening-list article{padding:12px}
+ .team-page .team-opening-list :is(strong,b){font-size:13px}
+ .team-page .team-opening-list .team-edit-opening{flex:0 0 auto}
+ .team-page .team-candidate-list>article{padding:14px 12px}
+ .team-page .team-candidate-main{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px 10px;align-items:start}
+ .team-page .team-candidate-main>span{width:34px;height:34px;font-size:13px}
+ .team-page .team-candidate-main>b{grid-column:2;justify-self:start;font-size:10px}
+ .team-page .team-candidate-main strong{font-size:13px;line-height:1.4}
+ .team-page .team-candidate-main small{font-size:11px;line-height:1.4;overflow-wrap:break-word}
+ .team-page .team-candidate-list>article>p{font-size:12px;line-height:1.5;overflow-wrap:break-word}
+ .team-page .team-assignment{padding:12px;gap:14px}
+ .team-page .team-confirmed-row{gap:10px;font-size:13px}
+ .team-page .team-confirmed-row em{align-self:flex-start;font-size:9px;max-width:100%;box-sizing:border-box;white-space:normal}
+ .team-page .scale-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .team-page .scale-summary>div{padding:12px}
+ .team-page .scale-summary small{font-size:9px;line-height:1.4;letter-spacing:.02em}
+ .team-page .scale-summary strong{font-size:24px}
+ .team-page .scale-roles>article>header{padding:12px;gap:10px;flex-wrap:wrap}
+ .team-page .scale-roles>article>header>div{flex:1 1 130px}
+ .team-page .scale-roles>article>header strong{font-size:13px}
+ .team-page .scale-roles>article>header small{font-size:11px}
+ .team-page .scale-roles>article>header>b{font-size:10px;line-height:1.4}
+ .team-page .scale-members{padding:4px 12px}
+ .team-page .scale-members>div:not(.scale-empty-role){display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px 10px;align-items:center;padding:12px 0}
+ .team-page .scale-members strong{font-size:13px;line-height:1.4}
+ .team-page .scale-members small{font-size:12px;line-height:1.4}
+ .team-page .scale-members em{grid-column:2;justify-self:start;font-size:9px;line-height:1.4}
+ .team-page .scale-members>div>button{grid-column:1/-1;width:100%;margin:0}
+ .team-page .team-flow-people{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .team-page .team-flow-people article{padding:12px 8px}
+ .team-page .team-flow-people strong{font-size:12px;line-height:1.4}
+ .team-page .team-flow-people small{font-size:11px;line-height:1.4;overflow-wrap:break-word}
+ .team-page .team-dashboard{margin:20px 12px}
+ .team-page .team-dashboard-title h2{font-size:21px;line-height:1.25}
+ .team-page .team-dashboard-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .team-page .team-dashboard-cards article{padding:12px}
+ .team-page .team-dashboard-cards article small{font-size:9px;letter-spacing:.02em;line-height:1.4}
+ .team-page .team-dashboard-cards article span{font-size:11px;line-height:1.4}
+ .team-page .team-person-panel h2{font-size:24px;line-height:1.25}
+ .team-page .team-person-history article{grid-template-columns:70px minmax(0,1fr);gap:10px;font-size:12px}
+ .team-page .team-person-history article>b{grid-column:2;text-align:left}
+ .team-page .team-replacement-overlay>section{max-height:calc(100dvh - 36px);overflow-y:auto;padding:22px 18px}
+ .team-page .team-replacement-overlay h2{font-size:24px;line-height:1.25;overflow-wrap:break-word}
+ .team-page .team-replacement-overlay p{font-size:13px}
+ .team-page .team-form-note{font-size:11px;line-height:1.5}
+}
