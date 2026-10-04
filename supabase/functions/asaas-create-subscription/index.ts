@@ -3,9 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-retry-count, traceparent, tracestate, baggage",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json",
+  "Cache-Control": "no-store",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -58,7 +59,7 @@ Deno.serve(async (req: Request) => {
       .eq("owner_id", user.id)
       .maybeSingle();
 
-    if (businessError) return json({ error: businessError.message }, 500);
+    if (businessError) return json({ error: "Não foi possível concluir a operação no momento." }, 500);
     if (!business) return json({ error: "Perfil profissional não encontrado." }, 404);
 
     const { data: plan, error: planError } = await admin
@@ -68,7 +69,7 @@ Deno.serve(async (req: Request) => {
       .eq("active", true)
       .maybeSingle();
 
-    if (planError) return json({ error: planError.message }, 500);
+    if (planError) return json({ error: "Não foi possível concluir a operação no momento." }, 500);
     if (!plan || plan.price_cents <= 0 || plan.billing_period !== "monthly") {
       return json({ error: "Plano não disponível para assinatura mensal." }, 400);
     }
@@ -85,7 +86,7 @@ Deno.serve(async (req: Request) => {
         .eq("assigned_user_id", user.id)
         .maybeSingle();
 
-      if (couponError) return json({ error: couponError.message }, 500);
+      if (couponError) return json({ error: "Não foi possível concluir a operação no momento." }, 500);
       if (!couponRow) return json({ error: "Cupom não encontrado para esta conta." }, 400);
       if (!couponRow.active) return json({ error: "Este cupom não está disponível." }, 400);
       if (couponRow.used_at) return json({ error: "Este cupom já foi utilizado." }, 409);
@@ -145,13 +146,10 @@ Deno.serve(async (req: Request) => {
       notificationDisabled: false,
     };
 
-    const persistCustomerId = async (id: string) => {
+    // A integração usa externalReference para recuperar o cliente nas próximas compras.
+    // Manter o ID nesta solicitação evita gravar campos protegidos do perfil.
+    const useCustomerId = async (id: string) => {
       customerId = id;
-      const { error: updateError } = await admin
-        .from("business_profiles")
-        .update({ asaas_customer_id: id })
-        .eq("id", business.id);
-      if (updateError) throw new Error(`Não foi possível atualizar o cliente Asaas no LOSI CONECTA: ${updateError.message}`);
     };
 
     // O ID salvo pode ter sido removido no Asaas ou pertencer ao Sandbox.
@@ -175,7 +173,7 @@ Deno.serve(async (req: Request) => {
         if (restoreResponse.ok) {
           const restored = await restoreResponse.json().catch(() => null);
           if (restored?.id && restored.deleted !== true) {
-            await persistCustomerId(restored.id);
+            await useCustomerId(restored.id);
           } else {
             customerId = null;
           }
@@ -187,7 +185,6 @@ Deno.serve(async (req: Request) => {
         return json({
           error: "Não foi possível validar o cliente no Asaas.",
           status: customerResponse.status,
-          details: customerData,
         }, customerResponse.status);
       }
     }
@@ -201,7 +198,7 @@ Deno.serve(async (req: Request) => {
       const lookupData = await lookup.json();
 
       if (!lookup.ok) {
-        return json({ error: "Não foi possível consultar o cliente no Asaas.", details: lookupData }, lookup.status);
+        return json({ error: "Não foi possível consultar o cliente no Asaas." }, lookup.status);
       }
 
       const activeCustomer = Array.isArray(lookupData?.data)
@@ -209,7 +206,7 @@ Deno.serve(async (req: Request) => {
         : null;
 
       if (activeCustomer?.id) {
-        await persistCustomerId(activeCustomer.id);
+        await useCustomerId(activeCustomer.id);
       } else {
         const customerResponse = await fetch("https://api.asaas.com/v3/customers", {
           method: "POST",
@@ -219,14 +216,14 @@ Deno.serve(async (req: Request) => {
         const customerData = await customerResponse.json();
 
         if (!customerResponse.ok) {
-          return json({ error: "Não foi possível criar o cliente no Asaas.", status: customerResponse.status, details: customerData }, customerResponse.status);
+          return json({ error: "Não foi possível criar o cliente no Asaas.", status: customerResponse.status }, customerResponse.status);
         }
 
         if (!customerData?.id) {
           return json({ error: "O Asaas não retornou um ID de cliente válido." }, 502);
         }
 
-        await persistCustomerId(customerData.id);
+        await useCustomerId(customerData.id);
       }
     }
 
@@ -253,7 +250,6 @@ Deno.serve(async (req: Request) => {
       return json({
         error: "O Asaas recusou a criação da assinatura.",
         status: subscriptionResponse.status,
-        details: subscriptionData,
       }, subscriptionResponse.status);
     }
 
@@ -321,7 +317,6 @@ Deno.serve(async (req: Request) => {
 
     return json({
       success: true,
-      customer_id: customerId,
       subscription: {
         id: createdSubscription.id,
         asaas_subscription_id: subscriptionData.id,
@@ -346,6 +341,7 @@ Deno.serve(async (req: Request) => {
         : null,
     });
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "Erro inesperado." }, 500);
+    console.error("Subscription creation failed", error instanceof Error ? error.message : "Unexpected error");
+    return json({ error: "Não foi possível processar a solicitação no momento." }, 500);
   }
 });
