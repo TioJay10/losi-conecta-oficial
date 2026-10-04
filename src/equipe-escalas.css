@@ -34,3 +34,16 @@
 @media(max-width:700px){.calendar-events-section,.calendar-history-section{margin:16px 0;padding:18px 16px;border-radius:14px}.calendar-section-heading{align-items:flex-start}.calendar-section-heading h2{font-size:21px}.calendar-history-list article{align-items:flex-start;flex-direction:column;gap:8px}.calendar-history-list article>small{align-self:flex-start}}
 
 .calendar-notifications{margin:22px 0;padding:22px;background:#fff;border:1px solid #e5e7eb;border-radius:16px}.calendar-notification-list{display:grid}.calendar-notification-list>button{appearance:none;width:100%;display:grid;grid-template-columns:8px 1fr;gap:12px;text-align:left;padding:14px 2px;border:0;border-top:1px solid #eef0f3;background:transparent;color:inherit;cursor:pointer}.calendar-notification-list>button:first-child{border-top:0}.calendar-notification-list>button>span{width:7px;height:7px;margin-top:6px;border-radius:50%;background:#d6b46a}.calendar-notification-list>button.read>span{background:#d1d5db}.calendar-notification-list>button>div{display:grid;gap:3px}.calendar-notification-list strong{color:#0b182a;font-size:13px}.calendar-notification-list p{margin:0;color:#475569;font-size:12px;line-height:1.45}.calendar-notification-list small{color:#8a94a3;font-size:10px}.calendar-notification-list>button.read strong,.calendar-notification-list>button.read p{color:#7b8492}.calendar-notification-list>button:focus-visible{outline:2px solid #8a6d2f;outline-offset:4px;border-radius:8px}@media(max-width:700px){.calendar-notifications{margin:16px 0;padding:18px 16px;border-radius:14px}}
+
+/* Controles do ID e do calendário, preservando o visual das páginas existentes. */
+.opportunity-form>.opportunity-id-switch{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opportunity-form .opportunity-text-button,.collaborator-access-card .opportunity-text-button{background:transparent;color:#0b182a;border:1px solid #d8dde5;letter-spacing:0}
+.opportunity-identity{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-top:20px}
+.opportunity-identity>strong{font-size:26px;color:#0b182a;overflow-wrap:anywhere}
+.opportunity-identity small{line-height:1.6;color:#475569}
+.opportunity-calendar-link{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:48px;padding:12px 18px;border-radius:10px;background:#0b182a;color:#fff;text-decoration:none;font-size:12px;font-weight:800}
+.opportunity-notice{padding:12px;background:#f5f0e5;color:#57431e;line-height:1.6}
+.calendar-action-error{padding:14px;color:#9f2018;background:#fff0ed;border-radius:10px}
+.opportunity-form button:disabled,.collaborator-access-card button:disabled{opacity:.6;cursor:wait}
+.opportunity-calendar-link:focus-visible,.opportunity-form button:focus-visible,.collaborator-access-card button:focus-visible{outline:2px solid #8a6d2f;outline-offset:3px}
+@media(max-width:600px){.opportunity-identity .opportunity-calendar-link{width:100%}.opportunity-id-switch button{font-size:11px;padding:8px}}
