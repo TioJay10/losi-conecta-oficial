@@ -17073,11 +17073,11 @@ body,
 .dashboard-page .receipts-signature-group,
 .dashboard-page .receipts-preview-card,
 .dashboard-page .receipts-history-card{
-  border-color:rgba(214,180,106,.98) !important;
+  border-color:rgba(214,180,106,0.176) !important;
   box-shadow:
-    0 0 0 1px rgba(214,180,106,.28),
-    0 0 8px rgba(214,180,106,.52),
-    0 0 20px rgba(214,180,106,.34),
+    0 0 0 1px rgba(214,180,106,0.05),
+    0 0 8px rgba(214,180,106,0.094),
+    0 0 20px rgba(214,180,106,0.061),
     0 14px 30px rgba(7,17,31,.14),
     0 5px 10px rgba(7,17,31,.07),
     inset 0 1px rgba(255,255,255,.98) !important;
@@ -17088,11 +17088,11 @@ body,
 .dashboard-page .receipts-signature-group:hover,
 .dashboard-page .receipts-preview-card:hover,
 .dashboard-page .receipts-history-card:hover{
-  border-color:rgba(231,202,126,1) !important;
+  border-color:rgba(231,202,126,0.18) !important;
   box-shadow:
-    0 0 0 1px rgba(231,202,126,.34),
-    0 0 10px rgba(214,180,106,.68),
-    0 0 26px rgba(214,180,106,.44),
+    0 0 0 1px rgba(231,202,126,0.061),
+    0 0 10px rgba(214,180,106,0.122),
+    0 0 26px rgba(214,180,106,0.079),
     0 18px 38px rgba(7,17,31,.17),
     0 6px 13px rgba(7,17,31,.08),
     inset 0 1px rgba(255,255,255,1) !important;
@@ -17100,7 +17100,7 @@ body,
 
 /* Grupos 01–04 da proposta são cards independentes. */
 .dashboard-page .proposals-group-card{
-  border:1px solid rgba(214,180,106,.98) !important;
+  border:1px solid rgba(214,180,106,0.176) !important;
   border-radius:10px !important;
   padding:20px !important;
   background:#fff !important;
@@ -17110,7 +17110,7 @@ body,
 .dashboard-page .receipts-preview-card,
 .dashboard-page .receipts-history-card,
 .dashboard-page .receipts-signature-group{
-  border:1px solid rgba(214,180,106,.98) !important;
+  border:1px solid rgba(214,180,106,0.176) !important;
   border-radius:10px !important;
   background:#fff !important;
 }
@@ -17139,11 +17139,11 @@ body,
 .dashboard-page .receipts-form-card,
 .dashboard-page .receipts-preview-card,
 .dashboard-page .receipts-history-card{
-  border-color:rgba(214,180,106,.98) !important;
+  border-color:rgba(214,180,106,0.176) !important;
   box-shadow:
-    0 0 0 1px rgba(214,180,106,.22),
-    0 0 9px rgba(214,180,106,.42),
-    0 0 22px rgba(214,180,106,.26),
+    0 0 0 1px rgba(214,180,106,0.04),
+    0 0 9px rgba(214,180,106,0.076),
+    0 0 22px rgba(214,180,106,0.047),
     0 14px 30px rgba(7,17,31,.14),
     0 5px 10px rgba(7,17,31,.07) !important;
 }
@@ -17169,11 +17169,11 @@ body,
 .dashboard-page .receipts-form-card:hover,
 .dashboard-page .receipts-preview-card:hover,
 .dashboard-page .receipts-history-card:hover{
-  border-color:rgba(231,202,126,1) !important;
+  border-color:rgba(231,202,126,0.18) !important;
   box-shadow:
-    0 0 0 1px rgba(231,202,126,.28),
-    0 0 11px rgba(214,180,106,.55),
-    0 0 27px rgba(214,180,106,.34),
+    0 0 0 1px rgba(231,202,126,0.05),
+    0 0 11px rgba(214,180,106,0.099),
+    0 0 27px rgba(214,180,106,0.061),
     0 18px 38px rgba(7,17,31,.17),
     0 6px 13px rgba(7,17,31,.08) !important;
 }
@@ -17238,11 +17238,11 @@ body,
 .dashboard-page .receipts-form-card,
 .dashboard-page .receipts-preview-card,
 .dashboard-page .receipts-history-card{
-  border-color:rgba(214,180,106,.98) !important;
+  border-color:rgba(214,180,106,0.176) !important;
   box-shadow:
-    0 0 0 1px rgba(214,180,106,.22),
-    0 0 9px rgba(214,180,106,.42),
-    0 0 22px rgba(214,180,106,.26),
+    0 0 0 1px rgba(214,180,106,0.04),
+    0 0 9px rgba(214,180,106,0.076),
+    0 0 22px rgba(214,180,106,0.047),
     0 14px 30px rgba(7,17,31,.14),
     0 5px 10px rgba(7,17,31,.07) !important;
 }
@@ -17307,10 +17307,10 @@ body,
 .dashboard-page .quotes-dashboard-card,
 .dashboard-page .business-services-card,
 .dashboard-page .personal-profile-card{
-  border-color:rgba(214,180,106,.82) !important;
+  border-color:rgba(214,180,106,0.148) !important;
   box-shadow:
-    0 0 0 1px rgba(214,180,106,.14),
-    0 0 7px rgba(214,180,106,.25),
+    0 0 0 1px rgba(214,180,106,0.025),
+    0 0 7px rgba(214,180,106,0.045),
     0 8px 18px rgba(7,17,31,.08) !important;
 }
 
@@ -17351,8 +17351,8 @@ body,
 .dashboard-page .dashboard-commercial-card,
 .dashboard-page .dashboard-operation-card{
   box-shadow:
-    0 0 0 1px rgba(214,180,106,.10),
-    0 0 6px rgba(214,180,106,.18),
+    0 0 0 1px rgba(214,180,106,0.018),
+    0 0 6px rgba(214,180,106,0.032),
     0 7px 16px rgba(7,17,31,.065) !important;
 }
 
@@ -17392,8 +17392,8 @@ body,
 .dashboard-page .business-services-card,
 .dashboard-page .personal-profile-card{
   box-shadow:
-    0 0 0 1px rgba(214,180,106,.14),
-    0 0 7px rgba(214,180,106,.25) !important;
+    0 0 0 1px rgba(214,180,106,0.025),
+    0 0 7px rgba(214,180,106,0.045) !important;
 }
 
 /* Sem profundidade em hover, foco ou clique. */
@@ -17406,8 +17406,8 @@ body,
 .dashboard-page .business-services-card:hover,
 .dashboard-page .personal-profile-card:hover{
   box-shadow:
-    0 0 0 1px rgba(214,180,106,.14),
-    0 0 7px rgba(214,180,106,.25) !important;
+    0 0 0 1px rgba(214,180,106,0.025),
+    0 0 7px rgba(214,180,106,0.045) !important;
 }
 
 
@@ -17547,10 +17547,10 @@ body,
 .marketplace-ad-card{
   min-width:0;
   padding:18px;
-  border:1px solid rgba(214,180,106,.72);
+  border:1px solid rgba(214,180,106,0.13);
   border-radius:12px;
   background:#fff;
-  box-shadow:0 0 0 1px rgba(214,180,106,.08),0 0 8px rgba(214,180,106,.14);
+  box-shadow:0 0 0 1px rgba(214,180,106,0.014),0 0 8px rgba(214,180,106,0.025);
 }
 .marketplace-ad-card.opportunity{border-color:#dfe4eb;box-shadow:none}
 .marketplace-ad-topline{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px}
@@ -17609,11 +17609,11 @@ body,
 
 /* BUSCA — detalhes e candidatura de anúncios LOSI ADS */
 .marketplace-ad-card{cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}
-.marketplace-ad-card:hover{border-color:#d6b46a;box-shadow:0 0 0 1px rgba(214,180,106,.12),0 0 10px rgba(214,180,106,.16)}
+.marketplace-ad-card:hover{border-color:rgba(214,180,106,.16);box-shadow:0 0 0 1px rgba(214,180,106,0.022),0 0 10px rgba(214,180,106,0.029)}
 .marketplace-ad-card:focus-visible{outline:2px solid #d6b46a;outline-offset:2px}
-.marketplace-ad-card.opportunity:hover{box-shadow:0 0 0 1px rgba(214,180,106,.08)}
+.marketplace-ad-card.opportunity:hover{box-shadow:0 0 0 1px rgba(214,180,106,0.014)}
 .marketplace-ad-modal-backdrop{position:fixed;inset:0;z-index:2400;display:grid;place-items:center;padding:20px;background:rgba(7,18,32,.44)}
-.marketplace-ad-modal{position:relative;width:min(650px,100%);max-height:min(88vh,780px);overflow:auto;padding:28px;border:1px solid rgba(214,180,106,.75);border-radius:16px;background:#fff;box-shadow:0 0 0 1px rgba(214,180,106,.10),0 0 18px rgba(214,180,106,.20);font-family:"Montserrat",Arial,sans-serif}
+.marketplace-ad-modal{position:relative;width:min(650px,100%);max-height:min(88vh,780px);overflow:auto;padding:28px;border:1px solid rgba(214,180,106,0.135);border-radius:16px;background:#fff;box-shadow:0 0 0 1px rgba(214,180,106,0.018),0 0 18px rgba(214,180,106,0.036);font-family:"Montserrat",Arial,sans-serif}
 .marketplace-ad-modal-close{position:absolute;top:10px;right:12px;width:34px;height:34px;border:0;background:transparent;color:#6f7b8b;font:400 26px/1 Arial,sans-serif;cursor:pointer}
 .marketplace-ad-modal h2{margin:4px 42px 5px 0;color:#0b182a;font:700 24px/1.2 "Montserrat",Arial,sans-serif;letter-spacing:-.02em}
 .marketplace-ad-modal-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px;padding:15px;border:1px solid #e7ebf0;border-radius:10px;background:#fbfcfd}

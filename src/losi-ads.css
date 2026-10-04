@@ -76,7 +76,7 @@
   padding:26px;
 }
 .losi-ads-choice-card{
-  box-shadow:0 0 0 1px rgba(214,180,106,.12),0 0 9px rgba(214,180,106,.20);
+  box-shadow:0 0 0 1px rgba(214,180,106,0.022),0 0 9px rgba(214,180,106,0.036);
 }
 .losi-ads-choice-card h2,.losi-ads-form-card h2,.losi-ads-my-ads h2{
   margin:7px 0 6px;
@@ -250,10 +250,10 @@
   overflow:auto;
   box-sizing:border-box;
   padding:26px;
-  border:1px solid rgba(214,180,106,.72);
+  border:1px solid rgba(214,180,106,0.13);
   border-radius:18px;
   background:#fff;
-  box-shadow:0 0 0 1px rgba(214,180,106,.12),0 0 18px rgba(214,180,106,.22);
+  box-shadow:0 0 0 1px rgba(214,180,106,0.022),0 0 18px rgba(214,180,106,0.04);
 }
 .losi-ads-modal-topline{
   display:flex;
@@ -563,10 +563,10 @@
   overflow:auto;
   padding:26px;
   box-sizing:border-box;
-  border:1px solid rgba(214,180,106,.72);
+  border:1px solid rgba(214,180,106,0.13);
   border-radius:18px;
   background:#fff;
-  box-shadow:0 0 0 1px rgba(214,180,106,.12),0 0 18px rgba(214,180,106,.22);
+  box-shadow:0 0 0 1px rgba(214,180,106,0.022),0 0 18px rgba(214,180,106,0.04);
 }
 .losi-ads-applications-list{
   display:grid;
