@@ -12,7 +12,7 @@ Deno.serve(async r=>{
   if(!event)return j({error:"Esta oportunidade não está disponível."},404);
 
   if(b.action==="get"){
-   const {data:openings}=await a.from("team_event_openings").select("id,title,slots,advertised_value").eq("event_id",event.id).order("created_at");
+   const {data:openings}=await a.from("team_event_openings").select("id,title,slots").eq("event_id",event.id).order("created_at");
    return j({event,openings:openings||[]});
   }
 
