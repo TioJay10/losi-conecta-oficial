@@ -13,6 +13,7 @@ import "../panel-header-contrast.css";
 import "../feed-modal-comments.css";
 import "../feed-background.css";
 import "../presentation.css";
+import "../supplier-mobile.css";
 import { OnlinePresenceProvider } from "../components/OnlinePresence";
 
 export const Route = createRootRoute({

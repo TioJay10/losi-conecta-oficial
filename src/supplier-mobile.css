@@ -1,0 +1,191 @@
+/* Ajustes do painel do fornecedor. Os documentos gerados mantêm sua tipografia. */
+@media screen and (max-width:768px) {
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page) {
+    font-size:14px;
+    line-height:1.5;
+  }
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page) :is(section,article,form,label) {
+    min-width:0;
+    box-sizing:border-box;
+  }
+  body :is(.dashboard-main,.dashboard-content,.profile-content,.quotes-content,.receipts-content,.proposals-content,.losi-ads-content) {
+    min-width:0!important;
+    box-sizing:border-box;
+  }
+  body .dashboard-page .dashboard-main {padding-left:0!important;padding-right:0!important}
+  body .dashboard-page .dashboard-content {
+    width:calc(100% - 24px)!important;
+    padding:22px 0 36px!important;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  body :is(.personal-profile-page,.business-services-page) .profile-content {
+    width:calc(100% - 24px)!important;
+    padding:24px 0 36px!important;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  body .quotes-page .quotes-content {width:calc(100% - 24px);padding:24px 0 36px}
+
+  /* Títulos da interface; prévias de propostas e recibos têm estilos próprios. */
+  body .dashboard-page :is(.dashboard-content>h1,.proposals-hero h1,.receipts-hero h1,.losi-ads-section-copy h1),
+  body :is(.personal-profile-page,.business-services-page) :is(.personal-profile-heading h1,.business-services-heading h1),
+  body .quotes-page .quotes-content h1,
+  body .inconsistency-page .inconsistency-card-header h1 {
+    font-size:clamp(23px,6vw,28px)!important;
+    line-height:1.2!important;
+    letter-spacing:-.02em!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:break-word;
+  }
+  body .dashboard-page .dashboard-content h2:not(.proposal-document-preview h2):not(.receipt-paper h2),
+  body .dashboard-page :is(.dashboard-status-title,.dashboard-onboarding-title,.dashboard-commercial h2,.dashboard-pending-invoices h2,.dashboard-saved-card h2,.receipts-card-head h2,.proposals-card-head h2,.proposals-preview-head h2,.losi-ads-section-copy h2,.losi-ads-form-heading h2,.losi-ads-my-ads-header h2,.losi-ads-my-applications-header h2),
+  body :is(.personal-profile-page,.business-services-page) :is(.personal-profile-card h2,.business-services-card h2,.business-section-title),
+  body .quotes-page :is(.quotes-dashboard-head h2,.proposal-builder-head h2,.proposal-recipient-head h2),
+  body .inconsistency-page :is(.inconsistency-history-header h2,.inconsistency-chat-header h2,.inconsistency-card-header h2) {
+    font-size:19px!important;
+    line-height:1.3!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:break-word;
+  }
+  body .dashboard-page .dashboard-content h3:not(.proposal-document-preview h3):not(.receipt-paper h3),
+  body .dashboard-page :is(.dashboard-plan-card h3,.dashboard-saved-provider-card h3,.receipts-form-card h3,.proposals-group-card h3,.losi-ads-choice-card h3,.losi-ads-own-card h3,.losi-ads-package-grid h3),
+  body .business-services-page .business-service-title,
+  body .quotes-page :is(.quotes-dashboard-list-item h3,.quote-modal-card h3,.proposal-items-title) {
+    font-size:16px!important;
+    line-height:1.35!important;
+    overflow-wrap:break-word;
+  }
+  body .dashboard-page :is(.dashboard-text,.dashboard-onboarding-text,.dashboard-plan-card p,.dashboard-pending-invoice p,.proposals-hero p,.receipts-hero p,.losi-ads-section-copy p,.losi-ads-form-heading p),
+  body :is(.personal-profile-page,.business-services-page) :is(.profile-page-text,.personal-profile-hint,.business-hint,.business-status-box),
+  body .quotes-page :is(.quotes-intro,.quotes-dashboard-list-item p,.quote-modal-card p),
+  body .inconsistency-page :is(.inconsistency-card-header p,.inconsistency-message p) {
+    font-size:13px!important;
+    line-height:1.55!important;
+    overflow-wrap:break-word;
+  }
+  body :is(.personal-profile-page,.business-services-page) :is(.personal-profile-label,.profile-form-grid label),
+  body .dashboard-page :is(.receipts-form-grid label,.proposals-field-label,.proposals-form-grid label>span,.losi-ads-form-grid label),
+  body .quotes-page :is(.proposal-form-grid label,.proposal-recipient-grid label),
+  body .inconsistency-page .inconsistency-field {
+    font-size:12px!important;
+    line-height:1.4!important;
+  }
+
+  /* Campos a 16 px para leitura e digitação sem zoom automático no iPhone. */
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page)
+    :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=hidden]),select,textarea) {
+    min-width:0!important;
+    max-width:100%;
+    box-sizing:border-box;
+    font-size:16px!important;
+    line-height:1.4;
+    min-height:44px;
+  }
+  body :is(.profile-form-grid,.personal-profile-form-grid,.business-services-form-grid,.receipts-form-grid,.proposals-form-grid,.losi-ads-form-grid,.proposal-form-grid,.proposal-recipient-grid) {
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:14px!important;
+  }
+  body :is(.profile-form-grid,.receipts-form-grid,.proposals-form-grid,.losi-ads-form-grid,.proposal-form-grid,.proposal-recipient-grid)>* {
+    min-width:0;
+    max-width:100%;
+    grid-column:1/-1!important;
+  }
+
+  /* Botões com palavras na horizontal e área adequada para toque. */
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page)
+    :is(.dashboard-primary,.dashboard-secondary,.dashboard-plan-modal-action,.dashboard-sidebar-logout,.personal-profile-primary,.personal-profile-upload,.business-primary,.business-secondary,.business-public-button,.business-delete-button,.business-location-button,.business-small-button,.business-upload-button,.receipts-primary,.receipts-inline-action,.receipts-history-meta button,.proposals-primary,.proposals-secondary,.proposals-preview-fullscreen,.proposal-primary,.quotes-secondary,.quote-delete-button,.quotes-whatsapp,.losi-ads-publish-button,.losi-ads-purchase-button,.losi-ads-remove-button,.losi-ads-invoices-button,.losi-ads-application-actions button,.losi-ads-pending-invoice button,.inconsistency-new-button,.inconsistency-submit) {
+    font-size:12px!important;
+    line-height:1.4!important;
+    letter-spacing:.02em!important;
+    min-height:44px!important;
+    height:auto!important;
+    max-width:100%;
+    padding:10px 12px!important;
+    box-sizing:border-box;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:normal!important;
+    hyphens:none;
+    writing-mode:horizontal-tb;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    text-align:center;
+  }
+  body .dashboard-page .dashboard-nav-item {min-height:48px;white-space:normal;min-width:0}
+  body .dashboard-page .dashboard-nav-item strong {font-size:13px!important;line-height:1.4;word-break:normal}
+  body .dashboard-page .dashboard-nav-item small {font-size:11px!important;line-height:1.4}
+  body .dashboard-page .dashboard-header-context {min-width:0}
+  body .dashboard-page .dashboard-header-context strong {font-size:12px!important;line-height:1.3}
+  body .dashboard-page .dashboard-header-user {min-width:0}
+
+  /* Cabeçalhos e ações podem ocupar novas linhas sem cortar o conteúdo. */
+  body :is(.dashboard-status,.dashboard-onboarding,.dashboard-pending-invoices-header,.receipts-card-head,.proposals-card-head,.proposals-preview-head,.quotes-dashboard-head,.proposal-builder-head,.proposal-recipient-head,.business-services-head,.business-actions,.business-bottom-actions,.business-service-actions,.personal-profile-card-header,.losi-ads-form-heading,.losi-ads-my-ads-header,.losi-ads-my-applications-header,.inconsistency-history-header) {
+    gap:12px;
+    flex-wrap:wrap;
+    min-width:0;
+  }
+  body :is(.dashboard-status,.dashboard-onboarding,.dashboard-pending-invoices-header,.receipts-card-head,.proposals-card-head,.quotes-dashboard-head,.proposal-builder-head,.business-services-head,.personal-profile-card-header,.losi-ads-form-heading)>div:first-child {
+    min-width:0;
+    flex:1 1 180px;
+  }
+  body :is(.dashboard-pending-invoice,.losi-ads-pending-invoice,.receipts-history-list article,.quotes-dashboard-list-item,.quote-modal-card) {
+    flex-wrap:wrap;
+    gap:12px;
+    min-width:0;
+  }
+  body :is(.dashboard-pending-invoice,.losi-ads-pending-invoice)>div:first-child {min-width:0;flex:1 1 180px}
+  body :is(.dashboard-pending-invoice-side,.losi-ads-pending-invoice-actions,.receipts-history-meta,.quote-modal-actions,.proposal-actions,.proposals-actions,.proposals-preview-tools,.business-bottom-actions,.losi-ads-application-actions) {
+    flex-wrap:wrap;
+    gap:10px;
+    min-width:0;
+    max-width:100%;
+  }
+  body :is(.dashboard-plan-card,.dashboard-saved-card,.personal-profile-card,.business-services-card,.quotes-dashboard,.receipts-form-card,.receipts-preview-card,.receipts-history-card,.proposals-form-card,.losi-ads-form-card) {
+    padding:18px 16px!important;
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+  body :is(.personal-profile-readonly,.personal-profile-photo-copy,.dashboard-saved-provider-card>div,.losi-ads-own-card-top>div,.losi-ads-application-main) {min-width:0;overflow-wrap:break-word}
+  body .business-services-page .onboarding-steps {gap:8px}
+}
+@media screen and (max-width:600px) {
+  body :is(.dashboard-plan-grid,.dashboard-grid,.dashboard-saved-list,.quotes-dashboard-grid,.proposal-mode-grid,.receipts-mode-grid,.losi-ads-type-grid,.losi-ads-package-grid,.losi-ads-own-grid) {
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:14px!important;
+  }
+  body :is(.business-actions,.business-bottom-actions,.business-service-actions,.proposal-actions,.proposals-actions,.quote-modal-actions,.losi-ads-form-footer,.losi-ads-pending-invoice-actions) {
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+  }
+  body :is(.business-actions,.business-bottom-actions,.business-service-actions,.proposal-actions,.proposals-actions,.quote-modal-actions,.losi-ads-form-footer,.losi-ads-pending-invoice-actions)>:is(button,a) {width:100%;margin:0;box-sizing:border-box}
+  body .dashboard-page :is(.dashboard-status,.dashboard-onboarding)>button {width:100%}
+  body .dashboard-page .dashboard-pending-invoice-side {width:100%;justify-content:space-between}
+  body .business-services-page .business-service-actions {width:100%}
+  body .personal-profile-page .personal-profile-photo-section {flex-direction:column;align-items:flex-start;gap:16px}
+  body .personal-profile-page .personal-profile-upload {width:100%}
+  body .dashboard-page .proposals-preview-head {align-items:flex-start}
+  body .dashboard-page .proposals-preview-tools {width:100%;justify-content:flex-start}
+  body .quotes-page :is(.proposal-recipient-head,.quotes-dashboard-head) {flex-wrap:wrap;gap:10px}
+  body .inconsistency-page .inconsistency-history-header {flex-direction:column;align-items:stretch}
+}
+
+@media screen and (max-width:600px) {
+  body .quotes-page .quotes-dashboard-list-item {flex-direction:column;align-items:stretch;gap:10px;padding:14px}
+  body .quotes-page .quotes-dashboard-list-item :is(strong,span,small) {max-width:100%;white-space:normal;overflow-wrap:break-word}
+  body .quotes-page .quotes-dashboard-list-value {justify-items:start}
+  body .quotes-page .quotes-dashboard-head h2 {font-size:19px!important;line-height:1.3!important}
+  body .quotes-page .quotes-dashboard-head p {font-size:13px!important;line-height:1.55!important}
+  body .quotes-page .quotes-dashboard-filters>label {width:100%;min-width:0}
+  body .quotes-page .quotes-dashboard-filters :is(input,select) {width:100%}
+  body .quotes-page .quotes-dashboard-card {padding:16px}
+  body .quotes-page .quotes-dashboard-card strong {font-size:28px}
+  body .quotes-page .quotes-dashboard-card span {font-size:12px}
+}
