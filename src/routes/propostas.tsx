@@ -731,15 +731,18 @@ function ProposalsPage() {
         <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
         <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
         <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
-          <Link to="/painel" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">01</span><span><strong>Visão geral</strong><small>Resumo da conta</small></span></Link>
+          <Link to="/painel" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">01</span><span><strong>Visão Geral</strong><small>Resumo da conta</small></span></Link>
           <Link to="/buscar" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span></Link>
           <Link to="/meu-perfil" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span></Link>
           <Link to="/meus-servicos" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span></Link>
-          <Link to="/notificar-inconsistencia" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">05</span><span><strong>Notificar Inconsistências</strong><small>Falar com o administrador</small></span></Link>
+          <Link to="/notificar-inconsistencia" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">05</span><span><strong>Notificar inconsistência</strong><small>Falar com o administrador</small></span></Link>
+          <div className="dashboard-nav-divider"><span>Operacional</span></div>
           <Link to="/orcamentos" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">06</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></Link>
           <Link to="/recibos" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">07</span><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></Link>
           <Link to="/propostas" className="dashboard-nav-item active" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">08</span><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></Link>
-        </nav>
+                  <Link to="/losi-ads" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">09</span><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></Link>
+          <Link to="/equipe-escalas" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><span className="dashboard-nav-mark">10</span><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></Link>
+</nav>
         <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><button type="button" className="dashboard-sidebar-logout" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/entrar" }); }}>Sair da conta</button></div>
       </aside>
 

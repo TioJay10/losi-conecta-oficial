@@ -411,16 +411,18 @@ function LosiAdsPage() {
         <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
         <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
         <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
-          <a className="dashboard-nav-item" href="/painel"><span className="dashboard-nav-mark">01</span><span><strong>Visão geral</strong><small>Resumo da conta</small></span></a>
+          <a className="dashboard-nav-item" href="/painel"><span className="dashboard-nav-mark">01</span><span><strong>Visão Geral</strong><small>Resumo da conta</small></span></a>
           <a className="dashboard-nav-item" href="/buscar"><span className="dashboard-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span></a>
           <a className="dashboard-nav-item" href="/meu-perfil"><span className="dashboard-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span></a>
           <a className="dashboard-nav-item" href="/meus-servicos"><span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span></a>
-          <a className="dashboard-nav-item" href="/notificar-inconsistencia"><span className="dashboard-nav-mark">05</span><span><strong>Notificar Inconsistências</strong><small>Falar com o administrador</small></span></a>
+          <a className="dashboard-nav-item" href="/notificar-inconsistencia"><span className="dashboard-nav-mark">05</span><span><strong>Notificar inconsistência</strong><small>Falar com o administrador</small></span></a>
+          <div className="dashboard-nav-divider"><span>Operacional</span></div>
           <a className="dashboard-nav-item" href="/orcamentos"><span className="dashboard-nav-mark">06</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></a>
           <a className="dashboard-nav-item" href="/recibos"><span className="dashboard-nav-mark">07</span><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></a>
           <a className="dashboard-nav-item" href="/propostas"><span className="dashboard-nav-mark">08</span><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></a>
           <a className="dashboard-nav-item active" href="/losi-ads"><span className="dashboard-nav-mark">09</span><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></a>
-        </nav>
+                  <a className="dashboard-nav-item" href="/equipe-escalas"><span className="dashboard-nav-mark">10</span><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></a>
+</nav>
         <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><button type="button" className="dashboard-sidebar-logout" onClick={() => void logout()}>Sair da conta</button></div>
       </aside>
 

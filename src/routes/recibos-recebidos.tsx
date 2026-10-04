@@ -55,15 +55,18 @@ function ReceivedReceiptsPage(){
       <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
       <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
       <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
-        <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/painel"})}}><span className="dashboard-nav-mark">01</span><span><strong>Visão geral</strong><small>Resumo da conta</small></span></button>
+        <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/painel"})}}><span className="dashboard-nav-mark">01</span><span><strong>Visão Geral</strong><small>Resumo da conta</small></span></button>
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/buscar"})}}><span className="dashboard-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span></button>
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/meu-perfil"})}}><span className="dashboard-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span></button>
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/meus-servicos"})}}><span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span></button>
-        <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/notificar-inconsistencia"})}}><span className="dashboard-nav-mark">05</span><span><strong>Notificar Inconsistências</strong><small>Falar com o administrador</small></span></button>
+        <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/notificar-inconsistencia"})}}><span className="dashboard-nav-mark">05</span><span><strong>Notificar inconsistência</strong><small>Falar com o administrador</small></span></button>
+        <div className="dashboard-nav-divider"><span>Operacional</span></div>
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/orcamentos"})}}><span className="dashboard-nav-mark">06</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></button>
         <button type="button" className="dashboard-nav-item active" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/recibos"})}}><span className="dashboard-nav-mark">07</span><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></button>
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/propostas"})}}><span className="dashboard-nav-mark">08</span><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></button>
-      </nav>
+              <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/losi-ads"})}}><span className="dashboard-nav-mark">09</span><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></button>
+        <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/equipe-escalas"})}}><span className="dashboard-nav-mark">10</span><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></button>
+</nav>
       <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><button className="dashboard-sidebar-logout" onClick={logout}>Sair da conta</button></div>
     </aside>
     <div className="dashboard-main">
