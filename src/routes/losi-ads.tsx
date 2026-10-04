@@ -186,14 +186,17 @@ function LosiAdsPage() {
   async function loadPendingInvoices() {
     if (!supabase) return;
     setPendingInvoicesLoading(true);
+    setPendingInvoicesMessage("");
+    setPendingInvoices([]);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
-      if (!accessToken) return;
-      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-manage-pending-subscription", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: JSON.stringify({ action: "invoices" }) });
-      const result = await response.json();
-      if (response.ok && result?.success) setPendingInvoices(Array.isArray(result.invoices) ? result.invoices : []);
-    } catch (error) { console.error("Erro ao carregar faturas pendentes:", error); }
+      if (!accessToken) throw new Error("Sua sessão expirou. Entre novamente para continuar.");
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/asaas-manage-pending-subscription", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: JSON.stringify({ action: "ads_invoices" }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.success) throw new Error(result?.error || "Não foi possível carregar as faturas.");
+      setPendingInvoices(Array.isArray(result.invoices) ? result.invoices : []);
+    } catch (error) { setPendingInvoicesMessage(error instanceof Error ? error.message : "Não foi possível carregar as faturas."); }
     finally { setPendingInvoicesLoading(false); }
   }
 
@@ -456,7 +459,7 @@ function LosiAdsPage() {
                     <div>
                       <div className="losi-ads-section-label">COBRANÇAS</div>
                       <h2 id="losi-ads-invoices-title">Faturas pendentes</h2>
-                      <p>Acesse suas cobranças em aberto e conclua o pagamento pelo Asaas.</p>
+                      <p>Consulte, pague ou cancele suas faturas de créditos ADS pelo Asaas.</p>
                     </div>
                     <button type="button" className="losi-ads-modal-close" aria-label="Fechar faturas pendentes" onClick={() => setPendingInvoicesOpen(false)}>×</button>
                   </div>
@@ -488,6 +491,8 @@ function LosiAdsPage() {
                           </div>
                         </article>
                       ))
+                    ) : pendingInvoicesMessage ? (
+                      <button type="button" className="losi-ads-invoices-button" onClick={() => void loadPendingInvoices()}>Atualizar faturas</button>
                     ) : (
                       <p className="losi-ads-invoices-empty">Você não possui faturas pendentes no momento.</p>
                     )}
