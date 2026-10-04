@@ -3,6 +3,7 @@ import { FormEvent, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { formatTaxDocument, isValidTaxDocument, normalizeTaxDocument } from "../lib/tax-document";
 
 type Category = { id: string; name: string };
 type Service = {
@@ -48,6 +49,8 @@ function BusinessServicesPage() {
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [taxDocument, setTaxDocument] = useState("");
+  const [taxDocumentLoaded, setTaxDocumentLoaded] = useState(true);
   const [uploading, setUploading] = useState<"logo" | "cover" | "portfolio" | null>(null);
   const [cepLoading, setCepLoading] = useState(false);
   const [coordinates, setCoordinates] = useState<{ latitude: number | null; longitude: number | null }>({
@@ -160,6 +163,16 @@ function BusinessServicesPage() {
         setShowAvailability(Boolean((loaded as Business & { show_availability?: boolean }).show_availability));
         await loadAvailability(loaded.id, mounted);
         await loadServices(loaded.id, mounted);
+        const { data: fiscal, error: fiscalError } = await supabase.from("business_fiscal_details").select("document").eq("business_id", loaded.id).maybeSingle();
+        if (mounted) {
+          setTaxDocumentLoaded(!fiscalError);
+          if (fiscalError) {
+            setMessageType("error");
+            setMessage("Não foi possível carregar o CPF/CNPJ. Recarregue a página para tentar novamente.");
+          } else {
+            setTaxDocument(formatTaxDocument(fiscal?.document ?? ""));
+          }
+        }
       }
 
       setLoading(false);
@@ -406,6 +419,18 @@ async function lookupViaCep(cep: string) {
       return;
     }
 
+    if (!taxDocumentLoaded) {
+      setMessageType("error");
+      setMessage("Recarregue a página para carregar o CPF/CNPJ antes de salvar.");
+      return;
+    }
+    const normalizedDocument = normalizeTaxDocument(taxDocument);
+    if (normalizedDocument && !isValidTaxDocument(normalizedDocument)) {
+      setMessageType("error");
+      setMessage("Informe um CPF ou CNPJ válido.");
+      return;
+    }
+
     const normalizedCep = form.cep.replace(/\D/g, "");
     if (normalizedCep.length !== 8) {
       setMessageType("error");
@@ -508,6 +533,17 @@ async function lookupViaCep(cep: string) {
       latitude: savedBusiness.latitude ?? null,
       longitude: savedBusiness.longitude ?? null,
     });
+
+    const { error: fiscalError } = await supabase.from("business_fiscal_details").upsert({
+      business_id: savedBusiness.id,
+      document: normalizedDocument || null,
+    }, { onConflict: "business_id" });
+    if (fiscalError) {
+      setMessageType("error");
+      setMessage("Os dados da empresa foram salvos, mas o CPF/CNPJ não foi salvo. Tente salvar novamente.");
+      setSaving(false);
+      return;
+    }
 
     await loadServices(savedBusiness.id);
     setMessageType("success");
@@ -679,6 +715,11 @@ async function lookupViaCep(cep: string) {
           <h2>Informações da empresa</h2>
           <div className="profile-form-grid business-services-form-grid">
             <Field label="Nome comercial *" value={form.business_name} onChange={(v) => update("business_name", v)} />
+            <div>
+              <label htmlFor="business-tax-document" className="business-field-label">CPF/CNPJ</label>
+              <input id="business-tax-document" className="business-field-input" value={taxDocument} onChange={(e) => setTaxDocument(formatTaxDocument(e.target.value))} placeholder="CPF ou CNPJ" maxLength={18} autoCapitalize="characters" spellCheck={false} disabled={!taxDocumentLoaded} />
+              <p className="business-hint">CPF para profissional autônomo ou CNPJ da empresa.</p>
+            </div>
             <Field label="WhatsApp" value={form.whatsapp} onChange={(v) => update("whatsapp", v)} />
             <Field label="Telefone comercial" value={form.phone} onChange={(v) => update("phone", v)} />
             <Field label="Instagram" value={form.instagram} onChange={(v) => update("instagram", v)} />
