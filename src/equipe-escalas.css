@@ -53,3 +53,5 @@
 .team-individual-value small{color:#475569;font-size:12px;line-height:1.5}
 .team-replacement-overlay input{box-sizing:border-box;width:100%;min-height:44px;padding:11px;border:1px solid #d8dde5;border-radius:10px;background:#fff;font:inherit}
 .team-replacement-overlay label{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+
+.team-opening-manager{scroll-margin-top:24px}.team-opening-manager:focus-visible,.team-events article:focus-visible,.team-event-history article:focus-visible{outline:2px solid #a8d62a;outline-offset:4px}.team-event-link{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:20px 0}.team-event-link label{display:grid;gap:8px;flex:1 1 240px;min-width:0}.team-event-link input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dbe1e8;border-radius:10px;font:inherit}.team-event-link small{flex-basis:100%;color:#64748b}
