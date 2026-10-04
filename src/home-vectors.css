@@ -1,14 +1,28 @@
-/* Vetores dos três passos da página inicial. */
+/* Ilustrações transparentes integradas à superfície de cada card. */
 .home-apple-inspired .home-feature-card .home-feature-vector {
-  background:#f5f3ed!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
 }
 .home-apple-inspired .home-feature-card .home-feature-vector img {
   object-fit:contain!important;
   object-position:center!important;
+  border-radius:0!important;
   filter:none!important;
   padding:8px 12px;
   box-sizing:border-box;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 72%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 72%,transparent 100%);
+  animation:home-vector-reveal 650ms cubic-bezier(.16,1,.3,1) both;
 }
-.home-apple-inspired .home-feature-card:hover .home-feature-vector img {
-  transform:none!important;
+.home-apple-inspired .home-feature-card:nth-child(2) .home-feature-vector img {animation-delay:80ms}
+.home-apple-inspired .home-feature-card:nth-child(3) .home-feature-vector img {animation-delay:160ms}
+.home-apple-inspired .home-feature-card:hover .home-feature-vector img {transform:none!important}
+@keyframes home-vector-reveal {
+  from {opacity:0;transform:translateY(8px)}
+  to {opacity:1;transform:translateY(0)}
+}
+@media (prefers-reduced-motion:reduce) {
+  .home-apple-inspired .home-feature-card .home-feature-vector img {animation:none}
 }
