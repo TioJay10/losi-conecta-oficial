@@ -100,6 +100,11 @@
     overflow-wrap: break-word;
     text-wrap: balance;
   }
+  body .inconsistency-page[class] .inconsistency-card-header h1 {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+
   body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class] :is(
     .dashboard-status-title,.dashboard-onboarding-title,.dashboard-commercial h2,
     .dashboard-plan-card h3,.dashboard-saved h2,.dashboard-pending-invoices h2,
