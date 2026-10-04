@@ -8,8 +8,11 @@ Deno.serve(async r=>{
   const {createClient}=await import("https://esm.sh/@supabase/supabase-js@2");
   const a=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const b=await r.json(),token=String(b.token||"").trim();
-  const {data:event}=await a.from("team_events").select("id,title,description,event_date,starts_at,ends_at,location_name,address,city,state,status,business_id,business_profiles(business_name)").eq("public_token",token).eq("status","open").maybeSingle();
-  if(!event)return j({error:"Esta oportunidade não está disponível."},404);
+  const {data:event,error:eventError}=await a.from("team_events").select("id,title,description,event_date,starts_at,ends_at,location_name,address,city,state,status,business_id,business_profiles(business_name)").eq("public_token",token).maybeSingle();
+  if(eventError){console.error("Opportunity lookup failed",eventError.code);return j({error:"Não foi possível carregar a oportunidade. Tente novamente em instantes."},500)}
+  if(!event)return j({error:"O link desta oportunidade não foi encontrado ou o evento foi excluído."},404);
+  if(event.status==="draft")return j({error:"Esta oportunidade ainda não foi publicada. Peça ao fornecedor para publicar o evento e enviar o link novamente."},404);
+  if(event.status!=="open")return j({error:"Esta oportunidade foi encerrada e não recebe novas candidaturas."},404);
 
   if(b.action==="get"){
    const {data:openings}=await a.from("team_event_openings").select("id,title,slots").eq("event_id",event.id).order("created_at");

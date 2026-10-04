@@ -14,3 +14,9 @@ const invalid=await calendar({token:'unknown',profile_id:'alice'});assert.equal(
 const opportunity=handler('team-public-opportunity');const publicData=await opportunity({token:'public-event',action:'get'});assert.equal(publicData.status,200);assert.equal(JSON.stringify(publicData.data).includes('advertised_value'),false);assert.equal(JSON.stringify(publicData.data).includes('agreed_value'),false);
 assert.ok(selections.filter(x=>x.table==='team_event_openings').every(x=>!x.columns.includes('advertised_value')));
 console.log('Privacidade OK: cada calendário retorna apenas a própria diária, IDs adulterados não mudam o titular, token inválido é rejeitado e oportunidades não expõem valores.');
+
+tables.team_events.push({id:'draft',public_token:'draft-token',status:'draft'},{id:'ended',public_token:'ended-token',status:'completed'});
+const draft=await opportunity({token:'draft-token',action:'get'});assert.equal(draft.status,404);assert.match(draft.data.error,/ainda não foi publicada/);assert.equal(draft.data.event,undefined);
+const ended=await opportunity({token:'ended-token',action:'get'});assert.equal(ended.status,404);assert.match(ended.data.error,/encerrada/);
+const missing=await opportunity({token:'missing',action:'get'});assert.equal(missing.status,404);assert.match(missing.data.error,/não foi encontrado/);
+console.log('Links OK: publicada acessível, rascunho bloqueado, encerrada bloqueada e link inexistente identificado.');
