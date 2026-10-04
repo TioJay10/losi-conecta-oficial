@@ -1,3 +1,4 @@
+import "../home-vectors.css";
 import { Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
@@ -114,8 +115,8 @@ export function HomePage({
 
       <section id="como-funciona" className="home-feature-grid">
         <article className="home-feature-card home-feature-card-dark">
-          <div className="home-feature-image">
-            <img src="https://images.unsplash.com/photo-1530023367847-a683933f4172?auto=format&fit=crop&fm=jpg&q=85&w=1600" alt="Mesa preparada para um evento" loading="lazy" decoding="async" />
+          <div className="home-feature-image home-feature-vector">
+            <img src="/home-find.svg" alt="Ilustração vetorial de busca por serviços para eventos" loading="lazy" decoding="async" width="640" height="340" />
           </div>
           <span>01 — ENCONTRE</span>
           <h2>Pesquise pelo que seu evento precisa.</h2>
@@ -123,8 +124,8 @@ export function HomePage({
         </article>
 
         <article className="home-feature-card home-feature-card-light">
-          <div className="home-feature-image">
-            <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&fm=jpg&q=85&w=1600" alt="Profissional apresentando uma reunião para uma equipe" loading="lazy" decoding="async" />
+          <div className="home-feature-image home-feature-vector">
+            <img src="/home-profile.svg" alt="Ilustração vetorial de um perfil profissional e seus serviços" loading="lazy" decoding="async" width="640" height="340" />
           </div>
           <span>02 — CONHEÇA</span>
           <h2>Veja quem está por trás do serviço.</h2>
@@ -132,8 +133,8 @@ export function HomePage({
         </article>
 
         <article className="home-feature-card home-feature-card-gold">
-          <div className="home-feature-image">
-            <img src="https://plus.unsplash.com/premium_photo-1723867236011-6099f308dab0?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Profissional usando o celular para se comunicar com um fornecedor" loading="lazy" decoding="async" />
+          <div className="home-feature-image home-feature-vector">
+            <img src="/home-conversation.svg" alt="Ilustração vetorial de uma conversa direta entre cliente e fornecedor" loading="lazy" decoding="async" width="640" height="340" />
           </div>
           <span>03 — CONECTE</span>
           <h2>Converse diretamente com o fornecedor.</h2>

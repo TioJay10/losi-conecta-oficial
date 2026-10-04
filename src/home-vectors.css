@@ -1,0 +1,14 @@
+/* Vetores dos três passos da página inicial. */
+.home-apple-inspired .home-feature-card .home-feature-vector {
+  background:#f5f3ed!important;
+}
+.home-apple-inspired .home-feature-card .home-feature-vector img {
+  object-fit:contain!important;
+  object-position:center!important;
+  filter:none!important;
+  padding:8px 12px;
+  box-sizing:border-box;
+}
+.home-apple-inspired .home-feature-card:hover .home-feature-vector img {
+  transform:none!important;
+}
