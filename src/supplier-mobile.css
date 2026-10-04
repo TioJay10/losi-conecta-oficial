@@ -211,3 +211,59 @@
   background:rgba(214,180,106,.35);
 }
 .dashboard-page .dashboard-nav-divider>span {white-space:nowrap}
+
+/* Cabeçalhos compactos: Meu perfil, Recibos e perfil público, somente mobile. */
+@media screen and (max-width:768px) {
+  body .personal-profile-page .personal-profile-header .profile-back,
+  body .receipts-page .dashboard-header .receipts-back,
+  body .provider-page .catalog-header .provider-search-button {
+    min-width:0!important;
+    width:auto!important;
+    max-width:100px!important;
+    min-height:40px!important;
+    height:auto!important;
+    padding:6px 8px!important;
+    font-size:10.5px!important;
+    line-height:1.3!important;
+    letter-spacing:0!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:normal!important;
+    box-sizing:border-box;
+    flex:0 0 auto!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center;
+  }
+  body .personal-profile-page .personal-profile-header {
+    column-gap:14px!important;
+    flex-wrap:nowrap!important;
+  }
+  body .receipts-page .dashboard-header .dashboard-header-right {
+    width:auto!important;
+    min-width:0!important;
+    flex:0 0 auto!important;
+    margin-left:auto!important;
+    padding-left:10px;
+  }
+  body .provider-page .catalog-header .provider-search-button {
+    width:96px!important;
+    max-width:96px!important;
+    margin-left:auto!important;
+  }
+}
+@media screen and (max-width:360px) {
+  body .personal-profile-page .personal-profile-header .profile-back,
+  body .receipts-page .dashboard-header .receipts-back {
+    max-width:78px!important;
+    font-size:10px!important;
+    padding-inline:6px!important;
+  }
+  body .provider-page .catalog-header .provider-search-button {
+    width:80px!important;
+    max-width:80px!important;
+    font-size:10px!important;
+    padding-inline:6px!important;
+  }
+}
