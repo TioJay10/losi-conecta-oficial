@@ -1,11 +1,39 @@
-/* Ilustrações transparentes integradas à superfície de cada card. */
+/* Cards brancos com película sobre os vetores e transição suave para o texto. */
+.home-apple-inspired .home-feature-grid>.home-feature-card {
+  --feature-inset:32px;
+  min-width:0!important;
+  background:#fff!important;
+  color:#0b182a!important;
+  border:1px solid #e1e1e3;
+  padding:var(--feature-inset)!important;
+  overflow:hidden;
+}
+.home-apple-inspired .home-feature-grid>.home-feature-card h2 {color:#0b182a!important}
+.home-apple-inspired .home-feature-grid>.home-feature-card p {color:#536174!important}
+.home-apple-inspired .home-feature-grid>.home-feature-card>span {color:#80602a!important}
 .home-apple-inspired .home-feature-card .home-feature-vector {
-  background:transparent!important;
+  position:relative;
+  isolation:isolate;
+  width:calc(100% + var(--feature-inset)*2)!important;
+  max-width:calc(100% + var(--feature-inset)*2);
+  height:auto!important;
+  aspect-ratio:32/17;
+  max-height:260px;
+  margin:calc(var(--feature-inset)*-1) calc(var(--feature-inset)*-1) 24px!important;
+  flex:0 0 auto;
+  background:#fff!important;
   border:0!important;
   border-radius:0!important;
   box-shadow:none!important;
+  overflow:hidden;
 }
 .home-apple-inspired .home-feature-card .home-feature-vector img {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  width:100%!important;
+  height:100%!important;
+  display:block;
   object-fit:contain!important;
   object-position:center!important;
   border-radius:0!important;
@@ -16,12 +44,29 @@
   mask-image:linear-gradient(to bottom,#000 0%,#000 72%,transparent 100%);
   animation:home-vector-reveal 650ms cubic-bezier(.16,1,.3,1) both;
 }
+.home-apple-inspired .home-feature-card .home-feature-vector::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  border-radius:0;
+  background:linear-gradient(to bottom,rgba(11,24,42,.58) 0%,rgba(11,24,42,.48) 58%,rgba(11,24,42,0) 100%);
+}
 .home-apple-inspired .home-feature-card:nth-child(2) .home-feature-vector img {animation-delay:80ms}
 .home-apple-inspired .home-feature-card:nth-child(3) .home-feature-vector img {animation-delay:160ms}
 .home-apple-inspired .home-feature-card:hover .home-feature-vector img {transform:none!important}
 @keyframes home-vector-reveal {
   from {opacity:0;transform:translateY(8px)}
   to {opacity:1;transform:translateY(0)}
+}
+@media (max-width:800px) {
+  .home-apple-inspired .home-feature-grid>.home-feature-card {--feature-inset:26px}
+  .home-apple-inspired .home-feature-card .home-feature-vector {max-height:240px}
+}
+@media (max-width:430px) {
+  .home-apple-inspired .home-feature-grid>.home-feature-card {--feature-inset:20px}
+  .home-apple-inspired .home-feature-card .home-feature-vector {margin-bottom:18px!important;max-height:210px}
 }
 @media (prefers-reduced-motion:reduce) {
   .home-apple-inspired .home-feature-card .home-feature-vector img {animation:none}
