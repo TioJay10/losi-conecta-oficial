@@ -225,3 +225,38 @@
 .team-page .scale-members>div>div{min-width:140px}
 .team-page .team-candidate-filters button{font-family:inherit;font-size:13px;font-weight:600;line-height:1.4}
 .team-page .team-opening-list article>b small{display:block;font-size:11px;font-weight:400;color:#475569;margin:0 0 4px}
+
+/* Network tree: the company is the root, every contact is a direct connection. */
+.team-network-flow{margin-top:28px;min-width:0;--network-line:#b9a16c}
+.team-network-root{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;max-width:340px;width:100%;margin:auto;padding:20px 24px;border-radius:4px;background:#071a33;color:#fff;text-align:center}
+.team-network-root strong{font-size:17px;line-height:1.4;overflow-wrap:break-word}
+.team-network-root small{font-size:12px;line-height:1.5;color:#e0c58a}
+.team-network-stem{width:1px;height:30px;margin:auto;background:var(--network-line)}
+.team-network-tree{position:relative;padding-top:22px;border-left:1px solid var(--network-line)}
+.team-network-tree::before{content:"";position:absolute;top:0;left:0;width:50%;border-top:1px solid var(--network-line)}
+.team-network-row{position:relative;display:grid;gap:22px;padding-left:26px;margin-bottom:22px;align-items:stretch}
+.team-network-row:last-child{margin-bottom:0}
+.team-network-row::before{content:"";position:absolute;top:50%;left:0;right:0;border-top:1px solid var(--network-line)}
+.team-network-row:last-child::after{content:"";position:absolute;top:50%;bottom:0;left:-1px;width:1px;background:#fff}
+.team-page .team-network-person{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0;width:100%;box-sizing:border-box;padding:18px;border:1px solid #dce2e9;border-radius:4px;background:#fff;color:#071a33;font-family:inherit;text-align:left;cursor:pointer}
+.team-network-person:hover{border-color:#9a7b35;background:#fffdf8}
+.team-network-person:focus-visible{outline:2px solid #145ea8;outline-offset:4px}
+.team-network-avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#f1eadb;color:#755d27;font-size:14px;font-weight:700;margin-bottom:3px}
+.team-network-person strong{font-size:14px;line-height:1.4;overflow-wrap:break-word}
+.team-network-city{font-size:12px;line-height:1.5;color:#475569;overflow-wrap:break-word}
+.team-network-status{font-size:11px;line-height:1.5;color:#226044}
+.team-network-person.is-inactive .team-network-status{color:#5b6472}
+.team-network-open{margin-top:auto;padding-top:10px;font-size:12px;line-height:1.5;font-weight:600;color:#071a33;overflow-wrap:break-word}
+.team-network-flow>.team-empty{margin-top:22px}
+@media(max-width:760px){
+ .team-network-flow{margin-top:22px}
+ .team-network-root{max-width:280px;padding:16px 18px}
+ .team-network-root strong{font-size:15px}
+ .team-network-row{grid-template-columns:minmax(0,1fr)!important;gap:16px;padding-left:22px;margin-bottom:16px}
+ .team-network-row::before,.team-network-row:last-child::after{display:none}
+ .team-page .team-network-person{padding:16px}
+ .team-network-person::before{content:"";position:absolute;top:50%;left:-23px;width:22px;border-top:1px solid var(--network-line)}
+ .team-network-row:last-child .team-network-person:last-child::after{content:"";position:absolute;left:-24px;top:50%;width:1px;height:calc(50% + 1px);background:#fff}
+ .team-network-person strong{font-size:13px}
+ .team-network-open{font-size:11px}
+}

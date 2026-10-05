@@ -165,7 +165,19 @@ function EquipeEscalasPage(){
     <label>UF<input maxLength={2} placeholder="SP" value={manualPerson.state} onChange={e=>setManualPerson({...manualPerson,state:e.target.value.toUpperCase()})}/></label>
     <button className="team-secondary">Adicionar à rede</button>
    </form>}
-   <div className="team-flow"><div className="team-flow-people">{people.length?people.map(p=><article key={p.id} role="button" tabIndex={0} onClick={()=>void openPerson(p)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();void openPerson(p)}}} className={p.network_status!=="active"?"inactive":""}><span>{p.name.slice(0,1).toUpperCase()}</span><strong>{p.name}</strong><small>{p.city||"Cidade não informada"}</small><small>{p.network_status==="active"?"Ativo na rede":p.network_status==="blocked"?"Bloqueado":"Inativo"}</small><small className="team-person-open">Ver cadastro e calendário</small></article>):<div className="team-empty">Ainda não há colaboradores. Adicione uma pessoa ou aprove uma candidatura de um evento.</div>}</div></div>
+   <div className="team-network-flow" aria-label="Fluxograma da rede de colaboradores">
+    <div className="team-network-root"><strong>{businessName||"Sua empresa"}</strong><small>{people.length} {people.length===1?"colaborador na rede":"colaboradores na rede"}</small></div>
+    {people.length?<><div className="team-network-stem" aria-hidden="true"/><div className="team-network-tree">
+     {Array.from({length:Math.ceil(people.length/3)},(_,row)=>people.slice(row*3,row*3+3)).map(row=><div className="team-network-row" key={row[0].id} style={{gridTemplateColumns:`repeat(${row.length}, minmax(0, 1fr))`}}>
+      {row.map(person=><button key={person.id} type="button" className={"team-network-person"+(person.network_status!=="active"?" is-inactive":"")} onClick={()=>void openPerson(person)}>
+       <span className="team-network-avatar" aria-hidden="true">{person.name.slice(0,1).toUpperCase()}</span>
+       <strong>{person.name}</strong><span className="team-network-city">{person.city||"Cidade não informada"}{person.state?` · ${person.state}`:""}</span>
+       <span className="team-network-status">{person.network_status==="active"?"Ativo na rede":person.network_status==="blocked"?"Bloqueado":"Inativo"}</span>
+       <span className="team-network-open">Ver cadastro e calendário</span>
+      </button>)}
+     </div>)}
+    </div></>:<div className="team-empty">Ainda não há colaboradores. Adicione uma pessoa ou aprove uma candidatura de um evento.</div>}
+   </div>
   </section>}
   {selectedPerson&&<div className="team-person-overlay" onClick={()=>setSelectedPerson(null)}><section className="team-person-panel" onClick={e=>e.stopPropagation()}><header><div><span>COLABORADOR DA REDE</span><h2>{selectedPerson.name}</h2><p>{selectedPerson.city||"Cidade não informada"}{selectedPerson.state?` · ${selectedPerson.state}`:""}</p></div><button onClick={()=>setSelectedPerson(null)} aria-label="Fechar">×</button></header>
    <div className="team-person-contact"><div><small>WHATSAPP</small><strong>{selectedPerson.whatsapp}</strong></div><button className="team-secondary" onClick={()=>openWhatsApp(selectedPerson.whatsapp,selectedPerson.name)}>CHAMAR NO WHATSAPP</button></div>
