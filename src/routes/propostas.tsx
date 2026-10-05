@@ -4,6 +4,7 @@ import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
 import "../proposals.css";
 import { LosiAiWorkspace } from "../components/LosiAiWorkspace";
+import { drawGeometricProposalCover, PROPOSAL_GEOMETRIC_BACKGROUND, type ProposalLayout } from "../lib/proposal-layout";
 
 export const Route = createFileRoute("/propostas")({ component: ProposalsPage });
 
@@ -162,7 +163,7 @@ function buildObjective(type: string) {
   return map[type] || map["Proposta personalizada"];
 }
 
-function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; business: Business | null; profile: Profile | null }) {
+function ProposalPdf({ draft, business, profile, layout = "classic", download = true }: { draft: ProposalDraft; business: Business | null; profile: Profile | null; layout?: ProposalLayout; download?: boolean }) {
   const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
   const W = 210;
   const H = 297;
@@ -187,13 +188,14 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   let pageNumber = 1;
 
   const addFooter = () => {
+    const footerMargin = layout === "geometric" && pageNumber === 1 ? 80 : margin;
     doc.setDrawColor(226, 230, 236);
     doc.setLineWidth(0.25);
-    doc.line(margin, footerLineY, W - margin, footerLineY);
+    doc.line(footerMargin, footerLineY, W - margin, footerLineY);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
     doc.setTextColor(...muted);
-    doc.text("LOSI CONECTA  •  DOCUMENTO PROFISSIONAL", margin, footerTextY);
+    doc.text("LOSI CONECTA  •  DOCUMENTO PROFISSIONAL", footerMargin, footerTextY);
     doc.text(String(pageNumber).padStart(2, "0"), W - margin, footerTextY, { align: "right" });
   };
 
@@ -274,6 +276,9 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   // CAPA
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, H, "F");
+  if(layout === "geometric") {
+    drawGeometricProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
+  } else {
   geometric();
   doc.setFillColor(...navy);
   doc.rect(0, 0, 10, H, "F");
@@ -329,6 +334,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
   doc.setFontSize(7.2);
   doc.setTextColor(...muted);
   doc.text(supplierLocation || "Prestador de serviços", 37, 247);
+  }
   addFooter();
 
   // PÁGINA DE APRESENTAÇÃO
@@ -539,6 +545,7 @@ function ProposalPdf({ draft, business, profile }: { draft: ProposalDraft; busin
     creator: supplier,
     keywords: "proposta comercial, apresentação, LOSI CONECTA",
   });
+  if (!download) return doc;
   const filename = `proposta-${(supplier || "empresa").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "empresa"}-${(draft.recipient || "cliente").toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "cliente"}.pdf`;
   const pdfBlob = doc.output("blob");
   const downloadUrl = URL.createObjectURL(pdfBlob);
@@ -556,6 +563,7 @@ function ProposalsPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
+  const [proposalLayout,setProposalLayout] = useState<ProposalLayout>("classic");
   const [customActivity, setCustomActivity] = useState("");
   const previewRef = useRef<HTMLElement | null>(null);
   const [loading, setLoading] = useState(true);
@@ -715,7 +723,7 @@ function ProposalsPage() {
     }
 
     try {
-      ProposalPdf({ draft: preview, business, profile });
+      ProposalPdf({ draft: preview, business, profile, layout: proposalLayout });
       setMessage("Proposta gerada com sucesso. O PDF foi preparado para download.");
     } catch (error) {
       console.error("Erro ao gerar proposta em PDF:", error);
@@ -858,9 +866,10 @@ function ProposalsPage() {
 
             <aside ref={previewRef} className={"proposals-preview-panel" + (previewFullscreen ? " is-fullscreen" : "")}>
               <div className="proposals-preview-head"><div><span className="proposals-kicker">VISUALIZAÇÃO</span><h2>Prévia da proposta</h2></div><div className="proposals-preview-tools"><span className="proposals-preview-status">A4 • PDF</span><button type="button" className="proposals-preview-fullscreen" onClick={() => void togglePreviewFullscreen()}>{previewFullscreen ? "Sair da tela inteira" : "Tela inteira"}</button></div></div>
-              <div className="proposal-document-preview">
+              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option></select></label>
+              <div className={"proposal-document-preview"+(proposalLayout==="geometric"?" proposal-layout-geometric":"")}>
                 <div className="proposal-preview-page proposal-preview-cover">
-                  <div className="proposal-cover-lines"></div>
+                  <div className="proposal-cover-lines" style={proposalLayout==="geometric"?{backgroundImage:`url("${PROPOSAL_GEOMETRIC_BACKGROUND}")`}:undefined}></div>
                   <div className="proposal-cover-brand"><strong>{supplier}</strong><span>PROPOSTA</span></div>
                   <div className="proposal-cover-title"><small>APRESENTAÇÃO DE SERVIÇOS</small><h3>PROPOSTA</h3><h4>COMERCIAL</h4><i></i><strong>{preview.title}</strong><span>APRESENTADA PARA</span><b>{preview.recipient || "Cliente / empresa"}</b></div>
                   <div className="proposal-cover-footer"><span>PREPARADA POR</span><strong>{supplier}</strong><small>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ") || "LOSI Gestão em Lazer"}</small></div>

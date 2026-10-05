@@ -639,3 +639,22 @@
     bottom:18px;
   }
 }
+.proposal-layout-choice{display:grid;gap:8px;margin:14px 0 18px;color:#071a33;font-size:13px;font-weight:600}
+.proposal-layout-choice select{box-sizing:border-box;width:100%;min-width:0;padding:12px;border:1px solid #cdd4de;border-radius:4px;background:#fff;color:#071a33;font:inherit;font-weight:400}
+.proposal-layout-choice select:focus-visible{outline:2px solid #145ea8;outline-offset:3px}
+.proposal-layout-geometric .proposal-preview-cover{aspect-ratio:210/297;min-height:650px;padding:30px 28px}
+.proposal-layout-geometric .proposal-cover-lines{background-size:100% 100%;background-repeat:no-repeat}
+.proposal-layout-geometric .proposal-cover-lines:before,.proposal-layout-geometric .proposal-cover-lines:after{display:none}
+.proposal-layout-geometric .proposal-cover-brand{display:block;margin-left:40%;text-align:right;font-size:15px}
+.proposal-layout-geometric .proposal-cover-brand strong{display:block;max-width:100%;overflow-wrap:anywhere}
+.proposal-layout-geometric .proposal-cover-brand span{display:none}
+.proposal-layout-geometric .proposal-cover-title{margin-left:36%;margin-top:110px}
+.proposal-layout-geometric .proposal-cover-title small{display:none}
+.proposal-layout-geometric .proposal-cover-title h3,.proposal-layout-geometric .proposal-cover-title h4{font-size:26px;letter-spacing:-.02em}
+.proposal-layout-geometric .proposal-cover-title i{height:3px;width:90px}
+.proposal-layout-geometric .proposal-cover-title strong{font-size:17px;line-height:1.4}
+.proposal-layout-geometric .proposal-cover-title span{margin-top:26px}
+.proposal-layout-geometric .proposal-cover-footer{left:42%;right:28px;bottom:38px;background:transparent;padding:0;color:#071a33}
+.proposal-layout-geometric .proposal-cover-footer strong{color:#071a33;overflow-wrap:anywhere}
+.proposal-layout-geometric .proposal-cover-footer small{color:#536174}
+@media(max-width:640px){.proposal-layout-choice select{font-size:16px}.proposal-layout-geometric .proposal-preview-cover{min-height:600px;padding:24px 18px}.proposal-layout-geometric .proposal-cover-brand{font-size:12px}.proposal-layout-geometric .proposal-cover-title{margin-top:90px}.proposal-layout-geometric .proposal-cover-title h3,.proposal-layout-geometric .proposal-cover-title h4{font-size:clamp(19px,5vw,26px)}.proposal-layout-geometric .proposal-cover-title strong{font-size:14px}.proposal-layout-geometric .proposal-cover-footer{right:18px;bottom:32px}}
