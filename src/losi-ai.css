@@ -47,3 +47,16 @@
 .lia-generation-status p{margin:4px 0 0;color:#536174;font-size:12px;line-height:1.6}
 @media(max-width:640px){.lia-generation-status{gap:12px}.lia-generation-image{width:38px;flex-basis:38px}.lia-generation-status strong{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.lia-generation-image{animation:none;transform:none}}
+
+.lia-pdf-history{margin-top:28px;padding-top:18px;border-top:1px solid #dce1e7}
+.lia-pdf-details{min-width:0;overflow-wrap:anywhere}
+.lia-pdf-details strong{display:block;font-size:14px;line-height:1.5}
+.lia-pdf-details small{display:block;margin-top:4px;font-size:12px;line-height:1.5;color:#536174}
+.losi-ai-history-row .lia-pdf-delete{display:inline-flex;align-items:center;justify-content:center;min-width:42px;color:#973332}
+.lia-pdf-viewer{margin-top:22px}
+.lia-pdf-viewer .losi-ai-actions{margin:12px 0}
+.lia-pdf-viewer a{color:#145ea8;font-size:13px;line-height:1.5;padding:10px 0;text-underline-offset:3px}
+.lia-pdf-viewer iframe{display:block;width:100%;height:650px;max-height:75vh;border:1px solid #cdd4de;border-radius:4px;background:#fff}
+.losi-ai-material-editor{scroll-margin-top:100px}
+.losi-ai-field :is(input,textarea):disabled{background:#f7f8fa;color:#536174;cursor:not-allowed}
+@media(max-width:640px){.lia-pdf-history .losi-ai-actions{align-items:center;gap:8px}.lia-pdf-history .lia-pdf-delete{flex:0 0 42px}.lia-pdf-viewer iframe{height:480px}.lia-pdf-details strong{font-size:13px}}

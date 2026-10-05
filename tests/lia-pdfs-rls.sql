@@ -1,0 +1,42 @@
+-- Run on a project with at least two existing Auth users. All fixtures are rolled back.
+begin;
+select set_config('test.owner',(select id::text from auth.users order by id limit 1),true);
+select set_config('request.jwt.claims',json_build_object('sub',current_setting('test.owner'),'role','authenticated')::text,true);
+select set_config('test.other',(select id::text from auth.users where id<>current_setting('test.owner')::uuid limit 1),true);
+set local role authenticated;
+do $$
+declare doc uuid; rejected boolean; n integer; fixture text:=replace(encode(convert_to('%PDF-1.3 fixture content','UTF8'),'base64'),E'\n','');
+begin
+ insert into public.losi_ai_documents(title,content,pdf_base64) values('Temporary test','Original',fixture) returning id into doc;
+ if not exists(select 1 from public.losi_ai_documents where id=doc and edit_count=0 and user_id=auth.uid()) then raise exception 'create failed'; end if;
+ rejected:=false;
+ begin update public.losi_ai_documents set edit_count=0 where id=doc; exception when insufficient_privilege then rejected:=true; end;
+ if not rejected then raise exception 'counter was writable'; end if;
+ rejected:=false;
+ begin insert into public.losi_ai_documents(title,content,pdf_base64,user_id) values('Test','Test',fixture,current_setting('test.other')::uuid); exception when insufficient_privilege then rejected:=true; end;
+ if not rejected then raise exception 'owner was writable'; end if;
+ perform set_config('request.jwt.claims',json_build_object('sub',current_setting('test.other'),'role','authenticated')::text,true);
+ if exists(select 1 from public.losi_ai_documents where id=doc) then raise exception 'cross-user read'; end if;
+ update public.losi_ai_documents set content='Unauthorized' where id=doc;
+ get diagnostics n=row_count;
+ if n<>0 then raise exception 'cross-user edit'; end if;
+ delete from public.losi_ai_documents where id=doc;
+ get diagnostics n=row_count;
+ if n<>0 then raise exception 'cross-user delete'; end if;
+ perform set_config('request.jwt.claims',json_build_object('sub',current_setting('test.owner'),'role','authenticated')::text,true);
+ update public.losi_ai_documents set title='Corrected',content='Correction',pdf_base64=fixture where id=doc and edit_count=0;
+ if not exists(select 1 from public.losi_ai_documents where id=doc and edit_count=1 and content='Correction') then raise exception 'first edit failed'; end if;
+ update public.losi_ai_documents set content='Second correction' where id=doc and edit_count=0;
+ get diagnostics n=row_count;
+ if n<>0 then raise exception 'conditional second edit succeeded'; end if;
+ rejected:=false;
+ begin update public.losi_ai_documents set content='Bypass' where id=doc;
+ exception when raise_exception then if sqlerrm='PDF_EDIT_LIMIT' then rejected:=true; else raise; end if; end;
+ if not rejected then raise exception 'direct second edit succeeded'; end if;
+ delete from public.losi_ai_documents where id=doc;
+ get diagnostics n=row_count;
+ if n<>1 then raise exception 'delete failed'; end if;
+end $$;
+reset role;
+select not has_table_privilege('anon','public.losi_ai_documents','SELECT') as anonymous_denied;
+rollback;

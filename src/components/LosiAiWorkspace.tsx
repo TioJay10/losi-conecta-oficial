@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { jsPDF } from "jspdf";
+import { LosiPdfHistory } from "./LosiPdfHistory";
+import { downloadPdf, LIA_PDF_COLUMNS, materialPdf, type SavedLiaPdf } from "../lib/lia-pdfs";
 import { supabase } from "../lib/supabase";
 import { AI_TONES, callLosiAi, type AiResult, type AiStatus, type AiTone } from "../lib/losi-ai";
 import "../losi-ai.css";
@@ -22,9 +23,15 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
  const [materials,setMaterials]=useState<Material[]>([]);
  const [saving,setSaving]=useState(false);
  const [historyLoading,setHistoryLoading]=useState(false);
+ const [pdfVersion,setPdfVersion]=useState(0);
+ const [activePdf,setActivePdf]=useState<SavedLiaPdf|null>(null);
+ const [editingPdf,setEditingPdf]=useState(false);
+ const pdfSaving=useRef(false);
+ const editor=useRef<HTMLDivElement>(null);
  const generating=useRef(false);
  const mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+ useEffect(()=>{if(editingPdf)editor.current?.querySelector("input")?.focus({preventScroll:true});},[editingPdf,activePdf?.id]);
  async function refresh(){
   setStatusLoading(true);
   try{const data=await callLosiAi({action:"status"});if(mounted.current)setStatus(data);}
@@ -66,7 +73,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
   setResult(null);setMessage("Conteúdo aplicado. Você pode editar antes de gerar o PDF.");
  }
  async function save(){
-  if(saving||!title.trim()||!content.trim())return;
+  if(saving||activePdf||!title.trim()||!content.trim())return;
   setSaving(true);setMessage("");
   try{
    const {data:{session}}=await supabase.auth.getSession();
@@ -85,31 +92,41 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
   if(materialId===material.id){setMaterialId(null);setTitle("");setContent("");}
   await loadMaterials();setMessage("Material excluído.");
  }
- function download(){
+ async function download(){
+  if(pdfSaving.current||busy||saving||!title.trim()||!content.trim())return;
+  if(editingPdf&&!window.confirm("Salvar esta correção? Esta é a única edição permitida para este PDF. Depois de salvar, você poderá visualizar, baixar ou excluir o arquivo."))return;
+  pdfSaving.current=true;setSaving(true);setMessage("");
   try{
-   const doc=new jsPDF({unit:"mm",format:"a4"}),margin=18;
-   let y=42;
-   const addHeader=()=>{doc.setFont("helvetica","bold");doc.setTextColor(7,26,51);doc.setFontSize(10);doc.text(doc.splitTextToSize(company,174).slice(0,2),margin,18);doc.setDrawColor(190,145,48);doc.line(margin,27,192,27);};
-   addHeader();doc.setFontSize(18);
-   const titleLines=doc.splitTextToSize(title,174);
-   doc.text(titleLines,margin,37);y=40+titleLines.length*8;
-   doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(27,38,53);
-   for(const paragraph of content.split("\n")){
-    const lines=doc.splitTextToSize(paragraph.replace(/\t/g,"    "),174);
-    for(const line of lines){
-     if(y>270){doc.addPage();addHeader();doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(27,38,53);y=37;}
-     doc.text(line,margin,y);y+=5.5;
-    }
-    y+=2;
+   if(activePdf&&!editingPdf){
+    const {data,error}=await supabase.from("losi_ai_documents").select("title,pdf_base64").eq("id",activePdf.id).single();
+    if(error||!data)throw new Error("Não foi possível baixar o PDF salvo. Atualize a lista e tente novamente.");
+    downloadPdf(data.pdf_base64,data.title);return;
    }
-   const pages=doc.getNumberOfPages();
-   for(let page=1;page<=pages;page++){doc.setPage(page);doc.setFontSize(8);doc.setTextColor(104,116,132);doc.text("LOSI CONECTA · "+page+" / "+pages,margin,285);}
-   doc.setProperties({title,author:company});
-   doc.save((title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").slice(0,70)||"material")+".pdf");
-   setMessage("PDF gerado. Salve o material para encontrá-lo novamente.");
-  }catch{setMessage("Não foi possível gerar o PDF. Tente novamente.");}
+   const pdf_base64=materialPdf(title.trim(),content,company);
+   if(pdf_base64.length>2800000)throw new Error("O PDF ficou muito grande. Reduza o conteúdo antes de salvar.");
+   const payload={title:title.trim(),content,pdf_base64};
+   const query=activePdf&&editingPdf
+    ?supabase.from("losi_ai_documents").update(payload).eq("id",activePdf.id).eq("edit_count",0)
+    :supabase.from("losi_ai_documents").insert(payload);
+   const {data,error}=await query.select(LIA_PDF_COLUMNS).single();
+   if(error||!data){
+    if(activePdf&&editingPdf&&(error?.message?.includes("PDF_EDIT_LIMIT")||error?.code==="PGRST116"))throw new Error("Este PDF já foi editado ou excluído. Atualize a lista. Seu texto continua no editor.");
+    throw new Error("Não foi possível salvar o PDF. Seu texto continua no editor; tente novamente.");
+   }
+   setActivePdf(data);setEditingPdf(false);setMaterialId(null);setResult(null);setPdfVersion(value=>value+1);
+   setMessage(activePdf?"Correção salva. A única edição deste PDF foi utilizada.":"PDF salvo automaticamente na sua conta. Você pode abri-lo em PDFs gerados.");
+   downloadPdf(pdf_base64,title);
+  }catch(error){setMessage(error instanceof Error?error.message:"Não foi possível gerar o PDF. Tente novamente.");}
+  finally{pdfSaving.current=false;setSaving(false);}
+ }
+ function editPdf(pdf:SavedLiaPdf,text:string){
+  if(content.trim()&&!window.confirm("Abrir este PDF para editar? O texto atual do editor será substituído."))return;
+  setActivePdf(pdf);setEditingPdf(true);setMaterialId(null);setTitle(pdf.title);setContent(text);setResult(null);
+  setMessage("Faça a correção e clique em Salvar edição e baixar PDF. Cancelar não utiliza sua edição.");
+  editor.current?.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
  }
  const locked=busy||saving;
+ const editorLocked=locked||Boolean(activePdf&&!editingPdf);
  return <section className="losi-ai-workspace" aria-labelledby="losi-ai-title">
   <div className="losi-ai-heading">
    <div className="losi-ai-brand">
@@ -145,7 +162,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
     <textarea value={instructions} maxLength={6000} rows={4} disabled={locked} onChange={event=>setInstructions(event.target.value)} placeholder={kind==="proposal"?"Descreva o objetivo, o público e o que deve ser destacado. A IA usará os dados do formulário.":"Ex.: Treinamento de atendimento para monitores iniciantes, com exemplos e perguntas de revisão."}/>
    </label>
    <p className="losi-ai-caption">Cada geração concluída consome uma unidade. Edição manual e download não consomem a franquia. Revise informações e orientações antes de compartilhar.</p>
-   <button type="button" className="proposals-primary" disabled={!available||locked||instructions.trim().length<15} onClick={()=>void generate()}>{busy?"LIA está gerando…":"Gerar conteúdo com a LIA"}</button>
+   <button type="button" className="proposals-primary" disabled={!available||locked||(kind==="material"&&Boolean(activePdf&&!editingPdf))||instructions.trim().length<15} onClick={()=>void generate()}>{busy?"LIA está gerando…":"Gerar conteúdo com a LIA"}</button>
    {busy&&<div className="lia-generation-status" role="status" aria-live="polite" aria-atomic="true">
     <img className="lia-generation-image" src="/lia-pavoa.webp" alt="" width={384} height={461} aria-hidden="true" />
     <div><strong>LIA está criando seu conteúdo…</strong><p>Seu rascunho aparecerá aqui assim que estiver pronto.</p></div>
@@ -154,13 +171,18 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
    {result&&<div className="losi-ai-review"><h3>{result.title}</h3><div className="losi-ai-preview">{kind==="material"?result.content:[result.description,result.objective,result.methodology,result.notes].filter(Boolean).join("\n\n")}</div>
     <div className="losi-ai-actions"><button type="button" className="proposals-primary" onClick={apply}>Aplicar rascunho</button><button type="button" className="proposals-secondary" onClick={()=>setResult(null)}>Descartar rascunho</button></div>
    </div>}
-   {kind==="material"&&<div className="losi-ai-material-editor">
-    <div className="losi-ai-heading"><h3>Editor do material</h3><button type="button" className="proposals-secondary" disabled={locked} onClick={()=>{if(content&&!window.confirm("Abrir um novo material? Salve o atual antes de continuar."))return;setMaterialId(null);setTitle("");setContent("");setResult(null);}}>Novo material</button></div>
-    <label className="losi-ai-field"><span>Título</span><input value={title} maxLength={160} onChange={event=>setTitle(event.target.value)}/></label>
-    <label className="losi-ai-field"><span>Conteúdo</span><textarea value={content} maxLength={60000} rows={14} onChange={event=>setContent(event.target.value)} placeholder="Escreva seu material ou aplique um rascunho gerado pela IA."/></label>
-    <div className="losi-ai-actions"><button type="button" className="proposals-secondary" disabled={locked||!title.trim()||!content.trim()} onClick={()=>void save()}>{saving?"Salvando…":"Salvar material"}</button><button type="button" className="proposals-primary" disabled={locked||!title.trim()||!content.trim()} onClick={download}>Baixar PDF</button></div>
-    <h3>Materiais salvos</h3>
-    {historyLoading?<p>Carregando materiais…</p>:materials.length?materials.map(material=><div className="losi-ai-history-row" key={material.id}><span>{material.title}</span><div className="losi-ai-actions"><button type="button" disabled={locked} onClick={()=>{if(content&&!window.confirm("Abrir este material? Alterações não salvas do editor serão substituídas."))return;setMaterialId(material.id);setTitle(material.title);setContent(material.content);setResult(null);}}>Abrir</button><button type="button" disabled={locked} onClick={()=>void remove(material)}>Excluir</button></div></div>):<p>Nenhum material salvo. Escreva um conteúdo e salve para começar.</p>}
+   {kind==="material"&&<div className="losi-ai-material-editor" ref={editor}>
+    <div className="losi-ai-heading"><h3>Editor do material</h3><button type="button" className="proposals-secondary" disabled={locked} onClick={()=>{if(content&&!window.confirm("Abrir um novo material? Salve o atual antes de continuar."))return;setMaterialId(null);setActivePdf(null);setEditingPdf(false);setTitle("");setContent("");setResult(null);setMessage("");}}>Novo material</button></div>
+    <label className="losi-ai-field"><span>Título</span><input disabled={editorLocked} value={title} maxLength={160} onChange={event=>setTitle(event.target.value)}/></label>
+    <label className="losi-ai-field"><span>Conteúdo</span><textarea disabled={editorLocked} value={content} maxLength={60000} rows={14} onChange={event=>setContent(event.target.value)} placeholder="Escreva seu material ou aplique um rascunho gerado pela IA."/></label>
+    {editingPdf&&<p className="losi-ai-notice">Você pode salvar uma única edição deste PDF. Revise todo o texto antes de confirmar.</p>}
+    {activePdf&&!editingPdf&&<p className="losi-ai-caption">Este PDF está salvo. {activePdf.edit_count?"A edição já foi utilizada.":"Para corrigir, use Editar PDF no histórico abaixo."}</p>}
+    <div className="losi-ai-actions"><button type="button" className="proposals-secondary" disabled={locked||Boolean(activePdf)||!title.trim()||!content.trim()} onClick={()=>void save()}>{saving?"Salvando…":"Salvar rascunho"}</button><button type="button" className="proposals-primary" disabled={locked||!title.trim()||!content.trim()} onClick={()=>void download()}>{saving?"Aguarde…":editingPdf?"Salvar edição e baixar PDF":activePdf?"Baixar PDF":"Gerar e salvar PDF"}</button>
+     {editingPdf&&<button type="button" className="proposals-secondary" disabled={locked} onClick={()=>{if(!window.confirm("Cancelar a correção? As alterações do editor serão descartadas e sua edição continuará disponível."))return;setActivePdf(null);setEditingPdf(false);setTitle("");setContent("");setResult(null);setMessage("Edição cancelada. O PDF salvo foi preservado.");}}>Cancelar edição</button>}
+    </div>
+    <LosiPdfHistory version={pdfVersion} disabled={locked} onEdit={editPdf} onDeleted={id=>{if(activePdf?.id===id){setActivePdf(null);setEditingPdf(false);setTitle("");setContent("");setResult(null);}}}/>
+    <h3>Rascunhos salvos</h3>
+    {historyLoading?<p>Carregando materiais…</p>:materials.length?materials.map(material=><div className="losi-ai-history-row" key={material.id}><span>{material.title}</span><div className="losi-ai-actions"><button type="button" disabled={locked} onClick={()=>{if(content&&!window.confirm("Abrir este material? Alterações não salvas do editor serão substituídas."))return;setMaterialId(material.id);setActivePdf(null);setEditingPdf(false);setTitle(material.title);setContent(material.content);setResult(null);}}>Abrir</button><button type="button" disabled={locked} onClick={()=>void remove(material)}>Excluir</button></div></div>):<p>Nenhum material salvo. Escreva um conteúdo e salve para começar.</p>}
    </div>}
   </>}
  </section>;
