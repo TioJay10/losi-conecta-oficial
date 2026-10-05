@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LosiPdfHistory } from "./LosiPdfHistory";
+import { LosiPdfPreview } from "./LosiPdfPreview";
 import { downloadPdf, LIA_PDF_COLUMNS, materialPdf, PDF_LAYOUTS, type PdfLayout, type SavedLiaPdf } from "../lib/lia-pdfs";
 import { supabase } from "../lib/supabase";
 import { AI_TONES, callLosiAi, type AiResult, type AiStatus, type AiTone } from "../lib/losi-ai";
@@ -188,6 +189,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
     <div className="losi-ai-actions"><button type="button" className="proposals-secondary" disabled={locked||Boolean(activePdf)||!title.trim()||!content.trim()} onClick={()=>void save()}>{saving?"Salvando…":"Salvar rascunho"}</button><button type="button" className="proposals-primary" disabled={locked||!title.trim()||!content.trim()} onClick={()=>void download()}>{saving?"Aguarde…":editingPdf?"Salvar edição e baixar PDF":activePdf?"Baixar PDF":"Gerar e salvar PDF"}</button>
      {editingPdf&&<button type="button" className="proposals-secondary" disabled={locked} onClick={()=>{if(!window.confirm("Cancelar a correção? As alterações do editor serão descartadas e sua edição continuará disponível."))return;setActivePdf(null);setEditingPdf(false);setTitle("");setContent("");setResult(null);setMessage("Edição cancelada. O PDF salvo foi preservado.");}}>Cancelar edição</button>}
     </div>
+    <LosiPdfPreview title={title} content={content} company={company} layout={pdfLayout} savedPdfId={!editingPdf?activePdf?.id:undefined}/>
     <LosiPdfHistory version={pdfVersion} disabled={locked} onEdit={editPdf} onDeleted={id=>{if(activePdf?.id===id){setActivePdf(null);setEditingPdf(false);setTitle("");setContent("");setResult(null);}}}/>
     <h3>Rascunhos salvos</h3>
     {historyLoading?<p>Carregando materiais…</p>:materials.length?materials.map(material=><div className="losi-ai-history-row" key={material.id}><span>{material.title}</span><div className="losi-ai-actions"><button type="button" disabled={locked} onClick={()=>{if(content&&!window.confirm("Abrir este material? Alterações não salvas do editor serão substituídas."))return;setMaterialId(material.id);setActivePdf(null);setEditingPdf(false);setTitle(material.title);setContent(material.content);setResult(null);}}>Abrir</button><button type="button" disabled={locked} onClick={()=>void remove(material)}>Excluir</button></div></div>):<p>Nenhum material salvo. Escreva um conteúdo e salve para começar.</p>}

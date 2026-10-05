@@ -73,3 +73,7 @@
 .lia-pdf-layouts:disabled .lia-pdf-layout-option{cursor:not-allowed}
 .lia-pdf-layout-option:focus-within{outline:2px solid #145ea8;outline-offset:3px}
 @media(max-width:640px){.lia-pdf-layout-options{gap:10px}.lia-pdf-layout-option{padding:10px;gap:8px}.lia-pdf-layout-option img{height:140px}.lia-pdf-layout-option>span{align-items:flex-start;font-size:12px}.lia-pdf-layout-option small{font-size:11px}}
+
+.lia-pdf-live-preview{padding-top:18px;border-top:1px solid #dce1e7}
+.lia-pdf-live-preview h3{overflow-wrap:anywhere}
+.lia-pdf-live-preview iframe{min-height:360px}
