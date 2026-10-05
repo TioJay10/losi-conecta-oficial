@@ -28,25 +28,31 @@
 .losi-ai-brand{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
 .losi-ai-brand-copy{min-width:0}
 .losi-ai-heading>.proposals-secondary{flex:0 0 auto}
-.lia-mascot{width:90px;flex:0 0 90px;align-self:center}
-.lia-mascot img{display:block;width:100%;height:auto;object-fit:contain;transform-origin:50% 90%;animation:lia-welcome 900ms ease-out both}
-.lia-mascot.is-working img{animation:lia-working 2.6s ease-in-out infinite}
-.lia-mascot:not(.is-working):hover img{animation:lia-greeting 1s ease-in-out}
+/* Sixteen articulated poses. All frames share a transparent canvas and foot anchor. */
+.lia-mascot{position:relative;display:block;width:110px;flex:0 0 110px;aspect-ratio:32/43;align-self:center;overflow:hidden}
+.lia-sprite-loader{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.lia-mascot-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.lia-sprite{display:block;width:100%;height:100%;visibility:hidden;background-image:url('/lia-pavoa-sprites.webp');background-size:400% 400%;background-repeat:no-repeat;background-position:0 0}
+.lia-mascot.is-loaded .lia-sprite{visibility:visible}
+.lia-idle .lia-sprite{animation:lia-blink 5.5s step-end infinite}
+.lia-working .lia-sprite{animation:lia-walk 1s step-end infinite}
+.lia-success .lia-sprite{animation:lia-wings 1.2s step-end 2}
+.lia-idle:hover .lia-sprite{animation:lia-wings 1.2s step-end 1}
 .lia-activity{display:block;font-size:12px;line-height:1.5;color:#536174}
-@keyframes lia-welcome{from{opacity:0;transform:translateY(5px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes lia-working{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(1deg)}}
-@keyframes lia-greeting{0%,100%{transform:rotate(0)}30%{transform:rotate(-3deg)}65%{transform:rotate(2deg)}}
-@media(max-width:640px){.losi-ai-brand{gap:12px;width:100%;align-items:flex-start}.lia-mascot{width:62px;flex-basis:62px}.losi-ai-brand-copy h2{font-size:17px}.losi-ai-brand-copy p{margin:6px 0;font-size:12px}.lia-activity{font-size:11px}}
-@media(prefers-reduced-motion:reduce){.lia-mascot img,.lia-mascot.is-working img,.lia-mascot:not(.is-working):hover img{animation:none;transform:none}}
+@keyframes lia-blink{0%,88%,100%{background-position:0 0}90%{background-position:33.333333% 0}92%{background-position:66.666667% 0}94%{background-position:33.333333% 0}96%{background-position:100% 0}}
+@keyframes lia-walk{0%,100%{background-position:0 33.333333%}12.5%{background-position:33.333333% 33.333333%}25%{background-position:66.666667% 33.333333%}37.5%{background-position:100% 33.333333%}50%{background-position:0 66.666667%}62.5%{background-position:33.333333% 66.666667%}75%{background-position:66.666667% 66.666667%}87.5%{background-position:100% 66.666667%}}
+@keyframes lia-wings{0%,100%{background-position:0 100%}16.666667%{background-position:33.333333% 100%}33.333333%{background-position:66.666667% 100%}50%{background-position:100% 100%}66.666667%{background-position:66.666667% 100%}83.333333%{background-position:33.333333% 100%}}
+@media(max-width:640px){.losi-ai-brand{gap:8px;width:100%;align-items:flex-start}.lia-mascot{width:80px;flex-basis:80px}.losi-ai-brand-copy h2{font-size:17px}.losi-ai-brand-copy p{margin:6px 0;font-size:12px}.lia-activity{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.lia-mascot .lia-sprite,.lia-idle:hover .lia-sprite{animation:none;background-position:0 0}}
 
 /* Indicador de geração no local do rascunho, controlado pelo estado real da requisição. */
 .lia-generation-status{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px 0;min-width:0}
-.lia-generation-image{display:block;width:44px;height:auto;flex:0 0 44px;object-fit:contain;transform-origin:50% 90%;animation:lia-working 2.6s ease-in-out infinite}
+.lia-generation-image{width:64px;flex-basis:64px}
 .lia-generation-status>div{min-width:0}
 .lia-generation-status strong{display:block;color:#071a33;font-size:14px;font-weight:600;line-height:1.5;overflow-wrap:break-word}
 .lia-generation-status p{margin:4px 0 0;color:#536174;font-size:12px;line-height:1.6}
-@media(max-width:640px){.lia-generation-status{gap:12px}.lia-generation-image{width:38px;flex-basis:38px}.lia-generation-status strong{font-size:13px}}
-@media(prefers-reduced-motion:reduce){.lia-generation-image{animation:none;transform:none}}
+@media(max-width:640px){.lia-generation-status{gap:12px}.lia-generation-image{width:54px;flex-basis:54px}.lia-generation-status strong{font-size:13px}}
+
 
 .lia-pdf-history{margin-top:28px;padding-top:18px;border-top:1px solid #dce1e7}
 .lia-pdf-details{min-width:0;overflow-wrap:anywhere}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AI_TONES, callLosiAi, type AiResult, type AiStatus, type AiTone } from "../lib/losi-ai";
 import "../losi-ai.css";
+import { LiaMascot } from "./LiaMascot";
 
 export function LosiAiWorkspace({context,company,onApply}:{context:Record<string,unknown>;company:string;onApply:(result:AiResult)=>void}){
  const [open,setOpen]=useState(false);
@@ -10,10 +11,16 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
  const [instructions,setInstructions]=useState("");
  const [result,setResult]=useState<AiResult|null>(null);
  const [busy,setBusy]=useState(false);
+ const [celebrating,setCelebrating]=useState(false);
  const [message,setMessage]=useState("");
  const generating=useRef(false);
  const mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+ useEffect(()=>{
+  if(!celebrating)return;
+  const timer=window.setTimeout(()=>setCelebrating(false),2400);
+  return()=>window.clearTimeout(timer);
+ },[celebrating]);
  async function refresh(){
   setStatusLoading(true);
   try{const data=await callLosiAi({action:"status"});if(mounted.current)setStatus(data);}
@@ -26,11 +33,11 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
  const available=Boolean(status?.configured&&status.access.allowed&&remaining>0);
  async function generate(){
   if(generating.current||!available)return;
-  generating.current=true;setBusy(true);setMessage("");setResult(null);
+  generating.current=true;setBusy(true);setCelebrating(false);setMessage("");setResult(null);
   try{
    const data=await callLosiAi({action:"generate",kind:"proposal",tone,requestId:crypto.randomUUID(),instructions,
     context:{...context,company}});
-   if(mounted.current){setResult(data.result);setMessage("Rascunho pronto. Revise antes de aplicar.");}
+   if(mounted.current){setResult(data.result);setCelebrating(true);setMessage("Rascunho pronto. Revise antes de aplicar.");}
   }catch(error){if(mounted.current)setMessage(error instanceof Error?error.message:"Não foi possível gerar o conteúdo.");}
   finally{generating.current=false;if(mounted.current){setBusy(false);void refresh();}}
  }
@@ -44,9 +51,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
  return <section className="losi-ai-workspace" aria-labelledby="losi-ai-title">
   <div className="losi-ai-heading">
    <div className="losi-ai-brand">
-    <div className={"lia-mascot"+(busy?" is-working":"")} aria-hidden="true">
-     <img key={open?"open":"closed"} src="/lia-pavoa.webp" alt="" width={384} height={461} decoding="async" />
-    </div>
+    <LiaMascot state={busy?"working":celebrating?"success":"idle"} />
     <div className="losi-ai-brand-copy"><span className="proposals-kicker">ASSISTENTE DE CONTEÚDO</span>
      <h2 id="losi-ai-title">LIA · Assistente LOSI</h2>
      <p>Crie os textos da proposta com a LIA. Revise o conteúdo antes de aplicar.</p>
@@ -74,7 +79,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
    <p className="losi-ai-caption">Cada geração concluída consome uma unidade. Edição manual e download não consomem a franquia. Revise informações e orientações antes de compartilhar.</p>
    <button type="button" className="proposals-primary" disabled={!available||locked||instructions.trim().length<15} onClick={()=>void generate()}>{busy?"LIA está gerando…":"Gerar conteúdo com a LIA"}</button>
    {busy&&<div className="lia-generation-status" role="status" aria-live="polite" aria-atomic="true">
-    <img className="lia-generation-image" src="/lia-pavoa.webp" alt="" width={384} height={461} aria-hidden="true" />
+    <LiaMascot className="lia-generation-image" state="working" />
     <div><strong>LIA está criando seu conteúdo…</strong><p>Seu rascunho aparecerá aqui assim que estiver pronto.</p></div>
    </div>}
    {message&&<p role="status" className="losi-ai-notice">{message}</p>}
