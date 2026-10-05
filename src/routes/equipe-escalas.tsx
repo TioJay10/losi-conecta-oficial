@@ -165,18 +165,21 @@ function EquipeEscalasPage(){
     <label>UF<input maxLength={2} placeholder="SP" value={manualPerson.state} onChange={e=>setManualPerson({...manualPerson,state:e.target.value.toUpperCase()})}/></label>
     <button className="team-secondary">Adicionar à rede</button>
    </form>}
-   <div className="team-network-flow" aria-label="Fluxograma da rede de colaboradores">
-    <div className="team-network-root"><strong>{businessName||"Sua empresa"}</strong><small>{people.length} {people.length===1?"colaborador na rede":"colaboradores na rede"}</small></div>
-    {people.length?<><div className="team-network-stem" aria-hidden="true"/><div className="team-network-tree">
-     {Array.from({length:Math.ceil(people.length/3)},(_,row)=>people.slice(row*3,row*3+3)).map(row=><div className="team-network-row" key={row[0].id} style={{gridTemplateColumns:`repeat(${row.length}, minmax(0, 1fr))`}}>
-      {row.map(person=><button key={person.id} type="button" className={"team-network-person"+(person.network_status!=="active"?" is-inactive":"")} onClick={()=>void openPerson(person)}>
-       <span className="team-network-avatar" aria-hidden="true">{person.name.slice(0,1).toUpperCase()}</span>
-       <strong>{person.name}</strong><span className="team-network-city">{person.city||"Cidade não informada"}{person.state?` · ${person.state}`:""}</span>
-       <span className="team-network-status">{person.network_status==="active"?"Ativo na rede":person.network_status==="blocked"?"Bloqueado":"Inativo"}</span>
-       <span className="team-network-open">Ver cadastro e calendário</span>
-      </button>)}
-     </div>)}
-    </div></>:<div className="team-empty">Ainda não há colaboradores. Adicione uma pessoa ou aprove uma candidatura de um evento.</div>}
+   <div className="team-network-flow">
+    {people.length>1&&<p className="team-network-scroll-help">Deslize para os lados para ver toda a rede.</p>}
+    <div className="team-network-scroll" role="region" aria-label="Fluxograma horizontal da rede de colaboradores" tabIndex={0}>
+     <div className="team-network-chart">
+      <div className="team-network-root"><strong>{businessName||"Sua empresa"}</strong><small>{people.length} {people.length===1?"colaborador na rede":"colaboradores na rede"}</small></div>
+      {people.length?<><div className="team-network-stem" aria-hidden="true"/><div className="team-network-row">
+       {people.map(person=><button key={person.id} type="button" className={"team-network-person"+(person.network_status!=="active"?" is-inactive":"")} onClick={()=>void openPerson(person)}>
+        <span className="team-network-avatar" aria-hidden="true">{person.name.slice(0,1).toUpperCase()}</span>
+        <strong>{person.name}</strong><span className="team-network-city">{person.city||"Cidade não informada"}{person.state?` · ${person.state}`:""}</span>
+        <span className="team-network-status">{person.network_status==="active"?"Ativo na rede":person.network_status==="blocked"?"Bloqueado":"Inativo"}</span>
+        <span className="team-network-open">Ver cadastro e calendário</span>
+       </button>)}
+      </div></>:<div className="team-empty">Ainda não há colaboradores. Adicione uma pessoa ou aprove uma candidatura de um evento.</div>}
+     </div>
+    </div>
    </div>
   </section>}
   {selectedPerson&&<div className="team-person-overlay" onClick={()=>setSelectedPerson(null)}><section className="team-person-panel" onClick={e=>e.stopPropagation()}><header><div><span>COLABORADOR DA REDE</span><h2>{selectedPerson.name}</h2><p>{selectedPerson.city||"Cidade não informada"}{selectedPerson.state?` · ${selectedPerson.state}`:""}</p></div><button onClick={()=>setSelectedPerson(null)} aria-label="Fechar">×</button></header>
