@@ -179,3 +179,6 @@
     ) {font-size:14px !important;line-height:1.55 !important}
   }
 }
+
+/* Título da proposta sobre o cabeçalho azul-marinho. */
+body .dashboard-page[class] .proposals-hero h1 { color: #fff !important; }
