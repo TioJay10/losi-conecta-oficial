@@ -23,3 +23,18 @@
 .losi-ai-history-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #e3e7ed;font-size:14px}
 .losi-ai-history-row>span{min-width:0;overflow-wrap:anywhere}
 @media(max-width:640px){.losi-ai-workspace{padding:16px}.losi-ai-heading{flex-direction:column;gap:10px}.losi-ai-heading h2{font-size:18px}.losi-ai-heading>button{width:100%}.losi-ai-field input,.losi-ai-field textarea{font-size:16px}.losi-ai-workspace .proposals-primary,.losi-ai-workspace .proposals-secondary{height:auto;min-height:42px;padding:10px 14px}.losi-ai-actions{width:100%}.losi-ai-actions>button{flex:1 1 130px}.losi-ai-history-row{align-items:flex-start;flex-direction:column}.losi-ai-tabs button{flex:1 1 140px}}
+
+/* Mascote LIA: arte aprovada, movimento discreto e sem sobrepor o formulário. */
+.losi-ai-brand{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
+.losi-ai-brand-copy{min-width:0}
+.losi-ai-heading>.proposals-secondary{flex:0 0 auto}
+.lia-mascot{width:90px;flex:0 0 90px;align-self:center}
+.lia-mascot img{display:block;width:100%;height:auto;object-fit:contain;transform-origin:50% 90%;animation:lia-welcome 900ms ease-out both}
+.lia-mascot.is-working img{animation:lia-working 2.6s ease-in-out infinite}
+.lia-mascot:not(.is-working):hover img{animation:lia-greeting 1s ease-in-out}
+.lia-activity{display:block;font-size:12px;line-height:1.5;color:#536174}
+@keyframes lia-welcome{from{opacity:0;transform:translateY(5px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes lia-working{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(1deg)}}
+@keyframes lia-greeting{0%,100%{transform:rotate(0)}30%{transform:rotate(-3deg)}65%{transform:rotate(2deg)}}
+@media(max-width:640px){.losi-ai-brand{gap:12px;width:100%;align-items:flex-start}.lia-mascot{width:62px;flex-basis:62px}.losi-ai-brand-copy h2{font-size:17px}.losi-ai-brand-copy p{margin:6px 0;font-size:12px}.lia-activity{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.lia-mascot img,.lia-mascot.is-working img,.lia-mascot:not(.is-working):hover img{animation:none;transform:none}}

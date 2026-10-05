@@ -109,7 +109,17 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
  }
  const locked=busy||saving;
  return <section className="losi-ai-workspace" aria-labelledby="losi-ai-title">
-  <div className="losi-ai-heading"><div><span className="proposals-kicker">CONTEÚDO PROFISSIONAL</span><h2 id="losi-ai-title">Propostas e materiais com IA</h2><p>Crie um rascunho, revise e use seus documentos no formato habitual.</p></div>
+  <div className="losi-ai-heading">
+   <div className="losi-ai-brand">
+    <div className={"lia-mascot"+(busy?" is-working":"")} aria-hidden="true">
+     <img key={open?"open":"closed"} src="/lia-pavoa.webp" alt="" width={384} height={461} decoding="async" />
+    </div>
+    <div className="losi-ai-brand-copy"><span className="proposals-kicker">ASSISTENTE DE CONTEÚDO</span>
+     <h2 id="losi-ai-title">LIA · Assistente LOSI</h2>
+     <p>Crie propostas e materiais com a LIA. Revise o conteúdo e gere seus documentos.</p>
+     <span className="lia-activity" role="status">{busy?"A LIA está preparando seu rascunho…":open?"Vamos preparar seu próximo conteúdo?":"Sua assistente para propostas e materiais."}</span>
+    </div>
+   </div>
    <button type="button" className="proposals-secondary" aria-expanded={open} onClick={()=>setOpen(!open)}>{open?"Recolher":"Abrir ferramentas"}</button></div>
   {open&&<>
    <div className="losi-ai-tabs" role="group" aria-label="Tipo de conteúdo">
@@ -123,11 +133,11 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
    </div>
    {status&&!status.configured&&<p className="losi-ai-notice">A geração com IA aguarda ativação. Você pode continuar escrevendo e gerando seus documentos manualmente.</p>}
    {status?.configured&&!status.access.allowed&&<p className="losi-ai-notice">Sua conta ainda não tem acesso à geração com IA.</p>}
-   <label className="losi-ai-field"><span>{kind==="proposal"?"Como a IA deve ajudar nesta proposta?":"Qual material você quer criar?"}</span>
+   <label className="losi-ai-field"><span>{kind==="proposal"?"Como a LIA deve ajudar nesta proposta?":"Qual material você quer criar?"}</span>
     <textarea value={instructions} maxLength={6000} rows={4} disabled={locked} onChange={event=>setInstructions(event.target.value)} placeholder={kind==="proposal"?"Descreva o objetivo, o público e o que deve ser destacado. A IA usará os dados do formulário.":"Ex.: Treinamento de atendimento para monitores iniciantes, com exemplos e perguntas de revisão."}/>
    </label>
    <p className="losi-ai-caption">Cada geração concluída consome uma unidade. Edição manual e download não consomem a franquia. Revise informações e orientações antes de compartilhar.</p>
-   <button type="button" className="proposals-primary" disabled={!available||locked||instructions.trim().length<15} onClick={()=>void generate()}>{busy?"Gerando conteúdo…":"Gerar conteúdo com IA"}</button>
+   <button type="button" className="proposals-primary" disabled={!available||locked||instructions.trim().length<15} onClick={()=>void generate()}>{busy?"LIA está gerando…":"Gerar conteúdo com a LIA"}</button>
    {message&&<p role="status" className="losi-ai-notice">{message}</p>}
    {result&&<div className="losi-ai-review"><h3>{result.title}</h3><div className="losi-ai-preview">{kind==="material"?result.content:[result.description,result.objective,result.methodology,result.notes].filter(Boolean).join("\n\n")}</div>
     <div className="losi-ai-actions"><button type="button" className="proposals-primary" onClick={apply}>Aplicar rascunho</button><button type="button" className="proposals-secondary" onClick={()=>setResult(null)}>Descartar rascunho</button></div>
