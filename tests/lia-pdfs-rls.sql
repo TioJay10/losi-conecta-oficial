@@ -24,8 +24,12 @@ begin
  get diagnostics n=row_count;
  if n<>0 then raise exception 'cross-user delete'; end if;
  perform set_config('request.jwt.claims',json_build_object('sub',current_setting('test.owner'),'role','authenticated')::text,true);
- update public.losi_ai_documents set title='Corrected',content='Correction',pdf_base64=fixture where id=doc and edit_count=0;
- if not exists(select 1 from public.losi_ai_documents where id=doc and edit_count=1 and content='Correction') then raise exception 'first edit failed'; end if;
+ if not exists(select 1 from public.losi_ai_documents where id=doc and layout='classic') then raise exception 'layout default failed'; end if;
+ rejected:=false;
+ begin update public.losi_ai_documents set layout='invalid' where id=doc; exception when check_violation then rejected:=true; end;
+ if not rejected then raise exception 'invalid layout accepted'; end if;
+ update public.losi_ai_documents set title='Corrected',content='Correction',pdf_base64=fixture,layout='geometric' where id=doc and edit_count=0;
+ if not exists(select 1 from public.losi_ai_documents where id=doc and edit_count=1 and content='Correction' and layout='geometric') then raise exception 'first edit or layout failed'; end if;
  update public.losi_ai_documents set content='Second correction' where id=doc and edit_count=0;
  get diagnostics n=row_count;
  if n<>0 then raise exception 'conditional second edit succeeded'; end if;

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { LIA_PDF_COLUMNS, pdfBlob, pdfFilename, type SavedLiaPdf } from "../lib/lia-pdfs";
+import { LIA_PDF_COLUMNS, PDF_LAYOUTS, pdfBlob, pdfFilename, type SavedLiaPdf } from "../lib/lia-pdfs";
 
 export function LosiPdfHistory({version,disabled,onEdit,onDeleted}:{version:number;disabled:boolean;onEdit:(pdf:SavedLiaPdf,content:string)=>void;onDeleted:(id:string)=>void}){
  const [items,setItems]=useState<SavedLiaPdf[]>([]);
@@ -59,7 +59,7 @@ export function LosiPdfHistory({version,disabled,onEdit,onDeleted}:{version:numb
   {loading&&<p role="status">Carregando PDFs…</p>}
   {!loading&&!items.length&&!message&&<p>Nenhum PDF salvo. Gere seu primeiro PDF no editor acima.</p>}
   {items.map(pdf=><div className="losi-ai-history-row" key={pdf.id}>
-   <div className="lia-pdf-details"><strong>{pdf.title}</strong><small>{new Date(pdf.created_at).toLocaleDateString("pt-BR")} · {pdf.edit_count?"Edição utilizada":"1 edição disponível"}</small></div>
+   <div className="lia-pdf-details"><strong>{pdf.title}</strong><small>{new Date(pdf.created_at).toLocaleDateString("pt-BR")} · {PDF_LAYOUTS[pdf.layout].label} · {pdf.edit_count?"Edição utilizada":"1 edição disponível"}</small></div>
    <div className="losi-ai-actions">
     <button type="button" disabled={locked} onClick={()=>void openPdf(pdf)}>Ver PDF</button>
     <button type="button" disabled={locked||pdf.edit_count>=1} onClick={()=>void openPdf(pdf,true)}>Editar PDF</button>

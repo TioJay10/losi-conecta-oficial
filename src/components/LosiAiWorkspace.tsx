@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LosiPdfHistory } from "./LosiPdfHistory";
-import { downloadPdf, LIA_PDF_COLUMNS, materialPdf, type SavedLiaPdf } from "../lib/lia-pdfs";
+import { downloadPdf, LIA_PDF_COLUMNS, materialPdf, PDF_LAYOUTS, type PdfLayout, type SavedLiaPdf } from "../lib/lia-pdfs";
 import { supabase } from "../lib/supabase";
 import { AI_TONES, callLosiAi, type AiResult, type AiStatus, type AiTone } from "../lib/losi-ai";
 import "../losi-ai.css";
@@ -26,12 +26,13 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
  const [pdfVersion,setPdfVersion]=useState(0);
  const [activePdf,setActivePdf]=useState<SavedLiaPdf|null>(null);
  const [editingPdf,setEditingPdf]=useState(false);
+ const [pdfLayout,setPdfLayout]=useState<PdfLayout>("classic");
  const pdfSaving=useRef(false);
  const editor=useRef<HTMLDivElement>(null);
  const generating=useRef(false);
  const mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
- useEffect(()=>{if(editingPdf)editor.current?.querySelector("input")?.focus({preventScroll:true});},[editingPdf,activePdf?.id]);
+ useEffect(()=>{if(editingPdf)editor.current?.querySelector<HTMLInputElement>('input:not([type="radio"])')?.focus({preventScroll:true});},[editingPdf,activePdf?.id]);
  async function refresh(){
   setStatusLoading(true);
   try{const data=await callLosiAi({action:"status"});if(mounted.current)setStatus(data);}
@@ -102,9 +103,9 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
     if(error||!data)throw new Error("Não foi possível baixar o PDF salvo. Atualize a lista e tente novamente.");
     downloadPdf(data.pdf_base64,data.title);return;
    }
-   const pdf_base64=materialPdf(title.trim(),content,company);
+   const pdf_base64=materialPdf(title.trim(),content,company,pdfLayout);
    if(pdf_base64.length>2800000)throw new Error("O PDF ficou muito grande. Reduza o conteúdo antes de salvar.");
-   const payload={title:title.trim(),content,pdf_base64};
+   const payload={title:title.trim(),content,pdf_base64,layout:pdfLayout};
    const query=activePdf&&editingPdf
     ?supabase.from("losi_ai_documents").update(payload).eq("id",activePdf.id).eq("edit_count",0)
     :supabase.from("losi_ai_documents").insert(payload);
@@ -121,7 +122,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
  }
  function editPdf(pdf:SavedLiaPdf,text:string){
   if(content.trim()&&!window.confirm("Abrir este PDF para editar? O texto atual do editor será substituído."))return;
-  setActivePdf(pdf);setEditingPdf(true);setMaterialId(null);setTitle(pdf.title);setContent(text);setResult(null);
+  setActivePdf(pdf);setEditingPdf(true);setPdfLayout(pdf.layout);setMaterialId(null);setTitle(pdf.title);setContent(text);setResult(null);
   setMessage("Faça a correção e clique em Salvar edição e baixar PDF. Cancelar não utiliza sua edição.");
   editor.current?.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
  }
@@ -173,6 +174,13 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
    </div>}
    {kind==="material"&&<div className="losi-ai-material-editor" ref={editor}>
     <div className="losi-ai-heading"><h3>Editor do material</h3><button type="button" className="proposals-secondary" disabled={locked} onClick={()=>{if(content&&!window.confirm("Abrir um novo material? Salve o atual antes de continuar."))return;setMaterialId(null);setActivePdf(null);setEditingPdf(false);setTitle("");setContent("");setResult(null);setMessage("");}}>Novo material</button></div>
+    <fieldset className="lia-pdf-layouts" disabled={editorLocked}><legend>Layout do PDF</legend>
+     <div className="lia-pdf-layout-options">{(Object.entries(PDF_LAYOUTS) as [PdfLayout,typeof PDF_LAYOUTS[PdfLayout]][]).map(([value,option])=><label key={value} className={"lia-pdf-layout-option"+(pdfLayout===value?" is-selected":"")}>
+      <img src={option.preview} alt="" width={212} height={300} loading="lazy"/>
+      <span><input type="radio" name="lia-pdf-layout" value={value} checked={pdfLayout===value} onChange={()=>setPdfLayout(value)}/><strong>{option.label}</strong></span>
+      <small>{option.description}</small>
+     </label>)}</div>
+    </fieldset>
     <label className="losi-ai-field"><span>Título</span><input disabled={editorLocked} value={title} maxLength={160} onChange={event=>setTitle(event.target.value)}/></label>
     <label className="losi-ai-field"><span>Conteúdo</span><textarea disabled={editorLocked} value={content} maxLength={60000} rows={14} onChange={event=>setContent(event.target.value)} placeholder="Escreva seu material ou aplique um rascunho gerado pela IA."/></label>
     {editingPdf&&<p className="losi-ai-notice">Você pode salvar uma única edição deste PDF. Revise todo o texto antes de confirmar.</p>}
