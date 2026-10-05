@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
 import "../proposals.css";
+import { LosiAiWorkspace } from "../components/LosiAiWorkspace";
 
 export const Route = createFileRoute("/propostas")({ component: ProposalsPage });
 
@@ -764,6 +765,15 @@ function ProposalsPage() {
           </div>
 
           {message && <div className="proposals-message">{message}</div>}
+
+          <LosiAiWorkspace company={supplier} context={{
+            title:draft.title,proposalType:draft.proposalType,description:draft.description,
+            objective:draft.objective,methodology:draft.methodology,notes:draft.notes,
+            audience:draft.audience,ageRange:draft.ageRange,duration:draft.duration,
+            location:draft.location,activities:draft.activities,team:draft.team,
+          }} onApply={result => setDraft(current => ({...current,title:result.title,
+            description:result.description,objective:result.objective,
+            methodology:result.methodology,notes:result.notes}))} />
 
           <div className="proposals-layout">
             <section className="proposals-form-card">
