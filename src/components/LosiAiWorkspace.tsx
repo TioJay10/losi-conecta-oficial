@@ -117,7 +117,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
     <div className="losi-ai-brand-copy"><span className="proposals-kicker">ASSISTENTE DE CONTEÚDO</span>
      <h2 id="losi-ai-title">LIA · Assistente LOSI</h2>
      <p>Crie propostas e materiais com a LIA. Revise o conteúdo e gere seus documentos.</p>
-     <span className="lia-activity" role="status">{busy?"A LIA está preparando seu rascunho…":open?"Vamos preparar seu próximo conteúdo?":"Sua assistente para propostas e materiais."}</span>
+     <span className="lia-activity">{busy?"A LIA está preparando seu rascunho…":open?"Vamos preparar seu próximo conteúdo?":"Sua assistente para propostas e materiais."}</span>
     </div>
    </div>
    <button type="button" className="proposals-secondary" aria-expanded={open} onClick={()=>setOpen(!open)}>{open?"Recolher":"Abrir ferramentas"}</button></div>
@@ -138,6 +138,10 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
    </label>
    <p className="losi-ai-caption">Cada geração concluída consome uma unidade. Edição manual e download não consomem a franquia. Revise informações e orientações antes de compartilhar.</p>
    <button type="button" className="proposals-primary" disabled={!available||locked||instructions.trim().length<15} onClick={()=>void generate()}>{busy?"LIA está gerando…":"Gerar conteúdo com a LIA"}</button>
+   {busy&&<div className="lia-generation-status" role="status" aria-live="polite" aria-atomic="true">
+    <img className="lia-generation-image" src="/lia-pavoa.webp" alt="" width={384} height={461} aria-hidden="true" />
+    <div><strong>LIA está criando seu conteúdo…</strong><p>Seu rascunho aparecerá aqui assim que estiver pronto.</p></div>
+   </div>}
    {message&&<p role="status" className="losi-ai-notice">{message}</p>}
    {result&&<div className="losi-ai-review"><h3>{result.title}</h3><div className="losi-ai-preview">{kind==="material"?result.content:[result.description,result.objective,result.methodology,result.notes].filter(Boolean).join("\n\n")}</div>
     <div className="losi-ai-actions"><button type="button" className="proposals-primary" onClick={apply}>Aplicar rascunho</button><button type="button" className="proposals-secondary" onClick={()=>setResult(null)}>Descartar rascunho</button></div>

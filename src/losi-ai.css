@@ -38,3 +38,12 @@
 @keyframes lia-greeting{0%,100%{transform:rotate(0)}30%{transform:rotate(-3deg)}65%{transform:rotate(2deg)}}
 @media(max-width:640px){.losi-ai-brand{gap:12px;width:100%;align-items:flex-start}.lia-mascot{width:62px;flex-basis:62px}.losi-ai-brand-copy h2{font-size:17px}.losi-ai-brand-copy p{margin:6px 0;font-size:12px}.lia-activity{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.lia-mascot img,.lia-mascot.is-working img,.lia-mascot:not(.is-working):hover img{animation:none;transform:none}}
+
+/* Indicador de geração no local do rascunho, controlado pelo estado real da requisição. */
+.lia-generation-status{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px 0;min-width:0}
+.lia-generation-image{display:block;width:44px;height:auto;flex:0 0 44px;object-fit:contain;transform-origin:50% 90%;animation:lia-working 2.6s ease-in-out infinite}
+.lia-generation-status>div{min-width:0}
+.lia-generation-status strong{display:block;color:#071a33;font-size:14px;font-weight:600;line-height:1.5;overflow-wrap:break-word}
+.lia-generation-status p{margin:4px 0 0;color:#536174;font-size:12px;line-height:1.6}
+@media(max-width:640px){.lia-generation-status{gap:12px}.lia-generation-image{width:38px;flex-basis:38px}.lia-generation-status strong{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.lia-generation-image{animation:none;transform:none}}
