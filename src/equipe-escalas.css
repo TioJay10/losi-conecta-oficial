@@ -227,33 +227,36 @@
 .team-page .team-opening-list article>b small{display:block;font-size:11px;font-weight:400;color:#475569;margin:0 0 4px}
 
 /* Company-rooted horizontal chart; scroll is contained within the network. */
-.team-network-flow{margin-top:28px;min-width:0;--network-line:#b9a16c;--network-node-width:220px;--network-gap:24px}
+.team-network-flow{margin-top:24px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;--network-line:#b9a16c;--network-node-width:176px;--network-gap:18px}
 .team-network-scroll-help{margin:0 0 14px;color:#475569;font-size:12px;line-height:1.5}
-.team-network-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-color:#b9a16c #f1f3f6;scrollbar-width:thin;padding-bottom:12px}
+.team-network-scroll{width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-color:#b9a16c #f1f3f6;scrollbar-width:thin;padding-bottom:12px}
 .team-network-scroll:focus-visible{outline:2px solid #145ea8;outline-offset:4px}
-.team-network-chart{width:max-content;min-width:100%;box-sizing:border-box;padding:4px 8px 8px}
-.team-network-root{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;width:280px;max-width:100%;margin:auto;padding:20px 24px;border-radius:4px;background:#071a33;color:#fff;text-align:center}
-.team-network-root strong{font-size:17px;line-height:1.4;overflow-wrap:break-word}
+.team-network-chart{display:flex;flex-direction:column;align-items:center;width:max-content;min-width:100%;box-sizing:border-box;padding:4px 4px 8px}
+.team-network-root{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;width:230px;max-width:100%;margin:0;padding:14px 18px;border-radius:4px;background:#071a33;color:#fff;text-align:center}
+.team-network-root strong{font-size:15px;line-height:1.4;overflow-wrap:break-word}
 .team-network-root small{font-size:12px;line-height:1.5;color:#e0c58a}
-.team-network-stem{width:1px;height:30px;margin:auto;background:var(--network-line)}
-.team-network-row{display:flex;flex-wrap:nowrap;justify-content:center;align-items:stretch;gap:var(--network-gap);width:max-content;min-width:100%;box-sizing:border-box;padding-top:32px}
-.team-page .team-network-person{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;flex:0 0 var(--network-node-width);width:var(--network-node-width);min-width:0;box-sizing:border-box;padding:18px;border:1px solid #dce2e9;border-radius:4px;background:#fff;color:#071a33;font-family:inherit;text-align:center;cursor:pointer}
-.team-network-person::before{content:"";position:absolute;bottom:100%;left:50%;height:33px;border-left:1px solid var(--network-line);pointer-events:none}
-.team-network-person:not(:last-child)::after{content:"";position:absolute;top:-33px;left:50%;width:calc(var(--network-node-width) + var(--network-gap));border-top:1px solid var(--network-line);pointer-events:none}
+.team-network-stem{flex-shrink:0;width:1px;height:24px;background:var(--network-line)}
+.team-network-row{display:flex;flex-wrap:nowrap;justify-content:flex-start;align-items:stretch;gap:var(--network-gap);width:max-content;box-sizing:border-box;padding-top:24px}
+.team-page .team-network-person{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 var(--network-node-width);width:var(--network-node-width);min-width:0;box-sizing:border-box;padding:12px;border:1px solid #dce2e9;border-radius:4px;background:#fff;color:#071a33;font-family:inherit;text-align:center;cursor:pointer}
+.team-network-person::before{content:"";position:absolute;bottom:100%;left:50%;height:25px;border-left:1px solid var(--network-line);pointer-events:none}
+.team-network-person:not(:last-child)::after{content:"";position:absolute;top:-25px;left:50%;width:calc(var(--network-node-width) + var(--network-gap));border-top:1px solid var(--network-line);pointer-events:none}
 .team-network-person:hover{border-color:#9a7b35;background:#fffdf8}
 .team-network-person:focus-visible{outline:2px solid #145ea8;outline-offset:4px}
-.team-network-avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#f1eadb;color:#755d27;font-size:14px;font-weight:700;margin-bottom:3px}
-.team-network-person strong{font-size:14px;line-height:1.4;overflow-wrap:break-word;max-width:100%}
-.team-network-city{font-size:12px;line-height:1.5;color:#475569;overflow-wrap:break-word;max-width:100%}
+.team-network-avatar{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#f1eadb;color:#755d27;font-size:12px;font-weight:700;margin-bottom:1px}
+.team-network-person strong{font-size:13px;line-height:1.4;overflow-wrap:break-word;max-width:100%}
+.team-network-city{font-size:11px;line-height:1.5;color:#475569;overflow-wrap:break-word;max-width:100%}
 .team-network-status{font-size:11px;line-height:1.5;color:#226044}
 .team-network-person.is-inactive .team-network-status{color:#5b6472}
-.team-network-open{margin-top:auto;padding-top:10px;font-size:12px;line-height:1.5;font-weight:600;color:#071a33;overflow-wrap:break-word}
+.team-network-open{margin-top:auto;padding-top:6px;font-size:11px;line-height:1.5;font-weight:600;color:#071a33;overflow-wrap:break-word}
 .team-network-chart>.team-empty{margin-top:22px;max-width:500px;white-space:normal}
 @media(max-width:760px){
- .team-network-flow{margin-top:22px;--network-node-width:190px;--network-gap:20px}
- .team-network-root{width:250px;padding:16px 18px}
- .team-network-root strong{font-size:15px}
- .team-page .team-network-person{padding:16px}
- .team-network-person strong{font-size:13px}
+ .team-network-flow{margin-top:18px;--network-node-width:144px;--network-gap:14px}
+ .team-network-chart{align-items:flex-start}
+ .team-network-stem{margin-left:calc(var(--network-node-width) / 2)}
+ .team-network-root{width:var(--network-node-width);gap:4px;padding:10px}
+ .team-network-root small{font-size:11px}
+ .team-network-root strong{font-size:12px}
+ .team-page .team-network-person{padding:10px}
+ .team-network-person strong{font-size:12px}
  .team-network-open{font-size:11px}
 }
