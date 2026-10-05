@@ -77,3 +77,5 @@
 .lia-pdf-live-preview{padding-top:18px;border-top:1px solid #dce1e7}
 .lia-pdf-live-preview h3{overflow-wrap:anywhere}
 .lia-pdf-live-preview iframe{min-height:360px}
+.losi-ai-workspace .lia-tools-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.lia-tools-toggle svg{flex:0 0 18px}
