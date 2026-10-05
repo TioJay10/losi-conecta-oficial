@@ -35,15 +35,26 @@
 .lia-sprite{display:block;width:100%;height:100%;visibility:hidden;background-image:url('/lia-pavoa-sprites.webp');background-size:400% 400%;background-repeat:no-repeat;background-position:0 0}
 .lia-mascot.is-loaded .lia-sprite{visibility:visible}
 .lia-idle .lia-sprite{animation:lia-blink 5.5s step-end infinite}
-.lia-working .lia-sprite{animation:lia-walk 1s step-end infinite}
+.lia-walk-rig{display:block;width:100%;height:100%}
+.lia-working .lia-mascot-fallback{display:none}
+.lia-walk-body{animation:lia-stride-bob 1.2s ease-in-out infinite}
+.lia-leg,.lia-foot{transform-box:view-box;animation-duration:1.2s;animation-timing-function:linear;animation-iteration-count:infinite}
+.lia-leg-left{transform-origin:168px 350px;animation-name:lia-leg-stride}
+.lia-leg-right{transform-origin:202px 350px;animation-name:lia-leg-stride;animation-delay:-.6s}
+.lia-foot-left{transform-origin:150px 411px;animation-name:lia-foot-stride}
+.lia-foot-right{transform-origin:222px 408px;animation-name:lia-foot-stride;animation-delay:-.6s}
+/* Contact → support → toe-off → flexed recovery → next contact. */
+@keyframes lia-leg-stride{0%,100%{transform:rotate(-18deg)}12.5%{transform:rotate(-9deg)}25%{transform:rotate(0deg)}37.5%{transform:rotate(9deg)}50%{transform:rotate(18deg)}62.5%{transform:rotate(12deg)}75%{transform:rotate(0deg)}87.5%{transform:rotate(-12deg)}}
+@keyframes lia-foot-stride{0%,100%{transform:rotate(18deg)}12.5%{transform:rotate(9deg)}25%{transform:rotate(0deg)}37.5%{transform:rotate(-9deg)}50%{transform:rotate(-18deg)}62.5%{transform:rotate(-48deg)}75%{transform:rotate(-38deg)}87.5%{transform:rotate(-8deg)}}
+@keyframes lia-stride-bob{0%,50%,100%{transform:translateY(0)}25%,75%{transform:translateY(-3px)}}
 .lia-success .lia-sprite{animation:lia-wings 1.2s step-end 2}
 .lia-idle:hover .lia-sprite{animation:lia-wings 1.2s step-end 1}
 .lia-activity{display:block;font-size:12px;line-height:1.5;color:#536174}
 @keyframes lia-blink{0%,88%,100%{background-position:0 0}90%{background-position:33.333333% 0}92%{background-position:66.666667% 0}94%{background-position:33.333333% 0}96%{background-position:100% 0}}
-@keyframes lia-walk{0%,100%{background-position:0 33.333333%}12.5%{background-position:33.333333% 33.333333%}25%{background-position:66.666667% 33.333333%}37.5%{background-position:100% 33.333333%}50%{background-position:0 66.666667%}62.5%{background-position:33.333333% 66.666667%}75%{background-position:66.666667% 66.666667%}87.5%{background-position:100% 66.666667%}}
+
 @keyframes lia-wings{0%,100%{background-position:0 100%}16.666667%{background-position:33.333333% 100%}33.333333%{background-position:66.666667% 100%}50%{background-position:100% 100%}66.666667%{background-position:66.666667% 100%}83.333333%{background-position:33.333333% 100%}}
 @media(max-width:640px){.losi-ai-brand{gap:8px;width:100%;align-items:flex-start}.lia-mascot{width:80px;flex-basis:80px}.losi-ai-brand-copy h2{font-size:17px}.losi-ai-brand-copy p{margin:6px 0;font-size:12px}.lia-activity{font-size:11px}}
-@media(prefers-reduced-motion:reduce){.lia-mascot .lia-sprite,.lia-idle:hover .lia-sprite{animation:none;background-position:0 0}}
+@media(prefers-reduced-motion:reduce){.lia-mascot .lia-sprite,.lia-idle:hover .lia-sprite{animation:none;background-position:0 0}.lia-walk-body,.lia-leg,.lia-foot{animation:none;transform:none}}
 
 /* Indicador de geração no local do rascunho, controlado pelo estado real da requisição. */
 .lia-generation-status{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px 0;min-width:0}
