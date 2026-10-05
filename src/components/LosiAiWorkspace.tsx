@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
-import { callLosiAi, type AiResult, type AiStatus } from "../lib/losi-ai";
+import { AI_TONES, callLosiAi, type AiResult, type AiStatus, type AiTone } from "../lib/losi-ai";
 import "../losi-ai.css";
 
 type Material={id:string;title:string;content:string;updated_at:string};
 export function LosiAiWorkspace({context,company,onApply}:{context:Record<string,unknown>;company:string;onApply:(result:AiResult)=>void}){
  const [open,setOpen]=useState(false);
  const [kind,setKind]=useState<"proposal"|"material">("proposal");
+ const [tones,setTones]=useState<{proposal:AiTone;material:AiTone}>({proposal:"formal",material:"educational"});
+ const tone=tones[kind];
  const [status,setStatus]=useState<AiStatus|null>(null);
  const [statusLoading,setStatusLoading]=useState(false);
  const [instructions,setInstructions]=useState("");
@@ -46,7 +48,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
   if(generating.current||!available)return;
   generating.current=true;setBusy(true);setMessage("");setResult(null);
   try{
-   const data=await callLosiAi({action:"generate",kind,requestId:crypto.randomUUID(),instructions,
+   const data=await callLosiAi({action:"generate",kind,tone,requestId:crypto.randomUUID(),instructions,
     context:kind==="proposal"?{...context,company}:{title,company}});
    if(mounted.current){setResult(data.result);setMessage("Rascunho pronto. Revise antes de aplicar.");}
   }catch(error){if(mounted.current)setMessage(error instanceof Error?error.message:"Não foi possível gerar o conteúdo.");}
@@ -133,6 +135,12 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
    </div>
    {status&&!status.configured&&<p className="losi-ai-notice">A geração com IA aguarda ativação. Você pode continuar escrevendo e gerando seus documentos manualmente.</p>}
    {status?.configured&&!status.access.allowed&&<p className="losi-ai-notice">Sua conta ainda não tem acesso à geração com IA.</p>}
+   <label className="losi-ai-field"><span>Tom do conteúdo</span>
+    <select value={tone} disabled={locked} aria-describedby="losi-ai-tone-help" onChange={event=>setTones(current=>({...current,[kind]:event.target.value as AiTone}))}>
+     {Object.entries(AI_TONES).map(([value,option])=><option key={value} value={value}>{option.label}</option>)}
+    </select>
+   </label>
+   <p id="losi-ai-tone-help" className="losi-ai-caption">{AI_TONES[tone].description}</p>
    <label className="losi-ai-field"><span>{kind==="proposal"?"Como a LIA deve ajudar nesta proposta?":"Qual material você quer criar?"}</span>
     <textarea value={instructions} maxLength={6000} rows={4} disabled={locked} onChange={event=>setInstructions(event.target.value)} placeholder={kind==="proposal"?"Descreva o objetivo, o público e o que deve ser destacado. A IA usará os dados do formulário.":"Ex.: Treinamento de atendimento para monitores iniciantes, com exemplos e perguntas de revisão."}/>
    </label>

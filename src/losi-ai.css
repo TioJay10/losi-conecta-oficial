@@ -9,11 +9,11 @@
 .losi-ai-tabs button,.losi-ai-history-row button,.losi-ai-balance button{padding:9px 14px;border:1px solid #cdd4de;border-radius:4px;background:#fff;color:#071a33;font-size:13px}
 .losi-ai-tabs button[aria-pressed=true]{background:#071a33;color:#fff;border-color:#071a33}
 .losi-ai-workspace button:disabled{opacity:.55;cursor:not-allowed}
-.losi-ai-workspace :is(button,input,textarea):focus-visible{outline:2px solid #145ea8;outline-offset:3px}
+.losi-ai-workspace :is(button,input,textarea,select):focus-visible{outline:2px solid #145ea8;outline-offset:3px}
 .losi-ai-balance{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;font-size:13px}
 .losi-ai-balance small{color:#536174}
 .losi-ai-field{display:grid;gap:8px;margin:16px 0;font-size:13px;font-weight:600}
-.losi-ai-field input,.losi-ai-field textarea{box-sizing:border-box;width:100%;min-width:0;padding:12px;border:1px solid #cdd4de;border-radius:4px;background:#fff;color:#1b2635;font-family:inherit;font-size:14px;font-weight:400;line-height:1.6}
+.losi-ai-field input,.losi-ai-field textarea,.losi-ai-field select{box-sizing:border-box;width:100%;min-width:0;padding:12px;border:1px solid #cdd4de;border-radius:4px;background:#fff;color:#1b2635;font-family:inherit;font-size:14px;font-weight:400;line-height:1.6}
 .losi-ai-field textarea{resize:vertical;min-height:100px;font-family:inherit;font-size:14px;line-height:1.6}
 .losi-ai-caption{margin:12px 0}
 .losi-ai-notice{padding:12px 14px;background:#f7f8fa;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
@@ -22,7 +22,7 @@
 .losi-ai-actions{display:flex;flex-wrap:wrap;gap:10px}
 .losi-ai-history-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #e3e7ed;font-size:14px}
 .losi-ai-history-row>span{min-width:0;overflow-wrap:anywhere}
-@media(max-width:640px){.losi-ai-workspace{padding:16px}.losi-ai-heading{flex-direction:column;gap:10px}.losi-ai-heading h2{font-size:18px}.losi-ai-heading>button{width:100%}.losi-ai-field input,.losi-ai-field textarea{font-size:16px}.losi-ai-workspace .proposals-primary,.losi-ai-workspace .proposals-secondary{height:auto;min-height:42px;padding:10px 14px}.losi-ai-actions{width:100%}.losi-ai-actions>button{flex:1 1 130px}.losi-ai-history-row{align-items:flex-start;flex-direction:column}.losi-ai-tabs button{flex:1 1 140px}}
+@media(max-width:640px){.losi-ai-workspace{padding:16px}.losi-ai-heading{flex-direction:column;gap:10px}.losi-ai-heading h2{font-size:18px}.losi-ai-heading>button{width:100%}.losi-ai-field input,.losi-ai-field textarea,.losi-ai-field select{font-size:16px}.losi-ai-workspace .proposals-primary,.losi-ai-workspace .proposals-secondary{height:auto;min-height:42px;padding:10px 14px}.losi-ai-actions{width:100%}.losi-ai-actions>button{flex:1 1 130px}.losi-ai-history-row{align-items:flex-start;flex-direction:column}.losi-ai-tabs button{flex:1 1 140px}}
 
 /* Mascote LIA: arte aprovada, movimento discreto e sem sobrepor o formulário. */
 .losi-ai-brand{display:flex;align-items:center;gap:18px;flex:1;min-width:0}

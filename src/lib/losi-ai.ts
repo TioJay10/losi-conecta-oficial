@@ -1,4 +1,12 @@
 import { supabase } from "./supabase";
+export const AI_TONES = {
+ formal:{label:"Formal",description:"Linguagem profissional, objetiva e respeitosa."},
+ cheerful:{label:"Alegre",description:"Texto leve, acolhedor e animado, sem exageros."},
+ journalistic:{label:"Jornalístico",description:"Informação clara, direta e organizada, com foco nos fatos."},
+ persuasive:{label:"Persuasivo",description:"Destaque os benefícios com argumentos claros e honestos."},
+ educational:{label:"Didático",description:"Explicações acessíveis, com exemplos e etapas fáceis de acompanhar."},
+} as const;
+export type AiTone = keyof typeof AI_TONES;
 export type AiResult = { title:string; description:string; objective:string; methodology:string; notes:string; content:string };
 export type AiStatus = {
  configured:boolean; access:{allowed:boolean;periodStart?:string;periodEnd?:string;proposalLimit?:number;materialLimit?:number};
