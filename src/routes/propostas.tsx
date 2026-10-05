@@ -172,6 +172,8 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
   const footerLineY = 276;
   const footerTextY = 284;
   const contentBottom = 268;
+  const bodyFontSize = 11;
+  const bodyLineHeight = bodyFontSize * 0.3528 * 1.32;
   const navy = [7, 26, 51] as const;
   const gold = [190, 145, 48] as const;
   const ink = [27, 38, 53] as const;
@@ -245,10 +247,10 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
   };
 
   const drawTextCard = (heading: string, text: string, y: number, _width = contentW, maxLines = 7) => {
-    const lineH = 4.15;
+    const lineH = bodyLineHeight;
     const textWidth = contentW;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.2);
+    doc.setFontSize(bodyFontSize);
     const lines = doc.splitTextToSize(text || "Informação a definir.", textWidth);
     const chunks: string[][] = [];
     for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
@@ -265,7 +267,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
       doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", margin, cursor);
       doc.setTextColor(...ink);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(9.2);
+      doc.setFontSize(bodyFontSize);
       doc.text(chunk, margin, cursor + 7, { maxWidth: textWidth, lineHeightFactor: 1.32 });
       cursor += 7 + bodyHeight + 9;
     });
@@ -387,7 +389,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
     doc.text(label.toUpperCase(), ix, iy);
     doc.setTextColor(...ink);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.3);
+    doc.setFontSize(10);
     const valueLines = doc.splitTextToSize(value, 78).slice(0, 2);
     doc.text(valueLines, ix, iy + 6, { lineHeightFactor: 1.15 });
   });
@@ -409,7 +411,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
     doc.setFontSize(15);
     doc.text("PROPOSTAS", 12, 49);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.2);
+    doc.setFontSize(9);
     doc.setTextColor(225,231,239);
     const sideText = doc.splitTextToSize(
       continuation
@@ -429,6 +431,8 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
   let activityY = addActivitiesPage();
   const selected = draft.activities.length ? draft.activities : [draft.proposalType];
   selected.forEach((item) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(bodyFontSize);
     const itemLines = doc.splitTextToSize(item, 108).slice(0, 2);
     const lineCount = itemLines.length;
     const itemH = lineCount > 1 ? 18 : 14;
@@ -440,24 +444,33 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
     doc.circle(76, activityY + 1.8, 1.5, "F");
     doc.setTextColor(...ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.8);
+    doc.setFontSize(bodyFontSize);
     doc.text(itemLines, 82, activityY + 4.2, { lineHeightFactor: 1.18 });
     activityY += itemH + 3;
   });
-  if (activityY + 32 > contentBottom) {
-    addFooter();
-    activityY = addActivitiesPage(true);
-  }
-  doc.setTextColor(...gold);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.4);
-  doc.text("DESENVOLVIMENTO", 73, activityY + 3);
   const method = draft.methodology || "As atividades serão conduzidas por profissionais responsáveis, com adaptação ao espaço, ao perfil do público e à dinâmica do evento. A programação poderá ser ajustada conforme as condições do local.";
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.3);
-  doc.setTextColor(...muted);
-  const methodLines = doc.splitTextToSize(method, 119).slice(0, 6);
-  doc.text(methodLines, 73, activityY + 10, { lineHeightFactor: 1.32 });
+  doc.setFontSize(bodyFontSize);
+  const methodLines: string[] = doc.splitTextToSize(method, 119);
+  let methodIndex = 0;
+  while (methodIndex < methodLines.length) {
+    if (activityY + 10 + bodyLineHeight > contentBottom) {
+      addFooter();
+      activityY = addActivitiesPage(true);
+    }
+    const capacity = Math.max(1, Math.floor((contentBottom - activityY - 10) / bodyLineHeight));
+    const chunk = methodLines.slice(methodIndex, methodIndex + capacity);
+    doc.setTextColor(...gold);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.4);
+    doc.text(methodIndex === 0 ? "DESENVOLVIMENTO" : "DESENVOLVIMENTO — CONTINUAÇÃO", 73, activityY + 3);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(bodyFontSize);
+    doc.setTextColor(...muted);
+    doc.text(chunk, 73, activityY + 10, { lineHeightFactor: 1.32 });
+    methodIndex += chunk.length;
+    activityY += 10 + chunk.length * bodyLineHeight;
+  }
   addFooter();
 
   // PÁGINA FINAL — os blocos são dimensionados pelo número real de linhas.
@@ -466,13 +479,13 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
   const drawFinalCard = (heading: string, text: string, startY: number, maxLines = 6) => {
     const textWidth = contentW;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.8);
+    doc.setFontSize(bodyFontSize);
     const lines = doc.splitTextToSize(text || "Informação a definir.", textWidth);
     const chunks: string[][] = [];
     for (let i = 0; i < lines.length; i += maxLines) chunks.push(lines.slice(i, i + maxLines));
     let cursor = startY;
     chunks.forEach((chunk, index) => {
-      const bodyHeight = chunk.length * 4.1;
+      const bodyHeight = chunk.length * bodyLineHeight;
       if (cursor + 7 + bodyHeight > 250) {
         addFooter();
         cursor = addStandardPage("DETALHAMENTO", "CONTINUAÇÃO");
@@ -483,7 +496,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
       doc.text(index === 0 ? heading.toUpperCase() : "CONTINUAÇÃO", margin, cursor);
       doc.setTextColor(...ink);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.8);
+      doc.setFontSize(bodyFontSize);
       doc.text(chunk, margin, cursor + 7, { maxWidth: textWidth, lineHeightFactor: 1.32 });
       cursor += 7 + bodyHeight + 9;
     });
@@ -506,12 +519,14 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
   );
 
   const drawCta = (startY: number) => {
-    if (startY + 40 > 255) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(bodyFontSize);
+    const lines = doc.splitTextToSize(ctaText || ctaOptions[0].text, contentW - 28).slice(0, 4);
+    const h = Math.max(34, 22 + lines.length * bodyFontSize * 0.3528 * 1.25);
+    if (startY + h > 255) {
       addFooter();
       startY = addStandardPage("PRÓXIMOS PASSOS", "ENCAMINHAMENTO");
     }
-    const lines = doc.splitTextToSize(ctaText || ctaOptions[0].text, contentW - 28).slice(0, 4);
-    const h = Math.max(34, 22 + lines.length * 4.3);
     doc.setDrawColor(...gold);
     doc.setLineWidth(0.8);
     doc.line(margin, startY, margin + 28, startY);
@@ -520,20 +535,24 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
     doc.setFontSize(7);
     doc.text("PRÓXIMO PASSO", margin, startY + 7);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(bodyFontSize);
     doc.text(lines, margin, startY + 16, { lineHeightFactor: 1.25 });
     return startY + h;
   };
 
   finalY = drawCta(finalY + 3);
 
-  const signatureY = Math.min(finalY + 13, 263);
+  if (finalY + 20 > contentBottom) {
+    addFooter();
+    finalY = addStandardPage("CONTATO");
+  }
+  const signatureY = finalY + 13;
   doc.setTextColor(...navy);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12.5);
   doc.text(supplier, margin, signatureY);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(9);
   doc.setTextColor(...muted);
   doc.text([supplierLocation, contact].filter(Boolean).join("  •  ") || "Prestador de serviços", margin, signatureY + 7);
   addFooter();
