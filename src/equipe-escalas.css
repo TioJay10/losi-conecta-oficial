@@ -148,3 +148,80 @@
  .team-page .team-replacement-overlay p{font-size:13px}
  .team-page .team-form-note{font-size:11px;line-height:1.5}
 }
+
+/* Clear task hierarchy: contacts live separately from the event workflow. */
+.team-page .team-hero{padding:32px 5vw;align-items:center;gap:20px}
+.team-page .team-hero h1{font-size:32px;line-height:1.2;margin:0 0 10px}
+.team-page .team-hero p{font-size:14px;line-height:1.6;margin:0;max-width:650px}
+.team-workspace-nav{display:flex;gap:0;margin:24px 5vw 0;border-bottom:1px solid #cdd5df}
+.team-workspace-nav button{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;padding:16px 20px;border:0;border-bottom:3px solid transparent;background:transparent;color:#475569;font:inherit;cursor:pointer;text-align:left}
+.team-workspace-nav button[aria-pressed=true]{border-bottom-color:#b88a32;color:#071a33;background:#fff}
+.team-workspace-nav strong{font-size:16px;line-height:1.4}
+.team-workspace-nav span{font-size:12px;line-height:1.5}
+.team-page .team-grid{display:flex;flex-direction:column;gap:24px;margin:24px 5vw 40px}
+.team-page .team-grid>.team-section{margin:0;width:100%;box-sizing:border-box}
+.team-page .team-section{border-radius:6px}
+.team-page .team-section-head{align-items:flex-start;gap:18px}
+.team-page .team-section-head h2{margin:0;font-size:23px;line-height:1.3}
+.team-page .team-section-help{margin:9px 0 16px;color:#475569;font-size:13px;line-height:1.6;max-width:760px;overflow-wrap:break-word}
+.team-page .team-section-head .team-section-help{margin-bottom:0}
+.team-page .team-event-selector .team-primary{width:auto;min-width:140px;padding:10px 18px;flex-shrink:0}
+.team-page .team-events{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.team-page .team-events article{min-width:0;border-radius:4px;align-items:flex-start}
+.team-page .team-event-history summary{padding:16px 0;color:#071a33;font-size:13px;font-weight:600;cursor:pointer}
+.team-page .team-event-history article{border-radius:4px}
+.team-event-sections{display:flex;flex-wrap:wrap;gap:8px 24px;border-top:1px solid #e2e7ed;border-bottom:1px solid #e2e7ed;padding:14px 0;margin:22px 0}
+.team-event-sections a{color:#071a33;text-decoration:none;font-size:13px;font-weight:600;line-height:1.5;padding:6px 0}
+.team-event-sections a:hover{text-decoration:underline;text-underline-offset:4px}
+.team-page .team-subheading{font-size:17px;line-height:1.4;margin:24px 0 0}
+.team-page .team-opening-form{border-radius:4px;background:#f8fafc}
+.team-page .team-private-help{font-size:12px;margin-top:12px}
+.team-published-label{display:inline-flex;align-items:center;font-size:13px;font-weight:600;color:#226044;padding:10px 0}
+.team-page .team-publish-actions{align-items:center;border-top:1px solid #e2e7ed;padding-top:16px;gap:16px}
+.team-page .team-publish-actions .team-danger{margin-left:auto}
+.team-page .team-candidate-filters{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}
+.team-candidate-filters button{display:inline-flex;align-items:center;gap:10px;min-height:42px;padding:10px 14px;border:1px solid #cbd5e1;border-radius:4px;background:#fff;color:#334155;font:600 13px/1.4 inherit;cursor:pointer}
+.team-candidate-filters button[aria-pressed=true]{color:#fff;background:#071a33;border-color:#071a33}
+.team-candidate-filters span{font-size:12px;font-variant-numeric:tabular-nums}
+.team-page .team-candidate-guidance{color:#334155;font-size:13px;line-height:1.6;margin:16px 0 10px}
+.team-page :is(.team-candidate-list>article,.scale-roles>article,.team-opening-list article){border-radius:4px}
+.team-page .team-candidate-main>b{font-size:11px;line-height:1.5;white-space:normal}
+.team-page .team-assignment{border-radius:4px}
+.team-page .team-confirmed-row em,.team-page .scale-members em{font-size:10px;line-height:1.4;white-space:normal}
+.team-page :is(.status-removed,.status-withdrawn,.status-rejected){color:#7d332d;background:#fff0ed}
+.team-page .team-manual-person{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 70px auto;border-radius:4px;margin-bottom:24px}
+.team-page .team-manual-person>div{grid-column:1/-1;margin-bottom:10px}
+.team-manual-person label{display:grid;gap:8px;color:#334155;font-size:12px;font-weight:600;min-width:0}
+.team-page .team-flow-people{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;text-align:left}
+.team-page .team-flow-people article{align-items:flex-start;min-width:0;border-radius:4px}
+.team-page .team-flow-people article.inactive{opacity:1;background:#f8fafc}
+.team-page .team-flow-people .team-person-open{margin-top:14px;color:#071a33;font-weight:600;font-size:12px}
+.team-page :is(#team-event-candidates,#team-event-scale,.team-form){scroll-margin-top:24px}
+.team-page :is(.team-workspace-nav button,.team-candidate-filters button,.team-flow-people article,.team-event-sections a,summary):focus-visible{outline:2px solid #145ea8;outline-offset:4px}
+@media(max-width:900px){.team-page .team-manual-person{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ .team-page .team-hero{padding:26px 16px}
+ .team-page .team-hero h1{font-size:27px}
+ .team-page .team-hero p{font-size:13px}
+ .team-page .team-hero>strong{margin-top:14px;font-size:12px}
+ .team-workspace-nav{margin:18px 12px 0}
+ .team-workspace-nav button{padding:12px 10px;gap:5px}
+ .team-workspace-nav strong{font-size:13px}
+ .team-workspace-nav span{font-size:11px}
+ .team-page .team-grid{margin:18px 12px 30px;gap:18px}
+ .team-page .team-section-head h2{font-size:20px}
+ .team-page .team-events{grid-template-columns:minmax(0,1fr)}
+ .team-page .team-event-selector .team-primary{width:100%;min-width:0}
+ .team-page .team-section-help{font-size:12px;line-height:1.6}
+ .team-event-sections{gap:6px 18px;padding:10px 0;margin:18px 0}
+ .team-event-sections a{font-size:12px}
+ .team-page .team-publish-actions .team-danger{margin-left:0}
+ .team-page .team-candidate-filters button{padding:10px 12px;font-size:12px;flex:1 1 135px}
+ .team-page .team-manual-person{grid-template-columns:minmax(0,1fr)}
+ .team-page .team-flow-people{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .team-page .team-flow-people .team-person-open{font-size:11px;line-height:1.5}
+}
+.team-page .scale-members>div:not(.scale-empty-role){flex-wrap:wrap}
+.team-page .scale-members>div>div{min-width:140px}
+.team-page .team-candidate-filters button{font-family:inherit;font-size:13px;font-weight:600;line-height:1.4}
+.team-page .team-opening-list article>b small{display:block;font-size:11px;font-weight:400;color:#475569;margin:0 0 4px}
