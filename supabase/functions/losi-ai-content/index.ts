@@ -80,7 +80,16 @@ Deno.serve(async(req:Request)=>{
      schema:{type:"object",properties,required:fields,additionalProperties:false}}}}),
   });
   const data=await response.json().catch(()=>({}));
-  if(!response.ok){console.error("[LOSI_AI] Provider error",{status:response.status,code:data.error?.code});throw new Error("provider");}
+  if(!response.ok){
+   console.error("[LOSI_AI] Provider error",{status:response.status,code:data.error?.code});
+   if(["credit_balance_exhausted","insufficient_quota"].includes(data.error?.code)){
+    return json({error:"O assistente está temporariamente indisponível. Entre em contato com o suporte. Sua franquia não foi descontada."},503);
+   }
+   if(response.status===429){
+    return json({error:"A IA está recebendo muitas solicitações. Aguarde alguns instantes. Sua franquia não foi descontada."},429);
+   }
+   throw new Error("provider");
+  }
   const choice=data.choices?.[0];
   if(choice?.finish_reason!=="stop"||choice?.message?.refusal) throw new Error("incomplete output");
   const result=JSON.parse(choice.message.content);

@@ -29,7 +29,9 @@ async function run(mode,kind="material",action="generate"){
    assert.equal(request.store,false);assert.equal(request.response_format.json_schema.strict,true);
    const input=JSON.parse(request.messages[1].content);
    assert(!("recipientContact" in input.context));
-   if(mode==="provider-error")return Response.json({error:{code:"mock"}},{status:429});
+   if(mode==="provider-error")return Response.json({error:{code:"mock"}},{status:500});
+   if(mode==="no-credit")return Response.json({error:{code:"credit_balance_exhausted"}},{status:429});
+   if(mode==="rate-limit")return Response.json({error:{code:"rate_limit_exceeded"}},{status:429});
    return Response.json({choices:[{finish_reason:mode==="truncated"?"length":"stop",message:{content:mode==="malformed"?"bad JSON":JSON.stringify(result)}}],usage:{prompt_tokens:100,completion_tokens:200}});
   }};
  vm.runInNewContext(built.outputText,context);
@@ -42,6 +44,7 @@ async function run(mode,kind="material",action="generate"){
  for(const kind of ["proposal","material"]){const r=await run("ok",kind);assert.equal(r.response.status,200);assert.equal(r.providerCalls,1);assert(r.writes.some(w=>w.status==="completed"));assert(!r.writes.some(w=>w.status==="failed"));}
  for(const mode of ["unconfigured","no-access","quota","short"]){const r=await run(mode);assert(r.response.status>=400);assert.equal(r.providerCalls,0);assert.equal(r.writes.length,0);}
  for(const mode of ["provider-error","truncated","malformed","db-error"]){const r=await run(mode);assert.equal(r.response.status,502);assert(r.writes.some(w=>w.status==="failed"));}
+ for(const mode of ["no-credit","rate-limit"]){const r=await run(mode);assert.equal(r.response.status,mode==="no-credit"?503:429);assert(r.writes.some(w=>w.status==="failed"));assert(r.data.error.includes("franquia não foi descontada"));}
  const cached=await run("cached");assert.equal(cached.data.cached,true);assert.equal(cached.providerCalls,0);
  const status=await run("unconfigured","material","status");assert.equal(status.data.configured,false);assert.equal(status.providerCalls,0);assert.equal(status.reserves,0);
  console.log("PASS: auth, access/quota, disabled activation, structured content, output limits, privacy filtering, cached requests and failure releases (mocked OpenAI).");
