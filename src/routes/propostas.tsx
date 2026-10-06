@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
 import "../proposals.css";
+import "../proposal-editorial.css";
 import { LosiAiWorkspace } from "../components/LosiAiWorkspace";
-import { drawGeometricProposalCover, PROPOSAL_GEOMETRIC_BACKGROUND, type ProposalLayout } from "../lib/proposal-layout";
+import { drawEditorialProposalCover, drawGeometricProposalCover, PROPOSAL_GEOMETRIC_BACKGROUND, type ProposalLayout } from "../lib/proposal-layout";
 
 export const Route = createFileRoute("/propostas")({ component: ProposalsPage });
 
@@ -164,7 +165,7 @@ function buildObjective(type: string) {
   return map[type] || map["Proposta personalizada"];
 }
 
-function ProposalPdf({ draft, business, profile, layout = "classic", download = true }: { draft: ProposalDraft; business: Business | null; profile: Profile | null; layout?: ProposalLayout; download?: boolean }) {
+function ProposalPdf({ draft, business, profile, layout = "classic", coverImage = "", download = true }: { draft: ProposalDraft; business: Business | null; profile: Profile | null; layout?: ProposalLayout; coverImage?: string; download?: boolean }) {
   const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
   const W = 210;
   const H = 297;
@@ -197,7 +198,8 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
     doc.line(footerMargin, footerLineY, W - margin, footerLineY);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
-    doc.setTextColor(...muted);
+    if (layout === "editorial" && pageNumber === 1) doc.setTextColor(220,229,241);
+    else doc.setTextColor(...muted);
     doc.text("LOSI CONECTA  •  DOCUMENTO PROFISSIONAL", footerMargin, footerTextY);
     doc.text(String(pageNumber).padStart(2, "0"), W - margin, footerTextY, { align: "right" });
   };
@@ -221,7 +223,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, W, H, "F");
     doc.setFillColor(...navy);
-    doc.rect(0, 0, W, 13, "F");
+    doc.rect(0, 0, W, layout === "editorial" ? 3 : 13, "F");
     doc.setFillColor(...gold);
     doc.rect(margin, 27, 3, 17, "F");
     doc.setTextColor(...navy);
@@ -279,7 +281,9 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
   // CAPA
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, H, "F");
-  if(layout === "geometric") {
+  if(layout === "editorial") {
+    drawEditorialProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,coverImage);
+  } else if(layout === "geometric") {
     drawGeometricProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
   } else {
   geometric();
@@ -579,11 +583,40 @@ function ProposalPdf({ draft, business, profile, layout = "classic", download = 
   window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
 }
 
+function EditorialProposalPreview({draft,business,profile,coverImage}:{draft:ProposalDraft;business:Business|null;profile:Profile|null;coverImage:string}) {
+  const [url,setUrl]=useState("");
+  const [error,setError]=useState("");
+  const [busy,setBusy]=useState(true);
+  useEffect(()=>{
+    let objectUrl="",cancelled=false;
+    setBusy(true);setError("");setUrl("");
+    const timer=window.setTimeout(()=>{
+      try{
+        const pdf=ProposalPdf({draft,business,profile,layout:"editorial",coverImage,download:false});
+        if(!pdf)throw new Error("Não foi possível preparar a prévia.");
+        objectUrl=URL.createObjectURL(pdf.output("blob"));
+        if(!cancelled)setUrl(objectUrl);
+      }catch{if(!cancelled)setError("Não foi possível carregar a prévia. Revise a imagem e tente novamente.");}
+      finally{if(!cancelled)setBusy(false);}
+    },450);
+    return()=>{cancelled=true;window.clearTimeout(timer);if(objectUrl)URL.revokeObjectURL(objectUrl);};
+  },[draft,business,profile,coverImage]);
+  return <div className="proposal-editorial-preview" aria-busy={busy}>
+    {busy&&<p role="status">Atualizando prévia…</p>}
+    {error&&<p role="alert">{error}</p>}
+    {url&&<><a href={url} target="_blank" rel="noopener noreferrer">Abrir prévia do PDF</a><iframe src={url+"#view=FitH"} title="Prévia da proposta no modelo Editorial curvo" /></>}
+  </div>;
+}
+
 function ProposalsPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
   const [proposalLayout,setProposalLayout] = useState<ProposalLayout>("classic");
+  const [coverImage,setCoverImage] = useState("");
+  const [coverImageBusy,setCoverImageBusy] = useState(false);
+  const [coverImageError,setCoverImageError] = useState("");
+  const coverRequest = useRef(0);
   const [customActivity, setCustomActivity] = useState("");
   const previewRef = useRef<HTMLElement | null>(null);
   const [loading, setLoading] = useState(true);
@@ -707,6 +740,10 @@ function ProposalsPage() {
   }, []);
 
   function newProposal() {
+    coverRequest.current += 1;
+    setCoverImage("");
+    setCoverImageError("");
+    setCoverImageBusy(false);
     setDraft({
       recipient: "",
       responsible: "",
@@ -732,6 +769,25 @@ function ProposalsPage() {
     setMessage("");
   }
 
+  async function chooseCoverImage(file:File) {
+    const request=++coverRequest.current;
+    setCoverImageError("");
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>8*1024*1024){setCoverImageError("Escolha uma imagem JPG, PNG ou WEBP de até 8 MB.");return;}
+    setCoverImageBusy(true);
+    const url=URL.createObjectURL(file);
+    try{
+      const image=new Image();
+      await new Promise<void>((resolve,reject)=>{image.onload=()=>resolve();image.onerror=()=>reject(new Error("Não foi possível abrir esta imagem."));image.src=url;});
+      const canvas=document.createElement("canvas");canvas.width=960;canvas.height=960;
+      const context=canvas.getContext("2d");if(!context)throw new Error("Não foi possível preparar a imagem.");
+      const side=Math.min(image.naturalWidth,image.naturalHeight);
+      context.fillStyle="#ffffff";context.fillRect(0,0,960,960);
+      context.drawImage(image,(image.naturalWidth-side)/2,(image.naturalHeight-side)/2,side,side,0,0,960,960);
+      if(request===coverRequest.current)setCoverImage(canvas.toDataURL("image/jpeg",.9));
+    }catch(error){if(request===coverRequest.current)setCoverImageError(error instanceof Error?error.message:"Não foi possível preparar a imagem.");}
+    finally{URL.revokeObjectURL(url);if(request===coverRequest.current)setCoverImageBusy(false);}
+  }
+
   function generate() {
     if (!draft.recipient.trim()) {
       setMessage("Informe para quem a proposta será apresentada.");
@@ -743,7 +799,7 @@ function ProposalsPage() {
     }
 
     try {
-      ProposalPdf({ draft: preview, business, profile, layout: proposalLayout });
+      ProposalPdf({ draft: preview, business, profile, layout: proposalLayout, coverImage });
       setMessage("Proposta gerada com sucesso. O PDF foi preparado para download.");
     } catch (error) {
       console.error("Erro ao gerar proposta em PDF:", error);
@@ -879,14 +935,22 @@ function ProposalsPage() {
 
               <div className="proposals-actions">
                 <button type="button" className="proposals-secondary" onClick={newProposal}>Limpar</button>
-                <button type="button" className="proposals-primary" onClick={generate}>Gerar proposta em PDF</button>
+                <button type="button" className="proposals-primary" disabled={coverImageBusy} onClick={generate}>Gerar proposta em PDF</button>
               </div>
               <p className="proposals-note">A proposta não inclui valores. Ela funciona como apresentação inicial do trabalho; orçamento e condições comerciais podem ser tratados separadamente.</p>
             </section>
 
             <aside ref={previewRef} className={"proposals-preview-panel" + (previewFullscreen ? " is-fullscreen" : "")}>
               <div className="proposals-preview-head"><div><span className="proposals-kicker">VISUALIZAÇÃO</span><h2>Prévia da proposta</h2></div><div className="proposals-preview-tools"><span className="proposals-preview-status">A4 • PDF</span><button type="button" className="proposals-preview-fullscreen" onClick={() => void togglePreviewFullscreen()}>{previewFullscreen ? "Sair da tela inteira" : "Tela inteira"}</button></div></div>
-              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option></select></label>
+              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option><option value="editorial">Editorial curvo · capa com imagem</option></select></label>
+              {proposalLayout === "editorial" && <div className="proposal-cover-image-control">
+                <label><span>Imagem da capa (opcional)</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={coverImageBusy} onChange={event=>{const file=event.target.files?.[0];event.currentTarget.value="";if(file)void chooseCoverImage(file);}} /></label>
+                <p>Escolha uma foto do seu trabalho. JPG, PNG ou WEBP, até 8 MB. Sem foto, a capa usa as iniciais da empresa.</p>
+                {coverImageBusy && <p role="status">Preparando imagem…</p>}
+                {coverImageError && <p role="alert">{coverImageError}</p>}
+                {coverImage && <button type="button" className="proposals-secondary" disabled={coverImageBusy} onClick={()=>setCoverImage("")}>Remover imagem</button>}
+              </div>}
+              {proposalLayout === "editorial" ? <EditorialProposalPreview draft={preview} business={business} profile={profile} coverImage={coverImage} /> : <>
               <div className={"proposal-document-preview"+(proposalLayout==="geometric"?" proposal-layout-geometric":"")}>
                 <div className="proposal-preview-page proposal-preview-cover">
                   <div className="proposal-cover-lines" style={proposalLayout==="geometric"?{backgroundImage:`url("${PROPOSAL_GEOMETRIC_BACKGROUND}")`}:undefined}></div>
@@ -916,6 +980,7 @@ function ProposalsPage() {
                   <div className="proposal-preview-signature"><strong>{supplier}</strong><span>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ")}</span></div>
                 </div>
               </div>
+              </>}
             </aside>
           </div>
         </section>
