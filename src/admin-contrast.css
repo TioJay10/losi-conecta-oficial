@@ -1,0 +1,179 @@
+/* Admin-only contrast pairs. Keep these after legacy theme overrides.
+   Tokens follow the surface, so white cards inside navy groups remain readable. */
+body :is(.admin-page,.admin-profile-page) {
+  --admin-text: #172033;
+  --admin-muted: #526174;
+  --admin-link: #75551f;
+  color: var(--admin-text) !important;
+  color-scheme: light;
+}
+body .admin-page[class] .admin-content {
+  color: var(--admin-text) !important;
+}
+/* The live Home preview owns its palette and is deliberately excluded. */
+body :is(.admin-page,.admin-profile-page) :is(h1,h2,h3,h4,h5,strong,b,legend,summary,th,td):not(.home-customization-preview-viewport *) {
+  color: var(--admin-text) !important;
+}
+body :is(.admin-page,.admin-profile-page) :is(p,span,small,label,em):not(.home-customization-preview-viewport *) {
+  color: var(--admin-muted) !important;
+}
+body :is(.admin-page,.admin-profile-page) a:not(.home-customization-preview-viewport *) {
+  color: var(--admin-link) !important;
+  text-decoration-color: currentColor;
+}
+body :is(.admin-page,.admin-profile-page) a:hover:not(.home-customization-preview-viewport *) {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+/* Navy surfaces: apply text tokens locally instead of whitening every card. */
+body .admin-page[class] :is(
+  .admin-sidebar,.admin-finance-hero,.admin-alerts-hero,
+  .admin-admin-center-hero,.admin-operational-metrics,.admin-audit-card,
+  .admin-presentation-hero,.admin-inconsistency-head,
+  .admin-inconsistency-chat-header
+) {
+  --admin-text: #ffffff;
+  --admin-muted: #dce5f1;
+  --admin-link: #f0d99a;
+  color: var(--admin-text) !important;
+}
+/* These groups already have light backgrounds, including security and
+   individual operational metrics nested under the navy heading. */
+body .admin-page[class] :is(
+  .admin-security-hero,.admin-security-section,.admin-security-card,
+  .admin-security-metrics article,.admin-operational-grid article,
+  .admin-finance-panel,.admin-empty,.admin-inconsistency-summary,
+  .admin-inconsistency-bubble,.admin-inconsistency-composer
+) {
+  --admin-text: #172033;
+  --admin-muted: #526174;
+  --admin-link: #75551f;
+  color: var(--admin-text) !important;
+}
+body .admin-page[class] :is(.admin-badge,.admin-filter-count,.admin-form-kicker,
+  .admin-subscription-plan,.admin-alert-type) {
+  color: var(--admin-link) !important;
+}
+/* White administrative header, dark navigation and avatar fallbacks. */
+body .admin-page[class] .admin-header :is(.admin-mobile-subtitle,.admin-header-user-name) {
+  color: #526174 !important;
+}
+body .admin-page[class] .admin-header .mobile-centered-brand span,
+body .admin-profile-page .admin-profile-header-brand span {
+  color: #75551f !important;
+}
+body .admin-page[class] :is(.admin-header-avatar-fallback,
+  .admin-inconsistency-item-avatar,.admin-inconsistency-message-avatar-fallback),
+body .admin-profile-page .admin-profile-photo {
+  background: #122036 !important;
+  color: #f0d99a !important;
+}
+/* Form content and placeholders stay legible, including disabled fields. */
+body :is(.admin-page,.admin-profile-page) :is(input,select,textarea):not(.home-customization-preview-viewport *) {
+  background-color: #ffffff !important;
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033;
+  caret-color: #172033;
+}
+body :is(.admin-page,.admin-profile-page) :is(input,textarea)::placeholder {
+  color: #526174 !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #526174;
+}
+body :is(.admin-page,.admin-profile-page) select option { color: #172033; background: #fff; }
+/* Actions own their text/background pair, even when nested in a dark group. */
+body .admin-page[class] :is(.admin-primary-button,.admin-action-button),
+body .admin-profile-page :is(.admin-profile-primary,.admin-profile-upload) {
+  background: #122036 !important;
+  color: #ffffff !important;
+  border-color: #9a7b35 !important;
+}
+body .admin-page[class] :is(.admin-primary-button,.admin-action-button):hover:not(:disabled),
+body .admin-profile-page :is(.admin-profile-primary,.admin-profile-upload):hover {
+  background: #243c59 !important;
+}
+body .admin-page[class] :is(.admin-secondary-button,.admin-back-button,.admin-user-unblock),
+body .admin-profile-page :is(.admin-profile-back,.admin-profile-secondary,.admin-profile-logout) {
+  background: #ffffff !important;
+  color: #172033 !important;
+}
+body .admin-page[class] :is(.admin-user-block,.admin-user-delete,.admin-category-delete,.admin-security-danger) {
+  background: #fff4f4 !important;
+  color: #9b2525 !important;
+}
+body .admin-page[class] :is(.admin-finance-periods button.active,
+  .admin-alerts-filters button.active,.admin-inconsistency-filters button.is-active) {
+  background: #122036 !important;
+  color: #ffffff !important;
+}
+body .admin-page[class] .admin-finance-periods button:not(.active) {
+  color: #ffffff !important;
+}
+body .admin-page[class] :is(.admin-alerts-filters button:not(.active),
+  .admin-inconsistency-filters button:not(.is-active)) {
+  background: #ffffff !important;
+  color: #526174 !important;
+}
+body .admin-page[class] .admin-inconsistency-composer button {
+  background: #122036 !important;
+  color: #ffffff !important;
+}
+body .admin-page[class] .admin-inconsistency-composer button.is-resolve {
+  background: #eef1f5 !important;
+  color: #344054 !important;
+}
+/* Child labels inherit the action's own color, not the surrounding card. */
+body :is(.admin-page,.admin-profile-page) :is(button,a,.admin-profile-upload)
+:is(span,strong,small,em):not(.home-customization-preview-viewport *) {
+  color: inherit !important;
+}
+/* Preserve semantic states with readable, paired colors. */
+body .admin-page[class] :is(.admin-subscription-status-active,.admin-category-status-active),
+body .admin-profile-page .admin-profile-message.success {
+  background: #eaf7ef !important;
+  color: #19623b !important;
+}
+body .admin-page[class] :is(.admin-subscription-status-pending,.admin-security-status) {
+  background: #fff3d6 !important;
+  color: #75501a !important;
+}
+body .admin-page[class] :is(.admin-subscription-status-cancelled,.admin-user-status-blocked),
+body .admin-profile-page .admin-profile-message.error {
+  background: #fff0f0 !important;
+  color: #9b2525 !important;
+}
+body .admin-page[class] :is(.admin-category-status-inactive,.admin-plan-meta span,.admin-security-reasons span) {
+  background: #eef1f5 !important;
+  color: #344054 !important;
+}
+body .admin-page[class] .admin-finance-axis-label { fill: #526174 !important; }
+body .admin-page[class] .admin-inconsistency-close { color: #ffffff !important; }
+body :is(.admin-page,.admin-profile-page) :is(button,input,select,textarea):disabled {
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+body :is(.admin-page,.admin-profile-page) :is(a,button,input,select,textarea):focus-visible
+:not(.home-customization-preview-viewport *) {
+  outline: 2px solid #9a7b35 !important;
+  outline-offset: 3px;
+}
+/* Exceptions to action-label inheritance: initials sit on their own navy disc. */
+body .admin-page[class] .admin-profile-link .admin-header-avatar-fallback,
+body .admin-page[class] .admin-inconsistency-item .admin-inconsistency-item-avatar {
+  color: #f0d99a !important;
+}
+body .admin-profile-page[class] .admin-profile-photo span {
+  color: #f0d99a !important;
+}
+body .admin-profile-page[class] .admin-profile-upload {
+  color: #ffffff !important;
+}
+body .admin-page[class] .admin-dashboard-activity summary .admin-finance-panel-head > span {
+  color: #526174 !important;
+}
+body .admin-page[class] :is(.admin-primary-button,.admin-action-button):disabled,
+body .admin-profile-page[class] .admin-profile-primary:disabled {
+  background: #e4e8ed !important;
+  color: #526174 !important;
+  border-color: #b8c2ce !important;
+}
