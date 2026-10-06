@@ -21,12 +21,12 @@ Deno.serve(async r=>{
 
   if(b.action==="recover"){
    const name=String(b.name||"").trim(),n=phone(b.whatsapp);
-   if(!name||n.length<12||n.length>13)return j({error:"Informe seu nome completo e WhatsApp com DDD."},400);
-   const {data:p,error}=await a.from("collaborator_profiles").select("losi_id,full_name").eq("whatsapp_normalized",n).maybeSingle();
+   if(!name||n.length<12||n.length>13)return j({error:"Informe nome completo ou nome de tio e WhatsApp com DDD."},400);
+   const {data:p,error}=await a.from("collaborator_profiles").select("losi_id,full_name,professional_name,calendar_token").eq("whatsapp_normalized",n).maybeSingle();
    if(error)return j({error:"Não foi possível localizar seu cadastro."},500);
    const norm=(v:string)=>v.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase("pt-BR");
-   if(!p||norm(p.full_name)!==norm(name))return j({error:"Não encontramos um cadastro com esse nome e WhatsApp."},404);
-   return j({found:true,losiId:p.losi_id});
+   if(!p||![p.full_name,p.professional_name].some(value=>value&&norm(value)===norm(name)))return j({error:"Não encontramos um cadastro com esse nome e WhatsApp."},404);
+   return j({found:true,losiId:p.losi_id,calendarToken:p.calendar_token});
   }
 
   if(b.action==="lookup"){
@@ -70,14 +70,14 @@ Deno.serve(async r=>{
     p=ins;createdProfile=true;
    }
 
-   if(b.action==="register")return j({success:true,losiId:p.losi_id,calendarToken:createdProfile||String(b.calendarToken||"")===p.calendar_token?p.calendar_token:undefined});
+   if(b.action==="register")return j({success:true,losiId:p.losi_id,calendarToken:p.calendar_token});
 
    const existing=await a.from("team_applications").select("id,status").eq("event_id",event.id).eq("opening_id",openingId).eq("profile_id",p.id).maybeSingle();
    if(existing.data)return j({error:"Você já se candidatou a esta oportunidade.",alreadyApplied:true},409);
 
    const ir=await a.from("team_applications").insert({event_id:event.id,opening_id:openingId,collaborator_id:null,profile_id:p.id,candidate_name:p.full_name,candidate_whatsapp:p.whatsapp,candidate_city:p.city,candidate_state:p.state,candidate_notes:String(b.notes||"").trim()||null});
    if(ir.error)return j({error:ir.error.code==="23505"?"Você já se candidatou a esta oportunidade.":"Não foi possível enviar sua candidatura.",alreadyApplied:ir.error.code==="23505"},ir.error.code==="23505"?409:500);
-   return j({success:true,losiId:p.losi_id,calendarToken:createdProfile||String(b.calendarToken||"")===p.calendar_token?p.calendar_token:undefined});
+   return j({success:true,losiId:p.losi_id,calendarToken:p.calendar_token});
   }
   return j({error:"Ação inválida."},400);
  }catch(e){console.error(e);return j({error:"Erro interno."},500)}

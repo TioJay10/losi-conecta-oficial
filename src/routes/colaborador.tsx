@@ -1,74 +1,61 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useState } from "react";
-import { readCollaboratorSession } from "../lib/collaborator-session";
+import { readCollaboratorSession, rememberCollaborator } from "../lib/collaborator-session";
 import "../equipe-escalas.css";
+import "../collaborator-access.css";
 
 export const Route = createFileRoute("/colaborador")({ component: CollaboratorAccess });
-type Result = { profile: { losi_id: string; display_name: string; city: string | null; state: string | null; photo_url: string | null; whatsapp_masked: string } };
+type Mode = "access" | "recover" | "register";
+type Result = { created?: boolean; calendarToken: string; profile: { losi_id: string; display_name: string; city: string | null; state: string | null; photo_url: string | null; whatsapp_masked: string } };
 function CollaboratorAccess() {
-  const [id, setId] = useState("");
-  const [recovering, setRecovering] = useState(false);
-  const [name, setName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
+  const [mode, setMode] = useState<Mode>("access");
+  const [form, setForm] = useState({ losiId: "", name: "", professionalName: "", whatsapp: "", city: "", state: "" });
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [personalLink, setPersonalLink] = useState("");
-  useEffect(() => { const session = readCollaboratorSession(); if (session) setId(session.losiId); }, []);
-
-  async function lookup(e: FormEvent) {
-    e.preventDefault(); setLoading(true); setError(""); setResult(null); setPersonalLink("");
+  useEffect(() => { const session = readCollaboratorSession(); if (session) setForm(value => ({ ...value, losiId: session.losiId })); }, []);
+  const field = (key: keyof typeof form, value: string) => setForm(old => ({ ...old, [key]: value }));
+  const switchMode = (value: Mode) => { setMode(value); setError(""); setResult(null); };
+  async function lookup(event: FormEvent) {
+    event.preventDefault(); setLoading(true); setError(""); setResult(null);
     try {
-      const r = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/team-collaborator-access", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(recovering ? { action: "recover", name, whatsapp } : { losiId: id }),
-      });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || "Não foi possível continuar.");
-      if (!d.found) throw new Error("Não encontramos esse ID LOSI.");
-      setResult(d); setId(d.profile.losi_id);
       const session = readCollaboratorSession();
-      if (session && session.losiId === d.profile.losi_id) {
-        // O ID localiza o perfil; o token pessoal autoriza o calendário.
-        const check = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/team-public-calendar", {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: session.calendarToken }),
-        });
-        if (check.ok) {
-          const calendar = await check.json();
-          if (calendar.collaborator.losi_id === d.profile.losi_id) setPersonalLink(`/calendario/${session.calendarToken}`);
-        }
-      }
+      const trusted = mode === "access" && session?.losiId === form.losiId ? session.calendarToken : undefined;
+      const response = await fetch("https://bpvaftobiosjesdbaany.supabase.co/functions/v1/team-collaborator-access", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, action: mode === "access" ? "access" : mode, calendarToken: trusted }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Não foi possível continuar.");
+      if (!data.calendarToken || !data.profile?.losi_id) throw new Error("Não foi possível abrir o calendário. Tente novamente.");
+      rememberCollaborator(data.profile.losi_id, data.calendarToken);
+      setResult(data); field("losiId", data.profile.losi_id);
     } catch (err) { setError(err instanceof Error ? err.message : "Não foi possível continuar."); }
     finally { setLoading(false); }
   }
-
   return <main className="collaborator-access-page"><section className="collaborator-access-card">
     <a className="collaborator-access-brand" href="/">LOSI <b>CONECTA</b></a>
-    <span>ÁREA DO COLABORADOR</span><h1>Seu calendário. Seu ID LOSI.</h1>
-    <p>Acesse suas escalas, oportunidades e seu perfil usando sua identidade de colaborador.</p>
+    <h1>Calendário do colaborador</h1>
+    <p>Acesse suas escalas e oportunidades sem conta de fornecedor, e-mail ou senha na LOSI Conecta.</p>
+    <div className="collaborator-access-modes" aria-label="Como deseja acessar?">
+      <button type="button" aria-pressed={mode !== "register"} disabled={loading} onClick={() => switchMode("access")}>Já tenho ID</button>
+      <button type="button" aria-pressed={mode === "register"} disabled={loading} onClick={() => switchMode("register")}>Primeiro acesso</button>
+    </div>
     <form onSubmit={lookup}>
-      {recovering ? <>
-        <label>Nome completo cadastrado<input required autoComplete="name" value={name} onChange={e => setName(e.target.value)} /></label>
-        <label>WhatsApp cadastrado<input required inputMode="tel" autoComplete="tel" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} /></label>
-      </> : <label>ID LOSI<input required placeholder="LOSI-000000" value={id} onChange={e => setId(e.target.value.toUpperCase())} /></label>}
+      {mode === "access" ? <label>ID do colaborador<input required autoComplete="off" placeholder="LOSI-000000" value={form.losiId} onChange={e => field("losiId", e.target.value.toUpperCase())} /></label> : <label>{mode === "register" ? "Nome completo" : "Nome completo ou nome de tio cadastrado"}<input required autoComplete="name" maxLength={160} value={form.name} onChange={e => field("name", e.target.value)} /></label>}
+      {mode === "register" && <label>Nome profissional / nome de tio<input required maxLength={160} value={form.professionalName} onChange={e => field("professionalName", e.target.value)} /></label>}
+      <label>{mode === "register" ? "WhatsApp" : "WhatsApp cadastrado"}<input required type="tel" inputMode="tel" autoComplete="tel" placeholder="(DDD) número" value={form.whatsapp} onChange={e => field("whatsapp", e.target.value)} /></label>
+      {mode === "register" && <div className="collaborator-location-fields"><label>Cidade<input required autoComplete="address-level2" maxLength={120} value={form.city} onChange={e => field("city", e.target.value)} /></label><label>UF<input maxLength={2} autoComplete="address-level1" value={form.state} onChange={e => field("state", e.target.value.toUpperCase())} /></label></div>}
       {error && <p className="opportunity-error" role="alert">{error}</p>}
-      <button disabled={loading}>{loading ? "LOCALIZANDO..." : recovering ? "RECUPERAR MEU ID" : "CONTINUAR"}</button>
-      <button type="button" className="opportunity-text-button" disabled={loading} onClick={() => { setRecovering(!recovering); setError(""); setResult(null); setPersonalLink(""); }}>
-        {recovering ? "JÁ SEI MEU ID LOSI" : "ESQUECI MEU ID LOSI"}
-      </button>
+      <button disabled={loading}>{loading ? "AGUARDE..." : mode === "register" ? "CRIAR MEU ID" : mode === "recover" ? "LOCALIZAR MEU CALENDÁRIO" : "ACESSAR MEU CALENDÁRIO"}</button>
+      {mode !== "register" && <button type="button" className="opportunity-text-button" disabled={loading} onClick={() => switchMode(mode === "recover" ? "access" : "recover")}>{mode === "recover" ? "JÁ SEI MEU ID" : "ESQUECI MEU ID"}</button>}
+      {mode === "register" && <small>Este cadastro cria apenas sua identidade de colaborador. Seu ID será o mesmo nas próximas oportunidades.</small>}
     </form>
     {result && <div className="collaborator-found" role="status">
       {result.profile.photo_url ? <img src={result.profile.photo_url} alt="" /> : <div className="calendar-avatar">{result.profile.display_name.slice(0, 1).toUpperCase()}</div>}
-      <div><small>PERFIL LOCALIZADO</small><strong>{result.profile.display_name}</strong><b>{result.profile.losi_id}</b>
-        <span>{result.profile.city ? result.profile.city + (result.profile.state ? " / " + result.profile.state : "") : "Localização não informada"}</span>
-        <span>WhatsApp {result.profile.whatsapp_masked}</span></div>
-      <div className="collaborator-verification">
-        {personalLink ? <a className="opportunity-calendar-link" href={personalLink}>ABRIR MEU CALENDÁRIO</a> : <>
-          <b>Acesso ao calendário pessoal</b><p>Abra o link pessoal recebido no cadastro ou pelo fornecedor. O ID localiza seu perfil; ele não libera sua agenda e seus valores em outro dispositivo.</p>
-          <p>A confirmação por código no WhatsApp ainda não está disponível.</p>
-        </>}
-      </div>
+      <div><small>{result.created ? "SEU ID FOI CRIADO" : "COLABORADOR LOCALIZADO"}</small><strong>{result.profile.display_name}</strong><b>{result.profile.losi_id}</b><span>{result.profile.city ? result.profile.city + (result.profile.state ? " / " + result.profile.state : "") : ""}</span><span>WhatsApp {result.profile.whatsapp_masked}</span></div>
+      <div className="collaborator-verification"><a className="opportunity-calendar-link" href={`/calendario/${result.calendarToken}`}>ABRIR MEU CALENDÁRIO</a><p>Guarde seu ID. Você também pode acessar com nome de tio e WhatsApp.</p></div>
     </div>}
-    <footer><a href="/">CONHEÇA A LOSI</a><span>Seu ID LOSI é pessoal e permanente.</span></footer>
+    <footer><span>Seu calendário e seu ID são pessoais.</span></footer>
   </section></main>;
 }

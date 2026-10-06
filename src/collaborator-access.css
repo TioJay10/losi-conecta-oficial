@@ -1,0 +1,12 @@
+.collaborator-access-card h1{margin-top:26px;font-size:30px;line-height:1.2}
+.collaborator-access-card input{min-width:0;width:100%;box-sizing:border-box;text-transform:none;color:#0b182a;background:#fff}
+.collaborator-access-card form label{color:#24364c;font-size:12px}
+.collaborator-access-card form small{color:#526174;font-size:12px;line-height:1.5}
+.collaborator-access-modes{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.collaborator-access-modes button{flex:1;min-height:44px;padding:10px 14px;border:1px solid #d8dde5;border-radius:6px;background:#fff;color:#24364c;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.collaborator-access-modes button[aria-pressed=true]{background:#0b182a;color:#fff;border-color:#0b182a}
+.collaborator-access-modes button:disabled{opacity:.6;cursor:wait}
+.collaborator-access-modes button:focus-visible{outline:2px solid #8a6d2f;outline-offset:3px}
+.collaborator-location-fields{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:12px}
+.collaborator-found>div{min-width:0;overflow-wrap:anywhere}
+@media(max-width:480px){.collaborator-access-card h1{font-size:25px}.collaborator-access-modes button{font-size:12px;padding:10px}.collaborator-access-card{border-radius:10px}}

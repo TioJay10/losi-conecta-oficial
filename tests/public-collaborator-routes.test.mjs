@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+const exports={};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/lib/public-routes.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports});
+for(const path of ['/','/entrar','/buscar','/faq','/fornecedor/empresa','/colaborador','/colaborador/','/calendario/token','/oportunidade/token']) assert.equal(exports.isPublicPath(path),true,path);
+for(const path of ['/admin','/painel','/equipe-escalas','/propostas','/minha-empresa','/colaborador-extra','/calendario-privado','/oportunidade-privada']) assert.equal(exports.isPublicPath(path),false,path);
+const root=fs.readFileSync('src/routes/__root.tsx','utf8');assert.match(root,/const publicRoute = isPublicPath\(location.pathname\)/);
+console.log('Rotas públicas do colaborador liberadas; painéis do fornecedor e administrador continuam protegidos.');

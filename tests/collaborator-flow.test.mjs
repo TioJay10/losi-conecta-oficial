@@ -39,7 +39,7 @@ assert.equal(db.tables.collaborator_profiles.length,1);assert.equal(db.tables.te
 assert.equal(db.tables.collaborator_profiles[0].whatsapp_normalized,'5555999991234');
 const id=registration.body.losiId, token=registration.body.calendarToken;
 const recovery=await call({token:'event-token',action:'recover',name:' joao  teste ',whatsapp:'5555999991234'});
-assert.equal(recovery.body.losiId,id);assert.equal(recovery.body.calendarToken,undefined);
+assert.equal(recovery.body.losiId,id);assert.equal(recovery.body.calendarToken,token);
 assert.equal((await call({token:'event-token',action:'recover',name:'Outra Pessoa',whatsapp:'5555999991234'})).status,404);
 assert.equal((await call({token:'event-token',action:'apply',losiId:id,openingId:'opening-1'})).status,403);
 const application=await call({token:'event-token',action:'apply',losiId:id,calendarToken:token,openingId:'opening-1'});
@@ -48,9 +48,24 @@ assert.equal(db.tables.collaborator_profiles.length,1);assert.equal(db.tables.te
 assert.equal((await call({token:'event-token',action:'apply',losiId:id,calendarToken:token,openingId:'opening-1'})).status,409);
 db.tables.team_events.push({id:'event-2',public_token:'second-event',status:'open'});db.tables.team_event_openings.push({id:'opening-2',event_id:'event-2'});
 const otherDevice=await call({token:'second-event',action:'apply',losiId:id,whatsapp:'5555999991234',openingId:'opening-2'});
-assert.equal(otherDevice.status,200);assert.equal(otherDevice.body.calendarToken,undefined);assert.equal(db.tables.collaborator_profiles.length,1);
+assert.equal(otherDevice.status,200);assert.equal(otherDevice.body.calendarToken,token);assert.equal(db.tables.collaborator_profiles.length,1);
 assert.equal((await call({token:'event-token',action:'register',name:'João Teste',whatsapp:'5555999991234'})).status,409);
 const access=handler('team-collaborator-access',db);
 const found=await access({action:'recover',name:'joao teste',whatsapp:'5555999991234'});
-assert.equal(found.body.profile.losi_id,id);assert.equal(found.body.calendarToken,undefined);assert.equal(found.body.profile.whatsapp,undefined);
+assert.equal(found.body.profile.losi_id,id);assert.equal(found.body.calendarToken,token);assert.equal(found.body.profile.whatsapp,undefined);
 console.log('OK: primeiro cadastro, ID único, DDD 55, recuperação, token pessoal, nova oportunidade, duplicidade e proteção do calendário.');
+
+const alias=await access({action:'recover',name:' tio  teste ',whatsapp:'(55) 99999-1234'});
+assert.equal(alias.status,200);assert.equal(alias.body.calendarToken,token);
+assert.equal((await access({losiId:id})).status,403);
+assert.equal((await access({losiId:id,whatsapp:'11999990000'})).status,403);
+const verified=await access({losiId:id,whatsapp:'(55) 99999-1234'});
+assert.equal(verified.status,200);assert.equal(verified.body.calendarToken,token);
+assert.equal((await access({losiId:id,calendarToken:token})).status,200);
+const standalone=await access({action:'register',name:'Maria Teste',professionalName:'Tia Sol',whatsapp:'11999991234',city:'Cotia'});
+assert.equal(standalone.status,200);assert.match(standalone.body.profile.losi_id,/^LOSI-\d{6}$/);
+assert.equal(standalone.body.created,true);assert.equal(db.tables.team_applications.length,2);
+assert.equal((await access({action:'register',name:'Maria Teste',whatsapp:'11999991234'})).status,409);
+assert.equal((await access({action:'register',name:'Maria',whatsapp:'123'})).status,400);
+assert.equal((await access({action:'recover',name:'Outra Pessoa',whatsapp:'11999991234'})).status,404);
+console.log('OK: cadastro independente, nome de tio, novo dispositivo, WhatsApp incorreto e ID sem credencial bloqueados.');

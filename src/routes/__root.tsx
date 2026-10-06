@@ -6,6 +6,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { Component, useEffect, useRef, useState } from "react";
+import { isPublicPath } from "../lib/public-routes";
 import type { ErrorInfo, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import "../responsive.css";
 import "../montserrat.css";
@@ -442,12 +443,7 @@ function RootComponent() {
     };
   }, []);
 
-  const publicRoute =
-    location.pathname === "/" ||
-    location.pathname === "/entrar" ||
-    location.pathname === "/buscar" ||
-    location.pathname === "/faq" ||
-    location.pathname.startsWith("/fornecedor/");
+  const publicRoute = isPublicPath(location.pathname);
 
   if (!authChecked && !publicRoute) {
     return (

@@ -1,2 +1,11 @@
 [functions.asaas-create-subscription]
 verify_jwt = true
+
+[functions.team-collaborator-access]
+verify_jwt = false
+
+[functions.team-public-calendar]
+verify_jwt = false
+
+[functions.team-public-opportunity]
+verify_jwt = false
