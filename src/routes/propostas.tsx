@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 import "../proposals.css";
 import "../proposal-editorial.css";
 import { LosiAiWorkspace } from "../components/LosiAiWorkspace";
-import { drawWaveProposalCover, drawEditorialProposalCover, drawGeometricProposalCover, PROPOSAL_GEOMETRIC_BACKGROUND, type ProposalLayout } from "../lib/proposal-layout";
+import { drawModernProposalCover, drawWaveProposalCover, drawEditorialProposalCover, drawGeometricProposalCover, type ProposalLayout } from "../lib/proposal-layout";
 
 export const Route = createFileRoute("/propostas")({ component: ProposalsPage });
 
@@ -176,8 +176,8 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   const contentBottom = 268;
   const bodyFontSize = 11;
   const bodyLineHeight = bodyFontSize * 0.3528 * 1.32;
-  const navy = [7, 26, 51] as const;
-  const gold = [190, 145, 48] as const;
+  const navy = layout === "modern" ? [42,47,59] as const : [7,26,51] as const;
+  const gold = layout === "modern" ? [160,64,8] as const : [190,145,48] as const;
   const ink = [27, 38, 53] as const;
   const muted = [104, 116, 132] as const;
   const pale = [246, 248, 251] as const;
@@ -192,13 +192,13 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   let pageNumber = 1;
 
   const addFooter = () => {
-    const footerMargin = pageNumber === 1 ? (layout === "waves" ? 88 : layout === "geometric" ? 80 : margin) : margin;
+    const footerMargin = pageNumber === 1 ? (layout === "waves" || layout === "modern" ? 88 : layout === "geometric" ? 80 : margin) : margin;
     doc.setDrawColor(226, 230, 236);
     doc.setLineWidth(0.25);
     doc.line(footerMargin, footerLineY, W - margin, footerLineY);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
-    if (layout === "editorial" && pageNumber === 1) doc.setTextColor(220,229,241);
+    if ((layout === "editorial" || layout === "modern") && pageNumber === 1) doc.setTextColor(220,229,241);
     else doc.setTextColor(...muted);
     doc.text("LOSI CONECTA  •  DOCUMENTO PROFISSIONAL", footerMargin, footerTextY);
     doc.text(String(pageNumber).padStart(2, "0"), W - margin, footerTextY, { align: "right" });
@@ -223,7 +223,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, W, H, "F");
     doc.setFillColor(...navy);
-    doc.rect(0, 0, W, layout === "editorial" || layout === "waves" ? 3 : 13, "F");
+    doc.rect(0, 0, W, layout === "editorial" || layout === "waves" || layout === "modern" ? 3 : 13, "F");
     doc.setFillColor(...gold);
     doc.rect(margin, 27, 3, 17, "F");
     doc.setTextColor(...navy);
@@ -281,7 +281,9 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   // CAPA
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, H, "F");
-  if(layout === "waves") {
+  if(layout === "modern") {
+    drawModernProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
+  } else if(layout === "waves") {
     drawWaveProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
   } else if(layout === "editorial") {
     drawEditorialProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,coverImage);
@@ -585,10 +587,11 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
 }
 
-function StyledProposalPreview({draft,business,profile,coverImage,layout}:{draft:ProposalDraft;business:Business|null;profile:Profile|null;coverImage:string;layout:"editorial"|"waves"}) {
+function StyledProposalPreview({draft,business,profile,coverImage,layout}:{draft:ProposalDraft;business:Business|null;profile:Profile|null;coverImage:string;layout:ProposalLayout}) {
   const [url,setUrl]=useState("");
   const [error,setError]=useState("");
   const [busy,setBusy]=useState(true);
+  const [retry,setRetry]=useState(0);
   useEffect(()=>{
     let objectUrl="",cancelled=false;
     setBusy(true);setError("");setUrl("");
@@ -598,15 +601,15 @@ function StyledProposalPreview({draft,business,profile,coverImage,layout}:{draft
         if(!pdf)throw new Error("Não foi possível preparar a prévia.");
         objectUrl=URL.createObjectURL(pdf.output("blob"));
         if(!cancelled)setUrl(objectUrl);
-      }catch{if(!cancelled)setError("Não foi possível carregar a prévia. Revise a imagem e tente novamente.");}
+      }catch{if(!cancelled)setError("Não foi possível carregar a prévia. Revise os dados e tente novamente.");}
       finally{if(!cancelled)setBusy(false);}
     },450);
     return()=>{cancelled=true;window.clearTimeout(timer);if(objectUrl)URL.revokeObjectURL(objectUrl);};
-  },[draft,business,profile,coverImage,layout]);
+  },[draft,business,profile,coverImage,layout,retry]);
   return <div className="proposal-editorial-preview" aria-busy={busy}>
     {busy&&<p role="status">Atualizando prévia…</p>}
-    {error&&<p role="alert">{error}</p>}
-    {url&&<><a href={url} target="_blank" rel="noopener noreferrer">Abrir prévia do PDF</a><iframe src={url+"#view=FitH"} title={"Prévia da proposta no modelo "+(layout==="waves"?"Ondas azuis":"Editorial curvo")} /></>}
+    {error&&<><p role="alert">{error}</p><button type="button" className="proposals-secondary" onClick={()=>setRetry(value=>value+1)}>Tentar novamente</button></>}
+    {url&&<><a href={url} target="_blank" rel="noopener noreferrer">Abrir prévia do PDF</a><iframe src={url+"#view=FitH"} title={"Prévia da proposta no modelo "+({classic:"Executivo LOSI",geometric:"Executivo geométrico",editorial:"Editorial curvo",waves:"Ondas azuis",modern:"Moderno laranja"}[layout])} /></>}
   </div>;
 }
 
@@ -944,7 +947,7 @@ function ProposalsPage() {
 
             <aside ref={previewRef} className={"proposals-preview-panel" + (previewFullscreen ? " is-fullscreen" : "")}>
               <div className="proposals-preview-head"><div><span className="proposals-kicker">VISUALIZAÇÃO</span><h2>Prévia da proposta</h2></div><div className="proposals-preview-tools"><span className="proposals-preview-status">A4 • PDF</span><button type="button" className="proposals-preview-fullscreen" onClick={() => void togglePreviewFullscreen()}>{previewFullscreen ? "Sair da tela inteira" : "Tela inteira"}</button></div></div>
-              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option><option value="editorial">Editorial curvo · capa com imagem</option><option value="waves">Ondas azuis · capa minimalista</option></select></label>
+              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option><option value="editorial">Editorial curvo · capa com imagem</option><option value="waves">Ondas azuis · capa minimalista</option><option value="modern">Moderno laranja · curvas em camadas</option></select></label>
               {proposalLayout === "editorial" && <div className="proposal-cover-image-control">
                 <label><span>Imagem da capa (opcional)</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={coverImageBusy} onChange={event=>{const file=event.target.files?.[0];event.currentTarget.value="";if(file)void chooseCoverImage(file);}} /></label>
                 <p>Escolha uma foto do seu trabalho. JPG, PNG ou WEBP, até 8 MB. Sem foto, a capa usa as iniciais da empresa.</p>
@@ -952,37 +955,7 @@ function ProposalsPage() {
                 {coverImageError && <p role="alert">{coverImageError}</p>}
                 {coverImage && <button type="button" className="proposals-secondary" disabled={coverImageBusy} onClick={()=>setCoverImage("")}>Remover imagem</button>}
               </div>}
-              {proposalLayout === "editorial" || proposalLayout === "waves" ? <StyledProposalPreview draft={preview} business={business} profile={profile} coverImage={coverImage} layout={proposalLayout} /> : <>
-              <div className={"proposal-document-preview"+(proposalLayout==="geometric"?" proposal-layout-geometric":"")}>
-                <div className="proposal-preview-page proposal-preview-cover">
-                  <div className="proposal-cover-lines" style={proposalLayout==="geometric"?{backgroundImage:`url("${PROPOSAL_GEOMETRIC_BACKGROUND}")`}:undefined}></div>
-                  <div className="proposal-cover-brand"><strong>{supplier}</strong><span>PROPOSTA</span></div>
-                  <div className="proposal-cover-title"><small>APRESENTAÇÃO DE SERVIÇOS</small><h3>PROPOSTA</h3><h4>COMERCIAL</h4><i></i><strong>{preview.title}</strong><span>APRESENTADA PARA</span><b>{preview.recipient || "Cliente / empresa"}</b></div>
-                  <div className="proposal-cover-footer"><span>PREPARADA POR</span><strong>{supplier}</strong><small>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ") || "LOSI Gestão em Lazer"}</small></div>
-                </div>
-
-                <div className="proposal-preview-page proposal-preview-presentation">
-                  <div className="proposal-preview-standard-head"><span>02</span><h3>APRESENTAÇÃO</h3></div>
-                  <div className="proposal-preview-text-section"><small>CONTEXTO DA PROPOSTA</small><p>{preview.description || "Sua descrição aparecerá aqui."}</p></div>
-                  <div className="proposal-preview-text-section"><small>OBJETIVO</small><p>{preview.objective || buildObjective(preview.proposalType)}</p></div>
-                  <h5>INFORMAÇÕES DO PROJETO</h5>
-                  <div className="proposal-preview-info">{[["Tipo",preview.proposalType],["Data",dateBR(preview.eventDate)],["Horário",preview.eventTime||"A definir"],["Duração",preview.duration||"A definir"],["Local",preview.location||"A definir"],["Público",preview.audience||"A definir"],["Faixa etária",preview.ageRange||"A definir"],["Responsável",preview.responsible||"A definir"]].map(([label,value])=><div key={label}><small>{label}</small><strong>{value}</strong></div>)}</div>
-                </div>
-
-                <div className="proposal-preview-page proposal-preview-activities">
-                  <div className="proposal-preview-side"><strong>ATIVIDADES</strong><span>PROPOSTAS</span><small>Uma programação pensada para promover participação, organização e uma experiência positiva para o público.</small></div>
-                  <div className="proposal-preview-activity-content"><h3>ATIVIDADES</h3>{(preview.activities.length?preview.activities:[preview.proposalType]).slice(0,7).map(item=><div key={item}><i></i><span>{item}</span></div>)}<h5>DESENVOLVIMENTO</h5><p>{preview.methodology || "A programação será conduzida por profissionais e adaptada ao espaço, ao perfil do público e à dinâmica do evento."}</p></div>
-                </div>
-
-                <div className="proposal-preview-page proposal-preview-detail">
-                  <div className="proposal-preview-standard-head"><span>04</span><h3>DETALHAMENTO</h3><small>E CONSIDERAÇÕES FINAIS</small></div>
-                  <div className="proposal-preview-text-section"><small>EQUIPE E ESTRUTURA</small><p>{preview.team || "Equipe dimensionada de acordo com o público, duração e características do projeto."}</p></div>
-                  <div className="proposal-preview-text-section"><small>CONSIDERAÇÕES</small><p>{preview.notes || "A programação poderá ser ajustada em conjunto com o contratante após a análise do local e das necessidades do público."}</p></div>
-                  <div className="proposal-preview-next"><small>PRÓXIMO PASSO</small><strong>{(preview.cta === "custom" ? preview.ctaCustom : ctaOptions.find(item => item.value === preview.cta)?.text || ctaOptions[0].text) || "Fale conosco para alinharmos os próximos passos."}</strong></div>
-                  <div className="proposal-preview-signature"><strong>{supplier}</strong><span>{[business?.city || profile?.city, business?.state || profile?.state].filter(Boolean).join(" — ")}</span></div>
-                </div>
-              </div>
-              </>}
+              <StyledProposalPreview draft={preview} business={business} profile={profile} coverImage={coverImage} layout={proposalLayout} />
             </aside>
           </div>
         </section>

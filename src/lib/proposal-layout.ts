@@ -1,6 +1,7 @@
 import type { jsPDF } from "jspdf";
+import { ShadingPattern } from "jspdf";
 
-export type ProposalLayout="classic"|"geometric"|"editorial"|"waves";
+export type ProposalLayout="classic"|"geometric"|"editorial"|"waves"|"modern";
 const shapes=[
  {points:[[0,0],[86,0],[29,100],[68,234],[31,297],[0,297]],color:[7,26,51]},
  {points:[[0,167],[65,54],[77,77],[0,210]],color:[20,94,168]},
@@ -105,4 +106,38 @@ export function drawWaveProposalCover(doc:jsPDF,supplier:string,title:string,rec
  doc.setTextColor(7,26,51);doc.setFontSize(10);doc.text(doc.splitTextToSize(supplier,104).slice(0,3),88,250,{lineHeightFactor:1.2});
  doc.setTextColor(82,97,116);doc.setFont("helvetica","normal");doc.setFontSize(7);
  doc.text(doc.splitTextToSize(location||"Prestador de serviços",104).slice(0,1),88,266);
+}
+
+/** White editorial field and layered orange/charcoal sweep, matching the reference composition. */
+export function drawModernProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string){
+ doc.setFillColor(52,58,70);doc.rect(0,0,210,297,"F");
+ doc.setFillColor(42,47,59);
+ doc.path([{op:"m",c:[0,297]},{op:"c",c:[108,278,176,189,210,120]},{op:"l",c:[210,52]},{op:"c",c:[175,190,107,269,0,297]},{op:"h",c:[]}]);doc.fill();
+ doc.setFillColor(62,68,81);
+ doc.path([{op:"m",c:[0,297]},{op:"c",c:[97,288,164,251,210,204]},{op:"l",c:[210,297]},{op:"h",c:[]}]);doc.fill();
+ doc.saveGraphicsState();
+ doc.path([{op:"m",c:[181,0]},{op:"l",c:[210,0]},{op:"l",c:[210,52]},{op:"c",c:[178,190,105,267,0,297]},{op:"c",c:[108,236,165,139,181,0]},{op:"h",c:[]}]);doc.clip();doc.discardPath();
+ doc.advancedAPI(pdf=>{
+  const gradient=new ShadingPattern("axial",[0,0,0,297],[{offset:0,color:[255,215,48]},{offset:1,color:[255,96,0]}]);
+  pdf.addShadingPattern("modern-orange",gradient);
+  pdf.rect(0,0,210,297,null);pdf.fill({key:"modern-orange",matrix:pdf.unitMatrix});
+ });
+ doc.restoreGraphicsState();
+ doc.setFillColor(239,240,242);
+ doc.path([{op:"m",c:[0,0]},{op:"l",c:[181,0]},{op:"c",c:[165,139,108,236,0,297]},{op:"h",c:[]}]);doc.fill();
+ doc.setFillColor(255,255,255);
+ doc.path([{op:"m",c:[0,0]},{op:"l",c:[154,0]},{op:"c",c:[167,141,96,241,0,297]},{op:"h",c:[]}]);doc.fill();
+ doc.setFont("helvetica","bold");doc.setFontSize(28);doc.setTextColor(226,88,5);
+ doc.text("PROPOSTA",20,65);doc.text("COMERCIAL",20,78);
+ let size=15,lines:string[]=[];
+ do{doc.setFontSize(size);lines=doc.splitTextToSize(title,105);if(lines.length*size*.3528*1.25<=32)break;size-=1;}while(size>9);
+ doc.setTextColor(42,47,59);doc.text(lines,20,96,{lineHeightFactor:1.25});
+ const recipientY=Math.max(144,96+lines.length*size*.3528*1.25+10);
+ doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(82,97,116);doc.text("APRESENTADA PARA",20,recipientY);
+ doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(42,47,59);
+ doc.text(doc.splitTextToSize(recipient||"Cliente / empresa",80).slice(0,3),20,recipientY+9,{lineHeightFactor:1.2});
+ doc.setFontSize(7);doc.setTextColor(160,64,8);doc.text("PREPARADA POR",20,190);
+ doc.setFontSize(10);doc.setTextColor(42,47,59);doc.text(doc.splitTextToSize(supplier,64).slice(0,3),20,199,{lineHeightFactor:1.2});
+ doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(82,97,116);
+ doc.text(doc.splitTextToSize(location||"Prestador de serviços",48).slice(0,2),20,220,{lineHeightFactor:1.2});
 }
