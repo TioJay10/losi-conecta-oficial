@@ -5,6 +5,8 @@ import { LiaMascot } from "./LiaMascot";
 
 export function LosiAiWorkspace({context,company,onApply}:{context:Record<string,unknown>;company:string;onApply:(result:AiResult)=>void}){
  const [open,setOpen]=useState(false);
+ const [pages,setPages]=useState(0);
+ const [depth,setDepth]=useState("standard");
  const [tone,setTone]=useState<AiTone>("formal");
  const [status,setStatus]=useState<AiStatus|null>(null);
  const [statusLoading,setStatusLoading]=useState(false);
@@ -35,7 +37,7 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
   if(generating.current||!available)return;
   generating.current=true;setBusy(true);setCelebrating(false);setMessage("");setResult(null);
   try{
-   const data=await callLosiAi({action:"generate",kind:"proposal",tone,requestId:crypto.randomUUID(),instructions,
+   const data=await callLosiAi({action:"generate",kind:"proposal",tone,depth,...(pages?{pages}:{}),requestId:crypto.randomUUID(),instructions,
     context:{...context,company}});
    if(mounted.current){setResult(data.result);setCelebrating(true);setMessage("Rascunho pronto. Revise antes de aplicar.");}
   }catch(error){if(mounted.current)setMessage(error instanceof Error?error.message:"Não foi possível gerar o conteúdo.");}
@@ -74,14 +76,23 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
     </select>
    </label>
    <p id="losi-ai-tone-help" className="losi-ai-caption">{AI_TONES[tone].description}</p>
+   <div className="losi-ai-writing-options">
+    <label className="losi-ai-field"><span>Profundidade</span><select value={depth} disabled={locked} onChange={event=>setDepth(event.target.value)}>
+     <option value="concise">Resumido</option><option value="standard">Equilibrado</option><option value="detailed">Detalhado</option>
+    </select></label>
+    <label className="losi-ai-field"><span>Referência de extensão</span><select value={pages} disabled={locked} aria-describedby="losi-ai-pages-help" onChange={event=>setPages(Number(event.target.value))}>
+     <option value={0}>Conforme meu pedido</option>{[1,2,3,4,5,6,7,8].map(value=><option key={value} value={value}>Até {value} {value===1?"página":"páginas"}</option>)}
+    </select></label>
+   </div>
+   <p id="losi-ai-pages-help" className="losi-ai-caption">A extensão é aproximada: capa, seções e layout alteram o total de páginas do PDF. Se você indicar páginas no pedido, a LIA usará essa indicação (até 8).</p>
    <label className="losi-ai-field"><span>Como a LIA deve ajudar nesta proposta?</span>
-    <textarea value={instructions} maxLength={6000} rows={4} disabled={locked} onChange={event=>setInstructions(event.target.value)} placeholder="Descreva o objetivo, o público e o que deve ser destacado. A IA usará os dados do formulário."/>
+    <textarea value={instructions} maxLength={6000} rows={4} disabled={locked} onChange={event=>setInstructions(event.target.value)} placeholder="Ex.: Desenvolva uma proposta detalhada para recreação infantil, com etapas de execução, exemplos e orientações para a equipe. Extensão de até 8 páginas."/>
    </label>
    <p className="losi-ai-caption">Cada geração concluída consome uma unidade. Edição manual e download não consomem a franquia. Revise informações e orientações antes de compartilhar.</p>
    <button type="button" className="proposals-primary" disabled={!available||locked||instructions.trim().length<15} onClick={()=>void generate()}>{busy?"LIA está gerando…":"Gerar conteúdo com a LIA"}</button>
    {busy&&<div className="lia-generation-status" role="status" aria-live="polite" aria-atomic="true">
     <LiaMascot className="lia-generation-image" state="working" />
-    <div><strong>LIA está criando seu conteúdo…</strong><p>Seu rascunho aparecerá aqui assim que estiver pronto.</p></div>
+    <div><strong>LIA está criando seu conteúdo…</strong><p>A LIA está desenvolvendo os tópicos do seu pedido. Textos mais extensos podem levar mais tempo.</p></div>
    </div>}
    {message&&<p role="status" className="losi-ai-notice">{message}</p>}
    {result&&<div className="losi-ai-review"><h3>{result.title}</h3><div className="losi-ai-preview">{[result.description,result.objective,result.methodology,result.notes].filter(Boolean).join("\n\n")}</div>

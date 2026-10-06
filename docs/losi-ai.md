@@ -17,7 +17,7 @@ For local frontend development, run npm run dev: the existing /__supabase proxy 
 
 The fixed initial model is gpt-4.1-mini-2025-04-14.
 POST /v1/chat/completions uses strict structured JSON output, store=false and a 90-second timeout.
-Output caps are 2,000 tokens for proposal and 4,000 for material.
+Output budgets adapt to validated depth and page references (1–8), capped server-side at 9,000 tokens. Page counts in instructions override the selector. Counts are approximate writing references, not guaranteed PDF pagination. Plain-text sections follow the requested topic, audience and requirements without filler. Context strings are limited to 2,000 characters each. One provider call and one quota unit per completed draft; no automatic paid retries. The LIA proposal workspace offers depth/length controls and does not restore the removed material editor.
 No web searches, image generation or external tools are enabled.
 
 ## Access

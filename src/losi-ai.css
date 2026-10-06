@@ -96,3 +96,7 @@
 .lia-pdf-live-preview iframe{min-height:360px}
 .losi-ai-workspace .lia-tools-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .lia-tools-toggle svg{flex:0 0 18px}
+
+.losi-ai-writing-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.losi-ai-writing-options .losi-ai-field{min-width:0;margin-bottom:0}
+@media(max-width:640px){.losi-ai-writing-options{grid-template-columns:minmax(0,1fr);gap:0}}
