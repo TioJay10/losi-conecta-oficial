@@ -1,0 +1,39 @@
+.admin-credit-center{display:grid;gap:20px;max-width:1100px}
+.admin-credit-search,.admin-credit-selected{padding:24px;border:1px solid #dce1e6;border-radius:6px;background:#fff;min-width:0}
+.admin-credit-center h2{margin:0 0 10px;font-size:21px;overflow-wrap:anywhere}
+.admin-credit-center p{font-size:13px;line-height:1.6}
+.admin-credit-search-row{display:flex;gap:12px;align-items:flex-end;margin-top:18px}
+.admin-credit-center label{display:flex;flex-direction:column;gap:8px;min-width:0;font-size:12px;font-weight:600}
+.admin-credit-search-row label{flex:1}
+.admin-credit-center :is(input,textarea,select){box-sizing:border-box;min-height:44px}
+.admin-credit-center button{min-height:44px;font:inherit;font-size:12px;font-weight:600;padding:10px 14px;border-radius:4px;cursor:pointer}
+.admin-credit-results{display:grid;gap:8px;margin-top:20px;max-height:360px;overflow:auto}
+.admin-credit-result{display:flex;flex-direction:column;align-items:flex-start;gap:6px;border:1px solid #dce1e6;background:#fff;text-align:left}
+.admin-credit-result.is-selected{border-color:#8a6d2f;background:#fcfaf5}
+.admin-credit-result span{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.admin-credit-balances{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:20px}
+.admin-credit-balances article{padding:16px;background:#f6f8fa;border:1px solid #dce1e6;border-radius:4px}
+.admin-credit-balances :is(span,strong,small){display:block}
+.admin-credit-balances strong{font-size:28px;margin:8px 0}
+.admin-credit-grant{display:grid;gap:16px;margin-top:20px;max-width:650px}
+.admin-credit-grant textarea{resize:vertical;min-height:80px}
+.admin-credit-grant>button{justify-self:start}
+.admin-credit-history{margin-top:28px;border-top:1px solid #dce1e6;padding-top:18px}
+.admin-credit-history article{padding:14px 0;border-bottom:1px solid #e8ebef}
+.admin-credit-history p{margin:6px 0}
+.admin-credit-history small{font-size:11px}
+.admin-credit-error,.admin-credit-success{padding:14px;border-radius:4px;font-size:13px;line-height:1.5}
+.admin-page .admin-credit-error{background:#fff0f0;color:#9b2525!important}
+.admin-page .admin-credit-success{background:#eaf7ef;color:#19623b!important}
+.admin-menu-group{margin-top:22px}
+.admin-menu-group:first-child{margin-top:0}
+.admin-menu-group-title{display:block;margin:0 12px 8px;font-size:10px;font-weight:600;letter-spacing:.06em}
+body .admin-page[class] .admin-menu-group-title{color:#dce5f1!important}
+@media(max-width:760px){
+ .admin-credit-search,.admin-credit-selected{padding:16px}
+ .admin-credit-center h2{font-size:18px}
+ .admin-credit-search-row{flex-direction:column;align-items:stretch}
+ .admin-credit-balances{grid-template-columns:minmax(0,1fr)}
+ .admin-credit-grant>button{justify-self:stretch}
+ .admin-credit-center :is(input,textarea,select){font-size:16px!important}
+}

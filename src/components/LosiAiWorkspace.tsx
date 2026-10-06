@@ -62,7 +62,8 @@ export function LosiAiWorkspace({context,company,onApply}:{context:Record<string
   {open&&<>
    <div className="losi-ai-balance">
     <span>{statusLoading?"Atualizando franquia…":status?.access.allowed?remaining+" de "+limit+" gerações disponíveis":"Acesso à IA em preparação"}</span>
-    {status?.access.periodEnd&&<small>Renovação: {new Date(status.access.periodEnd).toLocaleDateString("pt-BR")}</small>}
+    {(status?.access.proposalExtraRemaining??0)>0&&<small>Créditos extras: {status?.access.proposalExtraRemaining} · não expiram</small>}
+    {(status?.access.proposalBaseLimit??status?.access.proposalLimit??0)>0&&status?.access.periodEnd&&<small>Renovação da franquia: {new Date(status.access.periodEnd).toLocaleDateString("pt-BR")}</small>}
     <button type="button" disabled={locked||statusLoading} onClick={()=>void refresh()}>Atualizar saldo</button>
    </div>
    {status&&!status.configured&&<p className="losi-ai-notice">A geração com IA aguarda ativação. Você pode continuar escrevendo e gerando seus documentos manualmente.</p>}

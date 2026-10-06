@@ -9,7 +9,7 @@ export const AI_TONES = {
 export type AiTone = keyof typeof AI_TONES;
 export type AiResult = { title:string; description:string; objective:string; methodology:string; notes:string; content:string };
 export type AiStatus = {
- configured:boolean; access:{allowed:boolean;periodStart?:string;periodEnd?:string;proposalLimit?:number;materialLimit?:number};
+ configured:boolean; access:{allowed:boolean;periodStart?:string;periodEnd?:string;proposalLimit?:number;materialLimit?:number;proposalExtraRemaining?:number;materialExtraRemaining?:number;proposalBaseLimit?:number;materialBaseLimit?:number};
  used:{proposal:number;material:number};
 };
 export async function callLosiAi(body:Record<string,unknown>) {

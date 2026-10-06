@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { AdminCreditCenter } from "../components/AdminCreditCenter";
 import { AdminInconsistencyCenter } from "../components/AdminInconsistencyCenter";
 import { HomePage, type HomeCustomization } from "../components/HomePage";
 
@@ -49,6 +50,7 @@ function FinanceLineChart({ data, valueLabel }: { data: Array<{ label: string; v
 
 function auditActionLabel(action: string) {
   const labels: Record<string, string> = {
+    grant_credits: "Adição manual de créditos",
     send_broadcast: "Envio de comunicação",
     create_coupon: "Criação de cupom",
     send_coupon: "Envio de cupom",
@@ -81,6 +83,9 @@ function auditEntityLabel(entityType: string) {
 
 function auditDetailLabel(key: string, value: unknown) {
   const labels: Record<string, string> = {
+    kind: "Tipo de crédito",
+    amount: "Quantidade",
+    request_id: "Identificador",
     target_type: "Público",
     target_value: "Destino específico",
     recipient_count: "Destinatários",
@@ -98,6 +103,8 @@ function auditDetailLabel(key: string, value: unknown) {
     plan: "Usuários de um plano",
     user: "Usuário específico",
   };
+  if (value === null && labels[key]) return labels[key];
+  if (key === "kind" && typeof value === "string") return ({ads:"LOSI ADS",proposal:"Propostas com IA",material:"Materiais com IA"} as Record<string,string>)[value] || value;
   if (key === "target_type" && typeof value === "string") return targetLabels[value] || value;
   if (key === "status" && typeof value === "string") return value === "resolved" ? "Resolvida" : value === "dismissed" ? "Arquivada" : value === "open" ? "Em análise" : value;
   if (key === "resolution_action" && typeof value === "string") return ({none:"Nenhuma medida",keep_active:"Fornecedor mantido ativo",suspend_supplier:"Fornecedor suspenso",block_supplier:"Responsável pela conta bloqueado"} as Record<string,string>)[value] || value;
@@ -116,7 +123,7 @@ function AdminPage() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, categories: 0, services: 0, reviews: 0 });
   const [users, setUsers] = useState<Array<{ id: string; full_name: string | null; user_type: string; city: string | null; state: string | null; blocked: boolean; phone: string | null; created_at: string }>>([]);
   const [businesses, setBusinesses] = useState<Array<{ id: string; business_name: string; description: string | null; phone: string | null; whatsapp: string | null; website: string | null; instagram: string | null; address: string | null; logo_url: string | null; cover_url: string | null; portfolio_urls: string[]; city: string | null; state: string | null; owner_id: string; verified: boolean; active: boolean; approval_status: "pending" | "approved" | "rejected"; created_at: string }>>([]);
-  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "sounds" | "referenceImages" | "communication" | "activity" | "customization" | "inconsistencies">("dashboard");
+  const [section, setSection] = useState<"dashboard" | "overview" | "security" | "users" | "businesses" | "subscriptions" | "alerts" | "categories" | "services" | "reviews" | "commercial" | "coupons" | "notifications" | "sounds" | "referenceImages" | "communication" | "activity" | "customization" | "inconsistencies" | "adsCredits" | "aiCredits" | "presentation">("dashboard");
   const [dashboardView, setDashboardView] = useState<"day" | "month" | "year">("month");
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -295,7 +302,7 @@ function AdminPage() {
     document.addEventListener("visibilitychange", handleRefresh);
 
     const requestedSection = new URLSearchParams(window.location.search).get("section");
-    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","inconsistencies","sounds","referenceImages","communication","activity","customization"].includes(requestedSection)) {
+    if (requestedSection && ["dashboard","overview","security","users","businesses","subscriptions","alerts","categories","services","reviews","commercial","coupons","notifications","inconsistencies","sounds","referenceImages","communication","activity","customization","presentation","adsCredits","aiCredits"].includes(requestedSection)) {
       setSection(requestedSection as typeof section);
     }
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -1039,6 +1046,8 @@ function AdminPage() {
 
   const unreadAdminNotifications = adminNotifications.filter(item => !item.read_at).length;
   const menu = [
+    { id: "adsCredits" as const, label: "Créditos LOSI ADS" },
+    { id: "aiCredits" as const, label: "Créditos da LIA" },
     { id: "dashboard" as const, label: "Dashboard financeiro" },
     { id: "overview" as const, label: "Visão geral" },
     { id: "security" as const, label: "Central de segurança" },
@@ -1075,7 +1084,14 @@ function AdminPage() {
   const pendingSubscriptions = subscriptions.filter(item => item.status === "pending");
   const paidSubscriptions = subscriptions.filter(item => item.asaas_payment_id && item.paid_amount != null);
   const recentBusinessCount = businesses.filter(item => Date.now() - new Date(item.created_at).getTime() <= 30*24*60*60*1000).length;
-  const sectionTitle = section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "inconsistencies" ? "Notificações de Inconsistências" : section === "sounds" ? "Sons de notificação" : section === "referenceImages" ? "Imagens de referência" : section === "presentation" ? "Apresentação" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
+  const menuGroups = [
+    {label:"Visão geral",ids:["overview","dashboard","activity"]},
+    {label:"Fornecedores e catálogo",ids:["users","businesses","services","categories","reviews"]},
+    {label:"Comercial e créditos",ids:["commercial","subscriptions","coupons","adsCredits","aiCredits"]},
+    {label:"Comunicação e suporte",ids:["alerts","notifications","inconsistencies","communication"]},
+    {label:"Configurações",ids:["security","sounds","referenceImages","presentation","customization"]},
+  ];
+  const sectionTitle = section === "adsCredits" ? "Créditos LOSI ADS" : section === "aiCredits" ? "Créditos da LIA" : section === "dashboard" ? "Dashboard financeiro" : section === "overview" ? "Visão geral" : section === "security" ? "Central de segurança" : section === "users" ? "Usuários cadastrados" : section === "businesses" ? "Empresas cadastradas" : section === "subscriptions" ? "Assinaturas" : section === "alerts" ? "Central de alertas" : section === "services" ? "Serviços cadastrados" : section === "categories" ? "Categorias cadastradas" : section === "reviews" ? "Avaliações recebidas" : section === "commercial" ? "Comercial" : section === "coupons" ? "Cupons de desconto" : section === "notifications" ? "Notificações administrativas" : section === "inconsistencies" ? "Notificações de Inconsistências" : section === "sounds" ? "Sons de notificação" : section === "referenceImages" ? "Imagens de referência" : section === "presentation" ? "Apresentação" : section === "communication" ? "Central de comunicação" : section === "customization" ? "Personalização" : "Auditoria administrativa";
 
   return (
     <main className="admin-page">
@@ -1100,7 +1116,7 @@ function AdminPage() {
         <aside className={`admin-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
           <div className="admin-sidebar-title">GESTÃO</div>
           <nav className="admin-menu">
-            {menu.map(item => <button key={item.id} className={section === item.id ? "active" : ""} onClick={() => { setSection(item.id); setMobileMenuOpen(false); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}
+            {menuGroups.map(group => <div className="admin-menu-group" key={group.label}><span className="admin-menu-group-title">{group.label}</span>{group.ids.map(id => menu.find(item => item.id === id)!).map(item => <button key={item.id} className={section === item.id ? "active" : ""} aria-current={section === item.id ? "page" : undefined} onClick={() => { setSection(item.id); setMobileMenuOpen(false); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}</div>)}
           </nav>
           <div className="admin-sidebar-logout">
             <button type="button" onClick={logout}>Sair do painel</button>
@@ -1111,7 +1127,9 @@ function AdminPage() {
           <h1>{section === "overview" ? `Olá, ${name}.` : sectionTitle}</h1>
           <p className="admin-text">{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>
           {dataError && <div className="admin-data-error">Não foi possível carregar alguns dados: {dataError}</div>}
-          {section === "inconsistencies" ? (
+          {section === "adsCredits" || section === "aiCredits" ? (
+            <AdminCreditCenter key={section} mode={section === "adsCredits" ? "ads" : "ai"} />
+          ) : section === "inconsistencies" ? (
             <AdminInconsistencyCenter />
           ) : section === "customization" ? (
             <div className="admin-admin-center">
