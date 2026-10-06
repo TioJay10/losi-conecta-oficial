@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 import "../proposals.css";
 import "../proposal-editorial.css";
 import { LosiAiWorkspace } from "../components/LosiAiWorkspace";
-import { drawEditorialProposalCover, drawGeometricProposalCover, PROPOSAL_GEOMETRIC_BACKGROUND, type ProposalLayout } from "../lib/proposal-layout";
+import { drawWaveProposalCover, drawEditorialProposalCover, drawGeometricProposalCover, PROPOSAL_GEOMETRIC_BACKGROUND, type ProposalLayout } from "../lib/proposal-layout";
 
 export const Route = createFileRoute("/propostas")({ component: ProposalsPage });
 
@@ -192,7 +192,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   let pageNumber = 1;
 
   const addFooter = () => {
-    const footerMargin = layout === "geometric" && pageNumber === 1 ? 80 : margin;
+    const footerMargin = pageNumber === 1 ? (layout === "waves" ? 88 : layout === "geometric" ? 80 : margin) : margin;
     doc.setDrawColor(226, 230, 236);
     doc.setLineWidth(0.25);
     doc.line(footerMargin, footerLineY, W - margin, footerLineY);
@@ -223,7 +223,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, W, H, "F");
     doc.setFillColor(...navy);
-    doc.rect(0, 0, W, layout === "editorial" ? 3 : 13, "F");
+    doc.rect(0, 0, W, layout === "editorial" || layout === "waves" ? 3 : 13, "F");
     doc.setFillColor(...gold);
     doc.rect(margin, 27, 3, 17, "F");
     doc.setTextColor(...navy);
@@ -281,7 +281,9 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   // CAPA
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, H, "F");
-  if(layout === "editorial") {
+  if(layout === "waves") {
+    drawWaveProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
+  } else if(layout === "editorial") {
     drawEditorialProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,coverImage);
   } else if(layout === "geometric") {
     drawGeometricProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
@@ -583,7 +585,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
 }
 
-function EditorialProposalPreview({draft,business,profile,coverImage}:{draft:ProposalDraft;business:Business|null;profile:Profile|null;coverImage:string}) {
+function StyledProposalPreview({draft,business,profile,coverImage,layout}:{draft:ProposalDraft;business:Business|null;profile:Profile|null;coverImage:string;layout:"editorial"|"waves"}) {
   const [url,setUrl]=useState("");
   const [error,setError]=useState("");
   const [busy,setBusy]=useState(true);
@@ -592,7 +594,7 @@ function EditorialProposalPreview({draft,business,profile,coverImage}:{draft:Pro
     setBusy(true);setError("");setUrl("");
     const timer=window.setTimeout(()=>{
       try{
-        const pdf=ProposalPdf({draft,business,profile,layout:"editorial",coverImage,download:false});
+        const pdf=ProposalPdf({draft,business,profile,layout,coverImage,download:false});
         if(!pdf)throw new Error("Não foi possível preparar a prévia.");
         objectUrl=URL.createObjectURL(pdf.output("blob"));
         if(!cancelled)setUrl(objectUrl);
@@ -600,11 +602,11 @@ function EditorialProposalPreview({draft,business,profile,coverImage}:{draft:Pro
       finally{if(!cancelled)setBusy(false);}
     },450);
     return()=>{cancelled=true;window.clearTimeout(timer);if(objectUrl)URL.revokeObjectURL(objectUrl);};
-  },[draft,business,profile,coverImage]);
+  },[draft,business,profile,coverImage,layout]);
   return <div className="proposal-editorial-preview" aria-busy={busy}>
     {busy&&<p role="status">Atualizando prévia…</p>}
     {error&&<p role="alert">{error}</p>}
-    {url&&<><a href={url} target="_blank" rel="noopener noreferrer">Abrir prévia do PDF</a><iframe src={url+"#view=FitH"} title="Prévia da proposta no modelo Editorial curvo" /></>}
+    {url&&<><a href={url} target="_blank" rel="noopener noreferrer">Abrir prévia do PDF</a><iframe src={url+"#view=FitH"} title={"Prévia da proposta no modelo "+(layout==="waves"?"Ondas azuis":"Editorial curvo")} /></>}
   </div>;
 }
 
@@ -942,7 +944,7 @@ function ProposalsPage() {
 
             <aside ref={previewRef} className={"proposals-preview-panel" + (previewFullscreen ? " is-fullscreen" : "")}>
               <div className="proposals-preview-head"><div><span className="proposals-kicker">VISUALIZAÇÃO</span><h2>Prévia da proposta</h2></div><div className="proposals-preview-tools"><span className="proposals-preview-status">A4 • PDF</span><button type="button" className="proposals-preview-fullscreen" onClick={() => void togglePreviewFullscreen()}>{previewFullscreen ? "Sair da tela inteira" : "Tela inteira"}</button></div></div>
-              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option><option value="editorial">Editorial curvo · capa com imagem</option></select></label>
+              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option><option value="editorial">Editorial curvo · capa com imagem</option><option value="waves">Ondas azuis · capa minimalista</option></select></label>
               {proposalLayout === "editorial" && <div className="proposal-cover-image-control">
                 <label><span>Imagem da capa (opcional)</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={coverImageBusy} onChange={event=>{const file=event.target.files?.[0];event.currentTarget.value="";if(file)void chooseCoverImage(file);}} /></label>
                 <p>Escolha uma foto do seu trabalho. JPG, PNG ou WEBP, até 8 MB. Sem foto, a capa usa as iniciais da empresa.</p>
@@ -950,7 +952,7 @@ function ProposalsPage() {
                 {coverImageError && <p role="alert">{coverImageError}</p>}
                 {coverImage && <button type="button" className="proposals-secondary" disabled={coverImageBusy} onClick={()=>setCoverImage("")}>Remover imagem</button>}
               </div>}
-              {proposalLayout === "editorial" ? <EditorialProposalPreview draft={preview} business={business} profile={profile} coverImage={coverImage} /> : <>
+              {proposalLayout === "editorial" || proposalLayout === "waves" ? <StyledProposalPreview draft={preview} business={business} profile={profile} coverImage={coverImage} layout={proposalLayout} /> : <>
               <div className={"proposal-document-preview"+(proposalLayout==="geometric"?" proposal-layout-geometric":"")}>
                 <div className="proposal-preview-page proposal-preview-cover">
                   <div className="proposal-cover-lines" style={proposalLayout==="geometric"?{backgroundImage:`url("${PROPOSAL_GEOMETRIC_BACKGROUND}")`}:undefined}></div>
