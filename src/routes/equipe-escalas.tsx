@@ -1,3 +1,5 @@
+import { TeamEventSummary } from "../components/TeamEventSummary";
+import { type SummaryOpening, type SummaryApplication } from "../lib/team-event-summary";
 import { getTeamScale } from "../lib/team-scale";
 import { TeamPayments } from "../components/TeamPayments";
 import { PaymentStatus } from "../components/PaymentStatus";
@@ -52,7 +54,7 @@ function EquipeEscalasPage(){
  const [assignment,setAssignment]=useState<Record<string,{role:string;value:string}>>({});
  const [selectedPerson,setSelectedPerson]=useState<Collaborator|null>(null);
  const [personJobs,setPersonJobs]=useState<CollaboratorJob[]>([]);
- const [dashboardStats,setDashboardStats]=useState({openSlots:0,pending:0,waiting:0,unavailable:0});
+ const [summaryOpenings,setSummaryOpenings]=useState<SummaryOpening[]>([]);const [summaryApplications,setSummaryApplications]=useState<SummaryApplication[]>([]);const [summaryLoading,setSummaryLoading]=useState(true);const [summaryError,setSummaryError]=useState("");
  const [manualPerson,setManualPerson]=useState({name:"",whatsapp:"",city:"",state:"",notes:""});
  const [editingEvent,setEditingEvent]=useState(false);
  const [eventEdit,setEventEdit]=useState({title:"",description:"",event_date:"",starts_at:"",ends_at:"",location_name:"",address:"",city:"",state:""});
@@ -77,7 +79,9 @@ function EquipeEscalasPage(){
   setContextError("");
   try{const context=await teamRequest({action:"context",businessId:b.id});setEventPeople(context.eventPeople||[]);setPeople((p||[]).map(person=>({...person,...(context.network||[]).find((entry:any)=>entry.id===person.id)})) as Collaborator[]);}catch(err){setEventPeople([]);setContextError(err instanceof Error?err.message:"Não foi possível carregar os IDs para busca.");}
   const activeIds=(e||[]).filter(x=>x.status!=="completed"&&x.status!=="cancelled").map(x=>x.id);
-  if(activeIds.length){const [{data:allOpenings},{data:allApps}]=await Promise.all([supabase.from("team_event_openings").select("event_id,slots").in("event_id",activeIds),supabase.from("team_applications").select("event_id,status,attendance_status").in("event_id",activeIds)]);const slots=(allOpenings||[]).reduce((n,x)=>n+Number(x.slots||0),0);const confirmed=(allApps||[]).filter(x=>x.status==="confirmed").length;setDashboardStats({openSlots:Math.max(0,slots-confirmed),pending:(allApps||[]).filter(x=>x.status==="pending").length,waiting:(allApps||[]).filter(x=>x.status==="confirmed"&&!x.attendance_status).length,unavailable:(allApps||[]).filter(x=>x.status==="confirmed"&&x.attendance_status==="unavailable").length})}else setDashboardStats({openSlots:0,pending:0,waiting:0,unavailable:0});
+  setSummaryLoading(true);setSummaryError("");
+  if(activeIds.length){const [o,a]=await Promise.all([supabase.from("team_event_openings").select("id,event_id,title,slots").in("event_id",activeIds),supabase.from("team_applications").select("id,event_id,opening_id,candidate_name,status,attendance_status,assigned_role").in("event_id",activeIds)]);if(o.error||a.error){setSummaryOpenings([]);setSummaryApplications([]);setSummaryError("Não foi possível carregar os detalhes do resumo.")}else{setSummaryOpenings((o.data||[]) as SummaryOpening[]);setSummaryApplications((a.data||[]) as SummaryApplication[])}}else{setSummaryOpenings([]);setSummaryApplications([])}
+  setSummaryLoading(false);
   setSelectedEventId(current=>e?.some(event=>event.id===current)?current:(e||[]).find(event=>event.status!=="completed"&&event.status!=="cancelled")?.id||""); setLoading(false);
  }
  useEffect(()=>{void load()},[]);
@@ -93,7 +97,7 @@ function EquipeEscalasPage(){
   ]).then(([o,a])=>{if(cancelled)return;setOpenings((o.data||[]) as Opening[]);setApplications((a.data||[]) as unknown as Application[])});
   return ()=>{cancelled=true};
  },[selectedEventId]);
- function openEvent(id:string){setEventArea("links");setSelectedEventId(id);setEventToOpen({id})}
+ function openEvent(id:string,area:"links"|"candidates"|"scale"|"payments"="links"){setEventArea(area);setSelectedEventId(id);setEventToOpen({id})}
  useEffect(()=>{if(eventToOpen?.id!==selectedEventId)return;eventDetailsRef.current?.scrollIntoView?.({behavior:"smooth",block:"start"});eventDetailsRef.current?.focus({preventScroll:true})},[eventToOpen,selectedEventId]);
  async function deleteEvent(){
   const event=events.find(e=>e.id===selectedEventId);
@@ -125,7 +129,7 @@ function EquipeEscalasPage(){
   setShowNewEvent(false);openEvent(created.id);setOpenings([]);setApplications([]);setAssignment({});setOpeningKind("Recreador");setOpeningForm({title:"Recreador",slots:"1",advertised_value:""});
   await load();
  }
- async function addOpening(ev:FormEvent){ev.preventDefault();if(!selectedEventId)return;if(!openingForm.title.trim()){alert("Informe a função da vaga.");return}const {error}=await supabase.from("team_event_openings").insert({event_id:selectedEventId,title:openingForm.title.trim(),slots:Number(openingForm.slots),advertised_value:openingForm.advertised_value?Number(openingForm.advertised_value):null});if(error){alert(error.message);return}const {data}=await supabase.from("team_event_openings").select("id,event_id,title,slots,advertised_value").eq("event_id",selectedEventId).order("created_at");if(activeEventRef.current===selectedEventId)setOpenings((data||[]) as Opening[]);setOpeningKind("Recreador");setOpeningForm({title:"Recreador",slots:"1",advertised_value:""})}
+ async function addOpening(ev:FormEvent){ev.preventDefault();if(!selectedEventId)return;if(!openingForm.title.trim()){alert("Informe a função da vaga.");return}const {error}=await supabase.from("team_event_openings").insert({event_id:selectedEventId,title:openingForm.title.trim(),slots:Number(openingForm.slots),advertised_value:openingForm.advertised_value?Number(openingForm.advertised_value):null});if(error){alert(error.message);return}const {data}=await supabase.from("team_event_openings").select("id,event_id,title,slots,advertised_value").eq("event_id",selectedEventId).order("created_at");if(activeEventRef.current===selectedEventId)setOpenings((data||[]) as Opening[]);setOpeningKind("Recreador");setOpeningForm({title:"Recreador",slots:"1",advertised_value:""});await load()}
  async function publishEvent(copyAfter=false){
   const event=events.find(x=>x.id===selectedEventId);
   if(!event||!businessId)return;
@@ -180,7 +184,7 @@ function EquipeEscalasPage(){
   </nav>
   {contextError&&<div className="team-context-error" role="alert">{contextError} <button type="button" className="team-secondary" onClick={()=>void load()}>Recarregar IDs</button></div>}
   {view==="directory"&&businessId&&<TeamDirectory businessId={businessId} />}
-  {view==="events"&&<section className="team-dashboard"><div className="team-dashboard-title"><div><h2>Resumo dos eventos</h2></div><p>Resumo dos eventos ativos e da sua equipe.</p></div><div className="team-dashboard-cards"><article><small>EVENTOS ATIVOS</small><strong>{upcoming.length}</strong><span>Em planejamento ou publicados</span></article><article className={dashboardStats.openSlots?"attention":""}><small>VAGAS A PREENCHER</small><strong>{dashboardStats.openSlots}</strong><span>Ainda precisam ser preenchidas</span></article><article className={dashboardStats.pending?"attention":""}><small>CANDIDATURAS PENDENTES</small><strong>{dashboardStats.pending}</strong><span>Aguardando sua análise</span></article><article className={dashboardStats.waiting?"attention":""}><small>SEM RESPOSTA DE PRESENÇA</small><strong>{dashboardStats.waiting}</strong><span>Sem resposta no calendário</span></article><article className={dashboardStats.unavailable?"danger":""}><small>NÃO PODEM COMPARECER</small><strong>{dashboardStats.unavailable}</strong><span>Exigem ajuste na escala</span></article></div></section>}
+  {view==="events"&&<TeamEventSummary events={events} openings={summaryOpenings} applications={summaryApplications} loading={summaryLoading} error={summaryError} onRetry={()=>void load()} onOpen={(item,category)=>{setCandidateSearch(["waiting","unavailable"].includes(category)?item.name:"");if(category==="pending")setCandidateFilter("pending");openEvent(item.eventId,item.area)}}/>}
   {view==="network"&&<section className="team-section team-network"><div className="team-section-head"><div><h2>Rede de colaboradores</h2><p className="team-section-help">Pessoas cadastradas para trabalhar com sua empresa. Abra um cadastro para ver o histórico, o contato e o link de acesso ao calendário.</p></div><button className="team-secondary" type="button" aria-expanded={showAddPerson} onClick={()=>setShowAddPerson(!showAddPerson)}>{showAddPerson?"Fechar cadastro":"Adicionar colaborador"}</button></div>
    <div className="team-search-row"><label>Buscar na minha rede<input type="search" placeholder="Nome, nome de tio, ID, WhatsApp ou cidade" value={peopleSearch} onChange={e=>setPeopleSearch(e.target.value)} /></label></div>
    <TeamProviderImport businessId={businessId} onAdded={load} />
