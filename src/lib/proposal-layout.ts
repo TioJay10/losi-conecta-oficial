@@ -1,7 +1,7 @@
 import type { jsPDF } from "jspdf";
 import { ShadingPattern } from "jspdf";
 
-export type ProposalLayout="classic"|"geometric"|"editorial"|"waves"|"modern";
+export type ProposalLayout="classic"|"geometric"|"editorial"|"waves"|"modern"|"corporate";
 const shapes=[
  {points:[[0,0],[86,0],[29,100],[68,234],[31,297],[0,297]],color:[7,26,51]},
  {points:[[0,167],[65,54],[77,77],[0,210]],color:[20,94,168]},
@@ -140,4 +140,34 @@ export function drawModernProposalCover(doc:jsPDF,supplier:string,title:string,r
  doc.setFontSize(10);doc.setTextColor(42,47,59);doc.text(doc.splitTextToSize(supplier,64).slice(0,3),20,199,{lineHeightFactor:1.2});
  doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(82,97,116);
  doc.text(doc.splitTextToSize(location||"Prestador de serviços",48).slice(0,2),20,220,{lineHeightFactor:1.2});
+}
+
+/** Purple folded bands and a lime capsule frame the charcoal title panel. */
+export function drawCorporateProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string){
+ doc.setFillColor(255,255,255);doc.rect(0,0,210,297,"F");
+ const polygon=(points:number[][],color:[number,number,number])=>{
+  doc.setFillColor(...color);doc.lines(points.slice(1).map((p,i)=>[p[0]-points[i][0],p[1]-points[i][1]]),points[0][0],points[0][1],[1,1],"F",true);
+ };
+ polygon([[0,0],[17,0],[50,86],[0,86]],[82,17,104]);
+ polygon([[144,155],[185,155],[210,200],[210,297],[198,297]],[82,17,104]);
+ polygon([[22,162],[32,177],[44,162]],[64,12,83]);
+ doc.setFillColor(154,201,57);doc.rect(0,86,170,76,"F");doc.circle(170,124,38,"F");
+ polygon([[0,0],[13,0],[13,86],[0,86]],[92,20,110]);
+ polygon([[13,86],[13,162],[0,162],[0,86]],[162,208,63]);
+ polygon([[32,177],[39,177],[84,78],[75,72]],[64,12,83]);
+ polygon([[121,177],[129,177],[174,83],[166,74]],[229,231,232]);
+ doc.setFillColor(46,45,48);
+ doc.path([{op:"m",c:[75,72]},{op:"l",c:[161,72]},{op:"c",c:[169,72,171,76,167,85]},{op:"l",c:[121,177]},{op:"l",c:[34,177]},{op:"c",c:[28,177,27,172,31,164]},{op:"h",c:[]}]);doc.fill();
+ doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(82,17,104);
+ doc.text(doc.splitTextToSize(supplier,110).slice(0,3),192,25,{align:"right",lineHeightFactor:1.2});
+ doc.setTextColor(255,255,255);doc.setFont("helvetica","normal");doc.setFontSize(17);doc.text("PROPOSTA",102,113,{align:"center"});
+ doc.setTextColor(154,201,57);doc.setFont("helvetica","bold");doc.setFontSize(22);doc.text("COMERCIAL",101,127,{align:"center"});
+ let size=11,lines:string[]=[];
+ do{doc.setFontSize(size);lines=doc.splitTextToSize(title,66);if(lines.length*size*.3528*1.25<=20)break;size-=1;}while(size>8);
+ doc.setFont("helvetica","normal");doc.setTextColor(255,255,255);doc.text(lines,96,141,{align:"center",lineHeightFactor:1.25});
+ doc.setTextColor(82,17,104);doc.setFontSize(7);doc.text("APRESENTADA PARA",102,215,{align:"center"});
+ doc.setFont("helvetica","bold");doc.setFontSize(13);doc.text(doc.splitTextToSize(recipient||"Cliente / empresa",112).slice(0,3),102,225,{align:"center",lineHeightFactor:1.2});
+ doc.setFontSize(7);doc.setTextColor(54,100,24);doc.text("PREPARADA POR",102,247,{align:"center"});
+ doc.setTextColor(82,17,104);doc.setFontSize(10);doc.text(doc.splitTextToSize(supplier,112).slice(0,2),102,256,{align:"center",lineHeightFactor:1.2});
+ doc.setFont("helvetica","normal");doc.setTextColor(82,97,116);doc.setFontSize(7);doc.text(doc.splitTextToSize(location||"Prestador de serviços",104).slice(0,1),102,268,{align:"center"});
 }
