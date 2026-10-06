@@ -25,10 +25,11 @@
 .admin-credit-error,.admin-credit-success{padding:14px;border-radius:4px;font-size:13px;line-height:1.5}
 .admin-page .admin-credit-error{background:#fff0f0;color:#9b2525!important}
 .admin-page .admin-credit-success{background:#eaf7ef;color:#19623b!important}
-.admin-menu-group{margin-top:22px}
+.admin-menu-group{margin-top:28px}
 .admin-menu-group:first-child{margin-top:0}
-.admin-menu-group-title{display:block;margin:0 12px 8px;font-size:10px;font-weight:600;letter-spacing:.06em}
-body .admin-page[class] .admin-menu-group-title{color:#dce5f1!important}
+.admin-menu-group-title{display:grid;grid-template-columns:minmax(8px,1fr) minmax(0,auto) minmax(8px,1fr);align-items:center;gap:8px;margin:0 4px 12px;font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.035em;text-align:center;text-wrap:balance}
+.admin-menu-group-title::before,.admin-menu-group-title::after{content:"";display:block;height:1px;background:rgba(214,180,106,.4)}
+body .admin-page[class] .admin-menu-group-title{color:#f0d99a!important}
 @media(max-width:760px){
  .admin-credit-search,.admin-credit-selected{padding:16px}
  .admin-credit-center h2{font-size:18px}
