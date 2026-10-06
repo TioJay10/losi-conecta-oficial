@@ -1,3 +1,4 @@
+import { PanelMenuIcon } from "../components/PanelMenuIcon";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { jsPDF } from "jspdf";
@@ -466,17 +467,17 @@ function ReceiptsPage() {
         <div className="dashboard-sidebar-brand"><span>LOSI</span><strong>CONECTA</strong></div>
         <div className="dashboard-sidebar-caption">PAINEL PROFISSIONAL</div>
         <nav className="dashboard-sidebar-nav" aria-label="Menu do painel">
-          <Link to="/painel" className="dashboard-nav-item"><span className="dashboard-nav-mark">01</span><span><strong>Visão Geral</strong><small>Resumo da conta</small></span></Link>
-          <Link to="/buscar" className="dashboard-nav-item"><span className="dashboard-nav-mark">02</span><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span></Link>
-          <Link to="/meu-perfil" className="dashboard-nav-item"><span className="dashboard-nav-mark">03</span><span><strong>Meu perfil</strong><small>Dados pessoais</small></span></Link>
-          <Link to="/meus-servicos" className="dashboard-nav-item"><span className="dashboard-nav-mark">04</span><span><strong>Minha empresa</strong><small>Serviços e presença</small></span></Link>
-          <Link to="/notificar-inconsistencia" className="dashboard-nav-item"><span className="dashboard-nav-mark">05</span><span><strong>Notificar inconsistência</strong><small>Falar com o administrador</small></span></Link>
+          <Link to="/painel" className="dashboard-nav-item"><PanelMenuIcon name="overview" /><span><strong>Visão Geral</strong><small>Resumo da conta</small></span></Link>
+          <Link to="/buscar" className="dashboard-nav-item"><PanelMenuIcon name="search" /><span><strong>Fornecedores</strong><small>Encontrar parceiros</small></span></Link>
+          <Link to="/meu-perfil" className="dashboard-nav-item"><PanelMenuIcon name="profile" /><span><strong>Meu perfil</strong><small>Dados pessoais</small></span></Link>
+          <Link to="/meus-servicos" className="dashboard-nav-item"><PanelMenuIcon name="businesses" /><span><strong>Minha empresa</strong><small>Serviços e presença</small></span></Link>
+          <Link to="/notificar-inconsistencia" className="dashboard-nav-item"><PanelMenuIcon name="inconsistencies" /><span><strong>Notificar inconsistência</strong><small>Falar com o administrador</small></span></Link>
           <div className="dashboard-nav-divider"><span>Operacional</span></div>
-          <Link to="/orcamentos" className="dashboard-nav-item"><span className="dashboard-nav-mark">06</span><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></Link>
-          <Link to="/recibos" className="dashboard-nav-item active"><span className="dashboard-nav-mark">07</span><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></Link>
-          <Link to="/propostas" className="dashboard-nav-item"><span className="dashboard-nav-mark">08</span><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></Link>
-                  <Link to="/losi-ads" className="dashboard-nav-item"><span className="dashboard-nav-mark">09</span><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></Link>
-          <Link to="/equipe-escalas" className="dashboard-nav-item"><span className="dashboard-nav-mark">10</span><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></Link>
+          <Link to="/orcamentos" className="dashboard-nav-item"><PanelMenuIcon name="quotes" /><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></Link>
+          <Link to="/recibos" className="dashboard-nav-item active"><PanelMenuIcon name="receipts" /><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></Link>
+          <Link to="/propostas" className="dashboard-nav-item"><PanelMenuIcon name="proposals" /><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></Link>
+                  <Link to="/losi-ads" className="dashboard-nav-item"><PanelMenuIcon name="ads" /><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></Link>
+          <Link to="/equipe-escalas" className="dashboard-nav-item"><PanelMenuIcon name="team" /><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></Link>
 </nav>
         <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><Link to="/painel" className="dashboard-sidebar-logout">Voltar ao painel</Link></div>
       </aside>

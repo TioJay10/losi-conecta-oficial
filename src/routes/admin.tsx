@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { AdminCreditCenter } from "../components/AdminCreditCenter";
+import { PanelMenuIcon } from "../components/PanelMenuIcon";
 import { AdminInconsistencyCenter } from "../components/AdminInconsistencyCenter";
 import { HomePage, type HomeCustomization } from "../components/HomePage";
 
@@ -1116,7 +1117,7 @@ function AdminPage() {
         <aside className={`admin-sidebar${mobileMenuOpen ? " mobile-open" : ""}`}>
           <div className="admin-sidebar-title">GESTÃO</div>
           <nav className="admin-menu">
-            {menuGroups.map(group => <div className="admin-menu-group" key={group.label}><span className="admin-menu-group-title">{group.label}</span>{group.ids.map(id => menu.find(item => item.id === id)!).map(item => <button key={item.id} className={section === item.id ? "active" : ""} aria-current={section === item.id ? "page" : undefined} onClick={() => { setSection(item.id); setMobileMenuOpen(false); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><span>{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}</div>)}
+            {menuGroups.map(group => <div className="admin-menu-group" key={group.label}><span className="admin-menu-group-title">{group.label}</span>{group.ids.map(id => menu.find(item => item.id === id)!).map(item => <button key={item.id} className={section === item.id ? "active" : ""} aria-current={section === item.id ? "page" : undefined} onClick={() => { setSection(item.id); setMobileMenuOpen(false); window.history.replaceState(null, "", `/admin?section=${item.id}`); }}><PanelMenuIcon name={item.id} /><span className="admin-menu-label">{item.label}</span>{item.count !== undefined && <em>{item.count}</em>}</button>)}</div>)}
           </nav>
           <div className="admin-sidebar-logout">
             <button type="button" onClick={logout}>Sair do painel</button>

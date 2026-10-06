@@ -1,0 +1,181 @@
+/* LOSI work surfaces: shared rhythm, quiet navigation and deliberate actions. */
+@media screen {
+  :root { --panel-space:24px; --panel-inset:24px; --panel-control-radius:6px; }
+
+  /* Structural cards own their inset; document canvases retain their geometry. */
+  body :is(.dashboard-page,.personal-profile-page,.business-services-page,.quotes-page,.inconsistency-page,.team-page)[class]
+  :is(.dashboard-card,.dashboard-plan-card,.dashboard-quotes-overview,.dashboard-commercial-card,
+    .dashboard-operation-card,.personal-profile-card,.business-services-card,.quotes-dashboard,
+    .quote-builder,.proposals-form-card,.proposals-preview-panel,.receipts-form-card,
+    .receipts-preview-card,.receipts-history-card,.losi-ads-form-card,.losi-ads-my-ads,
+    .losi-ads-my-applications,.inconsistency-card,.inconsistency-history,.team-section) {
+    padding:var(--panel-inset)!important;
+    min-width:0;
+    box-sizing:border-box;
+  }
+  body :is(.dashboard-grid,.dashboard-plan-grid,.dashboard-saved-list,.dashboard-commercial-grid,
+    .dashboard-operation-grid,.proposals-layout,.receipts-layout,.quotes-dashboard-grid,
+    .losi-ads-type-grid,.losi-ads-own-grid,.business-services-list) {
+    gap:var(--panel-space)!important;
+  }
+  body :is(.personal-profile-content,.business-services-content) > :is(form,section) {
+    margin-block:0 var(--panel-space)!important;
+  }
+  body .dashboard-content > :is(.dashboard-status,.dashboard-onboarding,.dashboard-grid,
+    .dashboard-quotes-overview,.dashboard-commercial,.dashboard-operation,.dashboard-plan-grid,
+    .dashboard-saved,.dashboard-pending-invoices,.proposals-layout,.receipts-layout,
+    .receipts-history-card,.losi-ads-form-card,.losi-ads-my-ads,.losi-ads-my-applications) {
+    margin-block:var(--panel-space)!important;
+  }
+  body .dashboard-page[class] .proposals-group-card {
+    padding:20px 0!important;
+    margin:0!important;
+    border:0!important;
+    border-bottom:1px solid #dce1e6!important;
+    border-radius:0!important;
+  }
+  body .dashboard-page[class] .proposals-group-card:first-of-type {padding-top:0!important}
+  body .dashboard-page[class] .proposals-group-card:last-of-type {border-bottom:0!important}
+  body .dashboard-page[class] :is(.proposals-divider,.receipts-divider) {margin-block:24px!important}
+  body .dashboard-page[class] :is(.proposals-card-head,.receipts-card-head) {gap:12px;flex-wrap:wrap}
+  body .dashboard-page[class] .losi-ai-workspace {margin-block:24px!important}
+  body :is(.business-services-card,.personal-profile-card) :is(.business-section-title,.personal-profile-card-header) {margin-bottom:20px}
+  body :is(.personal-profile-form-grid,.business-services-form-grid) {gap:20px!important}
+
+  /* A fixed icon column prevents label or badge lengths from moving the SVG. */
+  .panel-menu-icon {display:block;width:18px;height:18px;min-width:18px;flex:0 0 18px;color:currentColor}
+  body .admin-page[class] .admin-menu button {
+    display:grid!important;
+    grid-template-columns:18px minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:10px!important;
+    width:100%;
+    min-height:44px!important;
+    padding:10px!important;
+    border-radius:6px!important;
+    border:1px solid transparent!important;
+    background:transparent!important;
+    color:#dce5f1!important;
+    font:500 12px/1.45 "Montserrat",Arial,sans-serif!important;
+    text-align:left!important;
+    transform:none!important;
+  }
+  body .admin-page[class] .admin-menu button.active {
+    background:rgba(214,180,106,.13)!important;
+    border-color:rgba(214,180,106,.3)!important;
+    color:#fff!important;
+    font-weight:600!important;
+  }
+  body .admin-page[class] .admin-menu button:hover:not(.active) {background:rgba(255,255,255,.07)!important;color:#fff!important}
+  body .admin-page[class] .admin-menu-label {min-width:0;white-space:normal;overflow-wrap:break-word}
+  body .admin-page[class] .admin-menu button em {margin:0;min-width:20px;box-sizing:border-box;font-variant-numeric:tabular-nums}
+  body .admin-page[class] .admin-menu .panel-menu-icon {color:#d6b46a}
+  body .dashboard-page[class] .dashboard-sidebar-nav .dashboard-nav-item {
+    display:grid!important;
+    grid-template-columns:18px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:12px!important;
+    padding:12px!important;
+    border-radius:6px!important;
+    transform:none!important;
+  }
+  body .dashboard-page[class] .dashboard-nav-item > span {min-width:0}
+  body .dashboard-page[class] .dashboard-nav-item .panel-menu-icon {color:#d6b46a}
+  body .dashboard-page[class] .dashboard-nav-item.active::before {display:none}
+
+  /* Every action shares typography and touch geometry; selectors preserve
+     the drawer scrim, profile avatar, conversation rows and home preview. */
+  body :is(.admin-page,.admin-profile-page)[class] button:not(:where(
+    .admin-mobile-menu-overlay,.admin-profile-link,.admin-mobile-menu-button,
+    .admin-inconsistency-item,.admin-inconsistency-close,.home-customization-preview-viewport *)) {
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:8px!important;
+    min-height:40px!important;
+    max-width:100%;
+    padding:10px 14px!important;
+    box-sizing:border-box;
+    border:1px solid #cbd4df!important;
+    border-radius:var(--panel-control-radius)!important;
+    background:#fff!important;
+    color:#24364c!important;
+    font:600 12px/1.4 "Montserrat",Arial,sans-serif!important;
+    letter-spacing:0!important;
+    text-decoration:none!important;
+    text-shadow:none!important;
+    white-space:normal!important;
+    overflow-wrap:normal;
+    word-break:normal;
+    writing-mode:horizontal-tb;
+    cursor:pointer;
+    box-shadow:none!important;
+    transform:none!important;
+    transition:background-color 150ms ease,border-color 150ms ease,color 150ms ease!important;
+  }
+  body :is(.admin-page,.admin-profile-page)[class] button:hover:not(:disabled):not(:where(
+    .admin-menu button,.admin-mobile-menu-overlay,.admin-profile-link,.admin-mobile-menu-button,
+    .admin-inconsistency-item,.admin-inconsistency-close,.home-customization-preview-viewport *)) {
+    background:#eef2f6!important;border-color:#8b9bb0!important;
+  }
+  body :is(.admin-page,.admin-profile-page)[class] :is(.admin-primary-button,.admin-action-button,
+    .admin-profile-primary,.admin-inconsistency-composer button:not(.is-resolve),
+    .admin-finance-periods button.active,.admin-alerts-filters button.active,.admin-inconsistency-filters button.is-active) {
+    background:#122036!important;color:#fff!important;border-color:#122036!important;
+  }
+  body :is(.admin-page,.admin-profile-page)[class] :is(.admin-primary-button,.admin-action-button,
+    .admin-profile-primary,.admin-inconsistency-composer button:not(.is-resolve),
+    .admin-finance-periods button.active,.admin-alerts-filters button.active,.admin-inconsistency-filters button.is-active):hover:not(:disabled) {
+    background:#243c59!important;border-color:#243c59!important;
+  }
+  body .admin-page[class] :is(.admin-user-block,.admin-user-delete,.admin-category-delete,.admin-security-danger) {
+    background:#fff4f4!important;color:#9b2525!important;border-color:#e5bcbc!important;
+  }
+  body .admin-page[class] :is(.admin-user-block,.admin-user-delete,.admin-category-delete,.admin-security-danger):hover:not(:disabled) {
+    background:#ffe6e6!important;border-color:#c77b7b!important;
+  }
+  body .admin-page[class] .admin-finance-periods button:not(.active) {
+    background:#fff!important;color:#24364c!important;border-color:#cbd4df!important;
+  }
+  body .admin-page[class] .admin-logout {
+    color:#fff!important;background:#122036!important;border-color:#122036!important;
+  }
+  body .admin-page[class] .admin-logout:hover:not(:disabled) {
+    color:#fff!important;background:#243c59!important;border-color:#243c59!important;
+  }
+  body .admin-page[class] .admin-sidebar-logout button {
+    color:#fff!important;background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.22)!important;
+  }
+  body .admin-page[class] .admin-sidebar-logout button:hover:not(:disabled) {
+    color:#fff!important;background:rgba(255,255,255,.13)!important;border-color:rgba(255,255,255,.4)!important;
+  }
+  body :is(.admin-page,.admin-profile-page)[class] button:disabled:not(.home-customization-preview-viewport *) {
+    color:#526174!important;background:#e4e8ed!important;border-color:#cbd4df!important;
+    opacity:1!important;cursor:not-allowed!important;box-shadow:none!important;
+  }
+  body :is(.admin-page,.admin-profile-page)[class] :is(button,a,input,select,textarea):focus-visible:not(.home-customization-preview-viewport *) {
+    outline:2px solid #a9873e!important;outline-offset:3px!important;
+  }
+  body .dashboard-page[class] .dashboard-sidebar-nav button:focus-visible {outline:2px solid #d6b46a!important;outline-offset:2px!important}
+  body .admin-page[class] :is(.admin-item-actions,.admin-modal-actions,.admin-profile-actions) {gap:10px!important;flex-wrap:wrap}
+  body .admin-page[class] .admin-inconsistency-composer {grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}
+  body .admin-page[class] .admin-inconsistency-composer button {min-width:0!important;width:auto!important}
+
+  @media (max-width:768px) {
+    :root {--panel-space:20px;--panel-inset:16px}
+    body :is(.proposals-layout,.receipts-layout) {grid-template-columns:minmax(0,1fr)!important}
+    body :is(.proposals-preview-panel,.receipts-preview-card) {position:static!important;max-width:100%}
+    body :is(.personal-profile-form-grid,.business-services-form-grid) {gap:16px!important}
+    body :is(.admin-page,.admin-profile-page)[class] button:not(:where(
+      .admin-mobile-menu-overlay,.admin-profile-link,.admin-mobile-menu-button,
+      .admin-inconsistency-item,.admin-inconsistency-close,.home-customization-preview-viewport *)) {min-height:44px!important}
+    body .admin-page[class] .admin-item-actions {display:flex;align-items:stretch}
+    body .admin-page[class] .admin-item-actions > button {flex:1 1 140px;min-width:0}
+    body .admin-page[class] :is(.admin-item-main,.admin-broadcast-footer) {flex-wrap:wrap;gap:16px}
+    body .admin-page[class] .admin-inconsistency-composer {grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+    body .admin-page[class] .admin-inconsistency-composer textarea {grid-column:1/-1}
+  }
+  @media (prefers-reduced-motion:reduce) {
+    body :is(.admin-page,.admin-profile-page)[class] button {transition:none!important}
+  }
+}
