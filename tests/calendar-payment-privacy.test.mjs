@@ -50,3 +50,26 @@ assert.equal(alice.data.collaborator.calendar_token,undefined);
 assert.equal((await calendar({sessionToken:secrets.alice,action:'respond',applicationId:'app-b',response:'confirmed'})).status,404);
 assert.ok(selections.filter(x=>x.table==='collaborator_profiles').every(x=>!x.columns.includes('calendar_token')));
 console.log('Proteção OK: links antigos não autorizam leitura nem alterações, sessão não revela token antigo, outro colaborador não pode responder pela sua escala.');
+
+// Event membership authorizes the brief and the strictly limited roster.
+tables.team_applications.push(
+ {id:'own-event',event_id:'event',profile_id:'alice',status:'pending',candidate_name:'Alice'},
+ {id:'peer',event_id:'event',profile_id:'bob',status:'confirmed',candidate_name:'Bob',candidate_whatsapp:'5511999999999',agreed_value:450,assigned_role:'Privado',collaborator_profiles:{id:'bob',losi_id:'LOSI-100002',full_name:'Bob',professional_name:'Tio Bob',photo_url:'https://example.test/bob.png',whatsapp:'secret-phone'}},
+ {id:'manual',event_id:'event',status:'confirmed',candidate_name:'Manual',team_collaborators:{name:'Manual',collaborator_profiles:{professional_name:'Tia Manual',photo_url:'https://example.test/manual.png'}}},
+ {id:'not-working',event_id:'event',status:'confirmed',candidate_name:'Indisponivel',attendance_status:'unavailable'},
+ {id:'only-approved',event_id:'event',status:'approved',candidate_name:'Nao escalado'},
+ {id:'other-day',event_id:'another-event',status:'confirmed',candidate_name:'Outro dia'}
+);
+const details=await calendar({action:'eventDetails',eventId:'event',sessionToken:secrets.alice});
+assert.equal(details.status,200);
+assert.deepEqual(details.data.escalados,[{name:'Tio Bob',photo_url:'https://example.test/bob.png'},{name:'Tia Manual',photo_url:'https://example.test/manual.png'}]);
+for(const member of details.data.escalados)assert.deepEqual(Object.keys(member).sort(),['name','photo_url']);
+for(const forbidden of ['LOSI-100002','5511999999999','450','secret-phone','Privado','Outro dia','Indisponivel','Nao escalado'])assert.equal(JSON.stringify(details.data).includes(forbidden),false);
+assert.equal((await calendar({action:'eventDetails',eventId:'event',sessionToken:secrets.new,profile_id:'alice'})).status,404);
+assert.equal((await calendar({action:'eventDetails',eventId:'another-event',sessionToken:secrets.alice})).status,404);
+assert.equal((await calendar({action:'eventDetails',eventId:'event',token:'token-alice'})).status,401);
+tables.team_applications.find(x=>x.id==='own-event').status='removed';
+assert.equal((await calendar({action:'eventDetails',eventId:'event',sessionToken:secrets.alice})).status,404);
+const rosterSelections=selections.filter(x=>x.table==='team_applications'&&x.columns.includes('candidate_name,'));
+assert.ok(rosterSelections.length>0);assert.ok(rosterSelections.every(x=>!x.columns.includes('whatsapp')&&!x.columns.includes('agreed_value')&&!x.columns.includes('losi_id')));
+console.log('Escalados OK: apenas nome e foto, mesmo evento e dia, exclusão de indisponíveis, sem IDs/telefones/diárias; acesso negado a estranhos e removidos.');

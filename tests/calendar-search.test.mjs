@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import ts from 'typescript';
+const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/lib/calendar-search.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports});
+const match=exports.matchesCalendarEvent,event={title:'Treinamento Thermas',event_date:'2026-10-15',business_profiles:{business_name:'Termas da Mata'},team_event_openings:[{title:'Recreação infantil'}]};
+const f=(patch={})=>({query:'',from:'',to:'',...patch});
+assert.equal(match(event,f({query:'termas recreacao'})),true);
+assert.equal(match(event,f({query:'empresa diferente'})),false);
+assert.equal(match(event,f({from:'2026-10-15',to:'2026-10-15'})),true);
+assert.equal(match(event,f({from:'2026-10-16'})),false);
+assert.equal(match(event,f({to:'2026-10-14'})),false);
+assert.equal(match(event,f({from:'2026-10-16',to:'2026-10-14'})),false);
+assert.equal(match(event,f({query:'monitor'}),['Monitor aquático']),true);
+assert.equal(match(null,f()),false);
+console.log('Busca OK: empresa, evento, vaga, acentos, função atribuída, dia exato e intervalo inclusivo.');
