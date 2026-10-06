@@ -176,8 +176,8 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   const contentBottom = 268;
   const bodyFontSize = 11;
   const bodyLineHeight = bodyFontSize * 0.3528 * 1.32;
-  const navy = layout === "modern" ? [42,47,59] as const : [7,26,51] as const;
-  const gold = layout === "modern" ? [160,64,8] as const : [190,145,48] as const;
+  const navy: readonly [number,number,number] = layout === "modern" ? [42,47,59] : [7,26,51];
+  const gold: readonly [number,number,number] = layout === "modern" ? [160,64,8] : [190,145,48];
   const ink = [27, 38, 53] as const;
   const muted = [104, 116, 132] as const;
   const pale = [246, 248, 251] as const;
