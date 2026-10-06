@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import ts from 'typescript';
+const store=new Map();const exports={};
+const js=ts.transpileModule(fs.readFileSync('src/lib/collaborator-session.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+vm.runInNewContext(js,{exports,window:{localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)}}});
+store.set('losi-collaborator-session-v1',JSON.stringify({version:1,losiId:'LOSI-123456',calendarToken:'11111111-1111-4111-8111-111111111111'}));
+assert.equal(exports.readCollaboratorSession(),null);assert.equal(store.size,0);
+assert.equal(exports.rememberCollaborator('LOSI-123456','a'.repeat(64)),true);
+assert.equal(exports.readCollaboratorSession().sessionToken,'a'.repeat(64));
+assert.equal(exports.rememberCollaborator('LOSI-123456','old-link'),false);
+exports.clearCollaboratorSession();assert.equal(exports.readCollaboratorSession(),null);
+console.log('Navegador OK: sessão persistente, acesso antigo invalidado e saída limpa credenciais.');

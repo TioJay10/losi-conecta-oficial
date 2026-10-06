@@ -1,3 +1,4 @@
+import { issueSession, readSession } from "../_shared/collaborator-sessions.ts";
 const H={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json"};
 const j=(b:unknown,s=200)=>new Response(JSON.stringify(b),{status:s,headers:H});
 const phone=(v:unknown)=>{let n=String(v||"").replace(/\D/g,"");if(n.length===10||n.length===11)n="55"+n;return n};
@@ -22,11 +23,11 @@ Deno.serve(async r=>{
   if(b.action==="recover"){
    const name=String(b.name||"").trim(),n=phone(b.whatsapp);
    if(!name||n.length<12||n.length>13)return j({error:"Informe nome completo ou nome de tio e WhatsApp com DDD."},400);
-   const {data:p,error}=await a.from("collaborator_profiles").select("losi_id,full_name,professional_name,calendar_token").eq("whatsapp_normalized",n).maybeSingle();
+   const {data:p,error}=await a.from("collaborator_profiles").select("id,losi_id,full_name,professional_name").eq("whatsapp_normalized",n).maybeSingle();
    if(error)return j({error:"Não foi possível localizar seu cadastro."},500);
    const norm=(v:string)=>v.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase("pt-BR");
    if(!p||![p.full_name,p.professional_name].some(value=>value&&norm(value)===norm(name)))return j({error:"Não encontramos um cadastro com esse nome e WhatsApp."},404);
-   return j({found:true,losiId:p.losi_id,calendarToken:p.calendar_token});
+   return j({found:true,losiId:p.losi_id,sessionToken:await issueSession(a,p)});
   }
 
   if(b.action==="lookup"){
@@ -45,13 +46,14 @@ Deno.serve(async r=>{
    if(!o)return j({error:"Vaga inválida."},400);
 
    }
-   let p:any=null;let createdProfile=false;
+   let p:any=null;let validSession:any=null;
    if(losi){
     const n=phone(whatsapp);
     const z=await a.from("collaborator_profiles").select("*").eq("losi_id",losi).maybeSingle();
     p=z.data;
     if(!p)return j({error:"ID LOSI não encontrado."},404);
-    if(String(b.calendarToken||"")!==p.calendar_token&&(!n||n!==p.whatsapp_normalized))return j({error:"O WhatsApp informado não corresponde ao cadastro deste ID LOSI."},403);
+    validSession=await readSession(a,b.sessionToken);
+    if(validSession?.profile_id!==p.id&&(!/^55\d{10,11}$/.test(n)||n!==p.whatsapp_normalized))return j({error:"O WhatsApp informado não corresponde ao cadastro deste ID LOSI."},403);
    }else{
     if(!name||!whatsapp)return j({error:"Preencha nome e WhatsApp."},400);
     const n=phone(whatsapp);
@@ -67,17 +69,17 @@ Deno.serve(async r=>{
      else if(created.error.code!=="23505")return j({error:"Não foi possível criar seu perfil LOSI."},500);
     }
     if(!ins)return j({error:"Não foi possível gerar seu ID LOSI. Tente novamente."},500);
-    p=ins;createdProfile=true;
+    p=ins;
    }
 
-   if(b.action==="register")return j({success:true,losiId:p.losi_id,calendarToken:p.calendar_token});
+   if(b.action==="register")return j({success:true,losiId:p.losi_id,sessionToken:validSession?.profile_id===p.id?b.sessionToken:await issueSession(a,p)});
 
    const existing=await a.from("team_applications").select("id,status").eq("event_id",event.id).eq("opening_id",openingId).eq("profile_id",p.id).maybeSingle();
    if(existing.data)return j({error:"Você já se candidatou a esta oportunidade.",alreadyApplied:true},409);
 
    const ir=await a.from("team_applications").insert({event_id:event.id,opening_id:openingId,collaborator_id:null,profile_id:p.id,candidate_name:p.full_name,candidate_whatsapp:p.whatsapp,candidate_city:p.city,candidate_state:p.state,candidate_notes:String(b.notes||"").trim()||null});
    if(ir.error)return j({error:ir.error.code==="23505"?"Você já se candidatou a esta oportunidade.":"Não foi possível enviar sua candidatura.",alreadyApplied:ir.error.code==="23505"},ir.error.code==="23505"?409:500);
-   return j({success:true,losiId:p.losi_id,calendarToken:p.calendar_token});
+   return j({success:true,losiId:p.losi_id,sessionToken:validSession?.profile_id===p.id?b.sessionToken:await issueSession(a,p)});
   }
   return j({error:"Ação inválida."},400);
  }catch(e){console.error(e);return j({error:"Erro interno."},500)}
