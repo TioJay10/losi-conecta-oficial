@@ -20,3 +20,21 @@ const draft=await opportunity({token:'draft-token',action:'get'});assert.equal(d
 const ended=await opportunity({token:'ended-token',action:'get'});assert.equal(ended.status,404);assert.match(ended.data.error,/encerrada/);
 const missing=await opportunity({token:'missing',action:'get'});assert.equal(missing.status,404);assert.match(missing.data.error,/não foi encontrado/);
 console.log('Links OK: publicada acessível, rascunho bloqueado, encerrada bloqueada e link inexistente identificado.');
+
+// A collaborator can discover published vacancies before joining any supplier network.
+tables.collaborator_profiles.push({id:'new',calendar_token:'token-new',losi_id:'LOSI-100003',full_name:'Novo colaborador'});
+const freshEvent=(id,patch={})=>({id,public_token:'public-'+id,status:'open',business_id:'another-business',event_date:'2099-10-10',team_event_openings:[{id:'opening-'+id,title:'Monitor',slots:1}],...patch});
+tables.team_events.push(freshEvent('other-supplier'),freshEvent('unpublished',{status:'draft'}),freshEvent('cancelled',{status:'cancelled'}),freshEvent('past',{event_date:'2000-01-01'}),freshEvent('no-vacancies',{team_event_openings:[]}),freshEvent('no-public-link',{public_token:null}));
+const newcomer=await calendar({token:'token-new'});
+assert.equal(newcomer.status,200);
+assert.deepEqual(newcomer.data.opportunities.map(x=>x.id),['event','other-supplier']);
+assert.deepEqual(newcomer.data.items,[]);assert.deepEqual(newcomer.data.networks,[]);
+assert.equal(JSON.stringify(newcomer.data).includes('agreed_value'),false);
+// Existing collaborators can discover the same public vacancies without sharing private schedules.
+const existing=await calendar({token:'token-alice'});
+assert.deepEqual(existing.data.opportunities.map(x=>x.id),['event','other-supplier']);
+tables.team_applications.push({id:'new-application',profile_id:'new',status:'pending',team_events:{id:'event'}});
+const applied=await calendar({token:'token-new'});
+assert.deepEqual(applied.data.opportunities.map(x=>x.id),['other-supplier']);
+assert.deepEqual(applied.data.items.map(x=>x.id),['new-application']);
+console.log('Descoberta OK: novo colaborador sem rede vê vagas públicas; rascunhos, canceladas, passadas, sem vagas e já candidatadas não entram na lista.');
