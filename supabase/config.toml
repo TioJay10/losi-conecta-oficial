@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.team-public-opportunity]
 verify_jwt = false
+
+[functions.team-network-directory]
+verify_jwt = true
