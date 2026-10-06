@@ -2,6 +2,64 @@ import type { jsPDF } from "jspdf";
 import { ShadingPattern } from "jspdf";
 
 export type ProposalLayout="classic"|"geometric"|"editorial"|"waves"|"modern"|"corporate";
+export type ProposalColors = { primary: string; accent: string };
+type RGB = [number, number, number];
+export function defaultProposalColors(layout: ProposalLayout): ProposalColors {
+ return layout === "corporate" ? {primary:"#521168",accent:"#9ac939"} : layout === "modern" ? {primary:"#2a2f3b",accent:"#ff6000"} : layout === "waves" ? {primary:"#071a33",accent:"#2786bf"} : {primary:"#071a33",accent:"#be9130"};
+}
+export function proposalColor(hex: string): RGB {
+ if(!/^#[0-9a-f]{6}$/i.test(hex)) throw new Error("Cor inválida.");
+ return [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
+}
+const mixColor=(color:RGB,target:number,amount:number):RGB=>color.map(v=>Math.round(v+(target-v)*amount)) as RGB;
+const luminance=(color:RGB)=>color.map(v=>{const n=v/255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4;}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+export function readableProposalColor(color:RGB): RGB {
+ let result=color;
+ while((1.05/(luminance(result)+.05))<4.5)result=mixColor(result,0,.08);
+ return result;
+}
+export const proposalForeground=(color:RGB):RGB=>luminance(color)>.179?[20,26,34]:[255,255,255];
+export function proposalColorOn(color:RGB,background:RGB): RGB {
+ const bg=luminance(background),target=bg>.179?0:255;
+ let result=color;
+ for(let i=0;i<80;i++){
+  const fg=luminance(result);
+  if((Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)>=4.5)break;
+  result=mixColor(result,target,.12);
+ }
+ return result;
+}
+/** Remap only the template's brand colors; paper, photographs and neutral ink stay intact. */
+function coloredCover(doc:jsPDF,colors?:ProposalColors,editorial=false):jsPDF {
+ if(!colors)return doc;
+ const primary=proposalColor(colors.primary),accent=proposalColor(colors.accent);
+ const primaryKeys=["7,26,51","82,17,104","42,47,59","52,58,70","62,68,81","64,12,83","92,20,110","18,42,69"];
+ const accentKeys=["190,145,48","20,94,168","240,217,154","39,134,191","39,111,155","226,88,5","160,64,8","154,201,57","162,208,63","54,100,24","225,244,253","199,231,249","123,192,229","145,203,235"];
+ return new Proxy(doc,{get(target,key){
+  if(key!=="setFillColor"&&key!=="setTextColor"&&key!=="setDrawColor") {const value=Reflect.get(target,key);return typeof value==="function"?value.bind(target):value;}
+  return (...args:number[])=>{
+   const original=args.join(","),text=key==="setTextColor";
+   let rgb:RGB|undefined;
+   if(primaryKeys.includes(original)){
+    rgb=text?(editorial?proposalColorOn(primary,accent):readableProposalColor(primary)):primary;
+    if(!text&&(original==="52,58,70"||original==="62,68,81"||original==="92,20,110"||original==="18,42,69"))rgb=mixColor(primary,255,.08);
+    if(!text&&original==="64,12,83")rgb=mixColor(primary,0,.18);
+   }
+   if(accentKeys.includes(original)){
+    rgb=accent;
+    if(original==="225,244,253")rgb=mixColor(accent,255,.9);
+    if(original==="199,231,249")rgb=mixColor(accent,255,.75);
+    if(original==="123,192,229"||original==="145,203,235")rgb=mixColor(accent,255,.4);
+    if(text)rgb=original==="154,201,57"?proposalColorOn(accent,[46,45,48]):editorial&&original==="240,217,154"?proposalColorOn(accent,primary):readableProposalColor(accent);
+   }
+   if(text&&editorial&&original==="255,255,255")rgb=proposalForeground(primary);
+   if(text&&editorial&&original==="220,229,241")rgb=proposalForeground(primary);
+   (target[key] as (...values:number[])=>unknown)(...(rgb||args));
+   return target;
+  };
+ }});
+}
+
 const shapes=[
  {points:[[0,0],[86,0],[29,100],[68,234],[31,297],[0,297]],color:[7,26,51]},
  {points:[[0,167],[65,54],[77,77],[0,210]],color:[20,94,168]},
@@ -23,7 +81,8 @@ export function drawProposalGeometry(doc:jsPDF){
   doc.lines(shape.points.slice(1).map((p,i)=>[p[0]-shape.points[i][0],p[1]-shape.points[i][1]]),shape.points[0][0],shape.points[0][1],[1,1],"F",true);
  }
 }
-export function drawGeometricProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string){
+export function drawGeometricProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string,colors?:ProposalColors){
+ doc=coloredCover(doc,colors);
  drawProposalGeometry(doc);
  doc.setTextColor(7,26,51);doc.setFont("helvetica","bold");doc.setFontSize(14);
  const brand=doc.splitTextToSize(supplier,108).slice(0,4);
@@ -44,7 +103,8 @@ export function drawGeometricProposalCover(doc:jsPDF,supplier:string,title:strin
 }
 
 /** Curved editorial cover, drawn as PDF vectors rather than a template bitmap. */
-export function drawEditorialProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string,image=""){
+export function drawEditorialProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string,image="",colors?:ProposalColors){
+ doc=coloredCover(doc,colors,true);
  doc.setFillColor(7,26,51);doc.rect(0,0,210,297,"F");
  doc.setFillColor(190,145,48);
  doc.path([{op:"m",c:[0,0]},{op:"l",c:[210,0]},{op:"l",c:[210,109]},{op:"c",c:[170,112,158,69,112,65]},{op:"c",c:[75,60,92,22,0,12]},{op:"h",c:[]}]);doc.fill();
@@ -74,7 +134,8 @@ export function drawEditorialProposalCover(doc:jsPDF,supplier:string,title:strin
 }
 
 /** Airy blue ribbons remain sharp at print resolution. */
-export function drawWaveProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string){
+export function drawWaveProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string,colors?:ProposalColors){
+ doc=coloredCover(doc,colors);
  doc.setFillColor(255,255,255);doc.rect(0,0,210,297,"F");
  const ribbon=(path:Array<{op:string;c:number[]}>,color:[number,number,number])=>{
   doc.setFillColor(...color);doc.path(path);doc.fill();
@@ -109,7 +170,8 @@ export function drawWaveProposalCover(doc:jsPDF,supplier:string,title:string,rec
 }
 
 /** White editorial field and layered orange/charcoal sweep, matching the reference composition. */
-export function drawModernProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string){
+export function drawModernProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string,colors?:ProposalColors){
+ doc=coloredCover(doc,colors);
  doc.setFillColor(52,58,70);doc.rect(0,0,210,297,"F");
  doc.setFillColor(42,47,59);
  doc.path([{op:"m",c:[0,297]},{op:"c",c:[108,278,176,189,210,120]},{op:"l",c:[210,52]},{op:"c",c:[175,190,107,269,0,297]},{op:"h",c:[]}]);doc.fill();
@@ -118,7 +180,7 @@ export function drawModernProposalCover(doc:jsPDF,supplier:string,title:string,r
  doc.saveGraphicsState();
  doc.path([{op:"m",c:[181,0]},{op:"l",c:[210,0]},{op:"l",c:[210,52]},{op:"c",c:[178,190,105,267,0,297]},{op:"c",c:[108,236,165,139,181,0]},{op:"h",c:[]}]);doc.clip();doc.discardPath();
  doc.advancedAPI(pdf=>{
-  const gradient=new ShadingPattern("axial",[0,0,0,297],[{offset:0,color:[255,215,48]},{offset:1,color:[255,96,0]}]);
+  const gradient=new ShadingPattern("axial",[0,0,0,297],[{offset:0,color:colors?mixColor(proposalColor(colors.accent),255,.4):[255,215,48]},{offset:1,color:colors?proposalColor(colors.accent):[255,96,0]}]);
   pdf.addShadingPattern("modern-orange",gradient);
   pdf.rect(0,0,210,297,null);pdf.fill({key:"modern-orange",matrix:pdf.unitMatrix});
  });
@@ -143,7 +205,8 @@ export function drawModernProposalCover(doc:jsPDF,supplier:string,title:string,r
 }
 
 /** Purple folded bands and a lime capsule frame the charcoal title panel. */
-export function drawCorporateProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string){
+export function drawCorporateProposalCover(doc:jsPDF,supplier:string,title:string,recipient:string,location:string,colors?:ProposalColors){
+ doc=coloredCover(doc,colors);
  doc.setFillColor(255,255,255);doc.rect(0,0,210,297,"F");
  const polygon=(points:number[][],color:[number,number,number])=>{
   doc.setFillColor(...color);doc.lines(points.slice(1).map((p,i)=>[p[0]-points[i][0],p[1]-points[i][1]]),points[0][0],points[0][1],[1,1],"F",true);

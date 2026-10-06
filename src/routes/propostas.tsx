@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 import "../proposals.css";
 import "../proposal-editorial.css";
 import { LosiAiWorkspace } from "../components/LosiAiWorkspace";
-import { drawCorporateProposalCover, drawModernProposalCover, drawWaveProposalCover, drawEditorialProposalCover, drawGeometricProposalCover, type ProposalLayout } from "../lib/proposal-layout";
+import { drawCorporateProposalCover, drawModernProposalCover, drawWaveProposalCover, drawEditorialProposalCover, drawGeometricProposalCover, defaultProposalColors, proposalForeground, proposalColorOn, proposalColor, readableProposalColor, type ProposalColors, type ProposalLayout } from "../lib/proposal-layout";
 
 export const Route = createFileRoute("/propostas")({ component: ProposalsPage });
 
@@ -165,7 +165,7 @@ function buildObjective(type: string) {
   return map[type] || map["Proposta personalizada"];
 }
 
-function ProposalPdf({ draft, business, profile, layout = "classic", coverImage = "", download = true }: { draft: ProposalDraft; business: Business | null; profile: Profile | null; layout?: ProposalLayout; coverImage?: string; download?: boolean }) {
+function ProposalPdf({ draft, business, profile, layout = "classic", coverImage = "", colors, download = true }: { draft: ProposalDraft; business: Business | null; profile: Profile | null; layout?: ProposalLayout; coverImage?: string; colors?: ProposalColors; download?: boolean }) {
   const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
   const W = 210;
   const H = 297;
@@ -176,8 +176,8 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   const contentBottom = 268;
   const bodyFontSize = 11;
   const bodyLineHeight = bodyFontSize * 0.3528 * 1.32;
-  const navy: readonly [number,number,number] = layout === "corporate" ? [82,17,104] : layout === "modern" ? [42,47,59] : [7,26,51];
-  const gold: readonly [number,number,number] = layout === "corporate" ? [54,100,24] : layout === "modern" ? [160,64,8] : [190,145,48];
+  const navy: readonly [number,number,number] = colors ? readableProposalColor(proposalColor(colors.primary)) : layout === "corporate" ? [82,17,104] : layout === "modern" ? [42,47,59] : [7,26,51];
+  const gold: readonly [number,number,number] = colors ? readableProposalColor(proposalColor(colors.accent)) : layout === "corporate" ? [54,100,24] : layout === "modern" ? [160,64,8] : [190,145,48];
   const ink = [27, 38, 53] as const;
   const muted = [104, 116, 132] as const;
   const pale = [246, 248, 251] as const;
@@ -198,10 +198,10 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
     doc.line(footerMargin, footerLineY, W - margin, footerLineY);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
-    if ((layout === "editorial" || layout === "modern") && pageNumber === 1) doc.setTextColor(220,229,241);
+    if ((layout === "editorial" || layout === "modern") && pageNumber === 1) { if(colors)doc.setTextColor(...proposalForeground(proposalColor(colors.primary)));else doc.setTextColor(220,229,241); }
     else doc.setTextColor(...muted);
     doc.text("LOSI CONECTA  •  DOCUMENTO PROFISSIONAL", footerMargin, footerTextY);
-    if(layout === "corporate" && pageNumber === 1) doc.setTextColor(255,255,255);
+    if(layout === "corporate" && pageNumber === 1) doc.setTextColor(...(colors?proposalForeground(proposalColor(colors.primary)):[255,255,255] as [number,number,number]));
     doc.text(String(pageNumber).padStart(2, "0"), layout === "corporate" && pageNumber === 1 ? 203 : W - margin, footerTextY, { align: "right" });
   };
 
@@ -283,15 +283,15 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, H, "F");
   if(layout === "corporate") {
-    drawCorporateProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
+    drawCorporateProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,colors);
   } else if(layout === "modern") {
-    drawModernProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
+    drawModernProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,colors);
   } else if(layout === "waves") {
-    drawWaveProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
+    drawWaveProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,colors);
   } else if(layout === "editorial") {
-    drawEditorialProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,coverImage);
+    drawEditorialProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,coverImage,colors);
   } else if(layout === "geometric") {
-    drawGeometricProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation);
+    drawGeometricProposalCover(doc,supplier,proposalTitle,draft.recipient,supplierLocation,colors);
   } else {
   geometric();
   doc.setFillColor(...navy);
@@ -419,7 +419,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(15);
     doc.text("ATIVIDADES", 12, 39);
-    doc.setTextColor(...gold);
+    doc.setTextColor(...(colors ? proposalColorOn(proposalColor(colors.accent),[...navy]) : gold));
     doc.setFontSize(15);
     doc.text("PROPOSTAS", 12, 49);
     doc.setFont("helvetica", "normal");
@@ -590,7 +590,7 @@ function ProposalPdf({ draft, business, profile, layout = "classic", coverImage 
   window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
 }
 
-function StyledProposalPreview({draft,business,profile,coverImage,layout}:{draft:ProposalDraft;business:Business|null;profile:Profile|null;coverImage:string;layout:ProposalLayout}) {
+function StyledProposalPreview({draft,business,profile,coverImage,layout,colors}:{draft:ProposalDraft;business:Business|null;profile:Profile|null;coverImage:string;layout:ProposalLayout;colors?:ProposalColors}) {
   const [url,setUrl]=useState("");
   const [error,setError]=useState("");
   const [busy,setBusy]=useState(true);
@@ -600,7 +600,7 @@ function StyledProposalPreview({draft,business,profile,coverImage,layout}:{draft
     setBusy(true);setError("");setUrl("");
     const timer=window.setTimeout(()=>{
       try{
-        const pdf=ProposalPdf({draft,business,profile,layout,coverImage,download:false});
+        const pdf=ProposalPdf({draft,business,profile,layout,coverImage,colors,download:false});
         if(!pdf)throw new Error("Não foi possível preparar a prévia.");
         objectUrl=URL.createObjectURL(pdf.output("blob"));
         if(!cancelled)setUrl(objectUrl);
@@ -608,7 +608,7 @@ function StyledProposalPreview({draft,business,profile,coverImage,layout}:{draft
       finally{if(!cancelled)setBusy(false);}
     },450);
     return()=>{cancelled=true;window.clearTimeout(timer);if(objectUrl)URL.revokeObjectURL(objectUrl);};
-  },[draft,business,profile,coverImage,layout,retry]);
+  },[draft,business,profile,coverImage,layout,colors,retry]);
   return <div className="proposal-editorial-preview" aria-busy={busy}>
     {busy&&<p role="status">Atualizando prévia…</p>}
     {error&&<><p role="alert">{error}</p><button type="button" className="proposals-secondary" onClick={()=>setRetry(value=>value+1)}>Tentar novamente</button></>}
@@ -621,6 +621,8 @@ function ProposalsPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
   const [proposalLayout,setProposalLayout] = useState<ProposalLayout>("classic");
+  const [proposalColors,setProposalColors] = useState<ProposalColors | undefined>();
+  const activeColors=proposalColors||defaultProposalColors(proposalLayout);
   const [coverImage,setCoverImage] = useState("");
   const [coverImageBusy,setCoverImageBusy] = useState(false);
   const [coverImageError,setCoverImageError] = useState("");
@@ -807,7 +809,7 @@ function ProposalsPage() {
     }
 
     try {
-      ProposalPdf({ draft: preview, business, profile, layout: proposalLayout, coverImage });
+      ProposalPdf({ draft: preview, business, profile, layout: proposalLayout, coverImage, colors: proposalColors });
       setMessage("Proposta gerada com sucesso. O PDF foi preparado para download.");
     } catch (error) {
       console.error("Erro ao gerar proposta em PDF:", error);
@@ -950,7 +952,12 @@ function ProposalsPage() {
 
             <aside ref={previewRef} className={"proposals-preview-panel" + (previewFullscreen ? " is-fullscreen" : "")}>
               <div className="proposals-preview-head"><div><span className="proposals-kicker">VISUALIZAÇÃO</span><h2>Prévia da proposta</h2></div><div className="proposals-preview-tools"><span className="proposals-preview-status">A4 • PDF</span><button type="button" className="proposals-preview-fullscreen" onClick={() => void togglePreviewFullscreen()}>{previewFullscreen ? "Sair da tela inteira" : "Tela inteira"}</button></div></div>
-              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>setProposalLayout(event.target.value as ProposalLayout)}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option><option value="editorial">Editorial curvo · capa com imagem</option><option value="waves">Ondas azuis · capa minimalista</option><option value="modern">Moderno laranja · curvas em camadas</option><option value="corporate">Corporativo roxo e verde · faixas inclinadas</option></select></label>
+              <label className="proposal-layout-choice"><span>Modelo da proposta</span><select value={proposalLayout} onChange={event=>{setProposalLayout(event.target.value as ProposalLayout);setProposalColors(undefined);}}><option value="classic">Executivo LOSI · modelo atual</option><option value="geometric">Executivo geométrico · faixas diagonais</option><option value="editorial">Editorial curvo · capa com imagem</option><option value="waves">Ondas azuis · capa minimalista</option><option value="modern">Moderno laranja · curvas em camadas</option><option value="corporate">Corporativo roxo e verde · faixas inclinadas</option></select></label>
+              <fieldset className="proposal-colors"><legend>Cores do PDF</legend><div className="proposal-colors-controls">
+                <label><span>Principal</span><input type="color" value={activeColors.primary} onChange={event=>setProposalColors({...activeColors,primary:event.target.value})} /><span className="proposal-color-value">{activeColors.primary.toUpperCase()}</span></label>
+                <label><span>Destaque</span><input type="color" value={activeColors.accent} onChange={event=>setProposalColors({...activeColors,accent:event.target.value})} /><span className="proposal-color-value">{activeColors.accent.toUpperCase()}</span></label>
+                <button type="button" className="proposals-secondary" disabled={!proposalColors} onClick={()=>setProposalColors(undefined)}>Restaurar cores</button>
+              </div><p>Personalize faixas e detalhes. Os tons dos textos se ajustam para manter a leitura.</p></fieldset>
               {proposalLayout === "editorial" && <div className="proposal-cover-image-control">
                 <label><span>Imagem da capa (opcional)</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={coverImageBusy} onChange={event=>{const file=event.target.files?.[0];event.currentTarget.value="";if(file)void chooseCoverImage(file);}} /></label>
                 <p>Escolha uma foto do seu trabalho. JPG, PNG ou WEBP, até 8 MB. Sem foto, a capa usa as iniciais da empresa.</p>
@@ -958,7 +965,7 @@ function ProposalsPage() {
                 {coverImageError && <p role="alert">{coverImageError}</p>}
                 {coverImage && <button type="button" className="proposals-secondary" disabled={coverImageBusy} onClick={()=>setCoverImage("")}>Remover imagem</button>}
               </div>}
-              <StyledProposalPreview draft={preview} business={business} profile={profile} coverImage={coverImage} layout={proposalLayout} />
+              <StyledProposalPreview draft={preview} business={business} profile={profile} coverImage={coverImage} layout={proposalLayout} colors={proposalColors} />
             </aside>
           </div>
         </section>
