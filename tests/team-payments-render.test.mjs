@@ -1,0 +1,11 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import ts from 'typescript';import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);const compile=p=>ts.transpileModule(fs.readFileSync(p,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+const status={};vm.runInNewContext(compile('src/components/PaymentStatus.tsx'),{exports:status,require:id=>id.endsWith('.css')?{}:require(id)});
+const payments={};vm.runInNewContext(compile('src/components/TeamPayments.tsx'),{exports:payments,require:id=>id==='../lib/supabase'?{supabase:{rpc:()=>{throw Error('Unexpected request during render')}}}:id==='./PaymentStatus'?status:id==='../lib/team-management'?{matchesTeamSearch:()=>true}:id.endsWith('.css')?{}:require(id)});
+const rows=[{id:'a',status:'confirmed',candidate_name:'Pessoa pendente',assigned_role:'Recreador',agreed_value:100,payment_status:'pending'},{id:'b',status:'confirmed',candidate_name:'Pessoa paga',assigned_role:'Monitor',agreed_value:200,payment_status:'paid',paid_at:'2026-10-06T12:00:00Z'},{id:'c',status:'removed',candidate_name:'Pessoa sem valor',agreed_value:null,payment_status:'pending'},{id:'d',status:'pending',candidate_name:'Candidato ainda não escalado',agreed_value:9999}];
+const html=renderToStaticMarkup(React.createElement(payments.TeamPayments,{rows,onChange:()=>{},onEditValue:()=>{}}));
+for(const text of ['Pessoa pendente','Pessoa paga','Pessoa sem valor','Marcar pago','Reabrir pagamento','Registrado em','1 participação com valor a definir'])assert.ok(html.includes(text),text);
+assert.equal(html.includes('Candidato ainda não escalado'),false);
+assert.ok(html.includes("Definir valor"));
+const own=renderToStaticMarkup(React.createElement(status.PaymentStatus,rows[1]));assert.ok(own.includes('Pago'));assert.equal(own.includes('200'),false);assert.equal(own.includes('Pessoa paga'),false);
+console.log('Interface OK: totais, status, data, filtros, reabertura, valor indefinido e candidato fora da escala.');
