@@ -180,88 +180,47 @@
   }
 }
 
-/* Card titles: decorative SVGs, aligned to the first line at every size. */
+/* Icons are explicitly assigned to meaningful card titles, never inherited by a page. */
 @media screen {
   :root {
-    --panel-icon-overview:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%203h7v7H3z%20M14%203h7v7h-7z%20M3%2014h7v7H3z%20M14%2014h7v7h-7z%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-search:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M11%2019a8%208%200%201%200%200-16%208%208%200%200%200%200%2016%20m6-2%205%205%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-activity:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%205H5v16h14V5h-4%20M9%203h6v4H9z%20M8%2012h8%20M8%2016h5%22%2F%3E%3C%2Fsvg%3E");
     --panel-icon-dashboard:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2020V10%20M12%2020V4%20M20%2020v-7%20M2%2020h20%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-users:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M16%2021v-2a4%204%200%200%200-4-4H6a4%204%200%200%200-4%204v2%20M9%2011a4%204%200%201%200%200-8%204%204%200%200%200%200%208%20M22%2021v-2a4%204%200%200%200-3-3.87%20M16%203.13a4%204%200%200%201%200%207.75%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-receipts:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%203h14v18l-3-2-4%202-4-2-3%202Z%20M8%207h8%20M8%2011h8%20M8%2015h4%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-profile:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2021v-2a7%207%200%200%200-14%200v2%20M13%2011a4%204%200%201%200%200-8%204%204%200%200%200%200%208%22%2F%3E%3C%2Fsvg%3E");
     --panel-icon-businesses:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2021V3h12v18%20M16%209h4v12%20M2%2021h20%20M8%207h4%20M8%2011h4%20M8%2015h4%22%2F%3E%3C%2Fsvg%3E");
     --panel-icon-services:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%207h18v14H3z%20M8%207V3h8v4%20M3%2012h18%20M10%2012v3h4v-3%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-subscriptions:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%205h18v14H3z%20M3%2010h18%20M7%2015h3%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-coupons:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%205h18v5a2%202%200%200%200%200%204v5H3v-5a2%202%200%200%200%200-4Z%20M14%205v3%20M14%2011v2%20M14%2016v3%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-security:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203%203%207v5c0%205%209%209%209%209s9-4%209-9V7Z%20m-4%209%203%203%205-6%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-notifications:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M18%208a6%206%200%200%200-12%200c0%207-3%207-3%209h18c0-2-3-2-3-9%20M10%2021h4%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-communication:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%204h18v13H8l-5%204Z%20M7%208h10%20M7%2012h7%22%2F%3E%3C%2Fsvg%3E");
     --panel-icon-team:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%205h18v16H3z%20M3%2010h18%20M7%203v4%20M17%203v4%20M7%2014h2%20M15%2014h2%20M7%2018h2%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-users:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M16%2021v-2a4%204%200%200%200-4-4H6a4%204%200%200%200-4%204v2%20M9%2011a4%204%200%201%200%200-8%204%204%200%200%200%200%208%20M22%2021v-2a4%204%200%200%200-3-3.87%20M16%203.13a4%204%200%200%201%200%207.75%22%2F%3E%3C%2Fsvg%3E");
     --panel-icon-proposals:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%203h10l4%204v14H5z%20M15%203v5h4%20M8%2012h8%20M8%2016h6%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-aiCredits:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%203%202.5%206.5L21%2012l-6.5%202.5L12%2021l-2.5-6.5L3%2012l6.5-2.5Z%20M20%203v4%20M18%205h4%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-search:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M11%2019a8%208%200%201%200%200-16%208%208%200%200%200%200%2016%20m6-2%205%205%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-referenceImages:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%203h18v18H3z%20M3%2016l6-6%205%205%203-3%204%204%20M16%207h.01%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-receipts:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%203h14v18l-3-2-4%202-4-2-3%202Z%20M8%207h8%20M8%2011h8%20M8%2015h4%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-activity:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%205H5v16h14V5h-4%20M9%203h6v4H9z%20M8%2012h8%20M8%2016h5%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-ads:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%209v6h4l11%205V4L7%209Z%20M7%2015l2%206h3l-2-5%20M21%209v6%22%2F%3E%3C%2Fsvg%3E");
-    --panel-icon-profile:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2021v-2a7%207%200%200%200-14%200v2%20M13%2011a4%204%200%201%200%200-8%204%204%200%200%200%200%208%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-preview:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012s4-7%2010-7%2010%207%2010%207-4%207-10%207-10-7-10-7Z%20M12%2015a3%203%200%201%200%200-6%203%203%200%200%200%200%206%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-communication:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%204h18v13H8l-5%204Z%20M7%208h10%20M7%2012h7%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-notifications:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M18%208a6%206%200%200%200-12%200c0%207-3%207-3%209h18c0-2-3-2-3-9%20M10%2021h4%22%2F%3E%3C%2Fsvg%3E");
+    --panel-icon-security:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203%203%207v5c0%205%209%209%209%209s9-4%209-9V7Z%20m-4%209%203%203%205-6%22%2F%3E%3C%2Fsvg%3E");
   }
-  body :is(.personal-profile-content,.admin-profile-card) { --panel-card-icon:var(--panel-icon-profile); }
-  body :is(.business-services-content,.dashboard-onboarding) { --panel-card-icon:var(--panel-icon-businesses); }
-  body :is(.proposals-content,.quotes-content,.quote-builder,.proposals-group-card) { --panel-card-icon:var(--panel-icon-proposals); }
-  body :is(.receipts-content,.receipts-form-card,.receipts-history-card) { --panel-card-icon:var(--panel-icon-receipts); }
-  body :is(.inconsistency-page,.admin-inconsistency-center) { --panel-card-icon:var(--panel-icon-communication); }
-  body :is(.team-page,.team-section) { --panel-card-icon:var(--panel-icon-team); }
-  body :is(.losi-ads-content,.losi-ads-choice-card,.losi-ads-form-card,.losi-ads-my-ads) { --panel-card-icon:var(--panel-icon-ads); }
-  body :is(.dashboard-commercial,.dashboard-plan-card,.admin-commercial-card,.admin-subscription-card) { --panel-card-icon:var(--panel-icon-subscriptions); }
-  body :is(.dashboard-saved:has(.dashboard-saved-card > strong),.admin-coupon-card) { --panel-card-icon:var(--panel-icon-coupons); }
-  body :is(.dashboard-saved-provider-card,.team-network,.team-candidates,.admin-user-form) { --panel-card-icon:var(--panel-icon-users); }
-  body :is(.dashboard-pending-invoices,.admin-finance-panel,.admin-finance-hero) { --panel-card-icon:var(--panel-icon-dashboard); }
-  body :is(.losi-ai-workspace,.losi-ai-review) { --panel-card-icon:var(--panel-icon-aiCredits); }
-  body :is(.lia-pdf-history,.receipts-history-card,.team-person-history,.admin-credit-history,.admin-broadcast-history) { --panel-card-icon:var(--panel-icon-activity); }
-  body :is(.proposals-preview-panel,.receipts-preview-card,.lia-pdf-viewer) { --panel-card-icon:var(--panel-icon-referenceImages); }
-  body :is(.admin-security-section,.admin-security-hero,.admin-security-card) { --panel-card-icon:var(--panel-icon-security); }
-  body :is(.admin-alert-card,.admin-admin-center-hero,.admin-admin-notification,.dashboard-notification-popover) { --panel-card-icon:var(--panel-icon-notifications); }
-  body :is(.business-service-item,.provider-availability-manager) { --panel-card-icon:var(--panel-icon-services); }
-  body .admin-content[data-section="overview"] { --panel-card-icon:var(--panel-icon-overview); }
-  body .admin-content[data-section="dashboard"] { --panel-card-icon:var(--panel-icon-dashboard); }
-  body .admin-content[data-section="activity"] { --panel-card-icon:var(--panel-icon-activity); }
-  body .admin-content[data-section="users"] { --panel-card-icon:var(--panel-icon-users); }
-  body .admin-content[data-section="businesses"] { --panel-card-icon:var(--panel-icon-businesses); }
-  body .admin-content[data-section="services"] { --panel-card-icon:var(--panel-icon-services); }
-  body .admin-content[data-section="categories"] { --panel-card-icon:var(--panel-icon-overview); }
-  body .admin-content[data-section="reviews"] { --panel-card-icon:var(--panel-icon-users); }
-  body .admin-content[data-section="commercial"] { --panel-card-icon:var(--panel-icon-subscriptions); }
-  body .admin-content[data-section="subscriptions"] { --panel-card-icon:var(--panel-icon-subscriptions); }
-  body .admin-content[data-section="coupons"] { --panel-card-icon:var(--panel-icon-coupons); }
-  body .admin-content[data-section="adsCredits"] { --panel-card-icon:var(--panel-icon-ads); }
-  body .admin-content[data-section="aiCredits"] { --panel-card-icon:var(--panel-icon-aiCredits); }
-  body .admin-content[data-section="alerts"] { --panel-card-icon:var(--panel-icon-notifications); }
-  body .admin-content[data-section="notifications"] { --panel-card-icon:var(--panel-icon-notifications); }
-  body .admin-content[data-section="inconsistencies"] { --panel-card-icon:var(--panel-icon-communication); }
-  body .admin-content[data-section="communication"] { --panel-card-icon:var(--panel-icon-communication); }
-  body .admin-content[data-section="security"] { --panel-card-icon:var(--panel-icon-security); }
-  body .admin-content[data-section="sounds"] { --panel-card-icon:var(--panel-icon-notifications); }
-  body .admin-content[data-section="referenceImages"] { --panel-card-icon:var(--panel-icon-referenceImages); }
-  body .admin-content[data-section="presentation"] { --panel-card-icon:var(--panel-icon-referenceImages); }
-  body .admin-content[data-section="customization"] { --panel-card-icon:var(--panel-icon-overview); }
-  :is(body :is(.dashboard-content,.personal-profile-content,.business-services-content,.quotes-content,.inconsistency-page,.team-page,.admin-content,.admin-profile-card) :is(h2,h3,h4):not(:where(.proposal-document-preview *,.receipt-paper *,.home-customization-preview-viewport *,.dashboard-sidebar *,.admin-sidebar *)):not(:has(svg)),
-    body :is(.dashboard-plan-card,.dashboard-saved-card:not(.dashboard-saved-provider-card)) > strong:first-child,
-    body :is(.admin-metric,.admin-operational-grid > article,.admin-credit-balances > article) > span:first-child,
-    body .team-dashboard-cards > article > small:first-child,
-    body :is(.admin-item-main,.admin-subscription-main) > div:first-child > strong:first-child,
-    body .admin-profile-photo-copy > strong:first-child,
-    body .inconsistency-card-header > h1) {
+  body :is(.admin-credit-search > h2) { --panel-card-icon:var(--panel-icon-search); }
+  body :is(.admin-credit-history > h3,.admin-dashboard-activity .admin-finance-panel-head h3) { --panel-card-icon:var(--panel-icon-activity); }
+  body [data-panel-icon="signature"] { --panel-card-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%2019h9%20M16.5%203.5a2.12%202.12%200%200%201%203%203L9%2017l-4%201%201-4Z%22%2F%3E%3C%2Fsvg%3E"); }
+  body :is(.admin-finance-panel:has(.admin-finance-line-chart) .admin-finance-panel-head h3) { --panel-card-icon:var(--panel-icon-dashboard); }
+  body :is(.admin-finance-sales .admin-finance-panel-head h3,.dashboard-pending-invoices-header h2,[data-panel-icon="receipts"]) { --panel-card-icon:var(--panel-icon-receipts); }
+  body :is(.personal-profile-card-header h2) { --panel-card-icon:var(--panel-icon-profile); }
+  body :is(.business-services-card > h2) { --panel-card-icon:var(--panel-icon-businesses); }
+  body :is(.business-services-card:not(.provider-availability-manager) .business-section-title,[data-panel-icon="services"]) { --panel-card-icon:var(--panel-icon-services); }
+  body :is(.provider-availability-manager h2,.team-form .team-section-head h2,.official-scale .team-section-head h2) { --panel-card-icon:var(--panel-icon-team); }
+  body :is(.team-network .team-section-head h2,.team-candidates .team-section-head h2,[data-panel-icon="users"]) { --panel-card-icon:var(--panel-icon-users); }
+  body :is(.lia-pdf-history > .losi-ai-heading > h3,[data-panel-icon="proposals"]) { --panel-card-icon:var(--panel-icon-proposals); }
+  body :is(.proposals-preview-head h2,.receipts-preview-card .receipts-card-head h2,.lia-pdf-live-preview > h3) { --panel-card-icon:var(--panel-icon-preview); }
+  body :is(.inconsistency-card-header > h1,[data-panel-icon="communication"]) { --panel-card-icon:var(--panel-icon-communication); }
+  body :is(.admin-admin-center-hero h2) { --panel-card-icon:var(--panel-icon-notifications); }
+  body :is(.admin-security-hero h2) { --panel-card-icon:var(--panel-icon-security); }
+  body :is(.admin-credit-search > h2,.admin-credit-history > h3,.admin-dashboard-activity .admin-finance-panel-head h3,[data-panel-icon="signature"],.admin-finance-panel:has(.admin-finance-line-chart) .admin-finance-panel-head h3,.admin-finance-sales .admin-finance-panel-head h3,.dashboard-pending-invoices-header h2,[data-panel-icon="receipts"],.personal-profile-card-header h2,.business-services-card > h2,.business-services-card:not(.provider-availability-manager) .business-section-title,[data-panel-icon="services"],.provider-availability-manager h2,.team-form .team-section-head h2,.official-scale .team-section-head h2,.team-network .team-section-head h2,.team-candidates .team-section-head h2,[data-panel-icon="users"],.lia-pdf-history > .losi-ai-heading > h3,[data-panel-icon="proposals"],.proposals-preview-head h2,.receipts-preview-card .receipts-card-head h2,.lia-pdf-live-preview > h3,.inconsistency-card-header > h1,[data-panel-icon="communication"],.admin-admin-center-hero h2,.admin-security-hero h2):not(:has(svg)) {
     position:relative;
     padding-inline-start:28px!important;
     min-height:20px;
     box-sizing:border-box;
     overflow-wrap:break-word;
   }
-  :is(body :is(.dashboard-content,.personal-profile-content,.business-services-content,.quotes-content,.inconsistency-page,.team-page,.admin-content,.admin-profile-card) :is(h2,h3,h4):not(:where(.proposal-document-preview *,.receipt-paper *,.home-customization-preview-viewport *,.dashboard-sidebar *,.admin-sidebar *)):not(:has(svg)),
-    body :is(.dashboard-plan-card,.dashboard-saved-card:not(.dashboard-saved-provider-card)) > strong:first-child,
-    body :is(.admin-metric,.admin-operational-grid > article,.admin-credit-balances > article) > span:first-child,
-    body .team-dashboard-cards > article > small:first-child,
-    body :is(.admin-item-main,.admin-subscription-main) > div:first-child > strong:first-child,
-    body .admin-profile-photo-copy > strong:first-child,
-    body .inconsistency-card-header > h1)::before {
+  body :is(.admin-credit-search > h2,.admin-credit-history > h3,.admin-dashboard-activity .admin-finance-panel-head h3,[data-panel-icon="signature"],.admin-finance-panel:has(.admin-finance-line-chart) .admin-finance-panel-head h3,.admin-finance-sales .admin-finance-panel-head h3,.dashboard-pending-invoices-header h2,[data-panel-icon="receipts"],.personal-profile-card-header h2,.business-services-card > h2,.business-services-card:not(.provider-availability-manager) .business-section-title,[data-panel-icon="services"],.provider-availability-manager h2,.team-form .team-section-head h2,.official-scale .team-section-head h2,.team-network .team-section-head h2,.team-candidates .team-section-head h2,[data-panel-icon="users"],.lia-pdf-history > .losi-ai-heading > h3,[data-panel-icon="proposals"],.proposals-preview-head h2,.receipts-preview-card .receipts-card-head h2,.lia-pdf-live-preview > h3,.inconsistency-card-header > h1,[data-panel-icon="communication"],.admin-admin-center-hero h2,.admin-security-hero h2):not(:has(svg))::before {
     content:"";
     position:absolute;
     inset-inline-start:0;
@@ -269,8 +228,8 @@
     width:18px;
     height:18px;
     background-color:currentColor;
-    -webkit-mask-image:var(--panel-card-icon,var(--panel-icon-overview));
-    mask-image:var(--panel-card-icon,var(--panel-icon-overview));
+    -webkit-mask-image:var(--panel-card-icon);
+    mask-image:var(--panel-card-icon);
     -webkit-mask-size:contain;
     mask-size:contain;
     -webkit-mask-repeat:no-repeat;
@@ -279,23 +238,8 @@
     mask-position:center;
     pointer-events:none;
   }
-  /* Compact indicators keep the symbol beside their label, not their value. */
-  body :is(.admin-metric,.admin-operational-grid > article,.admin-credit-balances > article) > span:first-child,
-  body .team-dashboard-cards > article > small:first-child { display:block;line-height:1.5;white-space:normal }
   @media(max-width:768px) {
-    :is(body :is(.dashboard-content,.personal-profile-content,.business-services-content,.quotes-content,.inconsistency-page,.team-page,.admin-content,.admin-profile-card) :is(h2,h3,h4):not(:where(.proposal-document-preview *,.receipt-paper *,.home-customization-preview-viewport *,.dashboard-sidebar *,.admin-sidebar *)):not(:has(svg)),
-    body :is(.dashboard-plan-card,.dashboard-saved-card:not(.dashboard-saved-provider-card)) > strong:first-child,
-    body :is(.admin-metric,.admin-operational-grid > article,.admin-credit-balances > article) > span:first-child,
-    body .team-dashboard-cards > article > small:first-child,
-    body :is(.admin-item-main,.admin-subscription-main) > div:first-child > strong:first-child,
-    body .admin-profile-photo-copy > strong:first-child,
-    body .inconsistency-card-header > h1) {padding-inline-start:26px!important}
-    :is(body :is(.dashboard-content,.personal-profile-content,.business-services-content,.quotes-content,.inconsistency-page,.team-page,.admin-content,.admin-profile-card) :is(h2,h3,h4):not(:where(.proposal-document-preview *,.receipt-paper *,.home-customization-preview-viewport *,.dashboard-sidebar *,.admin-sidebar *)):not(:has(svg)),
-    body :is(.dashboard-plan-card,.dashboard-saved-card:not(.dashboard-saved-provider-card)) > strong:first-child,
-    body :is(.admin-metric,.admin-operational-grid > article,.admin-credit-balances > article) > span:first-child,
-    body .team-dashboard-cards > article > small:first-child,
-    body :is(.admin-item-main,.admin-subscription-main) > div:first-child > strong:first-child,
-    body .admin-profile-photo-copy > strong:first-child,
-    body .inconsistency-card-header > h1)::before {width:16px;height:16px}
+    body :is(.admin-credit-search > h2,.admin-credit-history > h3,.admin-dashboard-activity .admin-finance-panel-head h3,[data-panel-icon="signature"],.admin-finance-panel:has(.admin-finance-line-chart) .admin-finance-panel-head h3,.admin-finance-sales .admin-finance-panel-head h3,.dashboard-pending-invoices-header h2,[data-panel-icon="receipts"],.personal-profile-card-header h2,.business-services-card > h2,.business-services-card:not(.provider-availability-manager) .business-section-title,[data-panel-icon="services"],.provider-availability-manager h2,.team-form .team-section-head h2,.official-scale .team-section-head h2,.team-network .team-section-head h2,.team-candidates .team-section-head h2,[data-panel-icon="users"],.lia-pdf-history > .losi-ai-heading > h3,[data-panel-icon="proposals"],.proposals-preview-head h2,.receipts-preview-card .receipts-card-head h2,.lia-pdf-live-preview > h3,.inconsistency-card-header > h1,[data-panel-icon="communication"],.admin-admin-center-hero h2,.admin-security-hero h2):not(:has(svg)) {padding-inline-start:26px!important}
+    body :is(.admin-credit-search > h2,.admin-credit-history > h3,.admin-dashboard-activity .admin-finance-panel-head h3,[data-panel-icon="signature"],.admin-finance-panel:has(.admin-finance-line-chart) .admin-finance-panel-head h3,.admin-finance-sales .admin-finance-panel-head h3,.dashboard-pending-invoices-header h2,[data-panel-icon="receipts"],.personal-profile-card-header h2,.business-services-card > h2,.business-services-card:not(.provider-availability-manager) .business-section-title,[data-panel-icon="services"],.provider-availability-manager h2,.team-form .team-section-head h2,.official-scale .team-section-head h2,.team-network .team-section-head h2,.team-candidates .team-section-head h2,[data-panel-icon="users"],.lia-pdf-history > .losi-ai-heading > h3,[data-panel-icon="proposals"],.proposals-preview-head h2,.receipts-preview-card .receipts-card-head h2,.lia-pdf-live-preview > h3,.inconsistency-card-header > h1,[data-panel-icon="communication"],.admin-admin-center-hero h2,.admin-security-hero h2):not(:has(svg))::before {width:16px;height:16px}
   }
 }

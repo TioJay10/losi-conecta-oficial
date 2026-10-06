@@ -1123,7 +1123,7 @@ function AdminPage() {
             <button type="button" onClick={logout}>Sair do painel</button>
           </div>
         </aside>
-        <section className="admin-content" data-section={section}>
+        <section className="admin-content">
           <div className="admin-badge">ADMINISTRADOR</div>
           <h1>{section === "overview" ? `Olá, ${name}.` : sectionTitle}</h1>
           <p className="admin-text">{section === "overview" ? "Centro de gestão do LOSI CONECTA." : "Gerencie e acompanhe as informações da plataforma."}</p>

@@ -504,7 +504,7 @@ function ReceiptsPage() {
 
           <div className="receipts-layout">
             <section className="receipts-form-card">
-              <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 01</span><h2>Dados do contratante</h2></div><span className="receipts-step">1</span></div>
+              <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 01</span><h2 data-panel-icon="users">Dados do contratante</h2></div><span className="receipts-step">1</span></div>
               <div className="receipts-form-grid">
                 <label><span>Nome / Razão Social *</span><input value={clientName} onChange={e=>setClientName(e.target.value)} placeholder="Nome do contratante" /></label>
                 <label><span>CPF / CNPJ</span><input value={clientDocument} onChange={e=>setClientDocument(e.target.value)} placeholder="000.000.000-00" /></label>
@@ -513,7 +513,7 @@ function ReceiptsPage() {
 
               <div className="receipts-divider" />
 
-              <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 02</span><h2>Serviço e recebimento</h2></div><span className="receipts-step">2</span></div>
+              <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 02</span><h2 data-panel-icon="receipts">Serviço e recebimento</h2></div><span className="receipts-step">2</span></div>
               <div className="receipts-form-grid">
                 <label className="wide"><span>Serviço prestado *</span><input value={service} onChange={e=>setService(e.target.value)} placeholder="Ex.: Recreação infantil por 4 horas" /></label>
                 <label><span>Data do serviço</span><input type="date" value={serviceDate} onChange={e=>setServiceDate(e.target.value)} /></label>
@@ -524,7 +524,7 @@ function ReceiptsPage() {
               </div>
 
               <div className="receipts-signature-group">
-                <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 03</span><h2>Assinatura do prestador</h2></div><span className="receipts-step">3</span></div>
+                <div className="receipts-card-head"><div><span className="receipts-kicker">GRUPO 03</span><h2 data-panel-icon="signature">Assinatura do prestador</h2></div><span className="receipts-step">3</span></div>
                 <p className="receipts-signature-help">Assine diretamente na tela ou envie uma imagem da sua assinatura. Ela será incluída no PDF.</p>
                 <SignaturePad value={signatureData} onChange={setSignatureData} />
               </div>
@@ -556,7 +556,7 @@ function ReceiptsPage() {
           </div>
 
           <section className="receipts-history-card">
-            <div className="receipts-card-head"><div><span className="receipts-kicker">HISTÓRICO</span><h2>Recibos gerados</h2></div><span className="receipts-count">{history.length}</span></div>
+            <div className="receipts-card-head"><div><span className="receipts-kicker">HISTÓRICO</span><h2 data-panel-icon="proposals">Recibos gerados</h2></div><span className="receipts-count">{history.length}</span></div>
             {history.length === 0 ? <div className="receipts-empty"><strong>Nenhum recibo gerado ainda</strong><span>Os recibos criados por este navegador aparecerão aqui para consulta rápida.</span></div> : (
               <div className="receipts-history-list">
                 {history.map(item => <article key={item.id}><div><strong>{item.number}</strong><span>{item.clientName} · {item.service}</span></div><div className="receipts-history-meta"><b>{money(item.amount)}</b><span>{dateBR(item.serviceDate)}</span><button type="button" onClick={()=>openReceiptPdf(item,business,profile)}>Baixar PDF</button></div></article>)}
