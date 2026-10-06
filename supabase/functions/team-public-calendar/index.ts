@@ -11,7 +11,7 @@ if(b.action==="eventDetails"){
  if(membershipError)throw membershipError;if(!membership)return j({error:"Este evento não faz parte das suas participações ativas."},404);
  const {data:event,error:eventError}=await a.from("team_events").select("title,description,event_date,starts_at,ends_at,location_name,address,city,state,business_profiles(business_name),team_event_openings(title)").eq("id",eventId).maybeSingle();
  if(eventError)throw eventError;if(!event)return j({error:"Evento não encontrado."},404);
- const {data:rows,error:rosterError}=await a.from("team_applications").select("candidate_name,attendance_status,collaborator_profiles(full_name,professional_name,photo_url),team_collaborators(name,collaborator_profiles(full_name,professional_name,photo_url))").eq("event_id",eventId).eq("status","confirmed").order("candidate_name");
+ const {data:rows,error:rosterError}=await a.from("team_applications").select("candidate_name,attendance_status,collaborator_profiles(full_name,professional_name,photo_url),team_collaborators!team_applications_collaborator_id_fkey(name,collaborator_profiles(full_name,professional_name,photo_url))").eq("event_id",eventId).eq("status","confirmed").order("candidate_name");
  if(rosterError)throw rosterError;
  const one=(value:any)=>Array.isArray(value)?value[0]:value;
  const escalados=(rows||[]).filter((row:any)=>row.attendance_status!=="unavailable").map((row:any)=>{const profile=one(row.collaborator_profiles)||one(one(row.team_collaborators)?.collaborator_profiles);return {name:profile?.professional_name||profile?.full_name||one(row.team_collaborators)?.name||row.candidate_name||"Colaborador",photo_url:profile?.photo_url||null}});
