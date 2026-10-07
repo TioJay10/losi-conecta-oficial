@@ -27,7 +27,7 @@
 .lc-sent-attachment{position:relative;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .lc-sent-attachment:focus-visible{outline:2px solid #e5c37f;outline-offset:3px}
 .lc-sent-attachment>img{pointer-events:none}
-.lc-media-menu{position:relative;z-index:5;display:grid;gap:6px;padding:8px;margin-top:8px;background:#10283f;border:1px solid #bda069;border-radius:8px;box-shadow:0 8px 20px #0005;min-width:0}
+.lc-media-menu{position:relative;z-index:5;display:grid;gap:6px;padding:8px;margin-top:8px;background:#10283f;border:.5px solid rgba(214,180,106,.35);border-radius:8px;box-shadow:0 8px 20px #0005;min-width:0}
 .lc-media-menu p{color:#fff4d8;white-space:normal}.lc-app .lc-media-menu button{font-size:14px;min-height:44px}
 
 /* WhatsApp-inspired audio message: compact avatar, microphone badge and tactile waveform. */
@@ -59,9 +59,9 @@
 /* Message actions are plain menu rows, with a consistent SVG and label. */
 .lc-media-menu{gap:0;padding:4px;white-space:normal}
 .lc-app .lc-media-menu button{display:flex;align-items:center;justify-content:flex-start;gap:10px;width:100%;min-height:44px;padding:10px 12px;margin:0;background:transparent;border:0;border-radius:4px;box-shadow:none;color:var(--lc-text,#f5f7fa);text-align:left;font-size:14px;line-height:1.35;white-space:normal}
-.lc-app .lc-media-menu button+button{border-top:1px solid rgba(183,198,217,.12)}
+.lc-app .lc-media-menu button+button{border-top:.5px solid rgba(183,198,217,.1)}
 .lc-app .lc-media-menu button:hover:not(:disabled){background:#243e60}
-.lc-app .lc-media-menu button:focus-visible{outline:2px solid var(--lc-gold,#d6b46a);outline-offset:-2px;background:#243e60}
+.lc-app .lc-media-menu button:focus-visible{outline:1px solid var(--lc-gold,#d6b46a);outline-offset:-1px;background:#243e60}
 .lc-app .lc-media-menu button:disabled{opacity:.5;cursor:wait}
 .lc-app .lc-media-menu button .lc-message-action-icon{display:block;flex:0 0 18px;width:18px;height:18px;color:var(--lc-gold,#d6b46a)}
 .lc-app .lc-media-menu button>span{display:block;min-width:0;overflow-wrap:anywhere}
