@@ -155,10 +155,14 @@ Deno.serve(async(req:Request)=>{
   };
   const decorate=async(messages:any[])=>{
    messages=messages.map(m=>m.deleted_at?{id:m.id,thread_id:m.thread_id,group_id:m.group_id,sender_id:m.sender_id,created_at:m.created_at,body:'',deleted_at:m.deleted_at}:m);
-   const ids=messages.map(m=>m.attachment_id).filter(Boolean);if(!ids.length)return messages;
-   const batches=[];for(let i=0;i<ids.length;i+=100)batches.push(admin.from('losi_chat_uploads').select('id,file_name,kind,mime,byte_size').in('id',ids.slice(i,i+100)));
-   const uploads=(await Promise.all(batches)).flatMap(checked);
-   const map=new Map(uploads.map((u:any)=>[u.id,u]));return messages.map(m=>({...m,attachment:map.get(m.attachment_id)??null}));
+   const ids=messages.map(m=>m.attachment_id).filter(Boolean);
+   const senderIds=[...new Set(messages.map(m=>m.sender_id).filter(Boolean))];
+   const [uploadRows,senderRows]=await Promise.all([
+    ids.length?Promise.all(Array.from({length:Math.ceil(ids.length/100)},(_,i)=>admin.from('losi_chat_uploads').select('id,file_name,kind,mime,byte_size').in('id',ids.slice(i*100,(i+1)*100)))).then(rows=>rows.flatMap(checked)):Promise.resolve([]),
+    senderIds.length?checked(await admin.from('business_profiles').select('owner_id,logo_url,business_name').in('owner_id',senderIds)):Promise.resolve([])
+   ]);
+   const map=new Map(uploadRows.map((u:any)=>[u.id,u])),senders=new Map(senderRows.map((s:any)=>[s.owner_id,s]));
+   return messages.map(m=>({...m,sender_photo:senders.get(m.sender_id)?.logo_url??null,sender_name:m.sender_name??senders.get(m.sender_id)?.business_name,attachment:m.attachment_id?map.get(m.attachment_id)??null:null}));
   };
   const mediaTarget=async(id:string,group:boolean)=>{
    if(!uuid(id))throw new Error('ANEXO_INVALIDO');
