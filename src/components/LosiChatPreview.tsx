@@ -39,7 +39,7 @@ export function LosiChatPreview(){
  const retry=useRef<{id:string;text:string;thread:string}|null>(null);
  const bottom=useRef<HTMLDivElement>(null);
  const balance=Math.max(0,Number(account?.balance??0)).toLocaleString('pt-BR');
- const loadThreads=useCallback(async()=>{const d=await chatAction<{threads:ChatThread[];userId:string}>('threads');setUserId(d.userId);setConversations(d.threads.map(t=>({...t,initials:t.name.split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase(),text:t.last?(t.last.body||'Imagem ou documento'):'Comece esta conversa',time:t.last?new Date(t.last.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'',pinned:false,group:t.group===true,file:false,color:t.group?'sand':'ocean'})));},[]);
+ const loadThreads=useCallback(async()=>{const d=await chatAction<{threads:ChatThread[];userId:string}>('threads');setUserId(d.userId);setConversations(d.threads.map(t=>({...t,initials:t.name.split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase(),text:t.last?(t.last.body||'Imagem, vídeo ou documento'):'Comece esta conversa',time:t.last?new Date(t.last.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'',pinned:false,group:t.group===true,file:false,color:t.group?'sand':'ocean'})));},[]);
  const [section,setSection]=useState<Section>("chats");
  const [filter,setFilter]=useState<string>("all");
  const [search,setSearch]=useState("");
@@ -63,7 +63,7 @@ export function LosiChatPreview(){
  const unread=conversations.filter(c=>c.unread>0).length;
  function go(next:Section){setViewingGroup(false);setSection(next);setSelected(null);setMenu(false);setNotice("");}
  function openChat(chat:Chat){setViewingGroup(false);setSelected(chat);setSection("chats");setDraft("");setNotice("");}
- function previewNotice(){setNotice("Abra uma conversa e toque no clipe para enviar imagens ou documentos.");}
+ function previewNotice(){setNotice("Abra uma conversa e toque no clipe para enviar imagens, vídeos ou documentos.");}
  const nav=[{id:"contacts",icon:"users",label:"Contatos"},{id:"credits",icon:"wallet",label:"Créditos"},{id:"chats",icon:"chat",label:"Conversas"},{id:"account",icon:"profile",label:"Você"}] as const;
  return <main className={`lc-app${selected?" lc-chat-open":""}`} aria-label="Chat LOSI">
   <aside className="lc-rail" aria-label="Navegação do chat">
@@ -97,7 +97,7 @@ export function LosiChatPreview(){
     {visible.length===0&&<p className="lc-no-results">{chatLoading?'Carregando conversas…':filter==='groups'?'Seus grupos aparecerão aqui. Use “Novo grupo” no menu ou em Contatos.':filter==='all'&&!search?'Suas conversas aparecerão aqui. Toque em + para encontrar um fornecedor.':'Nenhuma conversa encontrada neste filtro.'}</p>}
    </div>}
    {section==="new-group"&&<div className="lc-account-panel lc-group-create-panel"><LosiChatGroupCreate hasNumber={Boolean(account?.digital_number)} onCancel={()=>go("contacts")} onCreated={async id=>{const d=await chatAction<{threads:ChatThread[];userId:string}>('threads');await loadThreads();const t=d.threads.find(t=>t.id===id);if(t)openChat({...t,initials:t.name.slice(0,2).toUpperCase(),text:t.last?.body??'',time:'',pinned:false,group:true,file:false,color:'sand'});}}/></div>}
-   {section==="credits"&&<div className="lc-account-panel"><LosiChatNumberPurchase businessId={account?.business_id} compact/><h3>Consumo por envio</h3><dl><div><dt>Mensagem de texto</dt><dd>1 crédito</dd></div><div><dt>Receber mensagens</dt><dd>Gratuito</dd></div></dl><dl><div><dt>Imagem</dt><dd>2 créditos</dd></div><div><dt>Imagem com texto</dt><dd>3 créditos</dd></div><div><dt>Documento até 2 / 5 / 10 / 20 MB</dt><dd>2 / 3 / 4 / 8 créditos</dd></div></dl><p>A legenda está incluída no custo dos documentos.</p><a href="/meus-servicos">Ir para Minha Empresa</a></div>}
+   {section==="credits"&&<div className="lc-account-panel"><LosiChatNumberPurchase businessId={account?.business_id} compact/><h3>Consumo por envio</h3><dl><div><dt>Mensagem de texto</dt><dd>1 crédito</dd></div><div><dt>Receber mensagens</dt><dd>Gratuito</dd></div></dl><dl><div><dt>Vídeo (legenda incluída)</dt><dd>10 créditos</dd></div><div><dt>Imagem</dt><dd>2 créditos</dd></div><div><dt>Imagem com texto</dt><dd>3 créditos</dd></div><div><dt>Documento até 2 / 5 / 10 / 20 MB</dt><dd>2 / 3 / 4 / 8 créditos</dd></div></dl><p>A legenda está incluída no custo dos documentos.</p><a href="/meus-servicos">Ir para Minha Empresa</a></div>}
    {section==="account"&&<div className="lc-account-panel"><span className="lc-account-avatar"><Icon name="profile"/></span><h2>Meu número digital LOSI</h2><strong className="lc-digital-number">{formatLosiNumber(account?.digital_number)}</strong><small>{account?.digital_number?'Vinculado permanentemente à sua conta':'Compra opcional em Minha Empresa'}</small><LosiChatNumberPurchase businessId={account?.business_id} compact/><a href="/meus-servicos">Ir para Minha Empresa</a><a href="/painel">Voltar ao painel LOSI</a></div>}
    {notice&&!selected&&<p className="lc-notice" role="status">{notice}<button aria-label="Fechar aviso" onClick={()=>setNotice("")}><Icon name="close"/></button></p>}
   </section>

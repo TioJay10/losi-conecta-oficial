@@ -56,25 +56,30 @@ Grupos permitem até 100 participantes, incluindo quem cria, adicionados por nú
 
 Atualização por consultas enquanto a página está visível: mensagens a cada 5s, lista a cada 10s e carteira a cada 15s, além das consultas após ações próprias. Não há promessa de entrega instantânea ou criptografia de ponta a ponta.
 
-## Imagens e documentos
+## Imagens, documentos e vídeos
 
-Imagens e documentos estão habilitados em conversas privadas e grupos, com uma cobrança por envio, independente do número de destinatários. O clipe abre o seletor; formatos aceitos: JPG/JPEG, PNG, WEBP, GIF, PDF, TXT, DOCX, XLSX e PPTX. Limite de 20 MiB por arquivo. A prévia informa o custo antes de enviar; receber e baixar não debita créditos.
+Imagens, documentos e vídeos estão habilitados em conversas privadas e grupos, com uma cobrança por envio, independente do número de destinatários. O clipe abre o seletor; formatos aceitos: JPG/JPEG, PNG, WEBP, GIF, PDF, TXT, DOCX, XLSX, PPTX, MP4, MOV e WEBM. Limite de 20 MiB por arquivo. A prévia informa o custo antes de enviar; receber e baixar não debita créditos.
 
 | Envio | Créditos |
 | --- | --- |
 | Imagem sem legenda | 2 |
 | Imagem com legenda | 3 |
+| Vídeo, com ou sem legenda | 10 |
 | Documento até 2 MiB | 2 |
 | Documento acima de 2 até 5 MiB | 3 |
 | Documento acima de 5 até 10 MiB | 4 |
 | Documento acima de 10 até 20 MiB | 8 |
 
-Legenda opcional de até 4000 caracteres; nos documentos, está incluída no custo da faixa. O compositor desabilita o envio com saldo insuficiente e mostra a condição. Estados de progresso são textuais (“Enviando arquivo…” e “Conferindo e enviando…”), sem porcentagem. Falha preserva o arquivo para nova tentativa, mantendo os identificadores e a legenda original para evitar duplicação; remover o anexo permite trocar a legenda ou o arquivo.
+Legenda opcional de até 4000 caracteres; nos documentos, está incluída no custo da faixa; nos vídeos, está incluída nos 10 créditos. O compositor desabilita o envio com saldo insuficiente e mostra a condição. Estados de progresso são textuais (“Enviando arquivo…” e “Conferindo e enviando…”), sem porcentagem. Falha preserva o arquivo para nova tentativa, mantendo os identificadores e a legenda original para evitar duplicação; remover o anexo permite trocar a legenda ou o arquivo.
 
-Imagens recebidas carregam próximas da área visível; erros oferecem “Recarregar imagem”. Imagens e documentos apresentam nome, tamanho e “Baixar arquivo”. Acesso usa armazenamento privado e URLs assinadas por 60 segundos; cada nova URL depende da participação autorizada e, em grupos, do histórico desde a entrada. Membros removidos ou que saíram não podem obter novas URLs. Arquivos já baixados e URLs anteriormente emitidas até expirar não podem ser revogados retroativamente pelo navegador.
+Imagens recebidas carregam próximas da área visível; erros oferecem “Recarregar imagem”. Imagens, documentos e vídeos apresentam nome, tamanho e “Baixar arquivo”. Acesso usa armazenamento privado e URLs assinadas por 60 segundos; cada nova URL depende da participação autorizada e, em grupos, do histórico desde a entrada. Membros removidos ou que saíram não podem obter novas URLs. Arquivos já baixados e URLs anteriormente emitidas até expirar não podem ser revogados retroativamente pelo navegador.
 
-O botão de câmera e o atalho de documento nas boas-vindas orientam abrir uma conversa e usar o clipe; não capturam mídia diretamente. Áudio e vídeo permanecem fora desta etapa. O filtro Grupos continua mostrando grupos reais ou orientação para criar o primeiro.
+Vídeos selecionados mostram prévia local com controles nativos, `playsInline` e `preload="metadata"`, usando ObjectURL revogada ao mudar o arquivo ou sair. A prévia ocupa a largura disponível, com fundo `#071524`, raio de 6px e altura máxima de 200px (150px até 600px). Na bolha, o vídeo tem largura de 100% e altura máxima de 360px (280px no mobile), preservando os limites do bloco de anexo e a composição azul-marinho/dourado aprovada.
+
+Vídeos recebidos não são carregados remotamente antes da ação “Ver vídeo”. O clique consulta uma URL privada de 60 segundos e abre o player nativo com controles, `playsInline` e carregamento de metadados, sem autoplay. Erro de reprodução remove o player e oferece reabrir com nova URL ou baixar o arquivo; a posição observada é restaurada quando os metadados permitem. Reprodução depende do codec suportado pelo navegador, sem transcodificação. Privacidade, histórico desde entrada, restrição de novas URLs a membros ativos, idempotência e débito atômico seguem as regras dos demais anexos.
+
+O botão de câmera e o atalho de documento nas boas-vindas orientam abrir uma conversa e usar o clipe; não capturam mídia diretamente. Áudio permanece fora desta etapa. O filtro Grupos continua mostrando grupos reais ou orientação para criar o primeiro.
 
 ## Evidência e verificação
 
-Documentação extraída dos componentes, estilos, consultas e restrições registradas em `PRODUCT.md` e `docs/losi-chat.md`, sem criação de tokens globais. A documentação de backend registra build local, testes de funções e testes SQL em transação com rollback. Também registra testes adicionais de grupos e cancelamento, com rollback e sem cobrança/cancelamento real de fornecedor. Esta etapa de documentação não repetiu esses testes nem realizou pagamento real de cliente. O navegador não estava disponível para verificação visual nesta etapa; não foram capturadas nem inspecionadas screenshots. A revisão de documentação foi concluída, mas a verificação visual está bloqueada pela indisponibilidade do navegador. Não há screenshots nem aprovação de fidelidade visual desta extensão. A correspondência visual renderizada com os uploads desktop e mobile permanece sem verificação por screenshot; os valores acima descrevem a implementação, não uma medição das imagens de referência.
+Documentação extraída dos componentes, estilos, consultas e restrições registradas em `PRODUCT.md` e `docs/losi-chat.md`, sem criação de tokens globais. A documentação de backend registra build local, testes de funções e testes SQL em transação com rollback. Também registra testes adicionais de grupos, cancelamento, mídia e vídeos, com rollback e sem cobrança/cancelamento real de fornecedor. A revisão de código da extensão de vídeos passou; a documentação de backend registra build e testes de formatos, custos e regras de acesso. Esta etapa de documentação não repetiu esses testes nem realizou pagamento real de cliente. O navegador não estava disponível para verificação visual nesta etapa; não foram capturadas nem inspecionadas screenshots. A revisão de documentação foi concluída, mas a verificação visual está bloqueada pela indisponibilidade do navegador. Não há screenshots nem aprovação de fidelidade visual desta extensão; controles nativos, codecs, recuperação de URL/posição e responsividade permanecem sem validação interativa no navegador. A correspondência visual renderizada com os uploads desktop e mobile permanece sem verificação por screenshot; os valores acima descrevem a implementação, não uma medição das imagens de referência.
