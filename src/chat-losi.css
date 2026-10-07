@@ -19,7 +19,7 @@
 .lc-quote{display:block;min-width:0;max-width:100%;background:#0c1a2b66;border-left:3px solid var(--lc-gold);border-radius:4px;padding:7px 9px;margin-bottom:7px;white-space:normal;font-size:12px;line-height:1.4}
 .lc-quote strong,.lc-reply-compose strong{display:block;color:var(--lc-gold);font-size:12px}
 .lc-quote p,.lc-reply-compose p{margin:3px 0 0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;color:var(--lc-text)}
-.lc-message-text{position:relative;min-width:0}
+.lc-message-text{position:relative;min-width:0;touch-action:pan-y;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .lc-message-text:focus-visible,.lc-reply-compose button:focus-visible{outline:2px solid var(--lc-gold);outline-offset:3px}
 .lc-reply-compose{display:flex;align-items:center;gap:10px;margin:8px 12px 0;padding:8px 10px;background:var(--lc-raised);border-left:3px solid var(--lc-gold);border-radius:4px;white-space:normal;font-size:12px;line-height:1.4}
 .lc-reply-compose>div{flex:1;min-width:0}.lc-reply-compose button{flex:none;display:grid;place-items:center;width:44px;height:44px;color:var(--lc-gold);background:transparent;border:0;border-radius:4px}.lc-reply-compose button:disabled{opacity:.5;cursor:wait}
