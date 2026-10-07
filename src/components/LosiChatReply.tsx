@@ -1,3 +1,4 @@
+import { LosiChatActionIcon } from './LosiChatActionIcon';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../lib/losi-chat';
 
@@ -31,6 +32,6 @@ export function LosiChatText({ message, onReply }: { message: ChatMessage; onRep
     onContextMenu={e => { e.preventDefault(); cancel(); setMenu(true); }}
     onKeyDown={e => { if (e.target !== e.currentTarget) return; if (e.key === 'Escape') { setMenu(false); area.current?.focus(); } else if (e.key === 'ContextMenu' || e.key === 'Enter' || (e.key === 'F10' && e.shiftKey)) { e.preventDefault(); setMenu(true); } }}>
     {message.body}
-    {menu && <div className="lc-media-menu" aria-label="Opções da mensagem"><button type="button" onClick={() => { setMenu(false); onReply(); }}>Responder</button><button type="button" onClick={() => { setMenu(false); area.current?.focus(); }}>Fechar</button></div>}
+    {menu && <div className="lc-media-menu" aria-label="Opções da mensagem"><button type="button" onClick={() => { setMenu(false); onReply(); }}><LosiChatActionIcon name="reply"/><span>Responder</span></button><button type="button" onClick={() => { setMenu(false); area.current?.focus(); }}><LosiChatActionIcon name="close"/><span>Fechar</span></button></div>}
   </div>;
 }
