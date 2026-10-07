@@ -139,6 +139,15 @@ Deno.serve(async(req:Request)=>{
    if(changePhoto&&old.photo_path)await admin.storage.from('losi-chat-attachments').remove([old.photo_path]);
    return json({success:true});
   }
+  if(body.action==='acknowledge'||body.action==='receipt-status'){
+   if(!Array.isArray(body.ids)||body.ids.length>100||!body.ids.every(uuid))throw new Error('ANEXO_INVALIDO');
+   if(body.action==='acknowledge'){
+    if(typeof body.read!=='boolean')throw new Error('ANEXO_INVALIDO');
+    checked(await admin.rpc('losi_chat_acknowledge',{p_user:user.id,p_ids:body.ids,p_read:body.read}));
+    return json({success:true});
+   }
+   return json({receipts:checked(await admin.rpc('losi_chat_receipt_status',{p_user:user.id,p_ids:body.ids}))});
+  }
   if(body.action==='group-create'){
    if(!uuid(body.requestId)||typeof body.name!=='string'||typeof body.description!=='string'||!Array.isArray(body.numbers)||body.numbers.length>99||!body.numbers.every((n:any)=>typeof n==='string'&&/^[1-9][0-9]{8}$/.test(n)))throw new Error('GRUPO_DADOS_INVALIDOS');
    const groupId=checked(await admin.rpc('losi_chat_create_group',{p_user:user.id,p_request:body.requestId,p_name:body.name,p_description:body.description,p_numbers:body.numbers}));
@@ -195,8 +204,10 @@ Deno.serve(async(req:Request)=>{
     ids.length?Promise.all(Array.from({length:Math.ceil(ids.length/100)},(_,i)=>admin.from('losi_chat_uploads').select('id,file_name,kind,mime,byte_size').in('id',ids.slice(i*100,(i+1)*100)))).then(rows=>rows.flatMap(checked)):Promise.resolve([]),
     senderIds.length?checked(await admin.from('business_profiles').select('owner_id,logo_url,business_name').in('owner_id',senderIds)):Promise.resolve([])
    ]);
+   const ownIds=messages.filter(m=>m.sender_id===user.id).map(m=>m.id);
+   const receipts=ownIds.length?checked(await admin.rpc('losi_chat_receipt_status',{p_user:user.id,p_ids:ownIds})):{};
    const map=new Map(uploadRows.map((u:any)=>[u.id,u])),senders=new Map(senderRows.map((s:any)=>[s.owner_id,s]));
-   return messages.map(m=>({...m,sender_photo:senders.get(m.sender_id)?.logo_url??null,sender_name:m.sender_name??senders.get(m.sender_id)?.business_name,attachment:m.attachment_id?map.get(m.attachment_id)??null:null}));
+   return messages.map(m=>({...m,receipt:receipts[m.id],sender_photo:senders.get(m.sender_id)?.logo_url??null,sender_name:m.sender_name??senders.get(m.sender_id)?.business_name,attachment:m.attachment_id?map.get(m.attachment_id)??null:null}));
   };
   const mediaTarget=async(id:string,group:boolean)=>{
    if(!uuid(id))throw new Error('ANEXO_INVALIDO');
