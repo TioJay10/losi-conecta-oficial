@@ -83,3 +83,11 @@ Revisão documental limitada ao código; build e SQL em rollback são verificado
 Novas mensagens individuais e de grupos criam um aviso privado no sistema de notificações existente. Há no máximo um aviso não lido por conversa e destinatário; novas mensagens atualizam esse aviso. O conteúdo da mensagem não é copiado para o aviso. O link ` /chat-losi?conversa=<uuid>` abre somente uma conversa retornada pelo backend para a conta autenticada. Ler a mensagem mais recente confirma a leitura do aviso; entrega ou leitura de mensagens anteriores não o encerra. São notificações dentro do app, sem push do sistema operacional. A geração ocorre na mesma transação dos recibos, sem cobrança adicional de créditos.
 
 Verificação: `tests/losi-chat-notifications.sql` usa transação com rollback para validar destinatários, agrupamento, privacidade, links de grupos e sincronização de leitura.
+
+### Respostas a mensagens
+
+Segurar uma mensagem no celular ou abrir seu menu contextual no desktop oferece “Responder”. Texto, áudio, imagem, vídeo e documento podem ser a mensagem original. A seleção aparece acima do compositor e pode ser cancelada antes do envio. O envio mantém o custo normal do conteúdo: citar uma mensagem não acrescenta créditos. A referência é salva com a mensagem, na mesma transação da cobrança, com as tentativas repetidas preservando o mesmo envio.
+
+Citações limitam o trecho a 240 caracteres e duas linhas. Mensagens excluídas, ocultas para o leitor ou anteriores à entrada dele no grupo aparecem como “Mensagem indisponível”. Não se aceita responder a mensagens de outra conversa. RPCs de envio e consulta das citações são exclusivas do backend autenticado.
+
+Verificação: `tests/losi-chat-replies.sql` (rollback) e `tests/losi-chat-reply-edge.cjs` cobrem permissões, privacidade, grupo, anexos, custo e novas tentativas.
