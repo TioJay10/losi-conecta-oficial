@@ -1,0 +1,17 @@
+const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),assert=require('node:assert/strict'),{randomUUID}=require('node:crypto');
+const source=fs.readFileSync('supabase/functions/losi-chat/index.ts','utf8').replace(/^import .*;\n/gm,'');
+const built=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None},reportDiagnostics:true});assert.equal(built.diagnostics.length,0);
+const user=randomUUID(),groupId=randomUUID();
+async function run(mode,photo){let handler,uploads=0,edits=0,removed=[];const group={id:groupId,isOwner:mode!=='member',name:'Parceiros',description:'',members:[]};
+ const admin={auth:{getUser:async()=>({data:{user:mode==='unauth'?null:{id:user}}})},from(table){const q={select(){return q},eq(){return q},single(){return q},maybeSingle(){return q},then(resolve){return Promise.resolve({data:table==='profiles'?{blocked:false}:{photo_path:'group-photos/'+groupId+'/old.jpg'}}).then(resolve)}};return q},rpc:async(name,args)=>{assert.equal(args.p_user,user);if(name==='losi_chat_group_details')return {data:group};if(name==='losi_chat_edit_group'){edits++;if(mode==='race')return {error:{message:'APENAS_ADMIN_GRUPO'}};assert.equal(args.p_change_photo,photo!==undefined);return {data:null};}throw Error(name);},storage:{from(){return {upload:async(path,bytes,opts)=>{uploads++;assert(path.startsWith('group-photos/'+groupId+'/'));assert.equal(opts.contentType,'image/jpeg');return {data:{path}}},remove:async(paths)=>{removed.push(...paths);return {data:[]}}}}}};
+ const context={Request,Response,Uint8Array,Date,atob,crypto:{randomUUID},verifyMedia:(bytes,mime)=>mime==='image/jpeg'&&bytes[0]===255&&bytes[1]===216&&bytes[2]===255,console:{error(){}},createClient:()=>admin,Deno:{env:{get:()=>''},serve:f=>handler=f}};vm.createContext(context);vm.runInContext(built.outputText,context);
+ const body={action:'group-edit',groupId,name:'Parceiros',description:'Novo resumo',...(photo===undefined?{}:{photo})};const r=await handler(new Request('https://test',{method:'POST',headers:{Authorization:'Bearer token'},body:JSON.stringify(body)}));return {status:r.status,uploads,edits,removed};}
+(async()=>{const valid='data:image/jpeg;base64,'+Buffer.from([255,216,255,0,255,217]).toString('base64');
+ for(const mode of ['unauth','member']){const r=await run(mode,valid);assert.notEqual(r.status,200);assert.equal(r.uploads,0);assert.equal(r.edits,0);}
+ for(const photo of ['data:image/svg+xml;base64,PHN2Zz4=', 'data:image/jpeg;base64,YmFk', 'data:image/jpeg;base64,'+'A'.repeat(700001)]){const r=await run('owner',photo);assert.notEqual(r.status,200);assert.equal(r.uploads,0);assert.equal(r.edits,0);}
+ let r=await run('owner',valid);assert.equal(r.status,200);assert.equal(r.uploads,1);assert.equal(r.edits,1);assert.equal(r.removed[0],'group-photos/'+groupId+'/old.jpg');
+ r=await run('owner',null);assert.equal(r.status,200);assert.equal(r.uploads,0);assert.equal(r.removed.length,1);
+ r=await run('owner',undefined);assert.equal(r.status,200);assert.equal(r.removed.length,0);
+ r=await run('race',valid);assert.notEqual(r.status,200);assert.equal(r.removed.length,1);assert.notEqual(r.removed[0],'group-photos/'+groupId+'/old.jpg');
+ console.log('PASS: group photo auth, member denial, format/size/signature checks, replacement/removal, text-only edits and cleanup after ownership change');
+})().catch(e=>{console.error(e);process.exit(1)});
