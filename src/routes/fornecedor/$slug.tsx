@@ -1,3 +1,4 @@
+import { LosiChatContact } from "../../components/LosiChatNumberPurchase";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
@@ -572,6 +573,7 @@ function ProviderPage() {
           </div>
 
           <div className="provider-profile-actions">
+            <LosiChatContact businessId={business.id} />
             <div className="provider-profile-icon-group" aria-label="Ações rápidas do fornecedor">
               <a
                 href={"/feed?fornecedor=" + encodeURIComponent(business.slug)}

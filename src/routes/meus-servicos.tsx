@@ -1,3 +1,4 @@
+import { LosiChatNumberPurchase } from "../components/LosiChatNumberPurchase";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FormEvent, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
@@ -711,7 +712,8 @@ async function lookupViaCep(cep: string) {
           <Step number="3" title="Análise" active={onboardingStep === 3} done={false} />
         </div>
 
-        <form onSubmit={saveBusiness} className="business-services-card">
+        <LosiChatNumberPurchase businessId={business?.id} initialDocument={taxDocument} />
+      <form onSubmit={saveBusiness} className="business-services-card">
           <h2>Informações da empresa</h2>
           <div className="profile-form-grid business-services-form-grid">
             <Field label="Nome comercial *" value={form.business_name} onChange={(v) => update("business_name", v)} />

@@ -12,3 +12,11 @@ verify_jwt = false
 
 [functions.team-network-directory]
 verify_jwt = true
+
+# losi-chat authenticates each private action with auth.getUser; public-number is opt-in.
+[functions.losi-chat]
+verify_jwt = false
+
+# Asaas authenticates with ASAAS_WEBHOOK_TOKEN.
+[functions.asaas-webhook]
+verify_jwt = false
