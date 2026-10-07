@@ -1,0 +1,24 @@
+begin;
+do $$ declare source public.losi_chat_groups; gid uuid:=gen_random_uuid(); target uuid; n text; denied boolean:=false; begin
+ select * into source from public.losi_chat_groups limit 1;
+ select user_id into target from public.losi_chat_group_members where group_id=source.id and user_id<>source.creator_id and active limit 1;
+ if target is null then raise exception 'Faltam participantes para verificar';end if;
+ select digital_number into n from public.losi_chat_accounts where user_id=target;
+ insert into public.losi_chat_groups(id,owner_id,creator_id,name) values(gid,source.creator_id,source.creator_id,'Verificação temporária');
+ insert into public.losi_chat_group_members(group_id,user_id) values(gid,source.creator_id),(gid,target);
+ begin perform public.losi_chat_manage_group(target,gid,'promote',n);exception when others then if sqlerrm<>'APENAS_ADMIN_GRUPO' then raise;end if;denied:=true;end;
+ if not denied then raise exception 'Participante promoveu sem permissão';end if;
+ perform public.losi_chat_manage_group(source.creator_id,gid,'promote',n);
+ if not (public.losi_chat_group_details(source.creator_id,gid)->>'isOwner')::boolean then raise exception 'Criador perdeu administração';end if;
+ if not (public.losi_chat_group_details(target,gid)->>'isOwner')::boolean then raise exception 'Novo administrador não autorizado';end if;
+ if (select owner_id from public.losi_chat_groups where id=gid)<>source.creator_id then raise exception 'Promoção transferiu proprietário';end if;
+ perform public.losi_chat_edit_group(target,gid,'Editar como novo administrador','Descrição',false,null);
+ denied:=false;
+ begin perform public.losi_chat_manage_group(target,gid,'remove',(select digital_number from public.losi_chat_accounts where user_id=source.creator_id));exception when others then if sqlerrm<>'CRIADOR_GRUPO_PROTEGIDO' then raise;end if;denied:=true;end;
+ if not denied then raise exception 'Criador removido';end if;
+ perform public.losi_chat_manage_group(source.creator_id,gid,'leave');
+ denied:=false;
+ begin perform public.losi_chat_manage_group(target,gid,'leave');exception when others then if sqlerrm<>'TRANSFIRA_ADMINISTRACAO' then raise;end if;denied:=true;end;
+ if not denied then raise exception 'Último administrador saiu';end if;
+end $$;
+rollback;
