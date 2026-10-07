@@ -50,6 +50,6 @@
 .lc-audio-message audio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .lc-audio-status{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .lc-audio-message.is-own .lc-audio-avatar>img{border-color:#e1bd6b}
-.lc-bubble:has(.lc-audio-message){width:min(560px,100%);max-width:100%;padding:8px 12px 6px;min-width:0;min-height:112px;line-height:1}
+.lc-bubble:has(.lc-audio-message){width:min(430px,100%);max-width:100%;padding:8px 12px 6px;min-width:0;min-height:112px;line-height:1}
 .lc-bubble.sent:has(.lc-audio-message){background:#0e496d}
-@media(max-width:600px){.lc-bubble:has(.lc-audio-message){min-width:0;width:100%;max-width:100%;min-height:86px;padding:7px 8px 5px}.lc-audio-message{grid-template-columns:44px 26px minmax(0,1fr);gap:6px;min-width:0}.lc-audio-avatar{width:44px;height:44px}.lc-audio-play{width:26px!important}.lc-audio-waveform{height:36px;gap:1px;padding-left:12px!important}.lc-audio-progress-dot{width:7px;height:7px}.lc-audio-waveform i{max-width:3px}}
+@media(max-width:600px){.lc-bubble:has(.lc-audio-message){min-width:0;width:min(420px,100%);max-width:100%;min-height:86px;padding:7px 8px 5px}.lc-audio-message{grid-template-columns:44px 26px minmax(0,1fr);gap:6px;min-width:0}.lc-audio-avatar{width:44px;height:44px}.lc-audio-play{width:26px!important}.lc-audio-waveform{height:36px;gap:1px;padding-left:12px!important}.lc-audio-progress-dot{width:7px;height:7px}.lc-audio-waveform i{max-width:3px}}
