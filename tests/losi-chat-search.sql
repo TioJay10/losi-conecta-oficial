@@ -1,0 +1,28 @@
+begin;
+do $$ declare a uuid;b uuid;t uuid;g uuid:=gen_random_uuid();m uuid:=gen_random_uuid();gone uuid:=gen_random_uuid();hidden uuid:=gen_random_uuid();data jsonb;last jsonb;begin
+ select user_id into a from public.losi_chat_accounts limit 1;select user_id into b from public.losi_chat_accounts where user_id<>a limit 1;
+ select id into t from public.losi_chat_threads where user_a=least(a,b) and user_b=greatest(a,b);
+ if t is null then t:=gen_random_uuid();insert into public.losi_chat_threads(id,user_a,user_b) values(t,least(a,b),greatest(a,b));end if;
+ insert into public.losi_chat_messages(id,thread_id,sender_id,body,created_at) values(m,t,a,'Pesquisa_TESTE literal 100%',clock_timestamp()),(gone,t,a,'Pesquisa_TESTE excluída',clock_timestamp()),(hidden,t,a,'Pesquisa_TESTE oculta',clock_timestamp());
+ update public.losi_chat_messages set deleted_at=clock_timestamp() where id=gone;
+ insert into public.losi_chat_hidden_messages(user_id,message_id) values(b,hidden);
+ data:=public.losi_chat_search_messages(b,t,false,'pesquisa_teste');
+ if jsonb_array_length(data->'messages')<>1 then raise exception 'Filtro de privacidade ou caixa incorreto';end if;
+ if jsonb_array_length(public.losi_chat_search_messages(b,t,false,'%')->'messages')<>1 then raise exception 'Wildcard não literal';end if;
+ begin perform public.losi_chat_search_messages(gen_random_uuid(),t,false,'Pesquisa_TESTE');raise exception 'Terceiro pesquisou conversa';exception when others then if sqlerrm<>'CONVERSA_INDISPONIVEL' then raise;end if;end;
+ for i in 1..55 loop insert into public.losi_chat_messages(id,thread_id,sender_id,body,created_at) values(gen_random_uuid(),t,a,'Pesquisa_PAGINA',clock_timestamp());end loop;
+ data:=public.losi_chat_search_messages(b,t,false,'Pesquisa_PAGINA');
+ if jsonb_array_length(data->'messages')<>50 or not (data->>'hasMore')::boolean then raise exception 'Primeira página incorreta';end if;
+ last:=data->'messages'->49;
+ data:=public.losi_chat_search_messages(b,t,false,'Pesquisa_PAGINA',(last->>'created_at')::timestamptz,(last->>'id')::uuid);
+ if jsonb_array_length(data->'messages')<>5 or (data->>'hasMore')::boolean then raise exception 'Segunda página incorreta';end if;
+ insert into public.losi_chat_groups(id,owner_id,creator_id,name) values(g,a,a,'Busca teste');
+ insert into public.losi_chat_messages(id,group_id,sender_id,body,created_at) values(gen_random_uuid(),g,a,'Pesquisa_GRUPO anterior',clock_timestamp());
+ insert into public.losi_chat_group_members(group_id,user_id,joined_at) values(g,a,clock_timestamp()),(g,b,clock_timestamp());
+ insert into public.losi_chat_messages(id,group_id,sender_id,body,created_at) values(gen_random_uuid(),g,a,'Pesquisa_GRUPO atual',clock_timestamp());
+ if jsonb_array_length(public.losi_chat_search_messages(b,g,true,'Pesquisa_GRUPO')->'messages')<>1 then raise exception 'Histórico anterior à entrada exposto';end if;
+ update public.losi_chat_group_members set active=false where group_id=g and user_id=b;
+ begin perform public.losi_chat_search_messages(b,g,true,'Pesquisa_GRUPO');raise exception 'Removido pesquisou grupo';exception when others then if sqlerrm<>'GRUPO_INDISPONIVEL' then raise;end if;end;
+ if has_function_privilege('authenticated','public.losi_chat_search_messages(uuid,uuid,boolean,text,timestamptz,uuid)','execute') then raise exception 'RPC exposta';end if;
+end $$;
+rollback;

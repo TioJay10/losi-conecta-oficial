@@ -91,3 +91,9 @@ Segurar uma mensagem no celular ou abrir seu menu contextual no desktop oferece 
 Citações limitam o trecho a 240 caracteres e duas linhas. Mensagens excluídas, ocultas para o leitor ou anteriores à entrada dele no grupo aparecem como “Mensagem indisponível”. Não se aceita responder a mensagens de outra conversa. RPCs de envio e consulta das citações são exclusivas do backend autenticado.
 
 Verificação: `tests/losi-chat-replies.sql` (rollback) e `tests/losi-chat-reply-edge.cjs` cobrem permissões, privacidade, grupo, anexos, custo e novas tentativas.
+
+### Busca dentro da conversa
+
+A lupa do cabeçalho abre uma busca de texto, legenda e nome de arquivo na conversa atual. A pesquisa é literal e ignora diferenças entre maiúsculas e minúsculas. As setas percorrem os resultados do mais recente para o mais antigo, carregando páginas adicionais de 50 ocorrências. O contador com `+` indica mais resultados disponíveis. Selecionar uma ocorrência carrega e destaca a mensagem no histórico, sem consumir créditos ou marcar os resultados pesquisados como lidos.
+
+O servidor limita a consulta à conversa autorizada, exclui mensagens apagadas/ocultas e respeita a data de entrada nos grupos. Arquivos são encontrados pelo nome, sem leitura do conteúdo do documento ou transcrição de áudio. Testes com rollback: `tests/losi-chat-search.sql`.
