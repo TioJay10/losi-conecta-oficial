@@ -41,3 +41,10 @@
 @media(max-width:700px){.lc-thread-search-button{width:28px}.lc-conversation-search{padding:6px 8px}.lc-conversation-search-controls>button{width:28px}.lc-thread-header:has(.lc-thread-search-button){flex-wrap:wrap}.lc-thread-header:has(.lc-thread-search-button)>div{min-width:65px}}
 
 .lc-conversation-search-controls>button.lc-search-close{width:44px;min-height:44px;position:relative;z-index:1}.lc-search-close svg{pointer-events:none}
+
+/* Keep mobile hit testing on the search controls, above the scrolling history. */
+.lc-main>.lc-conversation-search{position:relative;z-index:20;isolation:isolate;pointer-events:auto;align-self:stretch;flex:0 0 auto;width:100%;overflow:visible}
+.lc-conversation-search-controls{position:relative;z-index:1;pointer-events:auto}
+.lc-conversation-search input,.lc-conversation-search button{position:relative;pointer-events:auto;touch-action:manipulation}
+.lc-conversation-search input{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;-webkit-appearance:none;appearance:none}
+.lc-main>.lc-thread-messages{position:relative;z-index:0}
