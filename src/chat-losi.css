@@ -48,3 +48,6 @@
 .lc-conversation-search input,.lc-conversation-search button{position:relative;pointer-events:auto;touch-action:manipulation}
 .lc-conversation-search input{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;-webkit-appearance:none;appearance:none}
 .lc-main>.lc-thread-messages{position:relative;z-index:0}
+
+/* Closing search must hide the existing node, including while its input has focus. */
+.lc-main>.lc-conversation-search[hidden]{display:none!important}

@@ -5,17 +5,17 @@ type Results = { messages: ChatMessage[]; hasMore: boolean };
 function SearchIcon({ name }: { name: 'up'|'down'|'close' }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={name === 'up' ? 'm6 15 6-6 6 6' : name === 'down' ? 'm6 9 6 6 6-6' : 'm6 6 12 12 M18 6 6 18'} /></svg>;
 }
-export function LosiChatSearch({ threadId, group, onSelect, onClose }: { threadId: string; group: boolean; onSelect: (m: ChatMessage)=>void; onClose: (restoreFocus?: boolean)=>void }) {
+export function LosiChatSearch({ open, threadId, group, onSelect, onClose }: { open: boolean; threadId: string; group: boolean; onSelect: (m: ChatMessage)=>void; onClose: (restoreFocus?: boolean)=>void }) {
   const [query, setQuery] = useState(''), [results, setResults] = useState<ChatMessage[]>([]);
   const [index, setIndex] = useState(0), [more, setMore] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
   const version = useRef(0), select = useRef(onSelect), input = useRef<HTMLInputElement>(null);
   select.current = onSelect;
-  useEffect(()=>{input.current?.focus();},[]);
+  useEffect(()=>{if(input.current)input.current.value='';setQuery('');if(open)input.current?.focus();},[open,threadId,group]);
   useEffect(()=>{
     const current = ++version.current;
     setResults([]); setIndex(0); setMore(false); setError('');
-    if (!query.trim()) { setBusy(false); return; }
+    if (!open || !query.trim()) { setBusy(false); return; }
     setBusy(true);
     const timer = setTimeout(()=>{
       void chatAction<Results>('search-messages', {threadId, group, query:query.trim()}).then(data=>{
@@ -26,7 +26,7 @@ export function LosiChatSearch({ threadId, group, onSelect, onClose }: { threadI
         .finally(()=>{if(version.current===current)setBusy(false);});
     },350);
     return ()=>{clearTimeout(timer);version.current++;};
-  },[query,threadId,group,revision]);
+  },[open,query,threadId,group,revision]);
   async function next() {
     if (busy) return;
     if (index+1<results.length) { setIndex(index+1); select.current(results[index+1]); return; }
@@ -40,7 +40,7 @@ export function LosiChatSearch({ threadId, group, onSelect, onClose }: { threadI
     } catch(e) { if(version.current===current)setError(e instanceof Error?e.message:'Não foi possível carregar mais resultados.'); }
     finally {if(version.current===current)setBusy(false);}
   }
-  return <div className="lc-conversation-search" role="search" aria-label="Busca nesta conversa" onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();onClose(true);}}}>
+  return <div className="lc-conversation-search" hidden={!open} role="search" aria-label="Busca nesta conversa" onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();onClose(true);}}}>
     <div className="lc-conversation-search-controls"><input ref={input} type="text" inputMode="search" enterKeyHint="search" maxLength={120} defaultValue="" onInput={e=>{const value=e.currentTarget.value;setQuery(value);setBusy(Boolean(value.trim()));}} aria-label="Buscar texto ou nome de arquivo nesta conversa" placeholder="Buscar nesta conversa"/>
       <span className="lc-search-count" aria-label={results.length?`Resultado ${index+1} de ${results.length}${more?', há mais resultados':''}`:'Sem resultados'}>{results.length?`${index+1}/${results.length}${more?'+':''}`:'0/0'}</span>
       <button type="button" disabled={busy||index===0} aria-label="Resultado mais recente" onClick={()=>{setIndex(index-1);select.current(results[index-1]);}}><SearchIcon name="up"/></button>
