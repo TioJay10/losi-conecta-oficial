@@ -41,11 +41,11 @@ export function LosiChatSearch({ threadId, group, onSelect, onClose }: { threadI
     finally {if(version.current===current)setBusy(false);}
   }
   return <section className="lc-conversation-search" aria-label="Busca nesta conversa" onKeyDown={e=>{if(e.key==='Escape')onClose();}}>
-    <div className="lc-conversation-search-controls"><input ref={input} type="search" maxLength={120} value={query} onChange={e=>{setQuery(e.target.value);setBusy(Boolean(e.target.value.trim()));}} aria-label="Buscar texto ou nome de arquivo nesta conversa" placeholder="Buscar nesta conversa"/>
+    <div className="lc-conversation-search-controls"><input ref={input} type="text" inputMode="search" enterKeyHint="search" maxLength={120} value={query} onChange={e=>{setQuery(e.target.value);setBusy(Boolean(e.target.value.trim()));}} aria-label="Buscar texto ou nome de arquivo nesta conversa" placeholder="Buscar nesta conversa"/>
       <span className="lc-search-count" aria-label={results.length?`Resultado ${index+1} de ${results.length}${more?', há mais resultados':''}`:'Sem resultados'}>{results.length?`${index+1}/${results.length}${more?'+':''}`:'0/0'}</span>
       <button type="button" disabled={busy||index===0} aria-label="Resultado mais recente" onClick={()=>{setIndex(index-1);select.current(results[index-1]);}}><SearchIcon name="up"/></button>
       <button type="button" disabled={busy||!results.length||(index+1===results.length&&!more)} aria-label="Resultado mais antigo" onClick={()=>void next()}><SearchIcon name="down"/></button>
-      <button type="button" aria-label="Fechar busca" onClick={onClose}><SearchIcon name="close"/></button>
+      <button type="button" className="lc-search-close" aria-label="Fechar busca" onPointerDown={e=>e.preventDefault()} onPointerUp={e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();onClose();}} onClick={e=>{e.stopPropagation();onClose();}}><SearchIcon name="close"/></button>
     </div>
     <p role="status">{busy?'Buscando…':error||(!query.trim()?'Busque mensagens e nomes de arquivos.':!results.length?'Nenhuma mensagem encontrada.':'Use as setas para percorrer os resultados.')}{error&&<button type="button" onClick={()=>setRevision(r=>r+1)}>Tentar novamente</button>}</p>
   </section>;

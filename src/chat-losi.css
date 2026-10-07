@@ -39,3 +39,5 @@
 .lc-conversation-search :focus-visible,.lc-thread-search-button:focus-visible{outline:2px solid var(--lc-gold);outline-offset:2px}
 .lc-bubble.lc-search-hit{outline:2px solid var(--lc-gold);outline-offset:3px;scroll-margin-block:24px}
 @media(max-width:700px){.lc-thread-search-button{width:28px}.lc-conversation-search{padding:6px 8px}.lc-conversation-search-controls>button{width:28px}.lc-thread-header:has(.lc-thread-search-button){flex-wrap:wrap}.lc-thread-header:has(.lc-thread-search-button)>div{min-width:65px}}
+
+.lc-conversation-search-controls>button.lc-search-close{width:44px;min-height:44px;position:relative;z-index:1}.lc-search-close svg{pointer-events:none}
