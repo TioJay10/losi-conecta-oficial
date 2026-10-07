@@ -1,0 +1,12 @@
+const fs=require('node:fs'),ts=require('typescript'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('supabase/functions/losi-chat/media-rules.ts','utf8');const output=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+const context={exports:{},TextDecoder,Uint8Array,DataView};vm.createContext(context);vm.runInContext(output,context);const {mediaMetadata,verifyMedia}=context.exports;
+assert.equal(mediaMetadata('file.PDF',20).mime,'application/pdf');assert.equal(mediaMetadata('../bad.pdf',20).file_name,'.._bad.pdf');
+for(const [name,size] of [['bad.svg',10],['bad.exe',10],['bad.pdf',20971521],['empty.pdf',0]])assert.throws(()=>mediaMetadata(name,size));
+const b=s=>new TextEncoder().encode(s);
+assert.equal(verifyMedia(b('%PDF-1.7\n'), 'application/pdf'),true);assert.equal(verifyMedia(b('<html>'), 'application/pdf'),false);
+assert.equal(verifyMedia(Uint8Array.from([137,80,78,71,13,10,26,10]),'image/png'),true);assert.equal(verifyMedia(b('fake image'),'image/png'),false);
+assert.equal(verifyMedia(b('Conteúdo válido'),'text/plain'),true);assert.equal(verifyMedia(Uint8Array.from([255,0]),'text/plain'),false);
+assert.equal(verifyMedia(Uint8Array.from([80,75,3,4]),mediaMetadata('file.docx',4).mime),false);
+const ui=fs.readFileSync('src/components/LosiChatAttachments.tsx','utf8');assert.match(ui,/upsert:false/);assert.match(ui,/a\.requestId/);assert.match(ui,/URL\.revokeObjectURL/);
+console.log('PASS: MIME/signature/size validation, hostile formats, immutable upload/retry and preview lifecycle');

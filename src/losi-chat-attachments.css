@@ -1,0 +1,14 @@
+.lc-compose-wrap{flex-shrink:0;min-width:0;background:var(--lc-panel,#0d2235);border-top:1px solid rgba(202,168,97,.14)}
+.lc-app .lc-file-picker{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;overflow:hidden;clip-path:inset(50%);border:0!important}
+.lc-attachment-preview{display:flex;align-items:center;gap:12px;padding:14px 18px;min-width:0;color:#f4e1b6}
+.lc-attachment-preview>img{width:88px;height:72px;object-fit:contain;border-radius:6px;background:#071524;flex-shrink:0}
+.lc-attachment-preview>div{flex:1;min-width:0}.lc-attachment-preview strong,.lc-sent-attachment strong{display:block;font-size:14px;overflow-wrap:anywhere}
+.lc-attachment-preview small,.lc-sent-attachment small{display:block;font-size:12px;margin-top:4px;color:#c4cdd7}
+.lc-attachment-preview>button{color:#f4e1b6;background:transparent;border:1px solid #526172;border-radius:50%;width:36px;height:36px;flex-shrink:0;font-size:24px}
+.lc-upload-status{margin:0;padding:4px 16px 12px;font-size:13px;color:#f4e1b6}
+.lc-sent-attachment{white-space:normal;min-width:0;max-width:360px;margin-bottom:8px}
+.lc-sent-attachment>img{display:block;width:100%;max-height:360px;object-fit:contain;border-radius:6px;margin-bottom:8px}
+.lc-app .lc-sent-attachment button{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.14);color:#fff4d8;border:1px solid rgba(229,195,127,.25);border-radius:6px;padding:10px;min-height:44px;text-align:left;width:100%}
+.lc-sent-attachment button svg{flex-shrink:0}.lc-sent-attachment button span{min-width:0;display:block}.lc-sent-attachment p{font-size:13px;margin:6px 0}
+.lc-app .lc-compose-wrap .lc-composer input:not([type=file]){font-size:16px;min-width:0}
+@media(max-width:600px){.lc-attachment-preview{padding:10px 12px;gap:8px}.lc-attachment-preview>img{width:64px;height:60px}.lc-sent-attachment{max-width:100%}.lc-sent-attachment>img{max-height:280px}}
