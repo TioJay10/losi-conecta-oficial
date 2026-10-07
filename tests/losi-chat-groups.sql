@@ -1,0 +1,55 @@
+begin;
+do $$
+declare users uuid[]; a uuid;b uuid;c uuid;na text;nb text;nc text;n text; u uuid;g uuid=gen_random_uuid();mid uuid=gen_random_uuid();tid uuid;result jsonb;
+begin
+ select array_agg(owner_id) into users from (select distinct x.owner_id from public.business_profiles x join public.profiles p on p.id=x.owner_id where x.active and not coalesce(p.blocked,false) and not exists(select 1 from public.losi_chat_accounts z where z.user_id=x.owner_id) limit 3) t;
+ if coalesce(array_length(users,1),0)<>3 then raise exception 'Need three unused provider fixtures';end if;
+ a=users[1];b=users[2];c=users[3];
+ foreach u in array users loop
+  loop n=(100000000+floor(random()*900000000))::bigint::text;exit when not exists(select 1 from public.losi_chat_accounts where digital_number=n);end loop;
+  insert into public.losi_chat_accounts(user_id,business_id,digital_number,balance,claimed_at) select u,id,n,20,now() from public.business_profiles where owner_id=u and active limit 1;
+ end loop;
+ select digital_number into na from public.losi_chat_accounts where user_id=a;select digital_number into nb from public.losi_chat_accounts where user_id=b;select digital_number into nc from public.losi_chat_accounts where user_id=c;
+ if public.losi_chat_create_group(a,g,'Grupo de teste','Networking',array[nb,nb])<>g then raise exception 'Create failed';end if;
+ if public.losi_chat_create_group(a,g,'Grupo de teste','Networking',array[nb])<>g or (select count(*) from public.losi_chat_group_members where group_id=g)<>2 then raise exception 'Duplicate group/member';end if;
+ begin perform public.losi_chat_manage_group(b,g,'rename',null,'Ataque','');raise exception 'TEST_FAILED: non-owner rename';exception when others then if sqlerrm='TEST_FAILED: non-owner rename' then raise;end if;end;
+ begin perform public.losi_chat_group_details(c,g);raise exception 'TEST_FAILED: outsider details';exception when others then if sqlerrm='TEST_FAILED: outsider details' then raise;end if;end;
+ result=public.losi_chat_send_group_text(a,g,mid,'Primeira mensagem');if (result->>'balance')::integer<>19 then raise exception 'Wrong group debit';end if;
+ perform public.losi_chat_send_group_text(a,g,mid,'Primeira mensagem');if (select balance from public.losi_chat_accounts where user_id=a)<>19 then raise exception 'Retry double debit';end if;
+ if (select balance from public.losi_chat_accounts where user_id=b)<>20 then raise exception 'Receiver debited';end if;
+ if (public.losi_chat_list_groups(b)->0->>'unread')::integer<>1 then raise exception 'Unread group';end if;
+ if jsonb_array_length(public.losi_chat_group_messages(b,g)->'messages')<>1 then raise exception 'Group history';end if;
+ perform public.losi_chat_group_favorite(b,g,true);if not (public.losi_chat_list_groups(b)->0->>'favorite')::boolean then raise exception 'Favorite';end if;
+ insert into public.losi_chat_threads(user_a,user_b) values(least(a,b),greatest(a,b)) returning id into tid;
+ begin perform public.losi_chat_send_text(a,tid,mid,'Primeira mensagem');raise exception 'TEST_FAILED: cross-target retry';exception when others then if sqlerrm='TEST_FAILED: cross-target retry' then raise;end if;end;
+ perform public.losi_chat_manage_group(a,g,'add',nc);
+ if jsonb_array_length(public.losi_chat_group_messages(c,g)->'messages')<>0 then raise exception 'Pre-join history leaked';end if;
+ perform public.losi_chat_send_group_text(a,g,gen_random_uuid(),'Segunda mensagem');
+ if jsonb_array_length(public.losi_chat_group_messages(c,g)->'messages')<>1 then raise exception 'New member message missing';end if;
+ if (select balance from public.losi_chat_accounts where user_id=a)<>18 then raise exception 'Multiple recipients changed price';end if;
+ perform public.losi_chat_manage_group(a,g,'remove',nc);
+ begin perform public.losi_chat_group_messages(c,g);raise exception 'TEST_FAILED: removed member reads';exception when others then if sqlerrm='TEST_FAILED: removed member reads' then raise;end if;end;
+ begin perform public.losi_chat_send_group_text(c,g,gen_random_uuid(),'Intruso');raise exception 'TEST_FAILED: removed member sends';exception when others then if sqlerrm='TEST_FAILED: removed member sends' then raise;end if;end;
+ begin perform public.losi_chat_manage_group(a,g,'leave');raise exception 'TEST_FAILED: owner leaves';exception when others then if sqlerrm='TEST_FAILED: owner leaves' then raise;end if;end;
+ perform public.losi_chat_manage_group(a,g,'transfer',nb);
+ perform public.losi_chat_manage_group(a,g,'leave');
+ if not (public.losi_chat_group_details(b,g)->>'isOwner')::boolean then raise exception 'Transfer failed';end if;
+ perform public.losi_chat_manage_group(b,g,'rename',null,'Grupo atualizado','Nova descrição');
+ update public.losi_chat_accounts set balance=0 where user_id=b;
+ begin perform public.losi_chat_send_group_text(b,g,gen_random_uuid(),'Sem crédito');raise exception 'TEST_FAILED: no balance';exception when others then if sqlerrm='TEST_FAILED: no balance' then raise;end if;end;
+ if (select count(*) from public.losi_chat_messages where group_id=g)<>2 then raise exception 'Unexpected messages';end if;
+ if has_function_privilege('authenticated','public.losi_chat_send_group_text(uuid,uuid,uuid,text)','execute') or has_table_privilege('authenticated','public.losi_chat_group_members','insert') then raise exception 'Unsafe group grants';end if;
+ perform set_config('test.group',g::text,true);perform set_config('test.group_owner',b::text,true);perform set_config('test.group_left',a::text,true);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',b,'role','authenticated')::text,true);
+end $$;
+set local role authenticated;
+do $$begin
+ if (select count(*) from public.losi_chat_messages where group_id=current_setting('test.group')::uuid)<>2 then raise exception 'Owner RLS';end if;
+ if (select count(*) from public.losi_chat_groups where id=current_setting('test.group')::uuid)<>1 then raise exception 'Group metadata hidden';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.group_left'),'role','authenticated')::text,true);
+ if (select count(*) from public.losi_chat_messages where group_id=current_setting('test.group')::uuid)<>0 then raise exception 'Left member RLS leak';end if;
+ if (select count(*) from public.losi_chat_groups where id=current_setting('test.group')::uuid)<>0 then raise exception 'Left member group leak';end if;
+end $$;
+reset role;
+rollback;
+select 'PASS: group creation/retry, permissions, single-credit debit, membership/history, transfer, leave, RLS; rolled back' result;

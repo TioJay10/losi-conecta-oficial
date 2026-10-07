@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from './supabase';
 export type ChatAccount={user_id:string;business_id:string;digital_number:string|null;balance:number;show_public:boolean};
 export type ChatOrder={id:string;status:string;kind:string;credits:number;amount_cents:number;invoice_url:string|null;created_at:string};
-export type ChatMessage={id:string;thread_id:string;sender_id:string;body:string;created_at:string};
-export type ChatThread={id:string;name:string;number:string;photo:string|null;last:ChatMessage|null;unread:number;favorite:boolean};
+export type ChatMessage={id:string;thread_id:string|null;group_id?:string|null;sender_id:string;sender_name?:string;body:string;created_at:string};
+export type ChatThread={id:string;name:string;number:string|null;photo:string|null;last:ChatMessage|null;unread:number;favorite:boolean;group?:boolean;memberCount?:number};
 export function formatLosiNumber(n:string|null|undefined){return n?n.replace(/(\d{3})(\d{3})(\d{3})/,'$1.$2.$3'):'Ainda não resgatado';}
 export async function chatAction<T=any>(action:string,body:Record<string,unknown>={}):Promise<T>{
  const {data,error}=await supabase.functions.invoke('losi-chat',{body:{action,...body}});

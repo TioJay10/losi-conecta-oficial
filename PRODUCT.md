@@ -11,7 +11,7 @@ Fornecedores e profissionais que trabalham com eventos e lazer.
 Conectar fornecedores e apoiar a operação profissional. O novo Chat LOSI será um produto separado para troca de experiências e networking.
 
 ## Capabilities and Constraints
-Chat LOSI possui compra do número e recargas via Asaas, confirmação e notificação de pagamento, resgate, saldo real e conversas privadas de texto. Cada texto custa 1 crédito, debitado atomicamente com a gravação. Anexos e grupos serão implementados em etapa posterior, sem simular envios ou cobranças.
+Chat LOSI possui compra do número e recargas via Asaas, confirmação e notificação de pagamento, resgate, saldo real e conversas privadas e grupos de texto. Cada texto custa 1 crédito, debitado atomicamente com a gravação. Anexos serão implementados em etapa posterior, sem simular envios ou cobranças.
 O número digital interno será exclusivo e vinculado ao ID do fornecedor, comprado facultativamente em Minha Empresa e resgatado após confirmação de pagamento. Pode ser exibido opcionalmente nos contatos do perfil público. O número permanece após os créditos acabarem.
 Compra inicial confirmada: número + 10.000 créditos por R$29,90; número + 50.000 créditos por R$79,90. Recargas usam os mesmos pacotes e preços, confirmados pelo usuário: 10.000 por R$29,90 e 50.000 por R$79,90.
 Envios: texto 1 crédito; imagem 2; texto + imagem 3; vídeo 10; documentos leves 2–3 e pesados 4–8. Faixas de tamanho dos documentos ainda não definidas. Recebimento não debita saldo.
@@ -22,3 +22,6 @@ Nome LOSI Conecta, azul-marinho e dourado. O usuário exige a composição do Wh
 
 ## Evidence on Hand
 Referências fornecidas pelo usuário: image(20261007-001417).png (desktop) e IMG_6400.jpeg (mobile). O usuário aprovou a composição visual da primeira prévia. A etapa funcional preserva essa estrutura e substitui os dados ilustrativos pelos dados reais da conta.
+
+## Chat Groups and Invoices
+Grupos com até 100 participantes, números LOSI, administração transferível, adicionar/remover, editar nome/descrição e sair. Uma mensagem de texto custa 1 crédito por envio, sem multiplicar pelo número de destinatários. Novo participante vê somente conteúdo enviado após sua entrada; sair/remover revoga novas consultas. Faturas pendentes podem ser canceladas no app com confirmação no Asaas; pagamentos confirmados não têm cancelamento por esse botão.
