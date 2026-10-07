@@ -3,11 +3,15 @@ import { supabase } from './supabase';
 export type ChatAccount={user_id:string;business_id:string;digital_number:string|null;balance:number;show_public:boolean};
 export type ChatOrder={id:string;status:string;kind:string;credits:number;amount_cents:number;invoice_url:string|null;created_at:string};
 export type ChatAttachment={id:string;file_name:string;kind:'image'|'document'|'video'|'audio';mime:string;byte_size:number};
-export type ChatMessage={id:string;thread_id:string|null;group_id?:string|null;sender_id:string;sender_name?:string;attachment_id?:string|null;attachment?:ChatAttachment|null;body:string;created_at:string};
+export type ChatMessage={id:string;thread_id:string|null;group_id?:string|null;sender_id:string;sender_name?:string;attachment_id?:string|null;attachment?:ChatAttachment|null;body:string;created_at:string;deleted_at?:string|null};
 export type ChatThread={id:string;name:string;number:string|null;photo:string|null;last:ChatMessage|null;unread:number;favorite:boolean;group?:boolean;memberCount?:number};
 export function formatLosiNumber(n:string|null|undefined){return n?n.replace(/(\d{3})(\d{3})(\d{3})/,'$1.$2.$3'):'Ainda não resgatado';}
 export async function chatAction<T=any>(action:string,body:Record<string,unknown>={}):Promise<T>{
- const {data,error}=await supabase.functions.invoke('losi-chat',{body:{action,...body}});
+ let timeout:ReturnType<typeof setTimeout>|undefined;
+ const {data,error}=await Promise.race([
+  supabase.functions.invoke('losi-chat',{body:{action,...body}}),
+  new Promise<never>((_,reject)=>{timeout=setTimeout(()=>reject(new Error('A solicitação demorou demais. Tente novamente.')),60000);})
+ ]).finally(()=>clearTimeout(timeout));
  if(error){let message='Não foi possível concluir agora. Tente novamente.';try{const result=await error.context?.json();if(result?.error)message=result.error;}catch{/* Response may already be read. */}throw new Error(message);}
  if(data?.error)throw new Error(data.error);return data;
 }

@@ -154,6 +154,7 @@ Deno.serve(async(req:Request)=>{
    if(!t)throw new Error('CONVERSA_INDISPONIVEL');return t;
   };
   const decorate=async(messages:any[])=>{
+   messages=messages.map(m=>m.deleted_at?{id:m.id,thread_id:m.thread_id,group_id:m.group_id,sender_id:m.sender_id,created_at:m.created_at,body:'',deleted_at:m.deleted_at}:m);
    const ids=messages.map(m=>m.attachment_id).filter(Boolean);if(!ids.length)return messages;
    const batches=[];for(let i=0;i<ids.length;i+=100)batches.push(admin.from('losi_chat_uploads').select('id,file_name,kind,mime,byte_size').in('id',ids.slice(i,i+100)));
    const uploads=(await Promise.all(batches)).flatMap(checked);
@@ -182,7 +183,7 @@ Deno.serve(async(req:Request)=>{
    // Refresh expiry BEFORE granting another two-hour upload capability.
    checked(await admin.from('losi_chat_uploads').update({expires_at:new Date(Date.now()+125*60000).toISOString()}).eq('id',u.id).eq('sent',false));
    const signed=checked(await admin.storage.from('losi-chat-attachments').createSignedUploadUrl(u.path,{upsert:false}));
-   return json({path:u.path,token:signed.token,mime:u.mime});
+   return json({path:u.path,token:signed.token,mime:u.mime,signedUrl:signed.signedUrl});
   }
   if(body.action==='send-media'){
    if(!uuid(body.uploadId)||!uuid(body.requestId)||typeof body.text!=='string'||body.text.length>4000)throw new Error('ANEXO_INVALIDO');
@@ -198,11 +199,18 @@ Deno.serve(async(req:Request)=>{
    const data=checked(await admin.rpc('losi_chat_send_media',{p_user:user.id,p_upload:u.id,p_request:body.requestId,p_body:body.text}));
    data.message=(await decorate([data.message]))[0];return json(data);
   }
+  if(body.action==='delete-media'){
+   if(!uuid(body.messageId)||typeof body.everyone!=='boolean')throw new Error('ANEXO_INVALIDO');
+   checked(await admin.rpc('losi_chat_delete_media',{p_user:user.id,p_message:body.messageId,p_everyone:body.everyone}));
+   return json({success:true});
+  }
   if(body.action==='media-url'){
    if(!uuid(body.messageId))throw new Error('ANEXO_INVALIDO');
    const m=checked(await admin.from('losi_chat_messages').select('*').eq('id',body.messageId).single());
    if(m.group_id){const me=checked(await admin.from('losi_chat_group_members').select('joined_at').eq('group_id',m.group_id).eq('user_id',user.id).eq('active',true).lte('joined_at',m.created_at).maybeSingle());if(!me)throw new Error('GRUPO_INDISPONIVEL');}
    else await threadForUser(m.thread_id);
+   const hidden=checked(await admin.from('losi_chat_hidden_messages').select('message_id').eq('user_id',user.id).eq('message_id',m.id).maybeSingle());
+   if(m.deleted_at||hidden)throw new Error('ANEXO_INVALIDO');
    const u=checked(await admin.from('losi_chat_uploads').select('*').eq('id',m.attachment_id).eq('sent',true).single());
    const signed=checked(await admin.storage.from('losi-chat-attachments').createSignedUrl(u.path,60,body.download===true||u.kind==='document'?{download:u.file_name}:{}));
    return json({url:signed.signedUrl});
@@ -217,7 +225,9 @@ Deno.serve(async(req:Request)=>{
    if(body.group===true){
     if(!uuid(body.threadId)||body.before&&(!uuid(body.before.id)||typeof body.before.at!=='string'||!/^\d{4}-\d{2}-\d{2}T[0-9:.+-]+Z?$/.test(body.before.at)||!Number.isFinite(Date.parse(body.before.at))))throw new Error('GRUPO_DADOS_INVALIDOS');
     const data=checked(await admin.rpc('losi_chat_group_messages',{p_user:user.id,p_group:body.threadId,p_before_at:body.before?.at??null,p_before_id:body.before?.id??null}));
-    return json({...data,messages:await decorate(data.messages),userId:user.id});
+    const next=data.messages[0];const nextCursor=next?{at:next.created_at,id:next.id}:null;
+    const hiddenIds=checked(await admin.rpc('losi_chat_hidden_ids',{p_user:user.id,p_target:body.threadId,p_group:true}));
+    return json({...data,hiddenIds,nextCursor,messages:await decorate(data.messages.filter((m:any)=>!hiddenIds.includes(m.id))),userId:user.id});
    }
    await threadForUser(body.threadId);
    let query=admin.from('losi_chat_messages').select('*').eq('thread_id',body.threadId).order('created_at',{ascending:false}).order('id',{ascending:false}).limit(100);
@@ -227,9 +237,11 @@ Deno.serve(async(req:Request)=>{
     query=query.or(`created_at.lt.${at},and(created_at.eq.${at},id.lt.${body.before.id})`);
    }
    const messages=checked(await query);
+   const next=messages.at(-1);const nextCursor=next?{at:next.created_at,id:next.id}:null;
    const readAt=messages[0]?.created_at;
    if(readAt&&!body.before)checked(await admin.rpc('losi_chat_mark_read',{p_user:user.id,p_thread:body.threadId,p_read:readAt}));
-   return json({messages:await decorate(messages.reverse()),userId:user.id,hasMore:messages.length===100});
+   const hiddenIds=checked(await admin.rpc('losi_chat_hidden_ids',{p_user:user.id,p_target:body.threadId,p_group:false}));
+   return json({messages:await decorate(messages.reverse().filter((m:any)=>!hiddenIds.includes(m.id))),hiddenIds,nextCursor,userId:user.id,hasMore:messages.length===100});
   }
   if(body.action==='favorite'){
    if(body.group===true){if(!uuid(body.threadId))throw new Error('GRUPO_INDISPONIVEL');checked(await admin.rpc('losi_chat_group_favorite',{p_user:user.id,p_group:body.threadId,p_favorite:body.favorite===true}));return json({success:true});}
@@ -243,7 +255,7 @@ Deno.serve(async(req:Request)=>{
   return json({error:'Ação inválida.'},400);
  }catch(e){
   const code=e instanceof Error?e.message:'';
-  const messages:Record<string,string>={ANEXO_INVALIDO:'Arquivo inválido ou expirado. Selecione novamente um arquivo de até 20 MB.',ANEXO_FORMATO:'Use JPG, PNG, WEBP, GIF, PDF, TXT, DOCX, XLSX PPTX, MP4, MOV, WEBM, M4A ou WEBA válidos.',ANEXO_LIMITE:'Há muitos arquivos aguardando envio. Tente novamente após a expiração das prévias.',FATURA_NAO_CANCELAVEL:'Esta fatura não pode ser cancelada: o pagamento pode já ter sido confirmado.',COBRANCA_EM_CONFERENCIA:'A cobrança ainda está em conferência. Verifique o pagamento e tente cancelar novamente.',CANCELAMENTO_NAO_CONFIRMADO:'O Asaas ainda não confirmou o cancelamento. Verifique a fatura antes de tentar outra compra.',GRUPO_INDISPONIVEL:'Você não participa mais deste grupo ou ele está indisponível.',GRUPO_DADOS_INVALIDOS:'Informe um nome de até 80 caracteres e números LOSI válidos.',GRUPO_LIMITE:'O grupo pode ter até 100 participantes.',APENAS_ADMIN_GRUPO:'Somente quem administra o grupo pode fazer esta alteração.',TRANSFIRA_ADMINISTRACAO:'Transfira a administração para outro participante antes de sair.',DOCUMENTO_INVALIDO:'Informe um CPF/CNPJ válido para o pagamento.',RESGATE_SEU_NUMERO:'Resgate seu número digital antes de continuar.',PAGAMENTO_PENDENTE:'O pagamento ainda não foi confirmado.',SALDO_INSUFICIENTE:'Seus créditos acabaram. Faça uma recarga para enviar mensagens.',CONTATO_INDISPONIVEL:'Este número não está disponível para conversar.',NUMERO_INVALIDO:'Informe os 9 dígitos do número digital LOSI.',FORNECEDOR_INDISPONIVEL:'Cadastre sua empresa antes de comprar o número digital.',TEXTO_INVALIDO:'Escreva uma mensagem de até 4.000 caracteres.',COBRANCA_RECUSADA:'O Asaas não conseguiu criar a cobrança. Confira seus dados e tente novamente.'};
+  const messages:Record<string,string>={EXCLUSAO_NAO_PERMITIDA:'Somente quem enviou pode excluir para todos.',ANEXO_INVALIDO:'Arquivo inválido ou expirado. Selecione novamente um arquivo de até 20 MB.',ANEXO_FORMATO:'Use JPG, PNG, WEBP, GIF, PDF, TXT, DOCX, XLSX PPTX, MP4, MOV, WEBM, M4A ou WEBA válidos.',ANEXO_LIMITE:'Há muitos arquivos aguardando envio. Tente novamente após a expiração das prévias.',FATURA_NAO_CANCELAVEL:'Esta fatura não pode ser cancelada: o pagamento pode já ter sido confirmado.',COBRANCA_EM_CONFERENCIA:'A cobrança ainda está em conferência. Verifique o pagamento e tente cancelar novamente.',CANCELAMENTO_NAO_CONFIRMADO:'O Asaas ainda não confirmou o cancelamento. Verifique a fatura antes de tentar outra compra.',GRUPO_INDISPONIVEL:'Você não participa mais deste grupo ou ele está indisponível.',GRUPO_DADOS_INVALIDOS:'Informe um nome de até 80 caracteres e números LOSI válidos.',GRUPO_LIMITE:'O grupo pode ter até 100 participantes.',APENAS_ADMIN_GRUPO:'Somente quem administra o grupo pode fazer esta alteração.',TRANSFIRA_ADMINISTRACAO:'Transfira a administração para outro participante antes de sair.',DOCUMENTO_INVALIDO:'Informe um CPF/CNPJ válido para o pagamento.',RESGATE_SEU_NUMERO:'Resgate seu número digital antes de continuar.',PAGAMENTO_PENDENTE:'O pagamento ainda não foi confirmado.',SALDO_INSUFICIENTE:'Seus créditos acabaram. Faça uma recarga para enviar mensagens.',CONTATO_INDISPONIVEL:'Este número não está disponível para conversar.',NUMERO_INVALIDO:'Informe os 9 dígitos do número digital LOSI.',FORNECEDOR_INDISPONIVEL:'Cadastre sua empresa antes de comprar o número digital.',TEXTO_INVALIDO:'Escreva uma mensagem de até 4.000 caracteres.',COBRANCA_RECUSADA:'O Asaas não conseguiu criar a cobrança. Confira seus dados e tente novamente.'};
   console.error('Chat LOSI action failed',code);
   return json({error:messages[code]??'Não foi possível concluir agora. Tente novamente.'},400);
  }

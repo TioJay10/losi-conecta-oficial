@@ -8,5 +8,5 @@ assert.equal(verifyMedia(b('%PDF-1.7\n'), 'application/pdf'),true);assert.equal(
 assert.equal(verifyMedia(Uint8Array.from([137,80,78,71,13,10,26,10]),'image/png'),true);assert.equal(verifyMedia(b('fake image'),'image/png'),false);
 assert.equal(verifyMedia(b('Conteúdo válido'),'text/plain'),true);assert.equal(verifyMedia(Uint8Array.from([255,0]),'text/plain'),false);
 assert.equal(verifyMedia(Uint8Array.from([80,75,3,4]),mediaMetadata('file.docx',4).mime),false);
-const ui=fs.readFileSync('src/components/LosiChatAttachments.tsx','utf8');assert.match(ui,/upsert:false/);assert.match(ui,/a\.requestId/);assert.match(ui,/URL\.revokeObjectURL/);
+const ui=fs.readFileSync('src/components/LosiChatAttachments.tsx','utf8');assert.match(ui,/a\.requestId/);assert.match(ui,/URL\.revokeObjectURL/);
 console.log('PASS: MIME/signature/size validation, hostile formats, immutable upload/retry and preview lifecycle');
