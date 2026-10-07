@@ -256,9 +256,9 @@ Deno.serve(async(req:Request)=>{
   if(body.action==='threads'){
    const [privateChats,groups]=await Promise.all([admin.rpc('losi_chat_list_threads',{p_user:user.id}),admin.rpc('losi_chat_list_groups',{p_user:user.id})]);
    const groupThreads=checked(groups);
-   const groupRows=groupThreads.length?checked(await admin.from('losi_chat_groups').select('id,photo_path').in('id',groupThreads.map((g:any)=>g.id))):[];
+   const groupRows=groupThreads.length?checked(await admin.from('losi_chat_groups').select('id,photo_path,owner_id').in('id',groupThreads.map((g:any)=>g.id))):[];
    const photos=new Map(await Promise.all(groupRows.map(async(g:any)=>[g.id,await groupPhotoUrl(g.photo_path)])));
-   const threads=[...checked(privateChats),...groupThreads.map((g:any)=>({...g,photo:photos.get(g.id)??null}))];threads.sort((a:any,b:any)=>String(b.last?.created_at??'').localeCompare(String(a.last?.created_at??'')));
+   const threads=[...checked(privateChats),...groupThreads.map((g:any)=>({...g,photo:photos.get(g.id)??null,isOwner:groupRows.some((row:any)=>row.id===g.id&&row.owner_id===user.id)}))];threads.sort((a:any,b:any)=>String(b.last?.created_at??'').localeCompare(String(a.last?.created_at??'')));
    const lastMessages=await decorate(threads.map((t:any)=>t.last).filter(Boolean));const lastById=new Map(lastMessages.map((m:any)=>[m.id,m]));
    return json({threads:threads.map((t:any)=>({...t,last:lastById.get(t.last?.id)??t.last})),userId:user.id});
   }
