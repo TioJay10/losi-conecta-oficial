@@ -50,8 +50,8 @@
 .lc-audio-message audio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .lc-audio-status{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .lc-audio-message.is-own .lc-audio-avatar>img{border-color:#e1bd6b}
-.lc-bubble:has(.lc-audio-message){position:relative;width:min(430px,100%);max-width:100%;padding:7px 12px 18px;min-width:0;min-height:80px;line-height:1}
+.lc-bubble:has(.lc-audio-message){position:relative;width:min(380px,100%);max-width:100%;padding:7px 12px 18px;min-width:0;min-height:80px;line-height:1}
 .lc-audio-bubble-meta{position:absolute!important;right:12px;bottom:6px;display:flex!important;align-items:center;gap:4px;color:#b8c9d4;font-size:10px;line-height:1;pointer-events:none}
 .lc-audio-bubble-meta svg{width:14px;height:14px;color:#e1bd6b}
 .lc-bubble.sent:has(.lc-audio-message){background:#0e496d}
-@media(max-width:600px){.lc-bubble:has(.lc-audio-message){min-width:0;width:min(404px,100%);max-width:100%;min-height:68px;padding:5px 8px 17px}.lc-audio-message{grid-template-columns:40px 24px minmax(0,1fr);gap:5px;min-width:0;min-height:44px}.lc-audio-avatar{width:40px;height:40px}.lc-audio-play{width:24px!important;height:34px!important}.lc-audio-waveform{height:28px;gap:1px;padding-left:10px!important}.lc-audio-progress-dot{width:6px;height:6px}.lc-audio-waveform i{max-width:3px}.lc-audio-bubble-meta{right:8px;bottom:5px;font-size:9px}.lc-audio-bubble-meta svg{width:12px;height:12px}}
+@media(max-width:600px){.lc-bubble:has(.lc-audio-message){min-width:0;width:min(360px,100%);max-width:100%;min-height:68px;padding:5px 8px 17px}.lc-audio-message{grid-template-columns:40px 24px minmax(0,1fr);gap:5px;min-width:0;min-height:44px}.lc-audio-avatar{width:40px;height:40px}.lc-audio-play{width:24px!important;height:34px!important}.lc-audio-waveform{height:28px;gap:1px;padding-left:10px!important}.lc-audio-progress-dot{width:6px;height:6px}.lc-audio-waveform i{max-width:3px}.lc-audio-bubble-meta{right:8px;bottom:5px;font-size:9px}.lc-audio-bubble-meta svg{width:12px;height:12px}}
