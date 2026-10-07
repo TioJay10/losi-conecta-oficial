@@ -956,6 +956,9 @@ function DashboardPage() {
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/notificar-inconsistencia" }); }}>
             <PanelMenuIcon name="inconsistencies" /><span><strong>Notificar inconsistência</strong><small>Falar com o administrador</small></span>
           </button>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/chat-losi" }); }}>
+            <PanelMenuIcon name="communication" /><span><strong>Chat LOSI</strong><small>Conversas e networking</small></span>
+          </button>
           <div className="dashboard-nav-divider"><span>Operacional</span></div>
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/orcamentos" }); }}>
             <PanelMenuIcon name="quotes" /><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
