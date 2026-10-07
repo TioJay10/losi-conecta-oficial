@@ -170,7 +170,7 @@ Deno.serve(async(req:Request)=>{
    const minCost=meta.kind==='image'?2:meta.byte_size<=2097152?2:meta.byte_size<=5242880?3:meta.byte_size<=10485760?4:8;
    if(Number(a.balance)<minCost)throw new Error('SALDO_INSUFICIENTE');
    // Bounded cleanup after signed upload capabilities expire; never delete sent media.
-   const expired=checked(await admin.from('losi_chat_uploads').select('id,path').eq('user_id',user.id).eq('sent',false).lt('expires_at',new Date().toISOString()).limit(20));
+   const expired=checked(await admin.rpc('losi_chat_expired_uploads',{p_user:user.id}));
    if(expired.length){const removed=await admin.storage.from('losi-chat-attachments').remove(expired.map((x:any)=>x.path));if(!removed.error)checked(await admin.from('losi_chat_uploads').delete().in('id',expired.map((x:any)=>x.id)).eq('sent',false));}
    let u=checked(await admin.from('losi_chat_uploads').select('*').eq('id',body.uploadId).maybeSingle());
    if(u){if(u.user_id!==user.id||u.file_name!==meta.file_name||u.byte_size!==meta.byte_size||u.mime!==meta.mime||(body.group===true?u.group_id:u.thread_id)!==body.threadId||u.sent||Date.parse(u.expires_at)<Date.now())throw new Error('ANEXO_INVALIDO');}

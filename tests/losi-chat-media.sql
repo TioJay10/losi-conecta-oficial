@@ -32,6 +32,8 @@ begin
  update public.losi_chat_accounts set balance=0 where user_id=a;
  begin perform public.losi_chat_send_media(a,up,gen_random_uuid(),'');raise exception 'TEST_FAILED insufficient balance';exception when others then if sqlerrm='TEST_FAILED insufficient balance' then raise;end if;end;
  if(select sent from public.losi_chat_uploads where id=up) then raise exception 'Failed send marked sent';end if;
+ update public.losi_chat_uploads set expires_at=now()-interval '1 minute' where user_id=a and not sent;
+ if (select count(*) from public.losi_chat_expired_uploads(a))<>1 then raise exception 'Cleanup claimed sent upload';end if;
  if has_function_privilege('authenticated','public.losi_chat_send_media(uuid,uuid,uuid,text)','execute') or has_table_privilege('authenticated','public.losi_chat_uploads','select') then raise exception 'Unsafe media grants';end if;
  insert into storage.objects(bucket_id,name) values('losi-chat-attachments',a||'/private-test.png');perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'role','authenticated')::text,true);
 end $$;
