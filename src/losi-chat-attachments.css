@@ -16,3 +16,10 @@
 .lc-video-preview{flex-wrap:wrap}.lc-video-preview>video{display:block;width:100%;max-height:200px;object-fit:contain;background:#071524;border-radius:6px}
 .lc-sent-attachment>video{display:block;width:100%;max-height:360px;min-width:0;object-fit:contain;background:#071524;border-radius:6px;margin-bottom:8px}
 @media(max-width:600px){.lc-video-preview>video{max-height:150px}.lc-sent-attachment>video{max-height:280px}}
+
+.lc-audio-preview{flex-wrap:wrap}.lc-audio-preview>audio{display:block;width:100%;max-width:360px;height:44px}
+.lc-sent-attachment>audio{display:block;width:100%;height:44px;margin-bottom:8px}
+.lc-app .lc-audio-recording{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;color:#f4e1b6}
+.lc-audio-recording>span{font-size:13px;font-variant-numeric:tabular-nums}.lc-app .lc-audio-recording button{border-radius:6px;min-height:40px;width:auto;padding:8px;gap:6px;display:flex;background:#243e60;color:#f4e1b6;font-size:13px}
+.lc-app .lc-composer:has(.lc-audio-recording){flex-wrap:wrap}.lc-app .lc-composer:has(.lc-audio-recording)>input:not([type=file]){flex:1;min-width:140px}
+@media(max-width:600px){.lc-app .lc-composer{gap:8px;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}.lc-audio-recording{flex-basis:100%;order:1}.lc-app .lc-composer:has(.lc-audio-recording) .lc-send{display:none}}

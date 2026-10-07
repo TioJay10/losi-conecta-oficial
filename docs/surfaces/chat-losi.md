@@ -4,7 +4,7 @@
 
 Modo: Operate. Extensão em `/chat-losi`, acessível pelo menu do painel principal. A etapa funcional preserva a composição aprovada da prévia e o chat existente. Inclui o cartão de compra/resgate/recarga em Minha Empresa e sua versão compacta dentro do chat, além do contato público opcional. Esta documentação descreve essas adições, sem definir um sistema visual global.
 
-Composição fixada pelo usuário nas referências do WhatsApp: `image(20261007-001417).png` (desktop) e `IMG_6400.jpeg` (mobile). A marca mantém azul-marinho e dourado. Referências de produto e backend: `PRODUCT.md` e `docs/losi-chat.md`. Implementação: `src/components/LosiChatPreview.tsx`, `src/components/LosiChatNumberPurchase.tsx`, `src/components/LosiChatGroups.tsx`, `src/components/LosiChatAttachments.tsx`, `src/lib/losi-chat.ts`, `src/chat-losi.css`, `src/losi-chat-purchase.css`, `src/losi-chat-groups.css` e `src/losi-chat-attachments.css`. O nome legado `LosiChatPreview` permanece no código, mas a página usa dados reais da conta.
+Composição fixada pelo usuário nas referências do WhatsApp: `image(20261007-001417).png` (desktop) e `IMG_6400.jpeg` (mobile). A marca mantém azul-marinho e dourado. Referências de produto e backend: `PRODUCT.md` e `docs/losi-chat.md`. Implementação: `src/components/LosiChatPreview.tsx`, `src/components/LosiChatNumberPurchase.tsx`, `src/components/LosiChatGroups.tsx`, `src/components/LosiChatAttachments.tsx`, `src/components/LosiChatAudioRecorder.tsx`, `src/lib/losi-chat.ts`, `src/chat-losi.css`, `src/losi-chat-purchase.css`, `src/losi-chat-groups.css` e `src/losi-chat-attachments.css`. O nome legado `LosiChatPreview` permanece no código, mas a página usa dados reais da conta.
 
 ## Composição e responsividade
 
@@ -56,21 +56,22 @@ Grupos permitem até 100 participantes, incluindo quem cria, adicionados por nú
 
 Atualização por consultas enquanto a página está visível: mensagens a cada 5s, lista a cada 10s e carteira a cada 15s, além das consultas após ações próprias. Não há promessa de entrega instantânea ou criptografia de ponta a ponta.
 
-## Imagens, documentos e vídeos
+## Imagens, documentos, vídeos e áudios
 
-Imagens, documentos e vídeos estão habilitados em conversas privadas e grupos, com uma cobrança por envio, independente do número de destinatários. O clipe abre o seletor; formatos aceitos: JPG/JPEG, PNG, WEBP, GIF, PDF, TXT, DOCX, XLSX, PPTX, MP4, MOV e WEBM. Limite de 20 MiB por arquivo. A prévia informa o custo antes de enviar; receber e baixar não debita créditos.
+Imagens, documentos, vídeos e áudios estão habilitados em conversas privadas e grupos, com uma cobrança por envio, independente do número de destinatários. O clipe abre o seletor; formatos aceitos: JPG/JPEG, PNG, WEBP, GIF, PDF, TXT, DOCX, XLSX, PPTX, MP4, MOV e WEBM. Limite de 20 MiB por arquivo. A prévia informa o custo antes de enviar; receber e baixar não debita créditos.
 
 | Envio | Créditos |
 | --- | --- |
 | Imagem sem legenda | 2 |
 | Imagem com legenda | 3 |
 | Vídeo, com ou sem legenda | 10 |
+| Áudio gravado, com ou sem legenda | 1 |
 | Documento até 2 MiB | 2 |
 | Documento acima de 2 até 5 MiB | 3 |
 | Documento acima de 5 até 10 MiB | 4 |
 | Documento acima de 10 até 20 MiB | 8 |
 
-Legenda opcional de até 4000 caracteres; nos documentos, está incluída no custo da faixa; nos vídeos, está incluída nos 10 créditos. O compositor desabilita o envio com saldo insuficiente e mostra a condição. Estados de progresso são textuais (“Enviando arquivo…” e “Conferindo e enviando…”), sem porcentagem. Falha preserva o arquivo para nova tentativa, mantendo os identificadores e a legenda original para evitar duplicação; remover o anexo permite trocar a legenda ou o arquivo.
+Legenda opcional de até 4000 caracteres; nos documentos, está incluída no custo da faixa; nos vídeos, está incluída nos 10 créditos, e nos áudios gravados no crédito único. O compositor desabilita o envio com saldo insuficiente e mostra a condição. Estados de progresso são textuais (“Enviando arquivo…” e “Conferindo e enviando…”), sem porcentagem. Falha preserva o arquivo para nova tentativa, mantendo os identificadores e a legenda original para evitar duplicação; remover o anexo permite trocar a legenda ou o arquivo.
 
 Imagens recebidas carregam próximas da área visível; erros oferecem “Recarregar imagem”. Imagens, documentos e vídeos apresentam nome, tamanho e “Baixar arquivo”. Acesso usa armazenamento privado e URLs assinadas por 60 segundos; cada nova URL depende da participação autorizada e, em grupos, do histórico desde a entrada. Membros removidos ou que saíram não podem obter novas URLs. Arquivos já baixados e URLs anteriormente emitidas até expirar não podem ser revogados retroativamente pelo navegador.
 
@@ -78,8 +79,20 @@ Vídeos selecionados mostram prévia local com controles nativos, `playsInline` 
 
 Vídeos recebidos não são carregados remotamente antes da ação “Ver vídeo”. O clique consulta uma URL privada de 60 segundos e abre o player nativo com controles, `playsInline` e carregamento de metadados, sem autoplay. Erro de reprodução remove o player e oferece reabrir com nova URL ou baixar o arquivo; a posição observada é restaurada quando os metadados permitem. Reprodução depende do codec suportado pelo navegador, sem transcodificação. Privacidade, histórico desde entrada, restrição de novas URLs a membros ativos, idempotência e débito atômico seguem as regras dos demais anexos.
 
-O botão de câmera e o atalho de documento nas boas-vindas orientam abrir uma conversa e usar o clipe; não capturam mídia diretamente. Áudio permanece fora desta etapa. O filtro Grupos continua mostrando grupos reais ou orientação para criar o primeiro.
+O botão de câmera e o atalho de documento nas boas-vindas orientam abrir uma conversa e usar o clipe; não capturam mídia diretamente. O filtro Grupos continua mostrando grupos reais ou orientação para criar o primeiro.
+
+## Gravação e reprodução de áudio
+
+O microfone no compositor solicita permissão somente após clique, com rótulo e tooltip “Gravar áudio · 1 crédito”. Exige número resgatado e saldo de pelo menos 1 crédito. Permissão pendente mostra “Aguardando microfone…”; indisponibilidade ou negação mostra orientação para nova tentativa. A gravação mostra contador `mm:ss / 05:00`, “Parar” e descartar. Parar oferece prévia local com controles nativos para ouvir antes de enviar; descartar remove a gravação. Nenhum upload, mensagem ou débito ocorre antes da ação de enviar.
+
+O compositor para automaticamente após 5 minutos pelo relógio local; esse limite temporal não é um validador de duração no servidor. Gera M4A (`audio/mp4`) ou WEBA (`audio/webm`/Opus), até 20 MiB. O servidor aceita trilha de áudio sem trilha de vídeo e verifica formato/tamanho. O seletor do clipe não oferece arquivos externos de áudio nesta etapa. Envio de áudio custa 1 crédito, com legenda incluída e sem multiplicação nos grupos; ouvir, receber e baixar são gratuitos. Prévia e lista mostram “Mensagem de áudio” quando apropriado, usando os metadados de anexo do histórico/lista.
+
+Página escondida interrompe gravação e oferece a prévia; saída, `pagehide` e desmontagem descartam e liberam microfone/temporizador. Permissão resolvida depois de cancelar ou sair libera as tracks sem salvar. Falha em iniciar limpa o gravador para permitir nova tentativa. ObjectURLs locais são revogadas ao trocar arquivo ou sair. Durante gravação, envio e edição ficam bloqueados.
+
+Áudio local e recebido usam controles nativos de 44px de altura; prévia com largura máxima de 360px. A faixa de gravação tem contador de 13px com números tabulares, controles de altura mínima de 40px, raio de 6px e fundo `#243e60`. O compositor permite quebra de linha; até 600px, a gravação ocupa sua própria linha e esconde envio durante a captura. Recuo mobile de 12px inclui `env(safe-area-inset-bottom)`, preservando a área segura inferior. A paleta azul-marinho/dourado e a estrutura aprovada permanecem.
+
+“Ouvir áudio” solicita URL privada de 60 segundos apenas ao clicar, sem autoplay. Erro permite reabrir com nova URL ou baixar, restaurando a posição quando possível. Participação/histórico, restrição de novas URLs a membros removidos, débito atômico e novas tentativas com identificadores estáveis seguem os demais anexos. Compatibilidade de microfone e codec depende do navegador; não há transcrição.
 
 ## Evidência e verificação
 
-Documentação extraída dos componentes, estilos, consultas e restrições registradas em `PRODUCT.md` e `docs/losi-chat.md`, sem criação de tokens globais. A documentação de backend registra build local, testes de funções e testes SQL em transação com rollback. Também registra testes adicionais de grupos, cancelamento, mídia e vídeos, com rollback e sem cobrança/cancelamento real de fornecedor. A revisão de código da extensão de vídeos passou; a documentação de backend registra build e testes de formatos, custos e regras de acesso. Esta etapa de documentação não repetiu esses testes nem realizou pagamento real de cliente. O navegador não estava disponível para verificação visual nesta etapa; não foram capturadas nem inspecionadas screenshots. A revisão de documentação foi concluída, mas a verificação visual está bloqueada pela indisponibilidade do navegador. Não há screenshots nem aprovação de fidelidade visual desta extensão; controles nativos, codecs, recuperação de URL/posição e responsividade permanecem sem validação interativa no navegador. A correspondência visual renderizada com os uploads desktop e mobile permanece sem verificação por screenshot; os valores acima descrevem a implementação, não uma medição das imagens de referência.
+Documentação extraída dos componentes, estilos, consultas e restrições registradas em `PRODUCT.md` e `docs/losi-chat.md`, sem criação de tokens globais. A documentação de backend registra build local, testes de funções e testes SQL em transação com rollback. Também registra testes adicionais de grupos, cancelamento, mídia, vídeos e áudios, com rollback e sem cobrança/cancelamento real de fornecedor. A revisão de código das extensões de vídeo e áudio passou, incluindo correções de recuperação ao iniciar gravação, tooltip e área segura mobile; a documentação de backend registra build e testes de formatos, custos e regras de acesso. Testes do gravador usam mocks de MediaRecorder/getUserMedia, sem captura real por microfone. Esta etapa de documentação não repetiu esses testes nem realizou pagamento real de cliente. O navegador não estava disponível para verificação visual nesta etapa; não foram capturadas nem inspecionadas screenshots. A revisão de documentação foi concluída, mas a verificação visual está bloqueada pela indisponibilidade do navegador. Não há screenshots nem aprovação de fidelidade visual desta extensão; permissão/captura reais de microfone, controles nativos, codecs, recuperação de URL/posição e responsividade permanecem sem validação interativa no navegador. A correspondência visual renderizada com os uploads desktop e mobile permanece sem verificação por screenshot; os valores acima descrevem a implementação, não uma medição das imagens de referência.
