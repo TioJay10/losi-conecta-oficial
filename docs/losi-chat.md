@@ -77,3 +77,9 @@ Imagens, áudios e vídeos enviados deixam de mostrar rodapé fixo de nome/taman
 Upload usa a URL assinada retornada por prepare-media, via PUT com XMLHttpRequest, progresso computável e timeout de 180 segundos. Preparar/enviar têm espera máxima de 60 segundos no cliente. Resultado incerto mantém arquivo, legenda e UUIDs estáveis para nova tentativa; operação idempotente impede novo débito ou mensagem duplicada. A interface diferencia preparação, porcentagem enviada e conferência/gravação. Completar upload não equivale a concluir a mensagem: a etapa send-media ainda verifica e grava com débito atômico.
 
 Revisão documental limitada ao código; build e SQL em rollback são verificados separadamente nesta entrega. Menu por toque/teclado, upload real no navegador, reprodução/download e responsividade permanecem sem validação interativa, pois o navegador está indisponível. Não há screenshots nem aprovação de fidelidade visual desta extensão.
+
+### Notificações no painel
+
+Novas mensagens individuais e de grupos criam um aviso privado no sistema de notificações existente. Há no máximo um aviso não lido por conversa e destinatário; novas mensagens atualizam esse aviso. O conteúdo da mensagem não é copiado para o aviso. O link ` /chat-losi?conversa=<uuid>` abre somente uma conversa retornada pelo backend para a conta autenticada. Ler a mensagem mais recente confirma a leitura do aviso; entrega ou leitura de mensagens anteriores não o encerra. São notificações dentro do app, sem push do sistema operacional. A geração ocorre na mesma transação dos recibos, sem cobrança adicional de créditos.
+
+Verificação: `tests/losi-chat-notifications.sql` usa transação com rollback para validar destinatários, agrupamento, privacidade, links de grupos e sincronização de leitura.

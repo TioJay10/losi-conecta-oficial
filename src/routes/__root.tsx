@@ -85,6 +85,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
   currentPathRef.current = currentPath;
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [toastLink, setToastLink] = useState<string | null>(null);
   const [toastOffsetY, setToastOffsetY] = useState(-18);
 
   useEffect(() => {
@@ -200,13 +201,17 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
       type?: string | null;
       title?: string | null;
       message?: string | null;
+      created_at?: string;
+      link?: string | null;
     }) {
-      if (!mounted || knownNotificationIdsRef.current.has(notification.id)) return;
-      knownNotificationIdsRef.current.add(notification.id);
+      const key = notification.id + (notification.type === "losi_chat_message" ? notification.created_at ?? "" : "");
+      if (!mounted || knownNotificationIdsRef.current.has(key)) return;
+      knownNotificationIdsRef.current.add(key);
       if (notification.read_at) return;
 
       try {
         const message = getNotificationMessage(notification);
+        setToastLink(notification.link?.startsWith("/") && !notification.link.startsWith("//") ? notification.link : null);
         playNotificationSound();
         showToast(message);
       } catch (error) {
@@ -227,12 +232,13 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
+            event: "*",
             schema: "public",
             table: "notifications",
             filter: "user_id=eq." + userData.user.id,
           },
           (payload) => {
+            if (payload.eventType === "DELETE") return;
             void processNewNotification(
               payload.new as {
                 id: string;
@@ -240,6 +246,8 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
                 type?: string | null;
                 title?: string | null;
                 message?: string | null;
+                created_at?: string;
+                link?: string | null;
               },
             );
           },
@@ -352,7 +360,7 @@ function GlobalNotificationAlerts({ isAuthenticated, currentPath }: { isAuthenti
         opacity: toastOffsetY <= -80 ? 0 : 1,
       }}
     >
-      {toastMessage}
+      {toastLink ? <a href={toastLink} style={{ color: "inherit", textDecoration: "none" }} onPointerDown={(event) => event.stopPropagation()}>{toastMessage} <strong>Abrir conversa</strong></a> : toastMessage}
     </div>
   );
 }

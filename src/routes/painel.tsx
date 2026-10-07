@@ -471,7 +471,7 @@ function DashboardPage() {
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
+            event: "*",
             schema: "public",
             table: "notifications",
             filter: "user_id=eq." + user.id,
@@ -481,7 +481,7 @@ function DashboardPage() {
 
             const notification = payload.new as typeof notifications[number];
 
-            if (knownNotificationIdsRef.has(notification.id)) return;
+            if (payload.eventType === "DELETE") { void loadNotifications(); return; }
             knownNotificationIdsRef.add(notification.id);
 
             setNotifications((current) => [
@@ -747,6 +747,10 @@ function DashboardPage() {
   }
 
   async function openNotification(notification: typeof notifications[number]) {
+    if (notification.type === "losi_chat_message" && /^\/chat-losi\?conversa=[0-9a-f-]{36}$/.test(notification.link ?? "")) {
+      window.location.href = notification.link!;
+      return;
+    }
     if (!notification.read_at) {
       await markNotificationAsRead(notification.id);
     }

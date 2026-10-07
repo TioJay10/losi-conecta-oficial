@@ -1,0 +1,27 @@
+begin;
+do $$ declare a uuid;b uuid;t uuid;m uuid:=gen_random_uuid();m2 uuid:=gen_random_uuid();g uuid:=gen_random_uuid();gm uuid:=gen_random_uuid();nid uuid;begin
+ select user_id into a from public.losi_chat_accounts limit 1;
+ select user_id into b from public.losi_chat_accounts where user_id<>a limit 1;
+ if a is null or b is null then raise exception 'Duas contas são necessárias';end if;
+ select id into t from public.losi_chat_threads where user_a=least(a,b) and user_b=greatest(a,b);
+ if t is null then t:=gen_random_uuid();insert into public.losi_chat_threads(id,user_a,user_b) values(t,least(a,b),greatest(a,b));end if;
+ insert into public.losi_chat_messages(id,thread_id,sender_id,body,created_at) values(m,t,a,'Conteúdo privado de teste',clock_timestamp());
+ select id into nid from public.notifications where user_id=b and chat_message_id=m;
+ if nid is null then raise exception 'Aviso privado ausente';end if;
+ if exists(select 1 from public.notifications where chat_message_id=m and user_id=a) then raise exception 'Remetente recebeu aviso';end if;
+ if (select message from public.notifications where id=nid) like '%Conteúdo privado%' then raise exception 'Conteúdo exposto';end if;
+ insert into public.losi_chat_messages(id,thread_id,sender_id,body,created_at) values(m2,t,a,'Outra mensagem',clock_timestamp());
+ if (select chat_message_id from public.notifications where id=nid)<>m2 then raise exception 'Aviso não agrupado';end if;
+ perform public.losi_chat_acknowledge(b,array[m],true);
+ if (select read_at from public.notifications where id=nid) is not null then raise exception 'Mensagem nova marcada como lida prematuramente';end if;
+ perform public.losi_chat_acknowledge(b,array[m2],false);
+ if (select read_at from public.notifications where id=nid) is not null then raise exception 'Entrega marcou leitura';end if;
+ perform public.losi_chat_acknowledge(b,array[m2],true);
+ if (select read_at from public.notifications where id=nid) is null then raise exception 'Leitura não sincronizada';end if;
+ insert into public.losi_chat_groups(id,owner_id,creator_id,name) values(g,a,a,'Grupo de teste');
+ insert into public.losi_chat_group_members(group_id,user_id) values(g,a),(g,b);
+ insert into public.losi_chat_messages(id,group_id,sender_id,body,created_at) values(gm,g,a,'Privado',clock_timestamp());
+ if not exists(select 1 from public.notifications where user_id=b and chat_message_id=gm and link='/chat-losi?conversa='||g::text) then raise exception 'Link de grupo incorreto';end if;
+ if exists(select 1 from public.notifications where chat_message_id=gm and user_id=a) then raise exception 'Criador recebeu próprio aviso';end if;
+end $$;
+rollback;
