@@ -1,6 +1,6 @@
-import "../home-vectors.css";
+import "../home-asaas.css";
 import { Link } from "@tanstack/react-router";
-import type { CSSProperties } from "react";
+import type { CSSProperties, FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { AppLogo } from "./AppLogo";
 import { supabase } from "../lib/supabase";
@@ -21,11 +21,11 @@ export const DEFAULT_HOME_CUSTOMIZATION: HomeCustomization = {
   hero_title: "",
   hero_subtitle: "",
   hero_button_text: "",
-  color_background: "#f5f5f7",
+  color_background: "#ffffff",
   color_primary: "#8a6d2f",
   color_secondary: "#d6b46a",
   color_text: "#1d1d1f",
-  color_button: "#0b182a",
+  color_button: "#163dd9",
   color_button_text: "#ffffff",
 };
 
@@ -52,6 +52,12 @@ export function HomePage({
         hero_title: values.hero_title ?? "",
         hero_subtitle: values.hero_subtitle ?? "",
         hero_button_text: values.hero_button_text ?? "",
+        color_background: values.color_background || current.color_background,
+        color_primary: values.color_primary || current.color_primary,
+        color_secondary: values.color_secondary || current.color_secondary,
+        color_text: values.color_text || current.color_text,
+        color_button: values.color_button || current.color_button,
+        color_button_text: values.color_button_text || current.color_button_text,
       }));
     }
 
@@ -63,120 +69,82 @@ export function HomePage({
 
   const active = { ...customization, ...customizationOverride };
 
-  const themeStyle = {
-    "--home-bg": active.color_background || DEFAULT_HOME_CUSTOMIZATION.color_background,
-    "--home-gold": active.color_primary || DEFAULT_HOME_CUSTOMIZATION.color_primary,
-    "--home-gold-light": active.color_secondary || DEFAULT_HOME_CUSTOMIZATION.color_secondary,
-    "--home-text": active.color_text || DEFAULT_HOME_CUSTOMIZATION.color_text,
-    "--home-navy": active.color_button || DEFAULT_HOME_CUSTOMIZATION.color_button,
-    "--home-button-text": active.color_button_text || DEFAULT_HOME_CUSTOMIZATION.color_button_text,
+  const [email, setEmail] = useState("");
+  const [navOpen, setNavOpen] = useState(false);
+  const [connected, setConnected] = useState(true);
+  const [tool, setTool] = useState(0);
+  const style = {
+    "--lh-background": active.color_background,
+    "--lh-ink": active.color_text,
+    "--lh-button": active.color_button,
+    "--lh-button-text": active.color_button_text,
+    "--lh-gold": active.color_secondary,
+    "--lh-gold-dark": active.color_primary,
   } as CSSProperties;
-
-  return (
-    <main className={`home-page home-apple-inspired${preview ? " home-page-preview" : ""}`} style={themeStyle}>
-      <header className="home-header home-apple-header">
-        <AppLogo className="home-brand-link home-brand" aria-label="LOSI CONECTA">
-          <img className="home-brand-symbol" src="/losi-conecta-symbol.svg" alt="" aria-hidden="true" />
-          <span className="home-brand-name">LOSI CONECTA</span>
-        </AppLogo>
-        <nav className="home-nav home-apple-nav" aria-label="Navegação principal">
-          <a href="#como-funciona">Como funciona</a>
-          <a href="#para-quem">Para quem é</a>
-          <a href="#categorias">Categorias</a>
+  function beginSignup(event: FormEvent) {
+    event.preventDefault();
+    try { sessionStorage.setItem("losi-signup-email", email.trim()); } catch { /* The registration page also accepts manual entry. */ }
+    window.location.assign("/entrar?mode=signup");
+  }
+  const tools = [
+    { title: "Apresente seu trabalho", description: "Crie propostas comerciais, organize seus serviços e gere materiais em PDF. A LIA ajuda você a escrever o conteúdo.", items: ["Propostas comerciais", "Orçamentos", "Materiais com IA"], heading: "Sua próxima proposta", rows: ["Apresentação dos serviços", "Atividades para o evento", "Conteúdo e layout em PDF"] },
+    { title: "Organize sua equipe", description: "Reúna sua rede de colaboradores, publique oportunidades e acompanhe as escalas pelo calendário pessoal de cada participante.", items: ["Rede de colaboradores", "Eventos e escalas", "Calendário pessoal"], heading: "Sua operação organizada", rows: ["Crie o evento e as vagas", "Defina a equipe e as funções", "Acompanhe as confirmações"] },
+    { title: "Amplie suas conexões", description: "Divulgue seu perfil, anuncie no LOSI ADS e converse com outros fornecedores pelo Chat LOSI, com número digital e créditos próprios.", items: ["Perfil público", "LOSI ADS", "Chat de fornecedores"], heading: "Sua rede profissional", rows: ["Seu negócio na busca", "Oportunidades e anúncios", "Conversas e networking"] },
+  ];
+  return <main className={`losi-home${preview ? " losi-home-preview" : ""}`} style={style}>
+    <div className="lh-intro">
+      <header className="lh-header">
+        <AppLogo className="lh-brand"><img src="/losi-conecta-symbol.svg" alt=""/><span>LOSI <b>CONECTA</b></span></AppLogo>
+        <button className="lh-menu-toggle" type="button" aria-label={navOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={navOpen} aria-controls="lh-navigation" onClick={()=>setNavOpen(!navOpen)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d={navOpen ? "m5 5 14 14M19 5 5 19" : "M3 6h18M3 12h18M3 18h18"}/></svg></button>
+        <nav id="lh-navigation" className={navOpen ? "lh-navigation is-open" : "lh-navigation"} aria-label="Navegação principal" onClick={()=>setNavOpen(false)}>
+          <a href="#solucoes">Soluções</a><a href="#como-funciona">Como funciona</a><a href="#categorias">Fornecedores</a><Link to="/faq">Ajuda</Link>
+          <Link to="/entrar" className="lh-login">Acessar minha conta</Link><a href="/entrar?mode=signup" className="lh-header-signup">Criar minha conta</a>
         </nav>
-        <div className="home-header-actions">
-          <Link to="/buscar" className="home-header-search">Buscar</Link>
-          <Link to="/entrar" className="home-header-login">Entrar</Link>
-        </div>
       </header>
-
-      <section className="home-apple-hero">
-        <div className="home-hero-copy">
-          <p className="home-eyebrow">LOSI CONECTA</p>
+      <section className="lh-hero">
+        <div className="lh-hero-copy">
           <h1>{active.hero_title || "Tudo para o seu evento. Em um só lugar."}</h1>
-          <p className="home-hero-lead">{active.hero_subtitle || "Encontre profissionais, empresas e fornecedores para transformar ideias em experiências."}</p>
-          <div className="home-hero-links">
-            <Link to="/buscar" className="home-blue-link">{active.hero_button_text || "Encontrar fornecedores"} <span>›</span></Link>
-            <a href="#como-funciona" className="home-hero-text-link">Como funciona <span>›</span></a>
-          </div>
+          <p>{active.hero_subtitle || "Encontre fornecedores, apresente seu trabalho, organize sua equipe e crie novas conexões. Do primeiro contato ao próximo evento."}</p>
+          <form className="lh-signup" onSubmit={beginSignup}>
+            <h2>Faça parte da LOSI Conecta!</h2><label className="lh-sr-only" htmlFor="lh-email">Seu e-mail</label>
+            <input id="lh-email" type="email" autoComplete="email" placeholder="Preencha seu e-mail" value={email} onChange={event=>setEmail(event.target.value)} required maxLength={254}/>
+            <button type="submit">Criar minha conta</button><small>Continue para completar seu cadastro. Você escolhe os recursos que quer utilizar.</small>
+          </form>
+          <Link to="/buscar" className="lh-hero-search">{active.hero_button_text || "Quero encontrar fornecedores"}<Arrow/></Link>
         </div>
-        <div className="home-hero-panel">
-          <div className="home-hero-panel-media" aria-hidden="true">
-            <img src="https://images.unsplash.com/photo-1768508665663-fa483a0cb208?auto=format&fit=crop&w=1800&q=85" alt="" loading="eager" decoding="async" />
-          </div>
-          <div className="home-hero-panel-content">
-            <span>ENCONTRE</span>
-            <strong>Profissionais para o seu próximo evento.</strong>
-            <p>Recreação, monitoria, música, decoração, buffet, atrações e muito mais.</p>
-          </div>
-          <Link to="/buscar" className="home-panel-text-link">Explorar fornecedores <span>›</span></Link>
-        </div>
+        <div className="lh-hero-people"><img src="/home-event-professionals.webp" alt="Dois profissionais de eventos sorrindo, com uniformes azul e lilás" width="1448" height="1086" fetchPriority="high"/></div>
       </section>
-
-      <section id="como-funciona" className="home-feature-grid">
-        <article className="home-feature-card home-feature-card-dark">
-          <div className="home-feature-image home-feature-vector">
-            <img src="/home-find.svg" alt="Ilustração vetorial de busca por serviços para eventos" loading="lazy" decoding="async" width="640" height="340" />
-          </div>
-          <span>01 — ENCONTRE</span>
-          <h2>Pesquise pelo que seu evento precisa.</h2>
-          <p>Filtre por serviço, categoria e localização e encontre profissionais disponíveis para atender seu projeto.</p>
-        </article>
-
-        <article className="home-feature-card home-feature-card-light">
-          <div className="home-feature-image home-feature-vector">
-            <img src="/home-profile.svg" alt="Ilustração vetorial de um perfil profissional e seus serviços" loading="lazy" decoding="async" width="640" height="340" />
-          </div>
-          <span>02 — CONHEÇA</span>
-          <h2>Veja quem está por trás do serviço.</h2>
-          <p>Conheça o perfil público, serviços, informações e presença profissional antes de entrar em contato.</p>
-        </article>
-
-        <article className="home-feature-card home-feature-card-gold">
-          <div className="home-feature-image home-feature-vector">
-            <img src="/home-conversation.svg" alt="Ilustração vetorial de uma conversa direta entre cliente e fornecedor" loading="lazy" decoding="async" width="640" height="340" />
-          </div>
-          <span>03 — CONECTE</span>
-          <h2>Converse diretamente com o fornecedor.</h2>
-          <p>Depois de encontrar o profissional certo, a negociação continua de forma simples pelo WhatsApp.</p>
-        </article>
-      </section>
-
-      <section id="para-quem" className="home-market-section">
-        <div className="home-section-heading">
-          <p className="home-eyebrow">PARA QUEM É</p>
-          <h2>Um só lugar para quem procura e para quem oferece.</h2>
-        </div>
-        <div className="home-market-grid">
-          <article className="home-market-card home-market-card-organizers"><div className="home-market-card-media" aria-hidden="true"><img src="https://images.unsplash.com/photo-1620177088260-a9150572baf4?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="" loading="lazy" decoding="async" /></div><div className="home-market-card-content"><span>PARA ORGANIZADORES</span><h3>Encontre as pessoas certas.</h3><p>Descubra fornecedores para festas, eventos corporativos, ativações, passeios, oficinas e experiências.</p></div></article>
-          <article className="home-market-card home-market-card-suppliers"><div className="home-market-card-media" aria-hidden="true"><img src="https://images.unsplash.com/photo-1629822908853-b1d2a39ece98?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="" loading="lazy" decoding="async" /></div><div className="home-market-card-content"><span>PARA FORNECEDORES</span><h3>Mostre o que você faz.</h3><p>Tenha uma presença profissional no LOSI CONECTA e seja encontrado por quem está procurando soluções.</p></div></article>
-        </div>
-      </section>
-
-      <section id="categorias" className="home-categories-section">
-        <div className="home-section-heading home-section-heading-row">
-          <div><p className="home-eyebrow">CATEGORIAS</p><h2>Serviços para diferentes momentos do evento.</h2></div>
-        </div>
-        <div className="home-category-grid">
-          {["Recreação e entretenimento","Monitoria","Fotografia e vídeo","DJ e música","Decoração","Buffet e alimentação","Atrações","Estruturas e equipamentos"].map((category, index) => (
-            <Link key={category} to="/buscar" className="home-category-card"><span>{String(index + 1).padStart(2, "0")}</span><strong>{category}</strong><b>›</b></Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="home-final-cta">
-        <div><p className="home-eyebrow home-eyebrow-light">LOSI CONECTA</p><h2>Seu próximo evento começa com uma boa conexão.</h2></div>
-        <Link to="/entrar" className="home-final-button">Criar minha conta</Link>
-      </section>
-
-      <footer className="home-footer home-apple-footer">
-        <div className="home-footer-top">
-          <div className="home-footer-brand"><AppLogo className="home-footer-logo" aria-label="LOSI CONECTA" /><p>Uma plataforma para aproximar eventos, profissionais e oportunidades.</p></div>
-          <div className="home-footer-column"><strong>LOSI CONECTA</strong><a href="#como-funciona">Como funciona</a><a href="#para-quem">Para quem é</a><a href="#categorias">Categorias</a></div>
-          <div className="home-footer-column"><strong>ACESSO</strong><Link to="/buscar">Encontrar fornecedores</Link><Link to="/faq">Perguntas frequentes</Link><Link to="/entrar">Entrar</Link></div>
-        </div>
-        <div className="home-footer-bottom"><span>Encontre. Conheça. Conecte.</span><span>© {new Date().getFullYear()} LOSI CONECTA. Todos os direitos reservados.</span></div>
-      </footer>
-    </main>
-  );
+    </div>
+    <section id="como-funciona" className="lh-section lh-comparison">
+      <h2>Aqui seu evento tem as conexões<br className="lh-desktop-break"/> que precisa em um só lugar</h2>
+      <div className="lh-switch" aria-label="Comparar organização do evento"><button type="button" aria-pressed={!connected} onClick={()=>setConnected(false)}>Sem a LOSI</button><button type="button" aria-pressed={connected} onClick={()=>setConnected(true)}>Com a LOSI</button></div>
+      <div className={`lh-workflow ${connected ? "is-connected" : ""}`} aria-live="polite">
+        <div className="lh-workflow-center"><img src="/losi-conecta-symbol.svg" alt=""/><strong>{connected ? "Seu evento conectado" : "Tudo separado"}</strong><p>{connected ? "Encontre. Organize. Conecte." : "Contatos, arquivos e informações dispersos."}</p></div>
+        <div className="lh-workflow-steps">{(connected ? ["Encontre fornecedores na busca", "Conheça os perfis e serviços", "Converse e apresente sua proposta", "Organize os eventos e sua equipe"] : ["Procure contatos em diferentes lugares", "Peça informações individualmente", "Reúna arquivos e apresentações", "Confira a equipe em várias conversas"]).map((text,i)=><div key={text}><span>{i+1}</span><p>{text}</p></div>)}</div>
+      </div>
+      <Link to="/buscar" className="lh-primary">Encontrar fornecedores<Arrow/></Link>
+    </section>
+    <section id="solucoes" className="lh-section lh-solutions">
+      <h2>Faça tudo com sua plataforma de eventos.<br className="lh-desktop-break"/> Do seu jeito.</h2>
+      <div className="lh-tools-tabs" aria-label="Recursos da plataforma">{tools.map((item,i)=><button key={item.title} type="button" aria-pressed={tool===i} onClick={()=>setTool(i)}>{item.title}</button>)}</div>
+      <div className="lh-tool-content">
+        <div className="lh-demo" aria-label="Demonstração ilustrativa dos recursos"><div className="lh-demo-top"><img src="/losi-conecta-symbol.svg" alt=""/><strong>LOSI CONECTA</strong><span>Prévia ilustrativa</span></div><div className="lh-demo-body"><h3>{tools[tool].heading}</h3>{tools[tool].rows.map((text,i)=><div className="lh-demo-row" key={text}><Check/><span>{text}</span><span className="lh-demo-tag">{i===2 ? "Tudo pronto" : "Organizado"}</span></div>)}</div><div className="lh-demo-bottom">Seu trabalho merece uma apresentação profissional.</div></div>
+        <div className="lh-tool-copy"><h3>{tools[tool].title}</h3><p>{tools[tool].description}</p><ul>{tools[tool].items.map(text=><li key={text}><Check/>{text}</li>)}</ul><Link to="/entrar" className="lh-primary">Conhecer os recursos<Arrow/></Link></div>
+      </div>
+    </section>
+    <section id="categorias" className="lh-section lh-categories"><h2>Encontre quem faz<br/> seu evento acontecer</h2><p>Profissionais e empresas para diferentes momentos e necessidades.</p><div className="lh-category-links">{["Recreação e entretenimento","Monitoria","Fotografia e vídeo","DJ e música","Decoração","Buffet e alimentação","Atrações","Estruturas e equipamentos"].map(text=><Link to="/buscar" key={text}>{text}<Arrow/></Link>)}</div><Link to="/buscar" className="lh-primary">Explorar fornecedores<Arrow/></Link></section>
+    <section id="para-quem" className="lh-audience"><div className="lh-section lh-audience-inner"><div><h2>Você cuida do evento.<br/> A gente aproxima as pessoas.</h2><p>Para quem organiza uma festa, produz uma experiência ou oferece um serviço: uma rede para dar o próximo passo.</p><div className="lh-audience-row"><h3>Para organizadores</h3><p>Pesquise por categoria e localização, conheça os perfis e fale diretamente com os fornecedores.</p></div><div className="lh-audience-row"><h3>Para fornecedores</h3><p>Mostre seus serviços, compartilhe seu perfil e reúna as ferramentas da sua operação em um painel.</p></div><a href="/entrar?mode=signup" className="lh-primary">Começar agora<Arrow/></a></div><div className="lh-audience-photo"><img src="https://images.unsplash.com/photo-1620177088260-a9150572baf4?auto=format&fit=crop&w=1000&q=85" alt="Ambiente preparado para um evento" loading="lazy" width="1000" height="1100"/></div></div></section>
+    <section className="lh-section lh-mobile-section"><div><h2>Sua próxima conexão<br/> também está no celular</h2><p>Pesquise fornecedores e acompanhe sua operação onde estiver. A LOSI Conecta se adapta ao seu dia a dia.</p><Link to="/buscar" className="lh-primary">Acessar a plataforma<Arrow/></Link></div><div className="lh-mobile-preview"><img src="/losi-conecta-symbol.svg" alt=""/><strong>LOSI CONECTA</strong><span>Eventos · Profissionais · Conexões</span><Link to="/buscar">Encontrar fornecedores<Arrow/></Link><Link to="/entrar">Acessar meu painel<Arrow/></Link></div></section>
+    <section className="lh-section lh-faq"><h2>Alguma dúvida?</h2>{[
+      ["Como faço para criar minha conta?","Informe seu e-mail no início desta página e complete seu cadastro. Depois, acesse o painel para configurar seu perfil e sua empresa."],
+      ["Preciso de conta para buscar fornecedores?","Você pode explorar a busca e os perfis públicos para conhecer os serviços e encontrar fornecedores."],
+      ["Como converso com um fornecedor?","Abra o perfil público e utilize os contatos disponibilizados pelo profissional. O Chat LOSI é um recurso separado, com número digital e créditos."],
+      ["A LOSI oferece ferramentas para minha equipe?","Sim. Em Equipe & Escalas, você pode organizar eventos, oportunidades e colaboradores. Os participantes acompanham as informações pelo calendário pessoal."],
+      ["Todos os recursos estão incluídos no cadastro?","A disponibilidade depende do recurso e do plano. Anúncios, geração com IA e Chat LOSI podem utilizar franquias ou créditos próprios. Consulte as condições no painel."],
+    ].map(([question,answer])=><details key={question}><summary>{question}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5v14"/></svg></summary><p>{answer}</p></details>)}<p>Ainda precisa de ajuda? <Link to="/faq">Veja as perguntas frequentes<Arrow/></Link></p></section>
+    <section className="lh-final"><h2>Seu próximo evento começa<br/> com uma boa conexão.</h2><a href="/entrar?mode=signup" className="lh-primary">Criar minha conta<Arrow/></a></section>
+    <footer className="lh-footer lh-section"><div className="lh-footer-grid"><div><AppLogo className="lh-brand"><img src="/losi-conecta-symbol.svg" alt=""/><span>LOSI <b>CONECTA</b></span></AppLogo><p>Eventos, profissionais e oportunidades.<br/> Tudo mais próximo.</p></div><div><h3>Plataforma</h3><a href="#solucoes">Soluções</a><a href="#como-funciona">Como funciona</a><a href="#para-quem">Para quem é</a></div><div><h3>Comece por aqui</h3><Link to="/buscar">Buscar fornecedores</Link><a href="/entrar?mode=signup">Criar conta</a><Link to="/entrar">Entrar</Link></div><div><h3>Ajuda</h3><Link to="/faq">Perguntas frequentes</Link><a href="#categorias">Categorias de serviços</a></div></div><div className="lh-copyright">© {new Date().getFullYear()} LOSI CONECTA. Todos os direitos reservados.</div></footer>
+  </main>;
 }
+function Arrow(){return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>;}
+function Check(){return <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>;}

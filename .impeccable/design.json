@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-08T03:50:37.280249+00:00",
+  "title": "Design System: LOSI Conecta — homepage",
+  "extensions": {
+    "colorMeta": {
+      "hero-blue": {
+        "role": "primary",
+        "displayName": "Hero Blue",
+        "tonalRamp": [
+          "oklch(15% 0.2 264)",
+          "oklch(25% 0.2 264)",
+          "oklch(35% 0.2 264)",
+          "oklch(45% 0.2 264)",
+          "oklch(55% 0.2 264)",
+          "oklch(65% 0.2 264)",
+          "oklch(80% 0.2 264)",
+          "oklch(95% 0.2 264)"
+        ]
+      },
+      "hero-deep": {
+        "role": "primary",
+        "displayName": "Hero Deep Blue",
+        "tonalRamp": [
+          "oklch(15% 0.2 265)",
+          "oklch(25% 0.2 265)",
+          "oklch(35% 0.2 265)",
+          "oklch(45% 0.2 265)",
+          "oklch(55% 0.2 265)",
+          "oklch(65% 0.2 265)",
+          "oklch(80% 0.2 265)",
+          "oklch(95% 0.2 265)"
+        ]
+      },
+      "hero-end": {
+        "role": "primary",
+        "displayName": "Hero Indigo",
+        "tonalRamp": [
+          "oklch(15% 0.15 273)",
+          "oklch(25% 0.15 273)",
+          "oklch(35% 0.15 273)",
+          "oklch(45% 0.15 273)",
+          "oklch(55% 0.15 273)",
+          "oklch(65% 0.15 273)",
+          "oklch(80% 0.15 273)",
+          "oklch(95% 0.15 273)"
+        ]
+      },
+      "blue": {
+        "role": "primary",
+        "displayName": "Control Blue",
+        "tonalRamp": [
+          "oklch(15% 0.2 264)",
+          "oklch(25% 0.2 264)",
+          "oklch(35% 0.2 264)",
+          "oklch(45% 0.2 264)",
+          "oklch(55% 0.2 264)",
+          "oklch(65% 0.2 264)",
+          "oklch(80% 0.2 264)",
+          "oklch(95% 0.2 264)"
+        ]
+      },
+      "button": {
+        "role": "primary",
+        "displayName": "Action Blue",
+        "tonalRamp": [
+          "oklch(15% 0.2 264)",
+          "oklch(25% 0.2 264)",
+          "oklch(35% 0.2 264)",
+          "oklch(45% 0.2 264)",
+          "oklch(55% 0.2 264)",
+          "oklch(65% 0.2 264)",
+          "oklch(80% 0.2 264)",
+          "oklch(95% 0.2 264)"
+        ]
+      },
+      "navy": {
+        "role": "primary",
+        "displayName": "Closing Navy",
+        "tonalRamp": [
+          "oklch(15% 0.11 263)",
+          "oklch(25% 0.11 263)",
+          "oklch(35% 0.11 263)",
+          "oklch(45% 0.11 263)",
+          "oklch(55% 0.11 263)",
+          "oklch(65% 0.11 263)",
+          "oklch(80% 0.11 263)",
+          "oklch(95% 0.11 263)"
+        ]
+      },
+      "lilac": {
+        "role": "secondary",
+        "displayName": "Soft Lilac",
+        "tonalRamp": [
+          "oklch(15% 0.12 294)",
+          "oklch(25% 0.12 294)",
+          "oklch(35% 0.12 294)",
+          "oklch(45% 0.12 294)",
+          "oklch(55% 0.12 294)",
+          "oklch(65% 0.12 294)",
+          "oklch(80% 0.12 294)",
+          "oklch(95% 0.12 294)"
+        ]
+      },
+      "gold": {
+        "role": "tertiary",
+        "displayName": "Focus Gold",
+        "tonalRamp": [
+          "oklch(15% 0.09 86)",
+          "oklch(25% 0.09 86)",
+          "oklch(35% 0.09 86)",
+          "oklch(45% 0.09 86)",
+          "oklch(55% 0.09 86)",
+          "oklch(65% 0.09 86)",
+          "oklch(80% 0.09 86)",
+          "oklch(95% 0.09 86)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Hero headline",
+        "purpose": "Homepage hero copy only."
+      },
+      "headline": {
+        "displayName": "Section heading",
+        "purpose": "Homepage resource and closing headings."
+      }
+    },
+    "shadows": [
+      {
+        "name": "signup-echo",
+        "value": "8px -9px 0 #aba0f46b,16px -18px 0 #aba0f433",
+        "purpose": "Layered lilac signup backing."
+      },
+      {
+        "name": "resource-demo",
+        "value": "0 18px 45px #173d8120",
+        "purpose": "Lift for the illustrative resource preview."
+      },
+      {
+        "name": "mobile-preview",
+        "value": "15px 20px 0 #ece5fc",
+        "purpose": "Offset backing for phone-shaped access preview."
+      }
+    ],
+    "motion": [
+      {
+        "name": "action-hover",
+        "value": "filter .15s ease",
+        "purpose": "Hover brightness only when reduced motion is not requested."
+      },
+      {
+        "name": "demo-entrance",
+        "value": "lh-demo-in .3s ease-out",
+        "purpose": "Vertical entrance of 8px to 0 under prefers-reduced-motion:no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1100px"
+      },
+      {
+        "name": "stacked-hero",
+        "value": "850px"
+      },
+      {
+        "name": "single-column",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "description": "Homepage primary action.",
+      "html": "<button class=\"ds-primary\">Criar minha conta</button>",
+      "css": ".ds-primary{background:#163dd9;color:#fff;border:0;border-radius:32px;padding:16px 28px;min-height:52px;font:650 15px/1.35 Inter,\"Segoe UI\",sans-serif;cursor:pointer}.ds-primary:hover{filter:brightness(.92)}.ds-primary:focus-visible{outline:3px solid #d6b46a;outline-offset:4px}",
+      "refersTo": "button-primary"
+    },
+    {
+      "name": "Closing Button",
+      "kind": "button",
+      "description": "Warm CTA in the navy closing section.",
+      "html": "<button class=\"ds-final\">Criar minha conta</button>",
+      "css": ".ds-final{background:#e5d19e;color:#152960;border:0;border-radius:32px;padding:16px 28px;font:650 15px/1.35 Inter,\"Segoe UI\",sans-serif;cursor:pointer}.ds-final:hover{filter:brightness(.92)}.ds-final:focus-visible{outline:3px solid #d6b46a;outline-offset:4px}",
+      "refersTo": "button-final"
+    },
+    {
+      "name": "Email Input",
+      "kind": "input",
+      "description": "Email collection before registration.",
+      "html": "<label class=\"ds-label\" for=\"ds-email\">Seu e-mail</label><input class=\"ds-email\" id=\"ds-email\" type=\"email\" autocomplete=\"email\" placeholder=\"Preencha seu e-mail\" required>",
+      "css": ".ds-label{display:block;font:14px Inter,\"Segoe UI\",sans-serif;margin-bottom:8px}.ds-email{height:54px;width:100%;padding:0 15px;border:1px solid #c9ccd4;border-radius:8px;background:#fff;color:#17284b;font:16px Inter,\"Segoe UI\",sans-serif}.ds-email::placeholder{color:#686d7b}.ds-email:focus-visible{outline:3px solid #d6b46a;outline-offset:4px}",
+      "refersTo": "input-email"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "White-on-blue desktop navigation sample.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Navegação principal\"><a href=\"#solucoes\">Soluções</a><a href=\"#como-funciona\">Como funciona</a></nav>",
+      "css": ".ds-nav{display:flex;gap:28px;padding:24px;background:#1648e5;font:600 14px Inter,\"Segoe UI\",sans-serif}.ds-nav a{color:white;text-decoration:none}.ds-nav a:hover{text-decoration:underline;text-underline-offset:6px}.ds-nav a:focus-visible{outline:3px solid #d6b46a;outline-offset:4px}"
+    },
+    {
+      "name": "Status Tag",
+      "kind": "chip",
+      "description": "Illustrative status in the resource preview.",
+      "html": "<span class=\"ds-tag\">Organizado</span>",
+      "css": ".ds-tag{display:inline-block;font:10px Inter,\"Segoe UI\",sans-serif;padding:4px 7px;border-radius:5px;color:#48347b;background:#f0e9ff}",
+      "refersTo": "demo-tag"
+    },
+    {
+      "name": "Signup Card",
+      "kind": "card",
+      "description": "Asymmetric white signup container with lilac echoes.",
+      "html": "<section class=\"ds-card\"><h2>Faça parte da LOSI Conecta!</h2><p>Continue para completar seu cadastro.</p></section>",
+      "css": ".ds-card{background:#fff;color:#1535a8;max-width:365px;border-radius:24px 24px 0 24px;padding:24px;box-shadow:8px -9px 0 #aba0f46b,16px -18px 0 #aba0f433;font-family:Inter,\"Segoe UI\",sans-serif}.ds-card h2{font-size:21px;font-weight:650;margin:0 0 10px}.ds-card p{font-size:11px;line-height:1.4;color:#5d6475;margin:0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Conexões para o próximo evento",
+    "overview": "This document applies only to the homepage implemented in `src/components/HomePage.tsx` and `src/home-asaas.css`. The requested Asaas homepage composition is adapted to event professionals through LOSI branding, blue and lilac, a transparent image of two event professionals, and restrained gold. Its role is to help visitors discover suppliers and begin registration.\n\nThis is a source-code extraction, without supplied screenshots or a rendered visual assessment. Existing `PRODUCT.md` describes the separate Chat LOSI surface; its navy-and-gold identity and the other page styles remain outside this homepage design scope. The homepage's feature descriptions are source copy, not a new verification of service availability.",
+    "keyCharacteristics": [
+      "Blue gradient hero with left-aligned copy and a white email card.",
+      "Two event professionals on the right, with transparent image edges.",
+      "White resource sections, lilac supporting surfaces, and navy closing action.",
+      "Pill actions, clear selected controls, and restrained gold focus accents."
+    ],
+    "rules": [
+      {
+        "name": "The Home Scope Rule",
+        "body": "Apply this blue-and-lilac composition only inside the homepage root. Preserve the existing chat identity and all unrelated page styles.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do keep homepage rules scoped to the homepage root and its existing components.",
+      "Do preserve the left copy/email card and right transparent event-professional composition on desktop.",
+      "Do preserve stacked content and accessible hamburger navigation on mobile.",
+      "Do mark the resource demonstration as “Prévia ilustrativa”.",
+      "Do describe only the capabilities supported by the existing source and keep feature and plan conditions visible."
+    ],
+    "donts": [
+      "Don't apply this homepage palette to the chat or unrelated pages.",
+      "Don't replace the professionals with financial-service imagery or an Asaas logo.",
+      "Don't imply that signup alone activates every feature or that the preview shows a user's live data.",
+      "Don't remove labels, native FAQ controls, selected states, or keyboard-focus visibility."
+    ]
+  }
+}

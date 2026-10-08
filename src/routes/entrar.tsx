@@ -24,6 +24,16 @@ function AuthPage() {
   const [recoverySession, setRecoverySession] = useState(false);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mode") !== "signup") return;
+    setMode("signup");
+    try {
+      const savedEmail = sessionStorage.getItem("losi-signup-email");
+      if (savedEmail) setEmail(savedEmail);
+      sessionStorage.removeItem("losi-signup-email");
+    } catch { /* Storage may be unavailable in private browsing. */ }
+  }, []);
+
+  useEffect(() => {
     if (!supabase) return;
 
     let mounted = true;
