@@ -254,18 +254,17 @@
       "mode": "operate",
       "scope": "all supplier dashboard and workspace pages except chat and public search",
       "colors": {
-        "navyViolet": "#17124a",
-        "violet": "#4c1d95",
-        "actionBlue": "#1d4ed8",
-        "canvasLilac": "#f1edff",
-        "accentRose": "#f2bfd8",
-        "border": "#e5e0f4"
+        "navy": "#07111f",
+        "navySecondary": "#0b182a",
+        "gold": "#d6b46a",
+        "softGold": "#f0d99a",
+        "white": "#ffffff"
       },
       "layout": {
         "railWidth": "258px",
         "panelRadius": "14px"
       },
-      "notes": "Fixed navigation rail, white action header, compact work cards, responsive two-column metrics collapsing to one column. Chat LOSI and public search keep their own surfaces."
+      "notes": "Original LOSI page colors restored. Current navigation and responsive layout retained. Existing page styles own card and control colors. Chat LOSI and search remain independent."
     }
   }
 }
