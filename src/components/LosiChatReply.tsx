@@ -18,12 +18,6 @@ export function LosiChatText({ message, own, onReply, onDeleted }: { message: Ch
   const origin = useRef({ x: 0, y: 0 });
   const cancel = () => { clearTimeout(timer.current); timer.current = undefined; };
   useEffect(() => () => cancel(), []);
-  useEffect(() => {
-    if (!menu) return;
-    const close = (e: PointerEvent) => { if (!area.current?.contains(e.target as Node)) setMenu(false); };
-    document.addEventListener('pointerdown', close);
-    return () => document.removeEventListener('pointerdown', close);
-  }, [menu]);
   return <div ref={area} className="lc-message-text" tabIndex={0} aria-label="Mensagem. Segure ou abra o menu de contexto para responder."
     onPointerDown={e => { if (e.button !== 0 || menu) return; cancel(); origin.current = { x: e.clientX, y: e.clientY }; timer.current = setTimeout(() => setMenu(true), 500); }}
     onPointerMove={e => { if (Math.hypot(e.clientX - origin.current.x, e.clientY - origin.current.y) > 12) cancel(); }}

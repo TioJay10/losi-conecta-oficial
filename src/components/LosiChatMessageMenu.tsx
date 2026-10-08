@@ -12,6 +12,22 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
   const trigger = useRef<HTMLButtonElement>(null);
   const lock = useRef(false);
   useEffect(() => {
+    if (!open) return;
+    const outside = (event: PointerEvent) => {
+      if (!(event.target instanceof Node)) return;
+      if (menu.current?.contains(event.target) || trigger.current?.contains(event.target)) return;
+      onClose();
+    };
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    // Capture also sees touches on controls that stop event propagation.
+    document.addEventListener('pointerdown', outside, true);
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.removeEventListener('pointerdown', outside, true);
+      document.removeEventListener('keydown', escape);
+    };
+  }, [open, onClose]);
+  useEffect(() => {
     if (!open || !menu.current || !trigger.current) return;
     const node = menu.current;
     const desktop = window.matchMedia('(min-width: 769px)');
@@ -70,7 +86,7 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
     </button>}
     <div ref={menu} className="lc-media-menu" hidden={!open} aria-label="Opções da mensagem"
-      onPointerDown={e => e.stopPropagation()} onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); onClose(); } }}>
+      onPointerDown={e => e.stopPropagation()}>
       <div className="lc-media-actions" hidden={confirm}>
         {onReply && <button type="button" disabled={busy} onClick={() => { onClose(); onReply(); }}><LosiChatActionIcon name="reply"/><span>Responder</span></button>}
         {message.attachment && <button type="button" disabled={busy} onClick={() => void download()}><LosiChatActionIcon name="download"/><span>Baixar arquivo</span></button>}

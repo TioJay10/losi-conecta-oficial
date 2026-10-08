@@ -58,6 +58,19 @@ export function LosiChatPreview(){
  const [search,setSearch]=useState("");
  const [selected,setSelected]=useState<Chat|null>(null);
  const [menu,setMenu]=useState(false);
+ const optionsMenu=useRef<HTMLDivElement>(null),mobileOptions=useRef<HTMLButtonElement>(null),desktopOptions=useRef<HTMLButtonElement>(null);
+ useEffect(()=>{
+  if(!menu)return;
+  const outside=(event:PointerEvent)=>{
+   if(!(event.target instanceof Node))return;
+   if([optionsMenu.current,mobileOptions.current,desktopOptions.current].some(node=>node?.contains(event.target as Node)))return;
+   setMenu(false);
+  };
+  const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setMenu(false);};
+  document.addEventListener('pointerdown',outside,true);
+  document.addEventListener('keydown',escape);
+  return()=>{document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',escape);};
+ },[menu]);
  const [notice,setNotice]=useState("");
  const [draft,setDraft]=useState("");
  const [replyTo,setReplyTo]=useState<ChatMessage|null>(null);
@@ -135,9 +148,9 @@ export function LosiChatPreview(){
   </aside>
   <section className="lc-sidebar" aria-label="Conversas e saldo">
    <header className="lc-list-header">
-    <div className="lc-mobile-actions"><button aria-label="Abrir opções" onClick={()=>setMenu(!menu)} aria-expanded={menu}><Icon name="more"/></button><span/><button aria-label="Câmera" onClick={previewNotice}><Icon name="camera"/></button><button className="lc-add" aria-label="Nova conversa" onClick={()=>go("contacts")}><Icon name="plus"/></button></div>
-    <div className="lc-desktop-heading"><strong>Chat LOSI</strong><button aria-label="Abrir opções" onClick={()=>setMenu(!menu)} aria-expanded={menu}><Icon name="more"/></button><button className="lc-add" aria-label="Nova conversa" onClick={()=>go("contacts")}><Icon name="plus"/></button></div>
-    {menu&&<div className="lc-menu"><button className="lc-theme-menu-button" aria-label={themeLabel} onClick={()=>{toggleTheme();setMenu(false);}}><Icon name={theme==="dark"?"sun":"moon"}/><span>{theme==="dark"?"Modo claro":"Modo escuro"}</span></button><button onClick={()=>go("new-group")}>Novo grupo</button><button onClick={()=>go("account")}>Meu número digital</button><button onClick={()=>go("credits")}>Saldo e recarga</button><a href="/painel">Voltar ao painel</a></div>}
+    <div className="lc-mobile-actions"><button ref={mobileOptions} aria-label="Abrir opções" onClick={()=>setMenu(!menu)} aria-expanded={menu}><Icon name="more"/></button><span/><button aria-label="Câmera" onClick={previewNotice}><Icon name="camera"/></button><button className="lc-add" aria-label="Nova conversa" onClick={()=>go("contacts")}><Icon name="plus"/></button></div>
+    <div className="lc-desktop-heading"><strong>Chat LOSI</strong><button ref={desktopOptions} aria-label="Abrir opções" onClick={()=>setMenu(!menu)} aria-expanded={menu}><Icon name="more"/></button><button className="lc-add" aria-label="Nova conversa" onClick={()=>go("contacts")}><Icon name="plus"/></button></div>
+    {menu&&<div ref={optionsMenu} className="lc-menu"><button className="lc-theme-menu-button" aria-label={themeLabel} onClick={()=>{toggleTheme();setMenu(false);}}><Icon name={theme==="dark"?"sun":"moon"}/><span>{theme==="dark"?"Modo claro":"Modo escuro"}</span></button><button onClick={()=>go("new-group")}>Novo grupo</button><button onClick={()=>go("account")}>Meu número digital</button><button onClick={()=>go("credits")}>Saldo e recarga</button><a href="/painel">Voltar ao painel</a></div>}
     <h1 className="lc-mobile-title">{section==="chats"?"Conversas":section==="contacts"?"Contatos":section==="credits"?"Créditos":section==="new-group"?"Novo grupo":"Você"}</h1>
     <button className="lc-balance" onClick={()=>go("credits")} aria-label="Ver saldo de créditos"><Icon name="wallet"/><span><strong>{accountLoading?"…":balance}</strong> créditos</span></button>
     {accountError&&<p className="lc-demo-note" role="status">{accountError}</p>}

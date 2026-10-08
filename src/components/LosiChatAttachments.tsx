@@ -40,7 +40,6 @@ export function LosiChatAttachment({ message, own, onDeleted, onReply, profilePh
   const cancelPress = () => { if (timer.current) clearTimeout(timer.current); timer.current = null; };
   const closeMenu = () => { setMenu(false); container.current?.focus({preventScroll:true}); };
   useEffect(() => () => cancelPress(), []);
-  useEffect(() => { if (!menu) return; const close = (e: PointerEvent) => { if (!container.current?.contains(e.target as Node)) closeMenu(); }; document.addEventListener('pointerdown', close); return () => document.removeEventListener('pointerdown', close); }, [menu]);
   useEffect(() => { if (!container.current) return; if (typeof IntersectionObserver === 'undefined') { setVisible(true); return; } const observer = new IntersectionObserver(entries => { if (entries.some(e => e.isIntersecting)) { setVisible(true); observer.disconnect(); } }, { rootMargin: '200px' }); observer.observe(container.current); return () => observer.disconnect(); }, []);
   useEffect(() => { if (!attachment || attachment.kind === 'document' || !visible) return; let live = true; void chatAction<{ url: string }>('media-url', { messageId: message.id }).then(d => { if (live) { setUrl(d.url); setError(''); } }).catch(() => { if (live) setError('Não foi possível carregar a mídia.'); }); return () => { live = false; }; }, [message.id, attachment?.kind, reload, visible]);
   if (!attachment) return null;
