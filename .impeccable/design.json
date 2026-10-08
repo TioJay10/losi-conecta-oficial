@@ -248,5 +248,24 @@
       "Don't imply that signup alone activates every feature or that the preview shows a user's live data.",
       "Don't remove labels, native FAQ controls, selected states, or keyboard-focus visibility."
     ]
+  },
+  "surfaces": {
+    "supplier-panel": {
+      "mode": "operate",
+      "scope": "all supplier dashboard and workspace pages except chat and public search",
+      "colors": {
+        "navyViolet": "#17124a",
+        "violet": "#4c1d95",
+        "actionBlue": "#1d4ed8",
+        "canvasLilac": "#f1edff",
+        "accentRose": "#f2bfd8",
+        "border": "#e5e0f4"
+      },
+      "layout": {
+        "railWidth": "258px",
+        "panelRadius": "14px"
+      },
+      "notes": "Fixed navigation rail, white action header, compact work cards, responsive two-column metrics collapsing to one column. Chat LOSI and public search keep their own surfaces."
+    }
   }
 }

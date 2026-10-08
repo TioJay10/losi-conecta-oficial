@@ -19,6 +19,8 @@ import "../executive-surfaces.css";
 import "../admin-contrast.css";
 import "../panel-saas.css";
 import { OnlinePresenceProvider } from "../components/OnlinePresence";
+import { PanelMenuIcon } from "../components/PanelMenuIcon";
+import "../supplier-panel-theme.css";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -452,6 +454,7 @@ function RootComponent() {
   }, []);
 
   const publicRoute = isPublicPath(location.pathname);
+  const supplierSurface = ["/meu-perfil", "/meus-servicos", "/orcamentos", "/equipe-escalas", "/notificar-inconsistencia"].includes(location.pathname);
 
   if (!authChecked && !publicRoute) {
     return (
@@ -481,11 +484,36 @@ function RootComponent() {
   return (
     <OnlinePresenceProvider userId={currentUserId}>
       <SafeGlobalNotificationAlerts isAuthenticated={isAuthenticated} currentPath={location.pathname} />
-      <main>
+      {supplierSurface && <SupplierPanelRail pathname={location.pathname} />}
+      <main className={supplierSurface ? "supplier-surface-main" : undefined}>
         <Outlet />
       </main>
     </OnlinePresenceProvider>
   );
+}
+
+function SupplierPanelRail({ pathname }: { pathname: string }) {
+  const links = [
+    { to: "/painel", label: "Visão geral", icon: "overview" },
+    { to: "/meu-perfil", label: "Meu perfil", icon: "profile" },
+    { to: "/meus-servicos", label: "Minha empresa", icon: "businesses" },
+    { to: "/orcamentos", label: "Orçamentos", icon: "quotes" },
+    { to: "/recibos", label: "Recibos", icon: "receipts" },
+    { to: "/propostas", label: "Propostas", icon: "proposals" },
+    { to: "/losi-ads", label: "LOSI ADS", icon: "ads" },
+    { to: "/equipe-escalas", label: "Equipe & Escalas", icon: "team" },
+  ];
+  return <aside className="supplier-panel-rail" aria-label="Menu do painel profissional">
+    <a className="supplier-rail-brand" href="/painel"><strong>LOSI</strong><span>CONECTA</span></a>
+    <small className="supplier-rail-kicker">PAINEL PROFISSIONAL</small>
+    <nav>
+      <div className="supplier-rail-section">Visão geral</div>
+      {links.slice(0,3).map((link)=><a key={link.to} className={pathname===link.to?"active":""} href={link.to}><PanelMenuIcon name={link.icon}/><span>{link.label}</span></a>)}
+      <div className="supplier-rail-section">Operacional</div>
+      {links.slice(3).map((link)=><a key={link.to} className={pathname===link.to?"active":""} href={link.to}><PanelMenuIcon name={link.icon}/><span>{link.label}</span></a>)}
+    </nav>
+    <div className="supplier-rail-footer"><span className="supplier-rail-status"/> Conta profissional</div>
+  </aside>;
 }
 
 function RootErrorComponent() {

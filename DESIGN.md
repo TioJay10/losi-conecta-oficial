@@ -1,6 +1,21 @@
 ---
 name: LOSI Conecta — homepage
 description: Homepage-only design extracted from the Asaas-inspired event-professional composition.
+
+## Supplier panel surface
+
+The supplier workspace uses the same product identity in an operate-first dashboard composition inspired by the supplied professional dashboard reference. A fixed deep-violet navigation rail anchors the page, a quiet white header keeps actions discoverable, and a soft lilac/rose canvas separates compact work cards. Blue carries primary actions and operational emphasis; violet carries navigation and structure; pale rose is reserved for selected states and small accents. The Chat LOSI and public search remain independent surfaces.
+
+supplier-panel:
+  mode: operate
+  navy-violet: "#17124a"
+  violet: "#4c1d95"
+  action-blue: "#1d4ed8"
+  canvas-lilac: "#f1edff"
+  accent-rose: "#f2bfd8"
+  border: "#e5e0f4"
+  panel-radius: "14px"
+  rail-width: "258px"
 colors:
   hero-blue: "#1648e5"
   hero-deep: "#0734cc"

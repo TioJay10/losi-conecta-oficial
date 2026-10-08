@@ -1,0 +1,158 @@
+/* Supplier workspace visual system: blue, violet and soft rose. Chat and search
+   have their own surfaces and intentionally do not inherit these rules. */
+:root {
+  --supplier-blue: #1d4ed8;
+  --supplier-violet: #5b21b6;
+  --supplier-ink: #172554;
+  --supplier-rose: #f4d8e8;
+  --supplier-lilac: #f0edff;
+  --supplier-surface: #fbfaff;
+  --supplier-border: #e5e0f4;
+}
+
+.supplier-panel-rail {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 40;
+  width: 258px;
+  box-sizing: border-box;
+  padding: 28px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg,#17124a 0%,#26145f 56%,#312070 100%);
+  color:#e8e1f8;
+  box-shadow:16px 0 44px rgba(46,24,112,.18);
+}
+.supplier-rail-brand { display:flex; align-items:baseline; gap:5px; padding:2px 10px; color:#fff; text-decoration:none; font-size:20px; letter-spacing:.08em; }
+.supplier-rail-brand span { color:#f2bfd8; font-weight:800; }
+.supplier-rail-kicker { margin:9px 10px 28px; color:#c9b8f2; font-size:9px; font-weight:800; letter-spacing:.19em; }
+.supplier-panel-rail nav { display:grid; gap:6px; }
+.supplier-panel-rail nav a { display:grid; grid-template-columns:18px minmax(0,1fr); align-items:center; gap:11px; min-height:44px; padding:9px 10px; border:1px solid transparent; border-radius:10px; color:#d9d3f0; text-decoration:none; font-size:12px; font-weight:650; }
+.supplier-panel-rail nav a:hover { background:rgba(255,255,255,.08); border-color:rgba(221,194,255,.2); color:#fff; }
+.supplier-panel-rail nav a.active { background:linear-gradient(135deg,rgba(126,87,255,.42),rgba(238,181,215,.17)); border-color:rgba(238,181,215,.42); color:#fff; }
+.supplier-panel-rail nav a .panel-menu-icon { color:#f1c7dd; }
+.supplier-rail-section { margin:13px 10px 3px; color:#a99bd4; font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+.supplier-rail-footer { margin-top:auto; padding:14px 10px 0; border-top:1px solid rgba(255,255,255,.12); color:#bcb5d5; font-size:10px; }
+.supplier-rail-status { display:inline-block; width:6px; height:6px; margin-right:7px; border-radius:50%; background:#d8a6cf; box-shadow:0 0 9px rgba(238,181,215,.6); }
+.supplier-surface-main { min-height:100vh; margin-left:258px; }
+
+body :is(.dashboard-page,.profile-page,.quotes-page,.team-page,.inconsistency-page) {
+  font-family: Inter, Montserrat, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg,#f5f0ff 0%,#fcfbff 48%,#fbeef7 100%) !important;
+  color: var(--supplier-ink);
+}
+
+body .dashboard-page {
+  --dash-navy: #17124a;
+  --dash-navy-2: #26145f;
+  --dash-gold: #e8b9d0;
+  --dash-gold-soft: #f4d8e8;
+  --dash-ink: #172554;
+  --dash-muted: #667085;
+  background: linear-gradient(135deg,#f1edff 0%,#fcfbff 55%,#faedf6 100%) !important;
+}
+
+body .dashboard-sidebar {
+  width: 258px;
+  padding: 28px 16px 20px;
+  background: linear-gradient(160deg,#17124a 0%,#26145f 56%,#312070 100%) !important;
+  border-right: 1px solid rgba(221,194,255,.22) !important;
+  box-shadow: 16px 0 44px rgba(46,24,112,.18) !important;
+}
+body .dashboard-sidebar::before {
+  width: 240px; height: 240px; top:-120px; right:-120px;
+  background: rgba(225,170,211,.14) !important;
+  filter: blur(10px);
+}
+body .dashboard-sidebar-brand strong { color:#f2bfd8 !important; }
+body .dashboard-sidebar-caption { color:#c9b8f2 !important; }
+body .dashboard-nav-item {
+  min-height: 54px;
+  border-radius: 12px !important;
+  color: #d9d3f0 !important;
+}
+body .dashboard-nav-item:hover { background:rgba(255,255,255,.09) !important; border-color:rgba(221,194,255,.2) !important; transform:translateX(2px); }
+body .dashboard-nav-item.active {
+  background:linear-gradient(135deg,rgba(126,87,255,.42),rgba(238,181,215,.17)) !important;
+  border-color:rgba(238,181,215,.42) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.14), 0 12px 24px rgba(6,2,30,.2) !important;
+}
+body .dashboard-nav-mark { color:#f1c7dd !important; border-color:rgba(238,181,215,.3) !important; background:rgba(255,255,255,.06) !important; }
+body .dashboard-nav-item.active::before { background:linear-gradient(#f2bfd8,#b79aff) !important; box-shadow:0 0 12px rgba(238,181,215,.55) !important; }
+body .dashboard-nav-item small { color:#aaa4c9 !important; }
+body .dashboard-sidebar-footer { border-color:rgba(255,255,255,.12) !important; }
+body .dashboard-sidebar-status { color:#bcb5d5 !important; }
+body .dashboard-sidebar-logout { border-color:rgba(238,181,215,.25) !important; background:rgba(255,255,255,.06) !important; color:#e5dff4 !important; }
+
+body .dashboard-main { margin-left:258px; }
+body .dashboard-main .dashboard-header {
+  min-height:76px;
+  background:rgba(255,255,255,.9) !important;
+  border-bottom:1px solid var(--supplier-border) !important;
+  box-shadow:0 10px 30px rgba(63,33,125,.07) !important;
+}
+body .dashboard-header-context span { color:#6d4bc0 !important; }
+body .dashboard-header-context strong { color:#22205a !important; }
+body .dashboard-header-user > span,
+body .dashboard-header-user-avatar { border-color:#d9b5da !important; background:linear-gradient(145deg,#fff,#f7eaf5) !important; color:#6c45b6 !important; }
+body .dashboard-main .dashboard-logout { border-color:#d8b5dd !important; background:#fff6fb !important; color:#673aa5 !important; }
+body .dashboard-main .dashboard-content { width:min(1160px,calc(100% - 72px)); padding:42px 0 72px; }
+body .dashboard-main .dashboard-content > h1 { color:#20184e !important; letter-spacing:-.035em !important; }
+body .dashboard-main .dashboard-text { color:#686584 !important; }
+
+body .dashboard-main .dashboard-grid > button,
+body .dashboard-main :is(.dashboard-status,.dashboard-onboarding,.dashboard-plan-card,.dashboard-commercial-card,.dashboard-operation-card,.dashboard-pending-invoices,.dashboard-saved-card),
+body .dashboard-page :is(.dashboard-quotes-overview,.dashboard-commercial,.dashboard-operation) {
+  border:1px solid var(--supplier-border) !important;
+  border-radius:14px !important;
+  background:rgba(255,255,255,.94) !important;
+  box-shadow:0 13px 30px rgba(74,45,145,.08) !important;
+}
+body .dashboard-main .dashboard-grid > button:hover { border-color:#c8a9e8 !important; box-shadow:0 16px 34px rgba(91,33,182,.14) !important; }
+body .dashboard-main .dashboard-grid > button strong { color:#29205c !important; }
+body .dashboard-main .dashboard-grid > button span { color:#76718e !important; }
+body .dashboard-page :is(.dashboard-primary,.proposals-primary,.receipts-primary,.losi-ads-purchase-button,.losi-ads-publish-button,.team-primary) {
+  background:linear-gradient(135deg,#4c1d95,#1d4ed8) !important;
+  border-color:#4c1d95 !important;
+  color:#fff !important;
+  box-shadow:0 10px 20px rgba(76,29,149,.22) !important;
+}
+body .dashboard-page :is(.dashboard-secondary,.proposals-secondary,.receipts-inline-action,.losi-ads-invoices-button) {
+  background:#fff4fa !important; border-color:#e5bbd4 !important; color:#632f8e !important;
+}
+
+/* Pages that do not use the dashboard shell still share its surface rhythm. */
+body :is(.profile-page,.quotes-page,.team-page,.inconsistency-page) :is(.profile-header,.quotes-header,.team-topbar,.inconsistency-page-top) {
+  background:linear-gradient(100deg,#17124a,#382078) !important;
+  color:#fff !important;
+  border-bottom:1px solid rgba(225,194,255,.24) !important;
+  box-shadow:0 10px 28px rgba(51,26,113,.16) !important;
+}
+body :is(.profile-page,.quotes-page,.team-page,.inconsistency-page) :is(.profile-content,.quotes-content,.team-section,.inconsistency-page > *):not(.team-hero) {
+  color:var(--supplier-ink);
+}
+body :is(.profile-page,.quotes-page) :is(.personal-profile-card,.business-services-card,.quotes-dashboard,.proposal-builder,.quote-modal-card) {
+  border:1px solid var(--supplier-border) !important;
+  border-radius:14px !important;
+  background:rgba(255,255,255,.94) !important;
+  box-shadow:0 14px 30px rgba(74,45,145,.09) !important;
+}
+body .team-page .team-hero { background:linear-gradient(120deg,#17124a,#4c1d95) !important; }
+body .team-page .team-section { border-color:var(--supplier-border) !important; border-radius:14px !important; background:rgba(255,255,255,.94) !important; box-shadow:0 14px 30px rgba(74,45,145,.08) !important; }
+body :is(.profile-page,.quotes-page,.team-page,.inconsistency-page) :is(input,select,textarea) { border-color:#d8d0eb !important; background:#fff !important; color:#22205a !important; border-radius:8px !important; }
+body :is(.profile-page,.quotes-page,.team-page,.inconsistency-page) :is(button,a):focus-visible { outline:3px solid #e2afd0 !important; outline-offset:3px; }
+
+@media (max-width: 760px) {
+  .supplier-panel-rail { width:min(300px,86vw); transform:translateX(-102%); transition:transform .2s ease; }
+  .supplier-surface-main { margin-left:0; }
+  body .dashboard-sidebar { width:min(300px,86vw); }
+  body .dashboard-main { margin-left:0; }
+  body .dashboard-main .dashboard-content { width:calc(100% - 32px); padding:28px 0 48px; }
+  body .dashboard-main .dashboard-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:12px !important; }
+  body .dashboard-main .dashboard-grid > button { min-height:126px; padding:18px !important; }
+  body :is(.profile-page,.quotes-page,.team-page,.inconsistency-page) :is(.profile-content,.quotes-content) { width:calc(100% - 32px) !important; padding-inline:0 !important; }
+  body .team-page .team-topbar { height:64px; padding-inline:16px; }
+}
+@media (max-width: 430px) {
+  body .dashboard-main .dashboard-grid { grid-template-columns:1fr !important; }
+}
