@@ -65,3 +65,19 @@
 .lc-app .lc-media-menu button:disabled{opacity:.5;cursor:wait}
 .lc-app .lc-media-menu button .lc-message-action-icon{display:block;flex:0 0 18px;width:18px;height:18px;color:var(--lc-gold,#d6b46a)}
 .lc-app .lc-media-menu button>span{display:block;min-width:0;overflow-wrap:anywhere}
+
+/* Desktop action affordance sits in the bubble corner; mobile retains long press. */
+.lc-app .lc-bubble .lc-message-menu-trigger{display:none}
+.lc-app .lc-media-menu[hidden],.lc-app .lc-media-menu>div[hidden]{display:none!important}
+.lc-message-action-error{font-size:12px;line-height:1.4;color:var(--lc-text)}
+@media(min-width:769px){
+  .lc-bubble{position:relative}
+  .lc-bubble .lc-sent-attachment,.lc-bubble .lc-message-text{position:static}
+  .lc-bubble .lc-message-text{padding-right:24px}
+  .lc-bubble:has(.lc-sent-attachment):not(.lc-audio-bubble){padding-top:30px}
+  .lc-bubble.lc-audio-bubble .lc-audio-message{padding-right:22px}
+  .lc-app .lc-bubble .lc-message-menu-trigger{position:absolute;top:3px;right:3px;z-index:2;display:grid;place-items:center;width:28px;height:24px;min-height:24px;padding:3px;border:0;border-radius:4px;background:transparent;color:var(--lc-gold);cursor:pointer}
+  .lc-app .lc-bubble .lc-message-menu-trigger:hover,.lc-app .lc-bubble .lc-message-menu-trigger[aria-expanded=true]{background:#10283f}
+  .lc-bubble .lc-message-menu-trigger svg{width:18px;height:18px;pointer-events:none}
+  .lc-bubble .lc-media-menu{min-width:200px}
+}

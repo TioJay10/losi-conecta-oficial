@@ -1,4 +1,4 @@
-import { LosiChatActionIcon } from './LosiChatActionIcon';
+import { LosiChatMessageMenu } from './LosiChatMessageMenu';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../lib/losi-chat';
 
@@ -11,7 +11,7 @@ export function LosiChatQuote({ message }: { message: ChatMessage }) {
   const quote = message.reply;
   return <div className="lc-quote"><strong>{quote?.unavailable || !quote ? 'Mensagem indisponível' : quote.name}</strong>{quote && !quote.unavailable && <p>{quote.text || (quote.kind ? mediaLabels[quote.kind] : 'Mensagem')}</p>}</div>;
 }
-export function LosiChatText({ message, onReply }: { message: ChatMessage; onReply: () => void }) {
+export function LosiChatText({ message, own, onReply, onDeleted }: { message: ChatMessage; own: boolean; onReply: () => void; onDeleted: (id: string) => void }) {
   const [menu, setMenu] = useState(false);
   const area = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -20,7 +20,6 @@ export function LosiChatText({ message, onReply }: { message: ChatMessage; onRep
   useEffect(() => () => cancel(), []);
   useEffect(() => {
     if (!menu) return;
-    area.current?.querySelector<HTMLButtonElement>('button')?.focus();
     const close = (e: PointerEvent) => { if (!area.current?.contains(e.target as Node)) setMenu(false); };
     document.addEventListener('pointerdown', close);
     return () => document.removeEventListener('pointerdown', close);
@@ -32,6 +31,6 @@ export function LosiChatText({ message, onReply }: { message: ChatMessage; onRep
     onContextMenu={e => { e.preventDefault(); cancel(); setMenu(true); }}
     onKeyDown={e => { if (e.target !== e.currentTarget) return; if (e.key === 'Escape') { setMenu(false); area.current?.focus(); } else if (e.key === 'ContextMenu' || e.key === 'Enter' || (e.key === 'F10' && e.shiftKey)) { e.preventDefault(); setMenu(true); } }}>
     {message.body}
-    {menu && <div className="lc-media-menu" aria-label="Opções da mensagem"><button type="button" onClick={() => { setMenu(false); onReply(); }}><LosiChatActionIcon name="reply"/><span>Responder</span></button><button type="button" onClick={() => { setMenu(false); area.current?.focus(); }}><LosiChatActionIcon name="close"/><span>Fechar</span></button></div>}
+    <LosiChatMessageMenu message={message} own={own} open={menu} onOpen={()=>{cancel();setMenu(true);}} onClose={()=>{setMenu(false);area.current?.focus({preventScroll:true});}} onReply={onReply} onDeleted={onDeleted}/>
   </div>;
 }
