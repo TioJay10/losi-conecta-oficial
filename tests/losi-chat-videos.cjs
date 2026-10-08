@@ -8,6 +8,6 @@ try{
  assert.throws(()=>mediaMetadata('big.mp4',20971521));
  const mp4=fs.readFileSync(path.join(dir,'test.mp4'));assert.equal(verifyMedia(mp4,'video/quicktime'),false,'wrong MOV brand');
  const webm=fs.readFileSync(path.join(dir,'test.webm'));assert.equal(verifyMedia(webm,'video/mp4'),false,'wrong container');
- const ui=fs.readFileSync('src/components/LosiChatAttachments.tsx','utf8');const expression=ui.match(/export const mediaCost=([^;]+);/)[1];const cost=vm.runInNewContext(ts.transpileModule('('+expression+')',{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText);for(const size of [100,2097152,20971520])for(const caption of ['', 'Legenda'])assert.equal(cost({type:'video/mp4',size},caption),10);
+ const ui=fs.readFileSync('src/components/LosiChatAttachments.tsx','utf8');const expression=ui.match(/export const mediaCost\s*=([^;]+);/)[1];const cost=vm.runInNewContext(ts.transpileModule('('+expression+')',{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText);for(const size of [100,2097152,20971520])for(const caption of ['', 'Legenda'])assert.equal(cost({type:'video/mp4',size},caption),10);
  console.log('PASS: real MP4/MOV/WEBM video tracks, reject audio-only/fake/truncated containers, video price 10 at all sizes and captions');
 }finally{fs.rmSync(dir,{recursive:true,force:true});}
