@@ -1,0 +1,24 @@
+/* Reactions are message content. Emoji glyphs remain native to each device. */
+.lc-app .lc-media-menu,.lc-app .lc-bubble .lc-media-menu{position:fixed;z-index:50;width:320px;min-width:0;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;margin:0;overscroll-behavior:contain}
+.lc-reaction-picker{border-bottom:1px solid var(--lc-menu-divider,var(--lc-line));padding:4px 0 8px;margin-bottom:4px}
+.lc-reaction-quick{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0}
+.lc-app .lc-media-menu .lc-emoji-button{display:grid;place-items:center;width:100%;height:44px;min-height:44px;padding:0;border:0;border-radius:8px;background:transparent;font-size:26px;line-height:1;touch-action:manipulation}
+.lc-app .lc-media-menu .lc-emoji-button>span{overflow-wrap:normal;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif}
+.lc-app .lc-media-menu .lc-emoji-button[aria-pressed=true]{background:var(--lc-menu-hover);outline:1px solid var(--lc-gold);outline-offset:-2px}
+.lc-app .lc-media-menu .lc-emoji-more{font-size:20px;color:var(--lc-gold)}
+.lc-reaction-expanded{padding:8px 4px 0}
+.lc-emoji-search{display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--lc-raised);border-radius:8px;min-height:44px;color:var(--lc-muted)}
+.lc-app .lc-emoji-search input{min-width:0;width:100%;border:0;background:transparent;color:var(--lc-text);font-size:16px;padding:10px 0;outline-offset:0}
+.lc-emoji-search input::placeholder{color:var(--lc-muted)}
+.lc-reaction-expanded>p{font-size:12px;color:var(--lc-muted);line-height:1.4;margin:12px 2px 8px}
+.lc-reaction-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;max-height:220px;overflow-y:auto;overscroll-behavior:contain}
+.lc-reaction-summary{display:flex;flex-wrap:wrap;gap:5px;position:relative;margin-top:8px;white-space:normal}
+.lc-app .lc-reaction-count{display:flex;align-items:center;justify-content:center;gap:5px;min-width:44px;min-height:32px;padding:4px 8px;background:var(--lc-panel);border:1px solid var(--lc-line);border-radius:16px;color:var(--lc-text);font-size:12px;font-variant-numeric:tabular-nums}
+.lc-app .lc-reaction-count>span:first-child{font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-size:18px;line-height:1}
+.lc-app .lc-reaction-count[aria-pressed=true]{border-color:var(--lc-gold);background:var(--lc-menu-hover,var(--lc-raised))}
+.lc-reaction-summary>p{width:100%;font-size:12px;line-height:1.4;color:var(--lc-text);margin:4px 0}
+.lc-bubble.lc-audio-bubble:has(.lc-reaction-summary){padding-bottom:34px}
+.lc-bubble.lc-audio-bubble:has(.lc-reaction-summary) .lc-reaction-summary{margin-top:7px}
+@media(max-width:768px){.lc-app .lc-reaction-count{min-height:36px}.lc-app .lc-media-menu .lc-emoji-button{font-size:25px}.lc-reaction-grid{max-height:180px}}
+
+.lc-message-text{-webkit-touch-callout:none}

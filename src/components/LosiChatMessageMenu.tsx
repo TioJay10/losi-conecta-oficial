@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { chatAction, type ChatMessage } from '../lib/losi-chat';
+import {LosiChatReactionPicker} from './LosiChatReactions';
+import {setMessageReaction} from '../lib/losi-chat-reactions';
 import { LosiChatActionIcon } from './LosiChatActionIcon';
 
 /** The same actions are opened by the desktop chevron and mobile long press. */
@@ -32,42 +34,54 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
   useEffect(() => {
     if (!open || !menu.current || !trigger.current) return;
     const node = menu.current;
-    const desktop = window.matchMedia('(min-width: 769px)');
+    
     function position() {
-      if (!desktop.matches || !trigger.current) {
-        node.style.removeProperty('left'); node.style.removeProperty('top');
-        return;
-      }
-      const anchor = trigger.current.getBoundingClientRect();
+      if (!trigger.current) return;
+      const visibleTrigger=trigger.current.getBoundingClientRect();
+      const anchor=visibleTrigger.width?visibleTrigger:(trigger.current.closest('.lc-bubble,.lc-sent-attachment,.lc-message-text')??trigger.current).getBoundingClientRect();
+      const viewport=window.visualViewport;
+      const width=viewport?.width??window.innerWidth,height=viewport?.height??window.innerHeight;
+      const x=viewport?.offsetLeft??0,y=viewport?.offsetTop??0;
+      node.style.maxHeight=`${Math.max(100,height-24)}px`;
       const bounds = node.getBoundingClientRect();
-      const margin = 8;
-      const left = Math.max(margin, Math.min(anchor.right - bounds.width, window.innerWidth - bounds.width - margin));
+      const margin = 12;
+      const left = Math.max(x+margin, Math.min(anchor.right - bounds.width, x+width - bounds.width - margin));
       const below = anchor.bottom + 4;
-      const top = below + bounds.height <= window.innerHeight - margin ? below : anchor.top - bounds.height - 4;
+      const top = below + bounds.height <= y+height - margin ? below : anchor.top - bounds.height - 4;
       node.style.left = `${left}px`;
-      node.style.top = `${Math.max(margin, Math.min(top, window.innerHeight - bounds.height - margin))}px`;
+      node.style.top = `${Math.max(y+margin, Math.min(top, y+height - bounds.height - margin))}px`;
     }
     position();
     const observer = new ResizeObserver(position);
     observer.observe(node);
     function scroll(event: Event) {
       // Scrolling the menu itself must not dismiss its actions.
-      if (!desktop.matches) return;
+      
       if (event.target instanceof Node && node.contains(event.target)) return;
       onClose();
     }
     window.addEventListener('resize', position);
+    window.visualViewport?.addEventListener('resize',position);
+    window.visualViewport?.addEventListener('scroll',position);
     window.addEventListener('scroll', scroll, true);
     return () => {
       observer.disconnect();
       window.removeEventListener('resize', position);
+      window.visualViewport?.removeEventListener('resize',position);
+      window.visualViewport?.removeEventListener('scroll',position);
       window.removeEventListener('scroll', scroll, true);
     };
   }, [open, onClose]);
   useEffect(() => {
     if (!open) { setConfirm(false); return; }
-    menu.current?.querySelector<HTMLButtonElement>(confirm ? '.lc-media-confirm button:not(:disabled)' : '.lc-media-actions button:not(:disabled)')?.focus({ preventScroll: true });
+    menu.current?.querySelector<HTMLButtonElement>(confirm ? '.lc-media-confirm button:not(:disabled)' : '.lc-reaction-quick button:not(:disabled)')?.focus({ preventScroll: true });
   }, [open, confirm]);
+  async function react(emoji:string|null){
+    if(lock.current)return;lock.current=true;setBusy(true);setError('');
+    try{await setMessageReaction(message.id,emoji);onClose();}
+    catch(e){setError(e instanceof Error?e.message:'Não foi possível reagir. Tente novamente.');}
+    finally{lock.current=false;setBusy(false);}
+  }
   async function remove(everyone: boolean) {
     if (lock.current) return;
     lock.current = true; setBusy(true); setError('');
@@ -89,6 +103,7 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
     </button>}
     <div ref={menu} className="lc-media-menu" hidden={!open} aria-label="Opções da mensagem"
       onPointerDown={e => e.stopPropagation()}>
+      <div hidden={confirm}>{open&&!message.deleted_at&&<LosiChatReactionPicker message={message} busy={busy} onReact={emoji=>void react(emoji)}/>}</div>
       <div className="lc-media-actions" hidden={confirm}>
         {onReply && <button type="button" disabled={busy} onClick={() => { onClose(); onReply(); }}><LosiChatActionIcon name="reply"/><span>Responder</span></button>}
         {message.attachment && <button type="button" disabled={busy} onClick={() => void download()}><LosiChatActionIcon name="download"/><span>Baixar arquivo</span></button>}
@@ -102,7 +117,7 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
         <button type="button" disabled={busy} onClick={() => setConfirm(false)}><LosiChatActionIcon name="back"/><span>Voltar</span></button>
         <button type="button" onClick={onClose}><LosiChatActionIcon name="close"/><span>Fechar</span></button>
       </div>
+      {error && <p className="lc-message-action-error" role="alert">{error}</p>}
     </div>
-    {error && <p className="lc-message-action-error" role="status">{error}</p>}
   </>;
 }
