@@ -505,9 +505,9 @@ function SupplierPanelRail({ pathname }: { pathname: string }) {
     { to: "/equipe-escalas", label: "Equipe & Escalas", icon: "team" },
   ];
   return <>
-  <button type="button" className="supplier-rail-mobile-toggle" aria-label="Abrir menu do painel" aria-expanded={open} onClick={() => setOpen((value) => !value)}>☰</button>
+  <button type="button" className="supplier-rail-mobile-toggle" aria-label={open ? "Fechar menu do painel" : "Abrir menu do painel"} aria-controls="supplier-panel-navigation" aria-expanded={open} onClick={() => setOpen((value) => !value)}>☰</button>
   <button type="button" className={"supplier-rail-scrim" + (open ? " open" : "")} aria-label="Fechar menu do painel" onClick={() => setOpen(false)} />
-  <aside className={"supplier-panel-rail" + (open ? " open" : "")} aria-label="Menu do painel profissional">
+  <aside id="supplier-panel-navigation" className={"supplier-panel-rail" + (open ? " open" : "")} aria-label="Menu do painel profissional">
     <a className="supplier-rail-brand" href="/painel"><strong>LOSI</strong><span>CONECTA</span></a>
     <small className="supplier-rail-kicker">PAINEL PROFISSIONAL</small>
     <nav>
