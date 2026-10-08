@@ -26,3 +26,14 @@
 .lc-app[data-theme=light]{--lc-danger:#a52832}
 @media(max-width:700px){.lc-app .lc-thread-contact{gap:8px;padding:0;min-width:70px}.lc-contact-top{padding:8px 14px}.lc-contact-scroll{padding-inline:16px}.lc-contact-identity{padding-top:22px}.lc-contact-identity h3{font-size:24px}.lc-contact-row>small{max-width:78px}.lc-contact-photo{width:116px;height:116px}.lc-contact-assets.is-media{gap:10px}.lc-contact-asset{padding:8px}.lc-contact-asset .lc-sent-attachment :is(img,video){max-height:170px}}
 @media(prefers-reduced-motion:reduce){.lc-contact-details *{scroll-behavior:auto}}
+
+/* The complete stored file, including its caption, shares the chat long-press target. */
+.lc-contact-asset:has(>.lc-storage-attachment){padding:0}
+.lc-contact-asset>.lc-storage-attachment{margin:0;padding:10px;-webkit-touch-callout:none;touch-action:pan-y}
+.lc-storage-attachment .lc-storage-file-meta{display:block;color:var(--lc-muted);font-size:11px;margin-top:10px;line-height:1.4}
+.lc-storage-attachment>img{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+@media(max-width:700px){.lc-contact-asset>.lc-storage-attachment{padding:8px}.lc-contact-assets.is-media .lc-contact-asset:has(.lc-media-menu:not([hidden])){grid-column:1/-1}}
+
+.lc-app .lc-storage-attachment>.lc-message-menu-trigger{position:absolute;top:8px;right:8px;width:28px;min-width:28px;height:28px;min-height:28px;padding:5px;display:grid;place-items:center;background:var(--lc-menu,#10283f);border:0;border-radius:4px}
+.lc-storage-attachment>.lc-message-menu-trigger svg{width:18px;height:18px}
+@media(max-width:700px){.lc-app .lc-storage-attachment>.lc-message-menu-trigger{display:none}}
