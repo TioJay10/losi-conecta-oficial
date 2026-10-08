@@ -1,0 +1,47 @@
+/* Theme is scoped to Chat LOSI, including its group, media and billing surfaces. */
+.lc-app { --lc-accent:#d6b46a; --lc-on-accent:#0b182a; }
+.lc-app[data-theme="light"] {
+  color-scheme:light;
+  --lc-bg:#f5f6f8;
+  --lc-panel:#ffffff;
+  --lc-raised:#eaf0f6;
+  --lc-line:#d3dbe5;
+  --lc-text:#12243a;
+  --lc-muted:#526377;
+  --lc-gold:#806020;
+  --lc-gold-hover:#684b15;
+  --lc-sent:#e0eaf5;
+  --lc-control-border:#768497;
+  --lc-scrollbar:#8b99aa;
+  --lc-nav:#ffffff;
+  --lc-nav-active:#e0eaf5;
+  --lc-nav-border:#d3dbe5;
+  --lc-receipt:#526377;
+  --lc-receipt-read:#136b9c;
+  --lc-quote:#d7e3ee;
+  --lc-menu:#ffffff;
+  --lc-menu-hover:#eaf0f6;
+  --lc-menu-border:#d3dbe5;
+  --lc-menu-divider:#d3dbe5;
+  --lc-attachment-text:#173e5c;
+  --lc-media-canvas:#e4ebf2;
+  --lc-media-surface:#eaf0f6;
+  --lc-media-border:#768497;
+  --lc-audio-bg:#deecf5;
+  --lc-audio-text:#173e5c;
+  --lc-audio-avatar:#e4ebf2;
+  --lc-audio-play:#244963;
+  --lc-audio-play-hover:#102a40;
+  --lc-audio-meta:#426078;
+  --lc-audio-gold:#806020;
+  --lc-waveform:#806020;
+  --lc-wave-opacity:.85;
+  --lc-progress-dot:#2671b5;
+  --lc-focus:#806020;
+}
+.lc-app .lc-theme-menu-button {display:flex;align-items:center;gap:10px;}
+.lc-theme-menu-button svg {width:18px;height:18px;color:var(--lc-gold);}
+.lc-app[data-theme="light"] .lc-message-menu-trigger:hover,
+.lc-app[data-theme="light"] .lc-message-menu-trigger[aria-expanded="true"] {background:var(--lc-menu-hover);}
+.lc-app[data-theme="light"] .lc-group-new-link:hover {color:var(--lc-gold-hover);}
+.lc-app[data-theme="light"] .lcp-card :focus-visible {outline-color:var(--lc-gold);}

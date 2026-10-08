@@ -6,9 +6,13 @@ import { LosiChatComposer, LosiChatAttachment } from "./LosiChatAttachments";
 import "../chat-losi.css";
 import { LosiChatSearch } from "./LosiChatSearch";
 import { LosiChatQuote, LosiChatText } from "./LosiChatReply";
+import { useLosiChatTheme } from "../lib/losi-chat-theme";
+import "../losi-chat-theme.css";
 import { supabase } from "../lib/supabase";
 
 const icons = {
+ sun:"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M12 2v2 M12 20v2 M2 12h2 M20 12h2 M5 5l1.5 1.5 M17.5 17.5 19 19 M5 19l1.5-1.5 M17.5 6.5 19 5",
+ moon:"M20 15.2A9 9 0 0 1 8.8 4 9 9 0 1 0 20 15.2Z",
  chat:"M4 3h16a1 1 0 0 1 1 1v13H8l-5 4V4a1 1 0 0 1 1-1Z M7 8h10 M7 12h7",
  search:"M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15 m5.5-2 5 5",
  plus:"M12 4v16 M4 12h16",more:"M5 12h.01 M12 12h.01 M19 12h.01",
@@ -117,11 +121,14 @@ export function LosiChatPreview(){
  function openChat(chat:Chat){setViewingGroup(false);setSelected(chat);setSection("chats");setDraft("");setNotice("");}
  function previewNotice(){setNotice("Abra uma conversa e toque no clipe para enviar imagens, vídeos ou documentos.");}
  const nav=[{id:"contacts",icon:"users",label:"Contatos"},{id:"credits",icon:"wallet",label:"Créditos"},{id:"chats",icon:"chat",label:"Conversas"},{id:"account",icon:"profile",label:"Você"}] as const;
- return <main className={`lc-app${selected?" lc-chat-open":""}`} aria-label="Chat LOSI">
+ const {theme,toggleTheme}=useLosiChatTheme();
+ const themeLabel=theme==="dark"?"Ativar modo claro":"Ativar modo escuro";
+ return <main data-theme={theme} className={`lc-app${selected?" lc-chat-open":""}`} aria-label="Chat LOSI">
   <aside className="lc-rail" aria-label="Navegação do chat">
    <button className={section==="chats"?"is-active":""} aria-label="Conversas" onClick={()=>go("chats")}><Icon name="chat"/><span className="lc-rail-count">{unread}</span></button>
    <button className={section==="contacts"?"is-active":""} aria-label="Contatos" onClick={()=>go("contacts")}><Icon name="users"/></button>
    <button className={section==="credits"?"is-active":""} aria-label="Saldo e recarga" onClick={()=>go("credits")}><Icon name="wallet"/></button>
+   <button aria-label={themeLabel} title={themeLabel} onClick={toggleTheme}><Icon name={theme==="dark"?"sun":"moon"}/></button>
    <span className="lc-rail-rule"/>
    <a href="/painel" aria-label="Voltar ao painel LOSI"><Icon name="home"/></a>
    <button className="lc-rail-profile" aria-label="Meu número digital" onClick={()=>go("account")}><Icon name="profile"/></button>
@@ -130,7 +137,7 @@ export function LosiChatPreview(){
    <header className="lc-list-header">
     <div className="lc-mobile-actions"><button aria-label="Abrir opções" onClick={()=>setMenu(!menu)} aria-expanded={menu}><Icon name="more"/></button><span/><button aria-label="Câmera" onClick={previewNotice}><Icon name="camera"/></button><button className="lc-add" aria-label="Nova conversa" onClick={()=>go("contacts")}><Icon name="plus"/></button></div>
     <div className="lc-desktop-heading"><strong>Chat LOSI</strong><button aria-label="Abrir opções" onClick={()=>setMenu(!menu)} aria-expanded={menu}><Icon name="more"/></button><button className="lc-add" aria-label="Nova conversa" onClick={()=>go("contacts")}><Icon name="plus"/></button></div>
-    {menu&&<div className="lc-menu"><button onClick={()=>go("new-group")}>Novo grupo</button><button onClick={()=>go("account")}>Meu número digital</button><button onClick={()=>go("credits")}>Saldo e recarga</button><a href="/painel">Voltar ao painel</a></div>}
+    {menu&&<div className="lc-menu"><button className="lc-theme-menu-button" aria-label={themeLabel} onClick={()=>{toggleTheme();setMenu(false);}}><Icon name={theme==="dark"?"sun":"moon"}/><span>{theme==="dark"?"Modo claro":"Modo escuro"}</span></button><button onClick={()=>go("new-group")}>Novo grupo</button><button onClick={()=>go("account")}>Meu número digital</button><button onClick={()=>go("credits")}>Saldo e recarga</button><a href="/painel">Voltar ao painel</a></div>}
     <h1 className="lc-mobile-title">{section==="chats"?"Conversas":section==="contacts"?"Contatos":section==="credits"?"Créditos":section==="new-group"?"Novo grupo":"Você"}</h1>
     <button className="lc-balance" onClick={()=>go("credits")} aria-label="Ver saldo de créditos"><Icon name="wallet"/><span><strong>{accountLoading?"…":balance}</strong> créditos</span></button>
     {accountError&&<p className="lc-demo-note" role="status">{accountError}</p>}
