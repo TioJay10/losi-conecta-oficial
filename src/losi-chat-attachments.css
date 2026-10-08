@@ -79,5 +79,5 @@
   .lc-app .lc-bubble .lc-message-menu-trigger{position:absolute;top:3px;right:3px;z-index:2;display:grid;place-items:center;width:28px;height:24px;min-height:24px;padding:3px;border:0;border-radius:4px;background:transparent;color:var(--lc-gold);cursor:pointer}
   .lc-app .lc-bubble .lc-message-menu-trigger:hover,.lc-app .lc-bubble .lc-message-menu-trigger[aria-expanded=true]{background:#10283f}
   .lc-bubble .lc-message-menu-trigger svg{width:18px;height:18px;pointer-events:none}
-  .lc-bubble .lc-media-menu{min-width:200px}
+  .lc-bubble .lc-media-menu{position:fixed;z-index:50;width:224px;min-width:200px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;margin:0;white-space:normal}
 }

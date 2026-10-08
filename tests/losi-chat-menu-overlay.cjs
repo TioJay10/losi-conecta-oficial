@@ -1,0 +1,13 @@
+const fs=require('fs'),ts=require('typescript'),vm=require('vm'),assert=require('assert/strict');
+const code=ts.transpileModule(fs.readFileSync('src/components/LosiChatMessageMenu.tsx','utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+let effects=[],closed=0,desktop={matches:true};const events={};let disconnected=false;class Node{};
+const window={innerWidth:1024,innerHeight:700,matchMedia:()=>desktop,addEventListener:(n,f)=>events[n]=f,removeEventListener:(n,f)=>{if(events[n]===f)delete events[n]}};
+const react={useRef:v=>({current:v}),useState:v=>[v,()=>{}],useEffect:f=>effects.push(f)};
+const jsx=(type,props)=>({type,props});const context={exports:{},window,Node,ResizeObserver:class{observe(){}disconnect(){disconnected=true}},require:n=>n==='react'?react:n==='react/jsx-runtime'?{jsx,jsxs:jsx}:{}};vm.createContext(context);vm.runInContext(code,context);
+const tree=context.exports.LosiChatMessageMenu({message:{id:'1'},own:true,open:true,onOpen(){},onClose(){closed++},onDeleted(){}});
+function find(t,c){if(Array.isArray(t)){for(const n of t){const x=find(n,c);if(x)return x}}else if(t&&typeof t==='object'){if(t.props?.className===c)return t;return find(t.props?.children,c)}}
+const trigger=find(tree,'lc-message-menu-trigger'),menu=find(tree,'lc-media-menu');let anchor={right:900,top:80,bottom:104};const style={removeProperty(n){delete this[n]}};const child=new Node();const node={style,getBoundingClientRect:()=>({width:224,height:230}),contains:x=>x===child};trigger.props.ref.current={getBoundingClientRect:()=>anchor};menu.props.ref.current=node;
+const cleanup=effects[0]();assert.equal(style.left,'676px');assert.equal(style.top,'108px');
+anchor={right:100,top:660,bottom:684};events.resize();assert.equal(style.left,'8px','clamp left edge');assert.equal(style.top,'426px','flip above near bottom');
+anchor={right:1200,top:0,bottom:24};events.resize();assert.equal(style.left,'792px','clamp right edge');events.scroll({target:child});assert.equal(closed,0,'menu scrolling stays open');events.scroll({target:new Node()});assert.equal(closed,1,'history scrolling closes anchored menu');desktop.matches=false;events.resize();assert.equal(style.top,undefined);assert.equal(style.left,undefined);events.scroll({target:new Node()});assert.equal(closed,1,'mobile behavior preserved');cleanup();assert.ok(disconnected);assert.deepEqual(events,{});
+const css=fs.readFileSync('src/losi-chat-attachments.css','utf8');assert.match(css,/\.lc-bubble \.lc-media-menu\{position:fixed/,'desktop menu stays out of message flow');console.log('PASS: overlay anchors to arrow, clamps viewport, flips above, preserves mobile, cleans listeners');

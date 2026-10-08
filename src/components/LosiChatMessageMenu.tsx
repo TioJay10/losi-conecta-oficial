@@ -9,7 +9,43 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
 }) {
   const [busy, setBusy] = useState(false), [confirm, setConfirm] = useState(false), [error, setError] = useState('');
   const menu = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const lock = useRef(false);
+  useEffect(() => {
+    if (!open || !menu.current || !trigger.current) return;
+    const node = menu.current;
+    const desktop = window.matchMedia('(min-width: 769px)');
+    function position() {
+      if (!desktop.matches || !trigger.current) {
+        node.style.removeProperty('left'); node.style.removeProperty('top');
+        return;
+      }
+      const anchor = trigger.current.getBoundingClientRect();
+      const bounds = node.getBoundingClientRect();
+      const margin = 8;
+      const left = Math.max(margin, Math.min(anchor.right - bounds.width, window.innerWidth - bounds.width - margin));
+      const below = anchor.bottom + 4;
+      const top = below + bounds.height <= window.innerHeight - margin ? below : anchor.top - bounds.height - 4;
+      node.style.left = `${left}px`;
+      node.style.top = `${Math.max(margin, Math.min(top, window.innerHeight - bounds.height - margin))}px`;
+    }
+    position();
+    const observer = new ResizeObserver(position);
+    observer.observe(node);
+    function scroll(event: Event) {
+      // Scrolling the menu itself must not dismiss its actions.
+      if (!desktop.matches) return;
+      if (event.target instanceof Node && node.contains(event.target)) return;
+      onClose();
+    }
+    window.addEventListener('resize', position);
+    window.addEventListener('scroll', scroll, true);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', position);
+      window.removeEventListener('scroll', scroll, true);
+    };
+  }, [open, onClose]);
   useEffect(() => {
     if (!open) { setConfirm(false); return; }
     menu.current?.querySelector<HTMLButtonElement>(confirm ? '.lc-media-confirm button:not(:disabled)' : '.lc-media-actions button:not(:disabled)')?.focus({ preventScroll: true });
@@ -29,7 +65,7 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
     finally { lock.current = false; setBusy(false); }
   }
   return <>
-    {!message.deleted_at && <button type="button" className="lc-message-menu-trigger" aria-label="Opções da mensagem" aria-expanded={open}
+    {!message.deleted_at && <button ref={trigger} type="button" className="lc-message-menu-trigger" aria-label="Opções da mensagem" aria-expanded={open}
       onPointerDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); if (open) onClose(); else onOpen(); }}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
     </button>}
