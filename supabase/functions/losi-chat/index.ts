@@ -221,7 +221,7 @@ Deno.serve(async(req:Request)=>{
   }
   if(body.action==='contact-settings'){
    await threadForUser(body.threadId);
-   if(body.theme!==undefined&&!['default','navy','light','gold'].includes(body.theme)||body.blocked!==undefined&&typeof body.blocked!=='boolean'||body.theme===undefined&&body.blocked===undefined)throw new Error('CONVERSA_DADOS_INVALIDOS');
+   if(body.theme!==undefined&&!['default','navy','light','gold','blue','lavender','rose','teal','plum','linen','waves','confetti','petals','stars','arches','terrazzo','diamonds'].includes(body.theme)||body.blocked!==undefined&&typeof body.blocked!=='boolean'||body.theme===undefined&&body.blocked===undefined)throw new Error('CONVERSA_DADOS_INVALIDOS');
    checked(await admin.rpc('losi_chat_contact_settings',{p_user:user.id,p_thread:body.threadId,p_theme:body.theme??null,p_blocked:body.blocked??null}));
    return json(checked(await admin.rpc('losi_chat_contact_details',{p_user:user.id,p_thread:body.threadId})));
   }

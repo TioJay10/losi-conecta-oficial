@@ -2,8 +2,10 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { chatAction, formatLosiNumber, type ChatMessage, type ChatThread } from '../lib/losi-chat';
 import { LosiChatAttachment } from './LosiChatAttachments';
 import '../losi-chat-contact.css';
+import {conversationThemes,type ConversationThemeId} from '../lib/losi-chat-conversation-themes';
+import {LosiChatConversationThemes} from './LosiChatConversationThemes';
 
-export type ContactSettings = { media:number; documents:number; links:number; bytes:number; favorite:boolean; theme:'default'|'navy'|'light'|'gold'; blocked:boolean; canSend:boolean };
+export type ContactSettings = { media:number; documents:number; links:number; bytes:number; favorite:boolean; theme:ConversationThemeId; blocked:boolean; canSend:boolean };
 type Cursor = {at:string;id:string};
 type AssetPage = {messages:ChatMessage[];hasMore:boolean;nextCursor:Cursor|null};
 type View = 'contact'|'media'|'links'|'documents'|'theme';
@@ -21,11 +23,11 @@ const paths = {
 } as const;
 function Icon({name}:{name:keyof typeof paths}) { return <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]}/></svg>; }
 const bytesLabel=(bytes:number)=>bytes<1048576?`${Math.round(bytes/1024).toLocaleString('pt-BR')} KB`:`${(bytes/1048576).toLocaleString('pt-BR',{maximumFractionDigits:1})} MB`;
-const themes = [{id:'default',name:'Padrão do chat'},{id:'navy',name:'Azul-marinho'},{id:'light',name:'Claro'},{id:'gold',name:'Dourado suave'}] as const;
+const themes = conversationThemes;
 function Row({icon,label,value,onClick,danger=false,disabled=false,pressed}:{icon:keyof typeof paths;label:string;value?:ReactNode;onClick:()=>void;danger?:boolean;disabled?:boolean;pressed?:boolean}) {
  return <button type="button" className={`lc-contact-row${danger?' is-danger':''}`} onClick={onClick} disabled={disabled} aria-pressed={pressed}><Icon name={icon}/><span>{label}</span>{value!==undefined&&<small>{value}</small>}<Icon name="next"/></button>;
 }
-export function LosiChatContactDetails({thread,userId,onClose,onSearch,onSettings,onFavorite}:{thread:ChatThread;userId:string;onClose:()=>void;onSearch:()=>void;onSettings:(settings:ContactSettings)=>void;onFavorite:()=>Promise<void>}) {
+export function LosiChatContactDetails({thread,userId,onClose,onSearch,onSettings,onFavorite,globalTheme='dark'}:{thread:ChatThread;userId:string;onClose:()=>void;onSearch:()=>void;onSettings:(settings:ContactSettings)=>void;onFavorite:()=>Promise<void>;globalTheme?:'dark'|'light'}) {
  const [view,setView]=useState<View>('contact'),[settings,setSettings]=useState<ContactSettings|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [assets,setAssets]=useState<ChatMessage[]>([]),[loading,setLoading]=useState(false),[more,setMore]=useState(false),[confirmBlock,setConfirmBlock]=useState(false);
  const cursor=useRef<Cursor|null>(null),request=useRef(0),lock=useRef(false),scroll=useRef<HTMLDivElement>(null),heading=useRef<HTMLHeadingElement>(null),confirmation=useRef<HTMLDivElement>(null),live=useRef(true);
@@ -75,7 +77,7 @@ export function LosiChatContactDetails({thread,userId,onClose,onSearch,onSetting
     <div className="lc-contact-rows"><Row icon="share" label="Compartilhar contato" onClick={()=>void share()}/><Row icon="file" label={busy?'Aguarde…':'Exportar conversa em texto'} disabled={busy} onClick={()=>void exportConversation()}/></div>
     <div className="lc-contact-rows"><Row icon="block" label={settings?.blocked?'Desbloquear contato':'Bloquear contato'} danger={!settings?.blocked} disabled={!settings||busy} onClick={()=>settings?.blocked?void save({blocked:false}):setConfirmBlock(true)}/></div>
     {confirmBlock&&<div ref={confirmation} className="lc-contact-confirm" role="alert"><strong>Bloquear {thread.name}?</strong><p>Vocês não poderão enviar mensagens nesta conversa. O histórico será mantido e você poderá desbloquear depois.</p><div><button type="button" disabled={busy} onClick={()=>setConfirmBlock(false)}>Cancelar</button><button type="button" className="is-danger" disabled={busy} onClick={()=>void save({blocked:true})}>{busy?'Bloqueando…':'Bloquear contato'}</button></div></div>}
-   </>:view==='theme'?<><p className="lc-contact-hint">Este tema muda somente a sua visualização desta conversa.</p><div className="lc-contact-rows">{themes.map(t=><button type="button" key={t.id} className="lc-contact-row" aria-pressed={settings?.theme===t.id} disabled={busy||!settings} onClick={()=>void save({theme:t.id})}><span className={`lc-contact-swatch lc-contact-swatch-${t.id}`}/><span>{t.name}</span>{settings?.theme===t.id&&<Icon name="check"/>}</button>)}</div></>:<>
+   </>:view==='theme'?<LosiChatConversationThemes globalTheme={globalTheme} saved={settings?.theme} busy={busy} onApply={theme=>save({theme})}/>:<>
     <div className="lc-contact-tabs" aria-label="Tipo de conteúdo">{(['media','links','documents'] as const).map((tab,i)=><button type="button" key={tab} aria-pressed={view===tab} onClick={()=>setView(tab)}>{['Mídias','Links','Docs'][i]}</button>)}</div>
     <p className="lc-contact-hint">Arquivos e links compartilhados com {thread.name}.{settings&&` Arquivos: ${bytesLabel(settings.bytes)}.`}</p>
     <div className={`lc-contact-assets ${view==='media'?'is-media':''}`}>{assets.map(m=><article key={m.id} className="lc-contact-asset">{view==='links'?<div className="lc-contact-links">{[...new Set(m.body.match(/https?:\/\/[^\s<>]+/gi)??[])].map(url=><a key={url} href={url} target="_blank" rel="noopener noreferrer">{url}</a>)}</div>:<LosiChatAttachment message={m} own={m.sender_id===userId} footer={<small className="lc-storage-file-meta">{m.sender_id===userId?'Você':thread.name} · {new Date(m.created_at).toLocaleDateString('pt-BR')}</small>} onDeleted={id=>{setAssets(old=>old.filter(item=>item.id!==id));void refresh();window.dispatchEvent(new Event('losi-chat-sync'));}}/>}{view==='links'&&<small>{m.sender_id===userId?'Você':thread.name} · {new Date(m.created_at).toLocaleDateString('pt-BR')}</small>}</article>)}</div>
