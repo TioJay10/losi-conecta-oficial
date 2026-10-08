@@ -13,7 +13,7 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
   const lock = useRef(false);
   useEffect(() => {
     if (!open) return;
-    const outside = (event: PointerEvent) => {
+    const outside = (event: Event) => {
       if (!(event.target instanceof Node)) return;
       if (menu.current?.contains(event.target) || trigger.current?.contains(event.target)) return;
       onClose();
@@ -21,9 +21,11 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
     const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
     // Capture also sees touches on controls that stop event propagation.
     document.addEventListener('pointerdown', outside, true);
+    document.addEventListener('touchstart', outside, { capture: true, passive: true });
     document.addEventListener('keydown', escape);
     return () => {
       document.removeEventListener('pointerdown', outside, true);
+      document.removeEventListener('touchstart', outside, true);
       document.removeEventListener('keydown', escape);
     };
   }, [open, onClose]);

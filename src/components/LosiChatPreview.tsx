@@ -61,15 +61,16 @@ export function LosiChatPreview(){
  const optionsMenu=useRef<HTMLDivElement>(null),mobileOptions=useRef<HTMLButtonElement>(null),desktopOptions=useRef<HTMLButtonElement>(null);
  useEffect(()=>{
   if(!menu)return;
-  const outside=(event:PointerEvent)=>{
+  const outside=(event:Event)=>{
    if(!(event.target instanceof Node))return;
    if([optionsMenu.current,mobileOptions.current,desktopOptions.current].some(node=>node?.contains(event.target as Node)))return;
    setMenu(false);
   };
   const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setMenu(false);};
   document.addEventListener('pointerdown',outside,true);
+  document.addEventListener('touchstart',outside,{capture:true,passive:true});
   document.addEventListener('keydown',escape);
-  return()=>{document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',escape);};
+  return()=>{document.removeEventListener('pointerdown',outside,true);document.removeEventListener('touchstart',outside,true);document.removeEventListener('keydown',escape);};
  },[menu]);
  const [notice,setNotice]=useState("");
  const [draft,setDraft]=useState("");
