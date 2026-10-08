@@ -493,6 +493,7 @@ function RootComponent() {
 }
 
 function SupplierPanelRail({ pathname }: { pathname: string }) {
+  const [open, setOpen] = useState(false);
   const links = [
     { to: "/painel", label: "Visão geral", icon: "overview" },
     { to: "/meu-perfil", label: "Meu perfil", icon: "profile" },
@@ -503,7 +504,10 @@ function SupplierPanelRail({ pathname }: { pathname: string }) {
     { to: "/losi-ads", label: "LOSI ADS", icon: "ads" },
     { to: "/equipe-escalas", label: "Equipe & Escalas", icon: "team" },
   ];
-  return <aside className="supplier-panel-rail" aria-label="Menu do painel profissional">
+  return <>
+  <button type="button" className="supplier-rail-mobile-toggle" aria-label="Abrir menu do painel" aria-expanded={open} onClick={() => setOpen((value) => !value)}>☰</button>
+  <button type="button" className={"supplier-rail-scrim" + (open ? " open" : "")} aria-label="Fechar menu do painel" onClick={() => setOpen(false)} />
+  <aside className={"supplier-panel-rail" + (open ? " open" : "")} aria-label="Menu do painel profissional">
     <a className="supplier-rail-brand" href="/painel"><strong>LOSI</strong><span>CONECTA</span></a>
     <small className="supplier-rail-kicker">PAINEL PROFISSIONAL</small>
     <nav>
@@ -513,7 +517,7 @@ function SupplierPanelRail({ pathname }: { pathname: string }) {
       {links.slice(3).map((link)=><a key={link.to} className={pathname===link.to?"active":""} href={link.to}><PanelMenuIcon name={link.icon}/><span>{link.label}</span></a>)}
     </nav>
     <div className="supplier-rail-footer"><span className="supplier-rail-status"/> Conta profissional</div>
-  </aside>;
+  </aside></>;
 }
 
 function RootErrorComponent() {
