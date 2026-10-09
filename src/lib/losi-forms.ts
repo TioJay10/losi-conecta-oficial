@@ -30,6 +30,7 @@ export type LosiForm = FormDraft & {
   version: number;
   created_at: string;
   updated_at: string;
+  response_count?: number;
 };
 export type PublicForm = Pick<
   LosiForm,
