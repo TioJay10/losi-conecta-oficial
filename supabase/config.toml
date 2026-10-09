@@ -20,3 +20,7 @@ verify_jwt = false
 # Asaas authenticates with ASAAS_WEBHOOK_TOKEN.
 [functions.asaas-webhook]
 verify_jwt = false
+
+# Public form actions are scoped by token; private actions verify auth.getUser.
+[functions.losi-forms]
+verify_jwt = false

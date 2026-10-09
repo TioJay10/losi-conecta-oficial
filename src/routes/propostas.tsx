@@ -837,6 +837,7 @@ function ProposalsPage() {
           <Link to="/propostas" className="dashboard-nav-item active" onClick={() => setMobileMenuOpen(false)}><PanelMenuIcon name="proposals" /><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></Link>
                   <Link to="/losi-ads" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><PanelMenuIcon name="ads" /><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></Link>
           <Link to="/equipe-escalas" className="dashboard-nav-item" onClick={() => setMobileMenuOpen(false)}><PanelMenuIcon name="team" /><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></Link>
+        <a className="dashboard-nav-item" href="/formularios"><PanelMenuIcon name="forms" /><span><strong>Formulários</strong><small>Links e respostas</small></span></a>
 </nav>
         <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><button type="button" className="dashboard-sidebar-logout" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/entrar" }); }}>Sair da conta</button></div>
       </aside>

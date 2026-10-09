@@ -65,6 +65,7 @@ function ReceivedReceiptsPage(){
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/orcamentos"})}}><PanelMenuIcon name="quotes" /><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span></button>
         <button type="button" className="dashboard-nav-item active" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/recibos"})}}><PanelMenuIcon name="receipts" /><span><strong>Recibos</strong><small>Comprovantes de serviço</small></span></button>
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/propostas"})}}><PanelMenuIcon name="proposals" /><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></button>
+        <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/formularios"})}}><PanelMenuIcon name="forms" /><span><strong>Formulários</strong><small>Links e respostas</small></span></button>
               <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/losi-ads"})}}><PanelMenuIcon name="ads" /><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></button>
         <button type="button" className="dashboard-nav-item" onClick={()=>{setMobileMenuOpen(false);navigate({to:"/equipe-escalas"})}}><PanelMenuIcon name="team" /><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></button>
 </nav>

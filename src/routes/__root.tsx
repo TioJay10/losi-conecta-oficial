@@ -454,7 +454,7 @@ function RootComponent() {
   }, []);
 
   const publicRoute = isPublicPath(location.pathname);
-  const supplierSurface = ["/meu-perfil", "/meus-servicos", "/orcamentos", "/equipe-escalas", "/notificar-inconsistencia"].includes(location.pathname);
+  const supplierSurface = ["/meu-perfil", "/meus-servicos", "/orcamentos", "/equipe-escalas", "/notificar-inconsistencia", "/formularios"].includes(location.pathname);
 
   if (!authChecked && !publicRoute) {
     return (
@@ -501,6 +501,7 @@ function SupplierPanelRail({ pathname }: { pathname: string }) {
     { to: "/orcamentos", label: "Orçamentos", icon: "quotes" },
     { to: "/recibos", label: "Recibos", icon: "receipts" },
     { to: "/propostas", label: "Propostas", icon: "proposals" },
+    { to: "/formularios", label: "Formulários", icon: "forms" },
     { to: "/losi-ads", label: "LOSI ADS", icon: "ads" },
     { to: "/equipe-escalas", label: "Equipe & Escalas", icon: "team" },
   ];

@@ -426,6 +426,7 @@ function LosiAdsPage() {
           <a className="dashboard-nav-item" href="/propostas"><PanelMenuIcon name="proposals" /><span><strong>Propostas</strong><small>Apresentações comerciais</small></span></a>
           <a className="dashboard-nav-item active" href="/losi-ads"><PanelMenuIcon name="ads" /><span><strong>LOSI ADS</strong><small>Eventos e oportunidades</small></span></a>
                   <a className="dashboard-nav-item" href="/equipe-escalas"><PanelMenuIcon name="team" /><span><strong>Equipe & Escalas</strong><small>Rede e calendário</small></span></a>
+        <a className="dashboard-nav-item" href="/formularios"><PanelMenuIcon name="forms" /><span><strong>Formulários</strong><small>Links e respostas</small></span></a>
 </nav>
         <div className="dashboard-sidebar-footer"><div className="dashboard-sidebar-status"><span></span> Conta profissional</div><button type="button" className="dashboard-sidebar-logout" onClick={() => void logout()}>Sair da conta</button></div>
       </aside>

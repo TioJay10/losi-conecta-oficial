@@ -1,0 +1,727 @@
+/* Forms extend the supplier's original navy/gold palette. All selectors scoped. */
+.lf-workspace,
+.lf-public-page {
+  --lf-navy: #0b1b31;
+  --lf-panel: #13263e;
+  --lf-gold: #e2c482;
+  --lf-text: #f6f8fc;
+  --lf-muted: #c1ccda;
+  --lf-line: #3c4c63;
+  --lf-input: #0d1d33;
+  --lf-red: #ffd0cd;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  box-sizing: border-box;
+  color: var(--lf-text);
+  accent-color: var(--lf-gold);
+  caret-color: var(--lf-gold);
+}
+.lf-workspace *,
+.lf-public-page * {
+  box-sizing: border-box;
+}
+.lf-workspace {
+  padding: 36px clamp(16px, 4vw, 48px) 64px;
+  background: #fbfcfe;
+  min-height: 100vh;
+  max-width: 1500px;
+  margin: auto;
+}
+.lf-workspace h1,
+.lf-public-page h1 {
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  font-weight: 750;
+  margin: 0 0 10px;
+}
+.lf-workspace h2,
+.lf-public-page h2 {
+  font-size: 20px;
+  line-height: 1.35;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.lf-workspace h3,
+.lf-public-page h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+  font-weight: 650;
+}
+.lf-workspace p,
+.lf-public-page p {
+  margin: 0 0 14px;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+.lf-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 0 0 26px;
+  color: var(--lf-navy);
+}
+.lf-page-heading p {
+  color: #49576b;
+  margin: 0;
+}
+.lf-surface {
+  background: var(--lf-navy);
+  padding: 28px;
+  border-radius: 12px;
+  margin-top: 22px;
+  box-shadow: 0 12px 30px rgba(7, 22, 44, 0.1);
+  color: var(--lf-text);
+}
+.lf-surface h2 {
+  color: var(--lf-gold);
+}
+.lf-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.lf-workspace button,
+.lf-public-page button,
+.lf-button {
+  font: inherit;
+  font-weight: 600;
+  border: 1px solid var(--lf-line);
+  border-radius: 6px;
+  min-height: 44px;
+  padding: 9px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--lf-panel);
+  color: var(--lf-text);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: normal;
+  max-width: 100%;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.lf-workspace button:hover,
+.lf-public-page button:hover,
+.lf-button:hover {
+  background: #203952;
+  border-color: var(--lf-gold);
+}
+.lf-workspace button:disabled,
+.lf-public-page button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.lf-workspace .lf-primary,
+.lf-public-page .lf-primary {
+  background: var(--lf-gold);
+  border-color: var(--lf-gold);
+  color: var(--lf-navy);
+}
+.lf-workspace .lf-primary:hover,
+.lf-public-page .lf-primary:hover {
+  background: #eed8a7;
+}
+.lf-workspace :focus-visible,
+.lf-public-page :focus-visible {
+  outline: 2px solid var(--lf-gold);
+  outline-offset: 3px;
+}
+.lf-workspace ::selection,
+.lf-public-page ::selection {
+  background: var(--lf-gold);
+  color: var(--lf-navy);
+}
+.lf-workspace .panel-menu-icon,
+.lf-public-page .panel-menu-icon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+}
+.lf-workspace label,
+.lf-public-page label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lf-text);
+}
+.lf-workspace input,
+.lf-workspace textarea,
+.lf-workspace select,
+.lf-public-page input,
+.lf-public-page textarea,
+.lf-public-page select {
+  display: block;
+  font: inherit;
+  width: 100%;
+  min-width: 0;
+  background: var(--lf-input);
+  color: var(--lf-text);
+  border: 1px solid var(--lf-line);
+  border-radius: 6px;
+  padding: 11px 12px;
+  min-height: 44px;
+  margin-top: 7px;
+  color-scheme: dark;
+}
+.lf-workspace textarea,
+.lf-public-page textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.lf-workspace input::placeholder,
+.lf-workspace textarea::placeholder,
+.lf-public-page input::placeholder,
+.lf-public-page textarea::placeholder {
+  color: #b4c1d1;
+  opacity: 1;
+}
+.lf-workspace .lf-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0 0 24px;
+  border-bottom: 1px solid #d8e0e9;
+  padding-bottom: 12px;
+}
+.lf-tabs button {
+  background: transparent;
+  color: #34445b;
+  border-color: transparent;
+}
+.lf-tabs button[aria-current="page"] {
+  background: var(--lf-navy);
+  color: var(--lf-gold);
+}
+.lf-tabs button:hover {
+  background: #e9edf3;
+  color: #0b1b31;
+}
+.lf-tabs button[aria-current="page"]:hover {
+  background: var(--lf-panel);
+  color: var(--lf-gold);
+}
+.lf-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 34px;
+}
+.lf-fields {
+  display: grid;
+  gap: 18px;
+}
+.lf-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.lf-settings {
+  padding-left: 26px;
+  border-left: 1px solid var(--lf-line);
+  min-width: 0;
+}
+.lf-settings h3 {
+  color: var(--lf-gold);
+  margin: 0 0 14px;
+}
+.lf-settings h3:not(:first-child) {
+  margin-top: 30px;
+}
+.lf-audience {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.lf-audience button {
+  justify-content: flex-start;
+  text-align: left;
+}
+.lf-audience button[aria-pressed="true"],
+.lf-editor-tabs button[aria-pressed="true"] {
+  border-color: var(--lf-gold);
+  color: var(--lf-gold);
+  background: #21374f;
+}
+.lf-workspace .lf-muted,
+.lf-public-page .lf-muted {
+  font-size: 12px;
+  color: var(--lf-muted);
+  font-weight: 400;
+  margin: 14px 0;
+}
+.lf-workspace .lf-check,
+.lf-public-page .lf-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  min-height: 32px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.lf-workspace .lf-check input,
+.lf-public-page .lf-check input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  flex: 0 0 18px;
+  padding: 0;
+}
+.lf-fixed-question {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 26px 0;
+  padding: 16px 0;
+  border-block: 1px solid var(--lf-line);
+}
+.lf-fixed-question span {
+  color: var(--lf-muted);
+  font-size: 12px;
+}
+.lf-question-heading {
+  margin-top: 26px !important;
+}
+.lf-question {
+  border-top: 1px solid var(--lf-line);
+  padding: 20px 0;
+  display: grid;
+  gap: 14px;
+}
+.lf-question-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.lf-question-controls > span {
+  color: var(--lf-muted);
+  font-size: 12px;
+}
+.lf-icon-actions {
+  display: flex;
+  gap: 4px;
+}
+.lf-icon-actions button {
+  padding: 8px;
+  width: 40px;
+}
+.lf-editor-tabs,
+.lf-editor-footer,
+.lf-row-actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.lf-editor-tabs {
+  margin-bottom: 24px;
+}
+.lf-editor-footer {
+  border-top: 1px solid var(--lf-line);
+  padding-top: 22px;
+  margin-top: 28px;
+  justify-content: flex-end;
+}
+.lf-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding: 22px 0;
+  border-top: 1px solid var(--lf-line);
+}
+.lf-form-info {
+  flex: 1;
+  min-width: 180px;
+}
+.lf-form-row h3 {
+  overflow-wrap: anywhere;
+  color: var(--lf-text);
+  margin: 0 0 7px;
+}
+.lf-form-row p {
+  font-size: 12px;
+  color: var(--lf-muted);
+  margin: 0 0 8px;
+}
+.lf-form-row .lf-row-actions {
+  max-width: 540px;
+}
+.lf-badge {
+  display: inline-block;
+  border: 1px solid var(--lf-line);
+  color: var(--lf-gold);
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.lf-badge.draft {
+  color: var(--lf-muted);
+}
+.lf-empty {
+  padding: 30px 0;
+  text-align: center;
+  color: var(--lf-muted);
+}
+.lf-empty h3,
+.lf-empty h1 {
+  color: var(--lf-text);
+}
+.lf-empty p {
+  margin: 10px auto 20px;
+}
+.lf-search {
+  max-width: 580px;
+  margin-bottom: 18px;
+}
+.lf-notice {
+  background: #11243b;
+  color: #f1d699;
+  padding: 14px 18px;
+  border-radius: 6px;
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+}
+.lf-error {
+  background: #482527;
+  color: #ffdcda;
+  padding: 14px 18px;
+  border-radius: 6px;
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+}
+.lf-error button {
+  margin-left: 14px;
+}
+.lf-response-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.lf-response-detail {
+  background: var(--lf-panel);
+  padding: 22px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.lf-response-detail dl {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+}
+.lf-response-detail dt {
+  color: var(--lf-gold);
+  font-size: 12px;
+  font-weight: 600;
+}
+.lf-response-detail dd {
+  margin: 5px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.lf-detail-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--lf-line);
+  padding-top: 22px;
+  margin-top: 24px;
+}
+.lf-detail-actions label {
+  min-width: 180px;
+}
+.lf-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.lf-share-group {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+.lf-share-group label {
+  max-width: 760px;
+}
+.lf-share-group p {
+  margin: 0;
+}
+.lf-share-group > button {
+  justify-self: start;
+}
+.lf-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(3, 12, 24, 0.75);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.lf-dialog {
+  width: min(520px, 100%);
+  border: 0;
+  background: var(--lf-navy);
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  color: var(--lf-text);
+}
+.lf-dialog h2 {
+  margin-bottom: 14px;
+  color: var(--lf-gold);
+}
+.lf-dialog p {
+  margin-bottom: 24px;
+}
+.lf-workspace .lf-danger {
+  color: #ffdcda;
+  background: #482527;
+}
+.lf-preview {
+  max-width: 680px;
+  margin: auto;
+}
+.lf-public-heading {
+  border-bottom: 1px solid var(--lf-line);
+  margin-bottom: 26px;
+  padding-bottom: 22px;
+}
+.lf-public-heading > strong {
+  color: var(--lf-gold);
+  display: block;
+  margin-bottom: 16px;
+}
+.lf-public-heading h2,
+.lf-public-heading h1 {
+  color: var(--lf-text);
+  margin-bottom: 14px;
+  overflow-wrap: anywhere;
+}
+.lf-public-heading p {
+  color: var(--lf-muted);
+  white-space: pre-wrap;
+}
+.lf-preview > .lf-fields,
+.lf-public-page form > .lf-fields {
+  margin-top: 22px;
+}
+.lf-preview > label {
+  margin-bottom: 22px;
+}
+.lf-required {
+  color: var(--lf-gold);
+  font-size: 12px;
+  font-weight: 400;
+}
+.lf-multi {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.lf-multi legend {
+  font-size: 13px;
+  font-weight: 600;
+}
+.lf-public-page {
+  min-height: 100vh;
+  padding: 28px 16px 40px;
+  background: #f9fbfe;
+  color: var(--lf-navy);
+}
+.lf-public-brand {
+  max-width: 740px;
+  margin: 0 auto 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.lf-public-brand > a {
+  color: var(--lf-navy);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 800;
+}
+.lf-public-brand > a strong {
+  color: #8b661e;
+}
+.lf-public-brand .lf-public-back {
+  font-size: 12px;
+}
+.lf-public-surface {
+  max-width: 740px;
+  margin: auto;
+  padding: 36px;
+  background: var(--lf-navy);
+  color: var(--lf-text);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(12, 28, 48, 0.12);
+}
+.lf-public-page .lf-submit {
+  margin-top: 12px;
+}
+.lf-public-footer {
+  color: #536176;
+  text-align: center;
+  margin-top: 24px;
+  font-size: 12px;
+}
+.lf-success {
+  padding: 30px 0;
+  text-align: center;
+}
+.lf-success > .panel-menu-icon {
+  width: 44px;
+  height: 44px;
+  color: var(--lf-gold);
+  margin-bottom: 14px;
+}
+.lf-success p {
+  margin: 0 auto 24px;
+  color: var(--lf-muted);
+}
+.lf-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 1000px) {
+  .lf-editor-grid {
+    grid-template-columns: 1fr;
+  }
+  .lf-settings {
+    border-left: 0;
+    border-top: 1px solid var(--lf-line);
+    padding: 24px 0 0;
+  }
+  .lf-audience {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .lf-response-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .lf-form-row .lf-row-actions {
+    max-width: none;
+  }
+}
+@media (max-width: 600px) {
+  .lf-workspace {
+    padding: 70px 16px 40px;
+  }
+  .lf-page-heading {
+    gap: 14px;
+  }
+  .lf-page-heading h1 {
+    font-size: 26px;
+  }
+  .lf-page-heading p {
+    font-size: 13px;
+  }
+  .lf-surface {
+    padding: 20px 16px;
+  }
+  .lf-tabs {
+    gap: 4px !important;
+  }
+  .lf-tabs button {
+    font-size: 12px;
+    padding: 9px 10px;
+    flex: 1 1 auto;
+  }
+  .lf-editor-grid {
+    gap: 24px;
+  }
+  .lf-audience,
+  .lf-two,
+  .lf-response-filters {
+    grid-template-columns: 1fr;
+  }
+  .lf-workspace input,
+  .lf-workspace select,
+  .lf-workspace textarea,
+  .lf-public-page input,
+  .lf-public-page select,
+  .lf-public-page textarea {
+    font-size: 16px;
+  }
+  .lf-row-actions {
+    gap: 8px;
+  }
+  .lf-row-actions button,
+  .lf-row-actions .lf-button {
+    font-size: 12px;
+    flex: 1 1 auto;
+  }
+  .lf-form-row {
+    gap: 14px;
+    padding: 20px 0;
+  }
+  .lf-form-info {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  .lf-icon-actions button {
+    width: 44px;
+  }
+  .lf-public-page {
+    padding: 22px 12px 36px;
+  }
+  .lf-public-surface {
+    padding: 24px 18px;
+  }
+  .lf-public-brand {
+    margin: 0 6px 22px;
+  }
+  .lf-response-detail {
+    padding: 18px 14px;
+  }
+  .lf-editor-footer button {
+    flex: 1 1 auto;
+  }
+  .lf-dialog {
+    padding: 24px;
+  }
+  .lf-public-page .lf-submit {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lf-workspace button,
+  .lf-public-page button,
+  .lf-button {
+    transition: none;
+  }
+}
+
+.lf-dialog::backdrop {
+  background: rgba(3, 12, 24, 0.75);
+}
+
+.lf-editor-disabled {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
