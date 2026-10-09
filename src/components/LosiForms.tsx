@@ -36,6 +36,7 @@ export function LosiForms() {
     [preview, setPreview] = useState(false),
     [previewAnswers, setPreviewAnswers] = useState<FormAnswers>({});
   const [busy, setBusy] = useState(false),
+    [fieldErrors, setFieldErrors] = useState<Record<string, string>>({}),
     [selected, setSelected] = useState(""),
     [search, setSearch] = useState(""),
     [invites, setInvites] = useState<FormInvitation[]>([]),
@@ -124,6 +125,25 @@ export function LosiForms() {
   }
   async function save(status: FormDraft["status"]) {
     if (!draft) return;
+    const nextErrors: Record<string, string> = {};
+    draft.fields.forEach((field) => {
+      if (!field.label.trim()) nextErrors[field.id] = "Digite o texto da pergunta.";
+      if (["select", "multi"].includes(field.type)) {
+        const options = field.options.map((option) => option.trim()).filter(Boolean);
+        if (new Set(options).size < 2) nextErrors[field.id] = "Adicione pelo menos duas opções diferentes e preenchidas.";
+      }
+    });
+    if (Object.keys(nextErrors).length) {
+      setFieldErrors(nextErrors);
+      setError("Verifique os campos destacados em vermelho.");
+      requestAnimationFrame(() => {
+        const first = document.querySelector<HTMLElement>("[data-form-error=\"true\"]");
+        first?.scrollIntoView({ behavior: "smooth", block: "center" });
+        first?.focus();
+      });
+      return;
+    }
+    setFieldErrors({});
     await action(async () => {
       const r = await formsAction<{ form: LosiForm }>("save", {
         id: editing?.id,
@@ -336,7 +356,7 @@ export function LosiForms() {
                   </div>
                   <h3 className="lf-question-heading">Perguntas</h3>
                   {draft.fields.map((f, i) => (
-                    <section className="lf-question" key={f.id}>
+                    <section className={`lf-question ${fieldErrors[f.id] ? "lf-question-error" : ""}`} key={f.id} data-form-error={fieldErrors[f.id] ? "true" : undefined}>
                       <div className="lf-question-controls">
                         <span>Pergunta {i + 1}</span>
                         <div className="lf-icon-actions">
@@ -414,12 +434,18 @@ export function LosiForms() {
                           Opções (uma por linha)
                           <textarea
                             value={f.options.join("\n")}
-                            onChange={(e) =>
-                              fieldUpdate(f.id, {
-                                options: e.target.value.split("\n"),
-                              })
-                            }
+                            className={fieldErrors[f.id] ? "lf-input-error" : ""}
+                            aria-invalid={Boolean(fieldErrors[f.id])}
+                            onChange={(e) => {
+                              fieldUpdate(f.id, { options: e.target.value.split("\n") });
+                              setFieldErrors((errors) => {
+                                const next = { ...errors };
+                                delete next[f.id];
+                                return next;
+                              });
+                            }}
                           />
+                          {fieldErrors[f.id] && <span className="lf-field-error" role="alert">{fieldErrors[f.id]}</span>}
                         </label>
                       )}
                       <label className="lf-check">
