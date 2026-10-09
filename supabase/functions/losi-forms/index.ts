@@ -404,8 +404,12 @@ Deno.serve(async (req: Request) => {
           "id,form_id,respondent_id,respondent_name,source,answers,definition,status,created_at",
           { count: "exact" },
         )
-        .eq("form_id", b.id)
-        .order("created_at", { ascending: false });
+        .eq("form_id", b.id);
+      if (b.sort === "name")
+        query = query.order("respondent_name", { ascending: true });
+      query = query
+        .order("created_at", { ascending: b.sort === "oldest" })
+        .order("id", { ascending: true });
       if (["public", "supplier"].includes(b.source))
         query = query.eq("source", b.source);
       if (["new", "review", "approved", "archived"].includes(b.status))

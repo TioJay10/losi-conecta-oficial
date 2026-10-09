@@ -960,6 +960,7 @@ function LosiFormResponses({
     [status, setStatus] = useState(""),
     [from, setFrom] = useState(""),
     [until, setUntil] = useState(""),
+    [sort, setSort] = useState("newest"),
     [page, setPage] = useState(0),
     [expanded, setExpanded] = useState<string | null>(null),
     [busy, setBusy] = useState(false);
@@ -971,7 +972,7 @@ function LosiFormResponses({
   useEffect(() => {
     setPage(0);
     setExpanded(null);
-  }, [selected, search, source, status, from, until]);
+  }, [selected, search, source, status, from, until, sort]);
   const refresh = useCallback(async () => {
     const seq = ++sequence.current;
     if (!selected) {
@@ -983,7 +984,7 @@ function LosiFormResponses({
     try {
       const r = await formsAction<{ responses: FormResponse[]; count: number }>(
         "responses",
-        { id: selected, page, search, source, status, from, until },
+        { id: selected, page, search, source, status, from, until, sort },
       );
       if (seq === sequence.current) {
         setRows(r.responses);
@@ -995,7 +996,7 @@ function LosiFormResponses({
     } finally {
       if (seq === sequence.current) setLoading(false);
     }
-  }, [selected, page, search, source, status, from, until]);
+  }, [selected, page, search, source, status, from, until, sort]);
   useEffect(() => {
     const timer = setTimeout(() => void refresh(), 250);
     return () => {
@@ -1081,7 +1082,7 @@ function LosiFormResponses({
           </select>
         </label>
         <label>
-          De
+          Período — de
           <input
             type="date"
             value={from}
@@ -1089,14 +1090,23 @@ function LosiFormResponses({
           />
         </label>
         <label>
-          Até
+          Período — até
           <input
             type="date"
             value={until}
             onChange={(e) => setUntil(e.target.value)}
           />
         </label>
+        <label>
+          Ordenar respostas
+          <select value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="newest">Mais recentes primeiro</option>
+            <option value="oldest">Mais antigas primeiro</option>
+            <option value="name">Nome — A a Z</option>
+          </select>
+        </label>
       </div>
+      <p className="lf-response-help">Clique no nome para abrir o formulário respondido.</p>
       {error && (
         <p className="lf-error" role="alert">
           {error}
@@ -1122,25 +1132,24 @@ function LosiFormResponses({
       ) : (
         rows.map((r) => (
           <article key={r.id} className="lf-response-row">
-            <div className="lf-form-row">
-              <div>
-                <h3>{r.respondent_name}</h3>
-                <p>
-                  {date(r.created_at)} ·{" "}
-                  {r.source === "public" ? "Link público" : "Fornecedor LOSI"}
-                </p>
-                <span className="lf-badge">{responseStatuses[r.status]}</span>
-              </div>
-              <button
-                aria-expanded={expanded === r.id}
-                onClick={() => setExpanded(expanded === r.id ? null : r.id)}
-              >
-                <PanelMenuIcon name={expanded === r.id ? "up" : "down"} />
-                {expanded === r.id ? "Fechar resposta" : "Ver resposta"}
-              </button>
-            </div>
+            <button
+              type="button"
+              className="lf-response-summary"
+              aria-expanded={expanded === r.id}
+              aria-controls={`response-${r.id}`}
+              onClick={() => setExpanded(expanded === r.id ? null : r.id)}
+            >
+              <span className="lf-response-person">
+                <strong>{r.respondent_name}</strong>
+                <span>{r.source === "public" ? "Link público" : "Fornecedor LOSI"}</span>
+              </span>
+              <time dateTime={r.created_at}>{date(r.created_at)}</time>
+              <span className="lf-badge">{responseStatuses[r.status]}</span>
+              <PanelMenuIcon name={expanded === r.id ? "up" : "down"} />
+            </button>
             {expanded === r.id && (
-              <div className="lf-response-detail">
+              <div className="lf-response-detail" id={`response-${r.id}`}>
+                <h3>{r.definition.title}</h3>
                 <dl>
                   {r.definition.fields.map((f) => {
                     const answer = r.answers[f.id];
