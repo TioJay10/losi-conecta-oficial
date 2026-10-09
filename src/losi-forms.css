@@ -741,3 +741,7 @@
   .lf-heading-with-count { width: 100%; justify-content: flex-start; gap: 8px; flex-wrap: wrap; }
   .lf-heading-count { min-width: 34px; height: 30px; }
 }
+
+
+.lf-response-count { color: var(--lf-gold); font-weight: 700; }
+.lf-response-count strong { color: var(--lf-gold); font-size: 1.05em; }
