@@ -316,7 +316,26 @@ Deno.serve(async (req: Request) => {
           .order("created_at", { ascending: false })
           .limit(200),
       );
-      return json({ forms, business_name: ownBusiness.business_name });
+      const responseCounts: Record<string, number> = {};
+      const formIds = forms.map((form: any) => form.id);
+      if (formIds.length) {
+        const responses = checked(
+          await admin
+            .from("losi_form_responses")
+            .select("form_id")
+            .in("form_id", formIds),
+        );
+        for (const response of responses) {
+          responseCounts[response.form_id] = (responseCounts[response.form_id] ?? 0) + 1;
+        }
+      }
+      return json({
+        forms: forms.map((form: any) => ({
+          ...form,
+          response_count: responseCounts[form.id] ?? 0,
+        })),
+        business_name: ownBusiness.business_name,
+      });
     }
     if (b.action === "save") {
       const values = definition(b.form);
