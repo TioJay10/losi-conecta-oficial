@@ -253,7 +253,12 @@ export function LosiForms() {
               }}
             >
               <PanelMenuIcon name={t.icon} />
-              {t.label}
+              <span>{t.label}</span>
+              {t.key === "inbox" && invites.length > 0 && (
+                <span className="lf-tab-count" aria-label={`${invites.length} formulários recebidos`}>
+                  {invites.length > 99 ? "99+" : invites.length}
+                </span>
+              )}
             </button>
           ))}
         </nav>
