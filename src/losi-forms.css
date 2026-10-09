@@ -733,3 +733,7 @@
 
 
 .lf-tab-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: #c79a3b; color: #0b1f3a; font-size: 0.75rem; font-weight: 800; line-height: 1; }
+
+
+.lf-heading-with-count { display: inline-flex; align-items: center; gap: 10px; }
+.lf-heading-count { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 999px; background: #0b1f3a; color: #c79a3b; font-size: 0.86rem; font-weight: 800; line-height: 1; }
