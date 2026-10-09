@@ -630,6 +630,9 @@ export function LosiForms() {
                               ?.name ?? "Formulário livre"}{" "}
                             · {date(f.created_at)}
                           </p>
+                          <p className="lf-response-count">
+                            Respostas recebidas: <strong>{f.response_count ?? 0}</strong>
+                          </p>
                           <span className={"lf-badge " + f.status}>
                             {formStatuses[f.status]}
                           </span>
