@@ -77,7 +77,7 @@ function definition(b: any) {
     )];
     if (
       (selection &&
-        (options.length < 1 || options.length > 30)) ||
+        (options.length < 2 || options.length > 30)) ||
       options.some(
         (v: any) => typeof v !== "string" || !v.trim() || v.length > 100,
       )
