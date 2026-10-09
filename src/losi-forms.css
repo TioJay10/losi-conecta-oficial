@@ -736,4 +736,8 @@
 
 
 .lf-heading-with-count { display: inline-flex; align-items: center; gap: 10px; }
-.lf-heading-count { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 999px; background: #0b1f3a; color: #c79a3b; font-size: 0.86rem; font-weight: 800; line-height: 1; }
+.lf-heading-count { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 30px; padding: 0 9px; border: 1px solid #c79a3b; border-radius: 999px; background: #c79a3b; color: #0b1f3a; font-size: 0.86rem; font-weight: 800; line-height: 1; }
+@media (max-width: 600px) {
+  .lf-heading-with-count { width: 100%; justify-content: flex-start; gap: 8px; flex-wrap: wrap; }
+  .lf-heading-count { min-width: 34px; height: 30px; }
+}
