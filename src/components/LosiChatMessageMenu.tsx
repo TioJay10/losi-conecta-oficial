@@ -42,18 +42,31 @@ export function LosiChatMessageMenu({ message, own, open, onOpen, onClose, onRep
       const viewport=window.visualViewport;
       const width=viewport?.width??window.innerWidth,height=viewport?.height??window.innerHeight;
       const x=viewport?.offsetLeft??0,y=viewport?.offsetTop??0;
-      node.style.maxHeight=`${Math.max(100,height-24)}px`;
-      const bounds = node.getBoundingClientRect();
       const margin = 12;
-      const left = Math.max(x+margin, Math.min(anchor.right - bounds.width, x+width - bounds.width - margin));
-      const below = anchor.bottom + 4;
-      const top = below + bounds.height <= y+height - margin ? below : anchor.top - bounds.height - 4;
+      // The message scroller excludes the header, search and composer.
+      const history = trigger.current.closest('.lc-thread-messages')?.getBoundingClientRect();
+      const minY = Math.max(y, history?.top ?? y) + margin;
+      const maxY = Math.max(minY, Math.min(y+height, history?.bottom ?? y+height) - margin);
+      const minX = Math.max(x, history?.left ?? x) + margin;
+      const maxX = Math.max(minX, Math.min(x+width, history?.right ?? x+width) - margin);
+      node.style.maxHeight=`${maxY-minY}px`;
+      node.style.maxWidth=`${maxX-minX}px`;
+      const bounds = node.getBoundingClientRect();
+      const left = Math.max(minX, Math.min(anchor.right - bounds.width, maxX - bounds.width));
+      // Hidden mobile chevrons use the message's visible top as the anchor,
+      // so a tall image can open down without pushing the popup off-screen.
+      const anchorY = Math.max(minY, Math.min(anchor.top, maxY));
+      const openAbove = anchorY > minY + (maxY-minY) * 2 / 3;
+      const below = visibleTrigger.width ? anchor.bottom + 4 : anchorY + 4;
+      const top = openAbove ? anchorY - bounds.height - 4 : below;
       node.style.left = `${left}px`;
-      node.style.top = `${Math.max(y+margin, Math.min(top, y+height - bounds.height - margin))}px`;
+      node.style.top = `${Math.max(minY, Math.min(top, maxY - bounds.height))}px`;
     }
     position();
     const observer = new ResizeObserver(position);
     observer.observe(node);
+    const history = trigger.current.closest('.lc-thread-messages');
+    if (history) observer.observe(history);
     function scroll(event: Event) {
       // Scrolling the menu itself must not dismiss its actions.
       

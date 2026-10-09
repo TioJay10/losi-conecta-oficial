@@ -70,6 +70,8 @@
 .lc-app .lc-bubble .lc-message-menu-trigger{display:none}
 .lc-app .lc-media-menu[hidden],.lc-app .lc-media-menu>div[hidden]{display:none!important}
 .lc-message-action-error{font-size:12px;line-height:1.4;color:var(--lc-text)}
+.lc-bubble .lc-media-menu{position:fixed;z-index:50;width:224px;min-width:0;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;margin:0;white-space:normal}
+@media(max-width:768px){.lc-bubble .lc-media-menu{width:320px}}
 @media(min-width:769px){
   .lc-bubble{position:relative}
   .lc-bubble .lc-sent-attachment,.lc-bubble .lc-message-text{position:static}
@@ -79,5 +81,4 @@
   .lc-app .lc-bubble .lc-message-menu-trigger{position:absolute;top:3px;right:3px;z-index:2;display:grid;place-items:center;width:28px;height:24px;min-height:24px;padding:3px;border:0;border-radius:4px;background:transparent;color:var(--lc-gold);cursor:pointer}
   .lc-app .lc-bubble .lc-message-menu-trigger:hover,.lc-app .lc-bubble .lc-message-menu-trigger[aria-expanded=true]{background:var(--lc-menu,#10283f)}
   .lc-bubble .lc-message-menu-trigger svg{width:18px;height:18px;pointer-events:none}
-  .lc-bubble .lc-media-menu{position:fixed;z-index:50;width:224px;min-width:200px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);overflow:auto;margin:0;white-space:normal}
 }
