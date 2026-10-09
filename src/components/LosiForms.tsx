@@ -1026,7 +1026,12 @@ function LosiFormResponses({
   return (
     <section className="lf-surface">
       <div className="lf-section-heading">
-        <h2>Respostas recebidas</h2>
+        <h2 className="lf-heading-with-count">
+          Respostas recebidas
+          <span className="lf-heading-count" aria-label="Quantidade de respostas recebidas">
+            {count}
+          </span>
+        </h2>
         <button disabled={loading} onClick={() => void refresh()}>
           <PanelMenuIcon name="refresh" />
           Atualizar
