@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PanelMenuIcon } from "./PanelMenuIcon";
 import { LosiFormFields } from "./LosiFormFields";
+import { formWhatsAppLink } from "../lib/form-whatsapp";
 import {
   createFormDraft,
   fieldTypes,
@@ -1141,17 +1142,27 @@ function LosiFormResponses({
             {expanded === r.id && (
               <div className="lf-response-detail">
                 <dl>
-                  {r.definition.fields.map((f) => (
+                  {r.definition.fields.map((f) => {
+                    const answer = r.answers[f.id];
+                    const whatsapp = (f.type === "phone" || /whats\s*app/i.test(f.label))
+                      ? formWhatsAppLink(answer) : null;
+                    return (
                     <div key={f.id}>
                       <dt>{f.label}</dt>
                       <dd>
-                        {Array.isArray(r.answers[f.id])
-                          ? (r.answers[f.id] as string[]).join(", ") ||
+                        {whatsapp ? (
+                          <a className="lf-whatsapp-link" href={whatsapp} target="_blank" rel="noopener noreferrer"
+                            aria-label={`Conversar com ${r.respondent_name} pelo WhatsApp: ${answer}`}>
+                            {answer}<span aria-hidden="true">Abrir WhatsApp ↗</span>
+                          </a>
+                        ) : Array.isArray(answer)
+                          ? answer.join(", ") ||
                             "Não informado"
-                          : r.answers[f.id] || "Não informado"}
+                          : answer || "Não informado"}
                       </dd>
                     </div>
-                  ))}
+                    );
+                  })}
                 </dl>
                 <div className="lf-detail-actions">
                   <label>

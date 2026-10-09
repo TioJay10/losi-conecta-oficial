@@ -432,6 +432,18 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.lf-response-detail .lf-whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  min-height: 44px;
+  color: var(--lf-gold);
+  text-decoration: none;
+}
+.lf-whatsapp-link span { font-size: 12px; }
+.lf-whatsapp-link:hover { filter: brightness(1.15); }
+.lf-whatsapp-link:focus-visible { outline: 2px solid var(--lf-gold); outline-offset: 3px; }
 .lf-detail-actions {
   display: flex;
   align-items: flex-end;
