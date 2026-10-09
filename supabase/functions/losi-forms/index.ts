@@ -64,15 +64,23 @@ function definition(b: any) {
     )
       throw new Error("FORM_INVALID");
     ids.add(f.id);
-    const options = ["select", "multi"].includes(f.type) ? f.options : [];
+    const selection = ["select", "multi"].includes(f.type);
+    const rawOptions = selection ? f.options : [];
     if (
-      !Array.isArray(options) ||
-      (["select", "multi"].includes(f.type) &&
+      !Array.isArray(rawOptions) ||
+      rawOptions.some((v: any) => typeof v !== "string")
+    )
+      throw new Error("FORM_OPTIONS");
+    // Keep the editor's blank lines editable, but never store empty choices.
+    const options = [...new Set<string>(
+      rawOptions.map((v: string) => v.trim()).filter(Boolean),
+    )];
+    if (
+      (selection &&
         (options.length < 1 || options.length > 30)) ||
       options.some(
         (v: any) => typeof v !== "string" || !v.trim() || v.length > 100,
-      ) ||
-      new Set(options).size !== options.length
+      )
     )
       throw new Error("FORM_OPTIONS");
     return {
