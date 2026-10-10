@@ -75,11 +75,13 @@ export function WorkPlanner({
   categories,
   categoryError,
   onRetryCategories,
+  onTalk,
 }: {
   userId: string;
   categories: PlannerCategory[];
   categoryError?: string;
   onRetryCategories: () => void;
+  onTalk?: (brief: string) => void;
 }) {
   const [brief, setBrief] = useState<Brief>(blank);
   const [step, setStep] = useState(0);
@@ -240,6 +242,9 @@ export function WorkPlanner({
           Salvar rascunho
         </button>
       </header>
+      {onTalk && <button className="wp-talk-lia" type="button" onClick={() => {
+        onTalk(Object.entries({...brief, category: categoryName}).filter(([,value]) => Array.isArray(value) ? value.length : value).map(([key,value]) => `${({title:"Título",kind:"Tipo",description:"Pedido",category:"Nicho",client:"Cliente",city:"Cidade",state:"Estado",date:"Data",duration:"Duração em horas",participants:"Participantes",audience:"Público",location:"Espaço",services:"Serviços",team:"Equipe",budget:"Orçamento informado",notes:"Observações",document:"Documento"} as Record<string,string>)[key]}: ${Array.isArray(value)?value.join(", "):value}`).join("\n"));
+      }}><PanelMenuIcon name="communication"/>Continuar este plano com a Lia</button>}
       <nav className="wp-views" aria-label="Área de planejamento">
         <button
           type="button"

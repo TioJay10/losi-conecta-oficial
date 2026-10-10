@@ -454,7 +454,7 @@ function RootComponent() {
   }, []);
 
   const publicRoute = isPublicPath(location.pathname);
-  const supplierSurface = ["/meu-perfil", "/meus-servicos", "/orcamentos", "/equipe-escalas", "/notificar-inconsistencia", "/formularios", "/plano-de-trabalho"].includes(location.pathname);
+  const supplierSurface = ["/meu-perfil", "/meus-servicos", "/orcamentos", "/equipe-escalas", "/notificar-inconsistencia", "/formularios"].includes(location.pathname);
 
   if (!authChecked && !publicRoute) {
     return (
