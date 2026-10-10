@@ -964,6 +964,7 @@ function DashboardPage() {
             <PanelMenuIcon name="communication" /><span><strong>Chat LOSI</strong><small>Conversas e networking</small></span>
           </button>
           <div className="dashboard-nav-divider"><span>Operacional</span></div>
+          <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/plano-de-trabalho" }); }}><PanelMenuIcon name="activity" /><span><strong>Plano de trabalho</strong><small>Planejamento e execução</small></span></button>
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/formularios" }); }}><PanelMenuIcon name="forms" /><span><strong>Formulários</strong><small>Links e respostas</small></span></button>
           <button type="button" className="dashboard-nav-item" onClick={() => { setMobileMenuOpen(false); navigate({ to: "/orcamentos" }); }}>
             <PanelMenuIcon name="quotes" /><span><strong>Orçamentos</strong><small>Solicitações e propostas</small></span>
