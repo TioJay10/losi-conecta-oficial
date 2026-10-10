@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import type { AppliedPlan, GeneratedPlan, PlanContext, PlanKind } from "../lib/planning-link";
 import { LiaMascot } from "./LiaMascot";
 import { PanelMenuIcon } from "./PanelMenuIcon";
 import { callLosiAi, type AiStatus } from "../lib/losi-ai";
 import "../losi-ai.css";
 import "../lia-planning-chat.css";
 
-type Message = { id: string; role: "user" | "assistant"; text: string };
-type Conversation = { id: string; title: string; updatedAt: string; messages: Message[]; context?: string };
+type Message = { id: string; role: "user" | "assistant"; text: string; title?: string; planKind?: PlanKind };
+type Conversation = { id: string; title: string; updatedAt: string; messages: Message[]; context?: string; kind?: PlanKind; draftId?: string; planContent?: string };
 export type LiaRequest = typeof callLosiAi;
 const prompts = [
   {icon:"activity",label:"Criar um plano de trabalho",text:"Quero criar um plano de trabalho para um evento. Me ajude a organizar o briefing e faça perguntas sobre as informações que faltam."},
@@ -16,12 +17,13 @@ const prompts = [
 function isConversation(v: unknown): v is Conversation {
   if(!v || typeof v!=="object")return false;
   const c=v as Conversation;
-  return typeof c.id==="string" && typeof c.title==="string" && typeof c.updatedAt==="string" && (c.context===undefined||typeof c.context==="string") && Array.isArray(c.messages) && c.messages.every(m=>m&&typeof m.id==="string"&&["user","assistant"].includes(m.role)&&typeof m.text==="string");
+  return typeof c.id==="string" && typeof c.title==="string" && typeof c.updatedAt==="string" && (c.context===undefined||typeof c.context==="string") && (c.planContent===undefined||typeof c.planContent==="string") && (c.kind===undefined||["work","business"].includes(c.kind)) && (c.draftId===undefined||typeof c.draftId==="string") && Array.isArray(c.messages) && c.messages.every(m=>m&&typeof m.id==="string"&&["user","assistant"].includes(m.role)&&typeof m.text==="string"&&(m.title===undefined||typeof m.title==="string")&&(m.planKind===undefined||["work","business"].includes(m.planKind)));
 }
-export function LiaPlanningChat({userId,onOpenSteps,planContext,onContextConsumed,request=callLosiAi}:{userId:string;onOpenSteps:()=>void;planContext?:string;onContextConsumed:()=>void;request?:LiaRequest}) {
+export function LiaPlanningChat({userId,onOpenSteps,planContext,onContextConsumed,onApplyPlan,appliedPlan,request=callLosiAi}:{userId:string;onOpenSteps:()=>void;planContext?:PlanContext;onContextConsumed:()=>void;onApplyPlan:(plan:GeneratedPlan)=>void;appliedPlan?:AppliedPlan;request?:LiaRequest}) {
   const [threads,setThreads]=useState<Conversation[]>([]);
   const [activeId,setActiveId]=useState<string|null>(null);
   const [input,setInput]=useState("");
+  const [newKind,setNewKind]=useState<PlanKind>("work");
   const [search,setSearch]=useState("");
   const [sidebar,setSidebar]=useState(false);
   const [busy,setBusy]=useState(false);
@@ -40,6 +42,7 @@ export function LiaPlanningChat({userId,onOpenSteps,planContext,onContextConsume
   const menuButton=useRef<HTMLButtonElement>(null);
   const active=threads.find(t=>t.id===activeId);
   const messages=active?.messages||[];
+  const planKind=active?.kind || newKind;
   const key=`losi-lia-planning-v1:${userId}`;
   async function refreshStatus() {
     setLoadingStatus(true);setStatusError("");
@@ -60,9 +63,14 @@ export function LiaPlanningChat({userId,onOpenSteps,planContext,onContextConsume
   },[threads,ready,key,storageError]);
   useEffect(()=>{
     if(!ready||!planContext)return;
-    const thread:Conversation={id:crypto.randomUUID(),title:"Continuar meu plano",updatedAt:new Date().toISOString(),messages:[],context:planContext};
-    setThreads(all=>[thread,...all]);setActiveId(thread.id);setInput("Me ajude a desenvolver este plano. Aponte o que falta e sugira os próximos passos.");onContextConsumed();
+    const existing=threads.find(t=>t.draftId===planContext.draftId);
+    const thread:Conversation={...(existing||{id:crypto.randomUUID(),messages:[]}),title:planContext.title,updatedAt:new Date().toISOString(),context:planContext.briefing,kind:planContext.kind,draftId:planContext.draftId,planContent:planContext.content};
+    setThreads(all=>[thread,...all.filter(t=>t.id!==thread.id)]);setActiveId(thread.id);setInput("Me ajude a desenvolver este plano. Aponte o que falta e sugira os próximos passos.");onContextConsumed();
   },[planContext,ready,onContextConsumed]);
+  useEffect(()=>{
+    if(!appliedPlan || !ready)return;
+    setThreads(all=>all.map(t=>t.id===appliedPlan.conversationId ? {...t,draftId:appliedPlan.draftId,kind:appliedPlan.kind,context:appliedPlan.briefing,planContent:appliedPlan.content} : t));
+  },[appliedPlan,ready]);
   useEffect(()=>{end.current?.scrollIntoView({behavior:"instant",block:"end"});},[activeId,messages.length,busy]);
   useEffect(()=>{if(textarea.current){textarea.current.style.height="auto";textarea.current.style.height=Math.min(textarea.current.scrollHeight,180)+"px";}},[input]);
   useEffect(()=>{
@@ -77,24 +85,29 @@ export function LiaPlanningChat({userId,onOpenSteps,planContext,onContextConsume
   const remaining=status?Math.max(0,(status.access.materialLimit||0)-status.used.material):0;
   const available=Boolean(status?.configured&&status.access.allowed&&remaining>0);
   const availability=loadingStatus?"Verificando acesso à Lia…":statusError?"Não foi possível verificar o acesso":!status?.configured?"Lia aguardando ativação":!status.access.allowed?"Acesso à Lia não habilitado":remaining<1?"Sua franquia de materiais foi utilizada":`${remaining} ${remaining===1?"geração disponível":"gerações disponíveis"}`;
-  function newChat(){if(locked.current)return;setActiveId(null);setInput("");setError("");setNotice("");setSidebar(false);requestAnimationFrame(()=>textarea.current?.focus());}
+  function newChat(){if(locked.current)return;setActiveId(null);setNewKind("work");setInput("");setError("");setNotice("");setSidebar(false);requestAnimationFrame(()=>textarea.current?.focus());}
   function updateThread(thread:Conversation){setThreads(all=>[thread,...all.filter(t=>t.id!==thread.id)]);setActiveId(thread.id);}
   async function send(){
     const text=input.trim();if(!text||!available||locked.current||!ready)return;
     locked.current=true;setBusy(true);setError("");setNotice("");
     const user:Message={id:crypto.randomUUID(),role:"user",text};
-    const thread:Conversation=active?{...active,messages:[...active.messages,user],updatedAt:new Date().toISOString()}:{id:crypto.randomUUID(),title:text.slice(0,65),updatedAt:new Date().toISOString(),messages:[user]};
+    const thread:Conversation=active?{...active,messages:[...active.messages,user],updatedAt:new Date().toISOString()}:{id:crypto.randomUUID(),title:text.slice(0,65),updatedAt:new Date().toISOString(),messages:[user],kind:planKind};
     updateThread(thread);setInput("");
     // Existing Lia content service accepts 6,000 characters. Keep the latest turns
     // and the supplied briefing within that contract; never fabricate retrieval.
     const history=thread.messages.slice(0,-1).map(m=>`${m.role==="user"?"Usuário":"Lia"}: ${m.text}`).join("\n\n").slice(-2800);
-    const instructions=`Você é a Lia, assistente da LOSI. Responda ao último pedido do usuário, considerando a conversa. Ajude a construir e revisar um plano de trabalho ou negócios. Faça perguntas objetivas quando faltarem informações e ofereça sugestões práticas. Diferencie sugestões de dados confirmados. Não invente preços de mercado, pesquisa na internet, fornecedores cadastrados ou proporções de equipe. Não afirme ter pesquisado ou gerado um PDF. Não há busca na internet ou catálogo conectados a este chat.\nConversa anterior:\n${history}\nÚltimo pedido:\n${text}`;
+    const instructions=`Você é a Lia, assistente da LOSI. Responda ao último pedido do usuário, considerando a conversa. O campo currentPlan do contexto é a versão atual revisada do plano; use-o como base e preserve as edições do usuário ao atualizar. O tipo de plano selecionado é ${planKind === "business" ? "PLANO DE NEGÓCIOS" : "PLANO DE TRABALHO"}. Quando o usuário pedir um plano ou uma revisão, entregue o plano completo atualizado, não somente uma lista de alterações. Para negócios, organize objetivos, público, serviços, operação, divulgação e próximos passos; para trabalho, organize objetivo, atividades, execução, recursos e pendências. Se faltarem dados, identifique-os como a definir. Faça perguntas objetivas quando faltarem informações e ofereça sugestões práticas. Diferencie sugestões de dados confirmados. Não invente preços de mercado, pesquisa na internet, fornecedores cadastrados ou proporções de equipe. Não afirme ter pesquisado ou gerado um PDF. Não há busca na internet ou catálogo conectados a este chat.\nConversa anterior:\n${history}\nÚltimo pedido:\n${text}`;
     try {
-      const response=await request({action:"generate",kind:"material",tone:"educational",depth:"standard",requestId:crypto.randomUUID(),instructions,context:{description:thread.context||"Planejamento de eventos e negócios na LOSI"}});
+      const response=await request({action:"generate",kind:"material",tone:"educational",depth:"standard",requestId:crypto.randomUUID(),instructions,context:{description:thread.context||"Planejamento de eventos e negócios na LOSI",currentPlan:thread.planContent||""}});
       if(!response.result?.content||typeof response.result.content!=="string")throw Error("A Lia não retornou um texto. Tente novamente.");
-      if(mounted.current)updateThread({...thread,updatedAt:new Date().toISOString(),messages:[...thread.messages,{id:crypto.randomUUID(),role:"assistant",text:response.result.content}]});
+      if(mounted.current)updateThread({...thread,updatedAt:new Date().toISOString(),messages:[...thread.messages,{id:crypto.randomUUID(),role:"assistant",text:response.result.content,title:typeof response.result.title==="string"?response.result.title:thread.title,planKind}]});
     }catch(e){if(mounted.current){updateThread({...thread,messages:thread.messages.slice(0,-1)});setInput(text);setError(e instanceof Error?e.message:"Não foi possível enviar. Tente novamente.");}}
     finally{locked.current=false;if(mounted.current){setBusy(false);void refreshStatus();requestAnimationFrame(()=>textarea.current?.focus());}}
+  }
+  function applyPlan(m:Message){
+    if(!active || busy || storageError)return;
+    if(m.text.length>20000){setNotice("Este texto excede 20.000 caracteres. Peça à Lia uma versão mais concisa antes de aplicar.");return;}
+    onApplyPlan({requestId:crypto.randomUUID(),conversationId:active.id,messageId:m.id,draftId:active.draftId,title:m.title || active.title,kind:m.planKind || active.kind || "work",content:m.text,description:active.messages.find(msg=>msg.role==="user")?.text || ""});
   }
   async function copy(text:string){try{await navigator.clipboard.writeText(text);setNotice("Texto copiado.");}catch{setNotice("Não foi possível copiar. Selecione o texto e copie manualmente.");}}
   function removeThread(id:string){if(locked.current||!window.confirm("Excluir esta conversa deste dispositivo?"))return;setThreads(all=>all.filter(t=>t.id!==id));if(activeId===id)newChat();}
@@ -113,7 +126,7 @@ export function LiaPlanningChat({userId,onOpenSteps,planContext,onContextConsume
     <section className="lia-chat-main" aria-label="Chat de planejamento com a Lia">
       <header className="lia-chat-topbar"><div><button ref={menuButton} className="lia-chat-menu" aria-label="Abrir histórico de conversas" aria-expanded={sidebar} aria-controls="lia-chat-history" onClick={()=>setSidebar(true)}><PanelMenuIcon name="overview"/></button><details className="lia-chat-info"><summary>Lia <PanelMenuIcon name="down"/></summary><div><strong>Sua assistente LOSI</strong><p>Desenvolva e revise seu plano pela conversa. A Lia utiliza o assistente de conteúdo já disponível na LOSI.</p><p>Pesquisa na internet, indicação de fornecedores e PDF deste plano serão conectados depois.</p></div></details></div><button className="lia-chat-step-button" disabled={busy} onClick={onOpenSteps}><PanelMenuIcon name="activity"/><span>Etapas guiadas</span></button></header>
       <div className={`lia-chat-scroll${messages.length?" has-messages":""}`}>
-        {!messages.length?<div className="lia-chat-welcome"><LiaMascot className="lia-chat-welcome-mascot"/><h1>{active?.context?"Vamos continuar seu plano?":"O que vamos planejar hoje?"}</h1><p>{active?.context?"Seu briefing está nesta conversa. Conte o que você quer desenvolver ou mudar.":"Conte sua ideia à Lia. Juntos, vamos organizar os próximos passos."}</p><div className="lia-chat-suggestions">{prompts.map(p=><button key={p.label} onClick={()=>{setInput(p.text);textarea.current?.focus();}}><PanelMenuIcon name={p.icon}/>{p.label}</button>)}</div></div>:<div className="lia-chat-messages" role="log" aria-label="Mensagens da conversa">{messages.map(m=><article key={m.id} className={`lia-chat-message is-${m.role}`} aria-label={m.role==="user"?"Sua mensagem":"Resposta da Lia"}>{m.role==="assistant"&&<div className="lia-chat-answer-author"><img src="/lia-pavoa.webp" alt=""/>Lia</div>}<div className="lia-chat-message-text">{m.text}</div>{m.role==="assistant"&&<button className="lia-chat-copy" aria-label="Copiar resposta da Lia" onClick={()=>void copy(m.text)}><PanelMenuIcon name="copy"/></button>}</article>)}</div>}
+        {!messages.length?<div className="lia-chat-welcome"><LiaMascot className="lia-chat-welcome-mascot"/><h1>{active?.context?"Vamos continuar seu plano?":"O que vamos planejar hoje?"}</h1><p>{active?.context?"Seu briefing está nesta conversa. Conte o que você quer desenvolver ou mudar.":"Conte sua ideia à Lia. Juntos, vamos organizar os próximos passos."}</p><div className="lia-chat-suggestions">{prompts.map(p=><button key={p.label} onClick={()=>{setInput(p.text);if(!active){setNewKind(p.icon==="businesses"?"business":"work");}textarea.current?.focus();}}><PanelMenuIcon name={p.icon}/>{p.label}</button>)}</div></div>:<div className="lia-chat-messages" role="log" aria-label="Mensagens da conversa">{messages.map(m=><article key={m.id} className={`lia-chat-message is-${m.role}`} aria-label={m.role==="user"?"Sua mensagem":"Resposta da Lia"}>{m.role==="assistant"&&<div className="lia-chat-answer-author"><img src="/lia-pavoa.webp" alt=""/>Lia</div>}<div className="lia-chat-message-text">{m.text}</div>{m.role==="assistant"&&<div className="lia-chat-answer-actions"><button className="lia-chat-apply-plan" disabled={busy||!!storageError} onClick={()=>applyPlan(m)}><PanelMenuIcon name="activity"/>{active?.draftId?"Atualizar plano vinculado":"Aplicar ao plano"}</button><button className="lia-chat-copy" aria-label="Copiar resposta da Lia" onClick={()=>void copy(m.text)}><PanelMenuIcon name="copy"/></button></div>}</article>)}</div>}
         {busy&&<div className="lia-chat-thinking" role="status"><LiaMascot state="working"/><span>A Lia está preparando sua resposta…</span></div>}<div ref={end}/>
       </div>
       <div className="lia-chat-compose-area">
@@ -121,6 +134,7 @@ export function LiaPlanningChat({userId,onOpenSteps,planContext,onContextConsume
         {storageError&&<p className="lia-chat-notice" role="alert">{storageError}</p>}
         {error&&<p className="lia-chat-error" role="alert">{error}</p>}
         {notice&&<p className="lia-chat-notice" role="status">{notice}</p>}
+        <label className="lia-chat-plan-kind">Tipo de plano<select aria-label="Tipo de plano" disabled={busy || !!active?.draftId} value={planKind} onChange={e=>{const kind=e.target.value as PlanKind;setNewKind(kind);if(active)updateThread({...active,kind});}}><option value="work">Plano de trabalho</option><option value="business">Plano de negócios</option></select></label>
         <form className="lia-chat-composer" onSubmit={e=>{e.preventDefault();void send();}}><label className="lia-chat-sr" htmlFor="lia-planning-message">Mensagem para a Lia</label><textarea ref={textarea} id="lia-planning-message" rows={1} maxLength={2000} value={input} disabled={busy} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();void send();}}} placeholder="Pergunte à Lia ou descreva seu evento"/><div className="lia-chat-composer-tools"><span><PanelMenuIcon name="aiCredits"/>Planejamento com a Lia</span><button type="submit" className="lia-chat-send" aria-label="Enviar mensagem" disabled={!input.trim()||busy||!available||!ready}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button></div></form>
         <div className="lia-chat-access"><span>{availability}</span>{statusError&&<button disabled={loadingStatus||busy} onClick={()=>void refreshStatus()}>Tentar novamente</button>}<small>Cada resposta concluída usa 1 geração de materiais.</small></div>
         <p className="lia-chat-footnote">A Lia pode cometer erros. Revise o plano. Pesquisa, fornecedores e PDF: em breve.</p>

@@ -89,6 +89,11 @@ Deno.serve(async(req:Request)=>{
    if(typeof value==="string") context[key]=value.slice(0,2000);
    else if(key==="activities"&&Array.isArray(value)) context[key]=value.filter((v:any)=>typeof v==="string").slice(0,15).map((v:string)=>v.slice(0,80));
   }
+  // A reviewed planner draft is context, never an instruction or researched fact.
+  if (typeof body.context?.currentPlan === "string") {
+   if (body.context.currentPlan.length > 20000) return json({error:"Reduza o conteúdo do plano para até 20.000 caracteres."},400);
+   context.currentPlan = body.context.currentPlan;
+  }
   const {data:reservation,error:reservationError}=await admin.rpc("losi_ai_reserve",{
    p_user_id:user.id,p_kind:body.kind,p_request_id:requestId});
   if(reservationError) throw new Error("reservation");

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { AppliedPlan, GeneratedPlan, PlanContext } from "../lib/planning-link";
 import { PanelMenuIcon } from "./PanelMenuIcon";
 import "../work-planner.css";
 
@@ -20,6 +21,7 @@ type Brief = {
   budget: string;
   notes: string;
   document: "internal" | "commercial";
+  generatedContent?: string;
 };
 type Draft = { id: string; updatedAt: string; brief: Brief };
 export type PlannerCategory = { id: string; name: string };
@@ -66,6 +68,7 @@ function isDraft(value: unknown): value is Draft {
           d.brief.services.every((s) => typeof s === "string")
         : typeof d.brief[key as keyof Brief] === "string",
     ) &&
+    (d.brief.generatedContent === undefined || typeof d.brief.generatedContent === "string") &&
     ["work", "business"].includes(d.brief.kind) &&
     ["internal", "commercial"].includes(d.brief.document)
   );
@@ -76,12 +79,16 @@ export function WorkPlanner({
   categoryError,
   onRetryCategories,
   onTalk,
+  incomingPlan,
+  onPlanApplied,
 }: {
   userId: string;
   categories: PlannerCategory[];
   categoryError?: string;
   onRetryCategories: () => void;
-  onTalk?: (brief: string) => void;
+  onTalk?: (context: PlanContext) => void;
+  incomingPlan?: GeneratedPlan;
+  onPlanApplied?: (plan: AppliedPlan) => void;
 }) {
   const [brief, setBrief] = useState<Brief>(blank);
   const [step, setStep] = useState(0);
@@ -94,6 +101,7 @@ export function WorkPlanner({
   const [storageError, setStorageError] = useState("");
   const [service, setService] = useState("");
   const [reviewed, setReviewed] = useState(false);
+  const handledPlan = useRef<string | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const storageKey = `losi-work-plans-v1:${userId}`;
@@ -149,12 +157,46 @@ export function WorkPlanner({
       setId(draft.id);
       setDirty(false);
       setMessage("Rascunho salvo neste dispositivo.");
+      return draft.id;
     } catch {
       setMessage(
         "Não foi possível salvar. O armazenamento do navegador pode estar cheio ou indisponível.",
       );
     }
   }
+  function briefingText(value: Brief) {
+    const labels: Record<string, string> = {title:"Título",kind:"Tipo",description:"Pedido",category:"Nicho",client:"Cliente",city:"Cidade",state:"Estado",date:"Data",duration:"Duração em horas",participants:"Participantes",audience:"Público",location:"Espaço",services:"Serviços",team:"Equipe",budget:"Orçamento informado",notes:"Observações",document:"Documento",generatedContent:"Plano atual"};
+    const category = categories.find(c => c.id === value.category)?.name || value.category;
+    return Object.entries({...value, category}).filter(([k,v]) => k !== "generatedContent" && (Array.isArray(v) ? v.length : v)).map(([k,v]) => `${labels[k]}: ${Array.isArray(v) ? v.join(", ") : v}`).join("\n");
+  }
+  useEffect(() => {
+    if (!incomingPlan || !ready || handledPlan.current === incomingPlan.requestId) return;
+    if (storageError) { setMessage("Não foi possível aplicar o conteúdo porque os rascunhos deste navegador estão indisponíveis. Sua resposta permanece no chat."); return; }
+    // Preserve manual edits before switching to a different conversation's plan.
+    if (dirty && id !== incomingPlan.draftId && !save()) {
+      setMessage("Dê um nome e salve o rascunho em edição antes de aplicar o conteúdo da Lia. Depois, volte ao chat e aplique novamente.");
+      handledPlan.current = incomingPlan.requestId;
+      return;
+    }
+    const saved = drafts.find(d => d.id === incomingPlan.draftId);
+    const base = id && id === incomingPlan.draftId ? brief : saved?.brief || blank();
+    const nextBrief: Brief = {...base, title: base.title || incomingPlan.title || "Meu plano", kind: incomingPlan.kind, description: base.description || incomingPlan.description, generatedContent: incomingPlan.content};
+    const draft: Draft = {id: saved?.id || (id === incomingPlan.draftId ? id : null) || crypto.randomUUID(), updatedAt: new Date().toISOString(), brief: nextBrief};
+    try {
+      // Read at the mutation boundary so the prior save and other tabs are retained.
+      const stored = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      if (!Array.isArray(stored) || !stored.every(isDraft)) throw Error();
+      const next = [draft, ...stored.filter((d: Draft) => d.id !== draft.id)];
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      handledPlan.current = incomingPlan.requestId;
+      setDrafts(next); setBrief(nextBrief); setId(draft.id); setDirty(false); setReviewed(false); setView("editor"); go(3);
+      setMessage("Conteúdo da Lia aplicado e salvo neste dispositivo. Revise o texto antes de usar.");
+      onPlanApplied?.({conversationId: incomingPlan.conversationId, draftId: draft.id, kind: draft.brief.kind, title: draft.brief.title, briefing: briefingText(draft.brief), content: draft.brief.generatedContent || ""});
+    } catch {
+      handledPlan.current = incomingPlan.requestId;
+      setMessage("Não foi possível salvar o conteúdo. Sua resposta continua no chat; verifique o armazenamento e tente aplicar novamente.");
+    }
+  }, [incomingPlan, ready, storageError]);
   function mayReplace() {
     return (
       !dirty || window.confirm("Há alterações não salvas. Deseja descartá-las?")
@@ -229,7 +271,7 @@ export function WorkPlanner({
     <div className="wp-page">
       <header className="wp-header">
         <div>
-          <h1>Plano de trabalho</h1>
+          <h1>{brief.kind === "business" ? "Plano de negócios" : "Plano de trabalho"}</h1>
           <p>Da primeira ideia a um evento bem planejado.</p>
         </div>
         <button
@@ -242,8 +284,9 @@ export function WorkPlanner({
           Salvar rascunho
         </button>
       </header>
-      {onTalk && <button className="wp-talk-lia" type="button" onClick={() => {
-        onTalk(Object.entries({...brief, category: categoryName}).filter(([,value]) => Array.isArray(value) ? value.length : value).map(([key,value]) => `${({title:"Título",kind:"Tipo",description:"Pedido",category:"Nicho",client:"Cliente",city:"Cidade",state:"Estado",date:"Data",duration:"Duração em horas",participants:"Participantes",audience:"Público",location:"Espaço",services:"Serviços",team:"Equipe",budget:"Orçamento informado",notes:"Observações",document:"Documento"} as Record<string,string>)[key]}: ${Array.isArray(value)?value.join(", "):value}`).join("\n"));
+      {onTalk && <button className="wp-talk-lia" type="button" disabled={!ready || !!storageError} onClick={() => {
+        const draftId = save();
+        if (draftId) onTalk({ briefing: briefingText(brief), kind: brief.kind, draftId, title: brief.title, content: brief.generatedContent });
       }}><PanelMenuIcon name="communication"/>Continuar este plano com a Lia</button>}
       <nav className="wp-views" aria-label="Área de planejamento">
         <button
@@ -690,6 +733,12 @@ export function WorkPlanner({
                   )}
                   {step === 3 && (
                     <>
+                      {brief.generatedContent !== undefined && <section className="wp-generated-plan" aria-labelledby="wp-generated-title">
+                        <h3 id="wp-generated-title">{brief.kind === "business" ? "Plano de negócios" : "Plano de trabalho"} · conteúdo da Lia</h3>
+                        <p>Revise e ajuste o texto. Ao continuar com a Lia, suas edições serão incluídas no contexto.</p>
+                        <label htmlFor="wp-generated-content">Conteúdo do plano</label>
+                        <textarea id="wp-generated-content" rows={14} maxLength={20000} value={brief.generatedContent} onChange={e => update("generatedContent", e.target.value)} />
+                      </section>}
                       <div className="wp-review-title">
                         <h3>{brief.title || "Plano sem nome"}</h3>
                         <button type="button" onClick={() => go(0)}>
@@ -919,6 +968,7 @@ export function WorkPlanner({
                     <p>Os serviços adicionados aparecerão aqui.</p>
                   )}
                 </div>
+                {brief.generatedContent && <details className="wp-generated-preview"><summary>Ver conteúdo do plano</summary><div>{brief.generatedContent}</div></details>}
                 <div className="wp-paper-foot">
                   {brief.document === "internal"
                     ? "Documento de planejamento interno"

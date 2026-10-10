@@ -37,6 +37,7 @@ async function run(mode,kind="material",action="generate",tone=undefined,extra={
    assert(!("recipientContact" in input.context));
    assert(request.max_completion_tokens<=9000);
    if(mode==="long-context")assert.equal(input.context.description.length,2000);
+   if(extra.planText!==undefined)assert.equal(input.context.currentPlan,extra.planText);
    if(mode==="provider-error")return Response.json({error:{code:"mock"}},{status:500});
    if(mode==="no-credit")return Response.json({error:{code:"credit_balance_exhausted"}},{status:429});
    if(mode==="rate-limit")return Response.json({error:{code:"rate_limit_exceeded"}},{status:429});
@@ -45,7 +46,7 @@ async function run(mode,kind="material",action="generate",tone=undefined,extra={
  vm.runInNewContext(built.outputText,context);
  const unauth=await handler(new Request("https://example.invalid",{method:"POST",body:"{}"}));assert.equal(unauth.status,401);
  const response=await handler(new Request("https://example.invalid",{method:"POST",headers:{Authorization:"Bearer test"},
-  body:JSON.stringify({action,kind,tone,requestId:"11111111-1111-4111-8111-111111111111",...extra,instructions:mode==="short"?"bad":extra.instructions??"Crie um treinamento da equipe.",context:{company:"Test",recipientContact:"do-not-send",...(mode==="long-context"?{description:"x".repeat(20000)}:{})}})}));
+  body:JSON.stringify({action,kind,tone,requestId:"11111111-1111-4111-8111-111111111111",...extra,instructions:mode==="short"?"bad":extra.instructions??"Crie um treinamento da equipe.",context:{company:"Test",recipientContact:"do-not-send",...(extra.planText!==undefined?{currentPlan:extra.planText}:{}),...(mode==="long-context"?{description:"x".repeat(20000)}:{})}})}));
  return {response,data:await response.json(),providerCalls,reserves,writes};
 }
 (async()=>{
@@ -72,7 +73,10 @@ async function run(mode,kind="material",action="generate",tone=undefined,extra={
   const r=await run("ok","proposal","generate",undefined,options);assert.equal(r.response.status,400);assert.equal(r.reserves,0);assert.equal(r.providerCalls,0);
  }
  const longContext=await run("long-context","proposal");assert.equal(longContext.response.status,200);
+ const fullPlan="Minhas edições manuais "+"p".repeat(15000);
+ const planner=await run("ok","material","generate",undefined,{planText:fullPlan});assert.equal(planner.response.status,200);assert.equal(planner.providerCalls,1);
+ const oversized=await run("ok","material","generate",undefined,{planText:"x".repeat(20001)});assert.equal(oversized.response.status,400);assert.equal(oversized.reserves,0);assert.equal(oversized.providerCalls,0);
  const cached=await run("cached");assert.equal(cached.data.cached,true);assert.equal(cached.providerCalls,0);
  const status=await run("unconfigured","material","status");assert.equal(status.data.configured,false);assert.equal(status.providerCalls,0);assert.equal(status.reserves,0);
- console.log("PASS: auth, access/quota, disabled activation, structured content, output limits, privacy filtering, cached requests and failure releases (mocked OpenAI).");
+ console.log("PASS: auth, access/quota, disabled activation, structured content, output limits, privacy filtering, complete planner context and size rejection before quota reservation, cached requests and failure releases (mocked OpenAI).");
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -883,3 +883,5 @@
     animation: none;
   }
 }
+
+.wp-generated-plan{margin-bottom:28px}.wp-generated-plan h3{margin:0 0 8px;font-size:18px}.wp-generated-plan p{color:#c9d3e1;font-size:13px;line-height:1.7}.wp-generated-plan label{display:block;font-size:12px;margin:18px 0 8px}.wp-generated-plan textarea{width:100%;padding:16px;background:#10253f;color:#fff;border:1px solid #40546e;border-radius:8px;font:inherit;font-size:14px;line-height:1.8;resize:vertical;min-height:320px}.wp-generated-plan textarea:focus-visible{outline:2px solid #e2c482;outline-offset:3px}.wp-generated-preview{margin-top:20px;font-size:12px;color:#46536a}.wp-generated-preview summary{cursor:pointer;font-weight:600}.wp-generated-preview div{white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow:auto;margin-top:14px;line-height:1.8}@media(max-width:760px){.wp-generated-plan textarea{font-size:16px}}
