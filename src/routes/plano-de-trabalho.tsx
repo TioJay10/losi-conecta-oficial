@@ -8,6 +8,7 @@ export const Route = createFileRoute("/plano-de-trabalho")({
 });
 function WorkPlannerPage() {
   const [userId, setUserId] = useState("");
+  const [providerCompany, setProviderCompany] = useState("");
   const [categories, setCategories] = useState<PlannerCategory[]>([]);
   const [categoryError, setCategoryError] = useState("");
   const loadCategories = useCallback(async () => {
@@ -42,11 +43,18 @@ function WorkPlannerPage() {
       subscription.subscription.unsubscribe();
     };
   }, [loadCategories]);
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    setProviderCompany("");
+    void supabase.from("business_profiles").select("business_name").eq("owner_id",userId).maybeSingle().then(({data}) => {if(active)setProviderCompany(data?.business_name || "");});
+    return () => {active=false;};
+  },[userId]);
   if (!userId)
     return (
       <div className="wp-page" role="status">
         Preparando seu espaço de planejamento…
       </div>
     );
-  return <PlanningWorkspace key={userId} userId={userId} categories={categories} categoryError={categoryError} onRetryCategories={() => void loadCategories()} />;
+  return <PlanningWorkspace providerCompany={providerCompany} key={userId} userId={userId} categories={categories} categoryError={categoryError} onRetryCategories={() => void loadCategories()} />;
 }

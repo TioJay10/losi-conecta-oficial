@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { AppliedPlan, GeneratedPlan, PlanContext } from "../lib/planning-link";
 import { PanelMenuIcon } from "./PanelMenuIcon";
 import "../work-planner.css";
+
+const PlanningPdfTools = lazy(() => import("./PlanningPdfTools"));
 
 type Brief = {
   title: string;
@@ -22,6 +24,10 @@ type Brief = {
   notes: string;
   document: "internal" | "commercial";
   generatedContent?: string;
+  pdfLayout?: "classic"|"geometric";
+  company?: string;
+  quotedPrice?: string;
+  commercialTerms?: string;
 };
 type Draft = { id: string; updatedAt: string; brief: Brief };
 export type PlannerCategory = { id: string; name: string };
@@ -68,6 +74,8 @@ function isDraft(value: unknown): value is Draft {
           d.brief.services.every((s) => typeof s === "string")
         : typeof d.brief[key as keyof Brief] === "string",
     ) &&
+    (d.brief.pdfLayout === undefined || ["classic","geometric"].includes(d.brief.pdfLayout)) &&
+    ["company","quotedPrice","commercialTerms"].every(key => d.brief[key as keyof Brief] === undefined || typeof d.brief[key as keyof Brief] === "string") &&
     (d.brief.generatedContent === undefined || typeof d.brief.generatedContent === "string") &&
     ["work", "business"].includes(d.brief.kind) &&
     ["internal", "commercial"].includes(d.brief.document)
@@ -81,6 +89,7 @@ export function WorkPlanner({
   onTalk,
   incomingPlan,
   onPlanApplied,
+  providerCompany,
 }: {
   userId: string;
   categories: PlannerCategory[];
@@ -89,6 +98,7 @@ export function WorkPlanner({
   onTalk?: (context: PlanContext) => void;
   incomingPlan?: GeneratedPlan;
   onPlanApplied?: (plan: AppliedPlan) => void;
+  providerCompany?: string;
 }) {
   const [brief, setBrief] = useState<Brief>(blank);
   const [step, setStep] = useState(0);
@@ -165,7 +175,7 @@ export function WorkPlanner({
     }
   }
   function briefingText(value: Brief) {
-    const labels: Record<string, string> = {title:"Título",kind:"Tipo",description:"Pedido",category:"Nicho",client:"Cliente",city:"Cidade",state:"Estado",date:"Data",duration:"Duração em horas",participants:"Participantes",audience:"Público",location:"Espaço",services:"Serviços",team:"Equipe",budget:"Orçamento informado",notes:"Observações",document:"Documento",generatedContent:"Plano atual"};
+    const labels: Record<string, string> = {title:"Título",kind:"Tipo",description:"Pedido",category:"Nicho",client:"Cliente",city:"Cidade",state:"Estado",date:"Data",duration:"Duração em horas",participants:"Participantes",audience:"Público",location:"Espaço",services:"Serviços",team:"Equipe",budget:"Orçamento informado",notes:"Observações",document:"Documento",generatedContent:"Plano atual",company:"Empresa responsável",quotedPrice:"Valor proposto",commercialTerms:"Condições comerciais",pdfLayout:"Modelo PDF"};
     const category = categories.find(c => c.id === value.category)?.name || value.category;
     return Object.entries({...value, category}).filter(([k,v]) => k !== "generatedContent" && (Array.isArray(v) ? v.length : v)).map(([k,v]) => `${labels[k]}: ${Array.isArray(v) ? v.join(", ") : v}`).join("\n");
   }
@@ -737,7 +747,7 @@ export function WorkPlanner({
                         <h3 id="wp-generated-title">{brief.kind === "business" ? "Plano de negócios" : "Plano de trabalho"} · conteúdo da Lia</h3>
                         <p>Revise e ajuste o texto. Ao continuar com a Lia, suas edições serão incluídas no contexto.</p>
                         <label htmlFor="wp-generated-content">Conteúdo do plano</label>
-                        <textarea id="wp-generated-content" rows={14} maxLength={20000} value={brief.generatedContent} onChange={e => update("generatedContent", e.target.value)} />
+                        <textarea id="wp-generated-content" rows={14} maxLength={40000} value={brief.generatedContent} onChange={e => update("generatedContent", e.target.value)} />
                       </section>}
                       <div className="wp-review-title">
                         <h3>{brief.title || "Plano sem nome"}</h3>
@@ -868,10 +878,7 @@ export function WorkPlanner({
                           ))}
                         </div>
                       </fieldset>
-                      <p className="wp-tip">
-                        <PanelMenuIcon name="forms" />A geração de PDF nos
-                        modelos da LOSI estará disponível em breve.
-                      </p>
+                      <Suspense fallback={<p role="status">Preparando os modelos de PDF…</p>}><PlanningPdfTools plan={brief} layout={brief.pdfLayout||"classic"} company={brief.company??providerCompany??""} onLayout={value=>update("pdfLayout",value)} onCompany={value=>update("company",value)} onPrice={value=>update("quotedPrice",value)} onTerms={value=>update("commercialTerms",value)}/></Suspense>
                       {reviewed && (
                         <p className="wp-reviewed" role="status">
                           <PanelMenuIcon name="check" />
@@ -978,19 +985,19 @@ export function WorkPlanner({
               </div>
               <div className="wp-next">
                 <h3>Planejamento com IA</h3>
-                <p>Em breve, o assistente ajudará a organizar:</p>
+                <p>Pesquisa e PDF já disponíveis. Próximas integrações:</p>
                 <ul>
                   <li>
                     <PanelMenuIcon name="users" />
-                    <span>Equipe e fornecedores LOSI</span>
+                    <span>Dimensionamento validado por atividade</span>
                   </li>
                   <li>
                     <PanelMenuIcon name="search" />
-                    <span>Pesquisa de preços na internet, com fontes</span>
+                    <span>Cálculo automático de custos</span>
                   </li>
                   <li>
                     <PanelMenuIcon name="proposals" />
-                    <span>Plano e proposta em PDF</span>
+                    <span>Indicação de fornecedores cadastrados</span>
                   </li>
                 </ul>
                 <span className="wp-coming">Integrações em breve</span>

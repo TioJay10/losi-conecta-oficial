@@ -8,6 +8,16 @@ export type PdfLayout=keyof typeof PDF_LAYOUTS;
 export type SavedLiaPdf={id:string;title:string;layout:PdfLayout;edit_count:number;created_at:string;updated_at:string};
 export const LIA_PDF_COLUMNS="id,title,layout,edit_count,created_at,updated_at";
 
+function paragraphUrl(paragraph:string){
+ const links=paragraph.match(/https?:\/\/[^\s|]+/g)||[];
+ if(links.length!==1)return undefined;
+ try{const url=new URL(links[0]);return !url.username&&!url.password?url.href:undefined;}catch{return undefined;}
+}
+function sectionHeading(paragraph:string){
+ const text=paragraph.trim();
+ return text.length>0&&text.length<=100&&/[A-ZÁÉÍÓÚÂÊÔÃÕÇ]/.test(text)&&text===text.toUpperCase();
+}
+
 export function materialPdf(title:string,content:string,company:string,layout:PdfLayout="classic"){
  if(layout==="geometric")return geometricPdf(title,content,company);
  const doc=new jsPDF({unit:"mm",format:"a4"}),margin=18;
@@ -17,10 +27,12 @@ export function materialPdf(title:string,content:string,company:string,layout:Pd
  doc.text(titleLines,margin,37);let y=40+titleLines.length*8;
  doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(27,38,53);
  for(const paragraph of content.split("\n")){
+  if(sectionHeading(paragraph)&&y>252){doc.addPage();addHeader();doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(27,38,53);y=37;}
+  const link=paragraphUrl(paragraph);
   const lines=doc.splitTextToSize(paragraph.replace(/\t/g,"    "),174);
   for(const line of lines){
    if(y>270){doc.addPage();addHeader();doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(27,38,53);y=37;}
-   doc.text(line,margin,y);y+=5.5;
+   if(link)doc.textWithLink(line,margin,y,{url:link});else doc.text(line,margin,y);y+=5.5;
   }
   y+=2;
  }
@@ -74,9 +86,11 @@ function geometricPdf(title:string,content:string,company:string){
  const heading=doc.splitTextToSize(title,width);doc.text(heading,margin,45);
  let y=48+heading.length*8;bodyFont();
  for(const paragraph of content.split("\n")){
+  if(sectionHeading(paragraph)&&y>252){doc.addPage();header();bodyFont();y=43;}
+  const link=paragraphUrl(paragraph);
   for(const line of doc.splitTextToSize(paragraph.replace(/\t/g,"    "),width)){
    if(y>270){doc.addPage();header();bodyFont();y=43;}
-   doc.text(line,margin,y);y+=5.5;
+   if(link)doc.textWithLink(line,margin,y,{url:link});else doc.text(line,margin,y);y+=5.5;
   }
   y+=2;
  }

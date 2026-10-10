@@ -48,3 +48,12 @@ The parent implementation pass reported passing browser checks for guided steps,
 `DESIGN.md` remains a homepage extraction, with pre-existing supplier-panel prose placed inside its opening YAML frontmatter. That is format drift from the token-only schema in Impeccable's document reference. Its homepage font, palette, and radii are not the authority for this supplier surface. The detector flagged supplier type/color/radius differences against those homepage rules; those differences preserve the original supplier system rather than establish a new one. `PRODUCT.md` primarily records Chat LOSI and predates this planner extension. These limits are recorded without changing `PRODUCT.md`, `DESIGN.md`, or the global sidecar.
 
 Future planner work should extend the scoped supplier vocabulary and keep capability labels aligned with implemented behavior. Do not turn this task's guided composition or paper preview into a global rule, and do not present upcoming integrations as working controls.
+
+
+## Research and PDF functional extension (2026-10-10)
+
+This extension supersedes the earlier upcoming research/PDF boundaries above. Planner requests now run mandatory web research before synthesis, always include service pricing with units/regions, identify estimates and quote-required gaps, and attach consulted sources. Missing or failed research releases the generation reservation. Work and business plans receive deeper, specific sections; reviewed plan context supports 40,000 characters. Auth, entitlement and legacy proposal/material generation remain intact. LOSI catalog matching and verified operational/cost calculations remain forthcoming.
+
+The guided review exports the full reviewed content with the existing Clássico LOSI and Executivo geométrico PDF layouts, a configurable company name, manual commercial quote and terms, preview and download. Sources are clickable. Export itself uses no AI generation. Draft persistence retains layout and commercial fields. Research references never automatically become the commercial offer.
+
+Validation: mocked provider regression tests including mandatory research, pricing validation, failure release and cached responses; component browser fixture covering source links, apply/edit/reload, both plan types, both PDF downloads and mobile overflow; PDF text/link/pagination inspection and rendered-page review; production build. No paid live AI generation was used. This is functional verification, not a new independent Impeccable finish review.
