@@ -57,3 +57,8 @@ This extension supersedes the earlier upcoming research/PDF boundaries above. Pl
 The guided review exports the full reviewed content with the existing Clássico LOSI and Executivo geométrico PDF layouts, a configurable company name, manual commercial quote and terms, preview and download. Sources are clickable. Export itself uses no AI generation. Draft persistence retains layout and commercial fields. Research references never automatically become the commercial offer.
 
 Validation: mocked provider regression tests including mandatory research, pricing validation, failure release and cached responses; component browser fixture covering source links, apply/edit/reload, both plan types, both PDF downloads and mobile overflow; PDF text/link/pagination inspection and rendered-page review; production build. No paid live AI generation was used. This is functional verification, not a new independent Impeccable finish review.
+
+
+## Business-plan purpose correction (2026-10-10)
+
+Business plans are exclusively internal guidance for the supplier: market, services, pricing, costs, goals and next actions. The commercial presentation picker and quote/terms fields are hidden for business plans, and the export is explicitly labeled Plano de negócios em PDF. Existing business drafts previously marked commercial export as internal plans without commercial terms. Work plans retain their proposal presentation. Validated with the production build, browser fixture and downloaded PDF text; legacy draft formatting was also checked.

@@ -101,6 +101,7 @@ export function WorkPlanner({
   providerCompany?: string;
 }) {
   const [brief, setBrief] = useState<Brief>(blank);
+  const commercial = brief.kind !== "business" && brief.document === "commercial";
   const [step, setStep] = useState(0);
   const [view, setView] = useState<"editor" | "drafts">("editor");
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -138,7 +139,7 @@ export function WorkPlanner({
     return () => window.removeEventListener("beforeunload", prevent);
   }, [dirty]);
   function update<K extends keyof Brief>(key: K, value: Brief[K]) {
-    setBrief((b) => ({ ...b, [key]: value }));
+    setBrief((b) => ({ ...b, [key]: value, ...(key === "kind" && value === "business" ? {document: "internal" as const} : {}) }));
     setDirty(true);
     setReviewed(false);
     setMessage("");
@@ -177,7 +178,7 @@ export function WorkPlanner({
   function briefingText(value: Brief) {
     const labels: Record<string, string> = {title:"Título",kind:"Tipo",description:"Pedido",category:"Nicho",client:"Cliente",city:"Cidade",state:"Estado",date:"Data",duration:"Duração em horas",participants:"Participantes",audience:"Público",location:"Espaço",services:"Serviços",team:"Equipe",budget:"Orçamento informado",notes:"Observações",document:"Documento",generatedContent:"Plano atual",company:"Empresa responsável",quotedPrice:"Valor proposto",commercialTerms:"Condições comerciais",pdfLayout:"Modelo PDF"};
     const category = categories.find(c => c.id === value.category)?.name || value.category;
-    return Object.entries({...value, category}).filter(([k,v]) => k !== "generatedContent" && (Array.isArray(v) ? v.length : v)).map(([k,v]) => `${labels[k]}: ${Array.isArray(v) ? v.join(", ") : v}`).join("\n");
+    return Object.entries({...value, category, ...(value.kind === "business" ? {document:"internal",quotedPrice:"",commercialTerms:""} : {})}).filter(([k,v]) => k !== "generatedContent" && (Array.isArray(v) ? v.length : v)).map(([k,v]) => `${labels[k]}: ${Array.isArray(v) ? v.join(", ") : v}`).join("\n");
   }
   useEffect(() => {
     if (!incomingPlan || !ready || handledPlan.current === incomingPlan.requestId) return;
@@ -190,7 +191,7 @@ export function WorkPlanner({
     }
     const saved = drafts.find(d => d.id === incomingPlan.draftId);
     const base = id && id === incomingPlan.draftId ? brief : saved?.brief || blank();
-    const nextBrief: Brief = {...base, title: base.title || incomingPlan.title || "Meu plano", kind: incomingPlan.kind, description: base.description || incomingPlan.description, generatedContent: incomingPlan.content};
+    const nextBrief: Brief = {...base, title: base.title || incomingPlan.title || "Meu plano", kind: incomingPlan.kind, document: incomingPlan.kind === "business" ? "internal" : base.document, description: base.description || incomingPlan.description, generatedContent: incomingPlan.content};
     const draft: Draft = {id: saved?.id || (id === incomingPlan.draftId ? id : null) || crypto.randomUUID(), updatedAt: new Date().toISOString(), brief: nextBrief};
     try {
       // Read at the mutation boundary so the prior save and other tabs are retained.
@@ -829,7 +830,7 @@ export function WorkPlanner({
                             ))}
                         </dl>
                       )}
-                      <fieldset className="wp-document-picker">
+                      {brief.kind === "business" ? <p>Plano de negócios para orientar sua empresa: mercado, serviços, preços, custos, metas e próximos passos.</p> : <fieldset className="wp-document-picker">
                         <legend>Apresentação do documento</legend>
                         <p>
                           Escolha a versão para visualizar a estrutura do seu
@@ -877,7 +878,7 @@ export function WorkPlanner({
                             </label>
                           ))}
                         </div>
-                      </fieldset>
+                      </fieldset>}
                       <Suspense fallback={<p role="status">Preparando os modelos de PDF…</p>}><PlanningPdfTools plan={brief} layout={brief.pdfLayout||"classic"} company={brief.company??providerCompany??""} onLayout={value=>update("pdfLayout",value)} onCompany={value=>update("company",value)} onPrice={value=>update("quotedPrice",value)} onTerms={value=>update("commercialTerms",value)}/></Suspense>
                       {reviewed && (
                         <p className="wp-reviewed" role="status">
@@ -924,12 +925,12 @@ export function WorkPlanner({
                   <span>CONECTA</span>
                   <PanelMenuIcon
                     name={
-                      brief.document === "internal" ? "activity" : "proposals"
+                      commercial ? "proposals" : "activity"
                     }
                   />
                 </div>
                 <span className="wp-paper-type">
-                  {brief.document === "internal"
+                  {!commercial
                     ? brief.kind === "business"
                       ? "Plano de negócios"
                       : "Plano de trabalho"
@@ -977,7 +978,7 @@ export function WorkPlanner({
                 </div>
                 {brief.generatedContent && <details className="wp-generated-preview"><summary>Ver conteúdo do plano</summary><div>{brief.generatedContent}</div></details>}
                 <div className="wp-paper-foot">
-                  {brief.document === "internal"
+                  {!commercial
                     ? "Documento de planejamento interno"
                     : "Apresentação para o cliente"}
                   <span>Prévia do briefing</span>
