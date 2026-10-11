@@ -3,6 +3,9 @@ const source=fs.readFileSync(path.join(__dirname,"../supabase/functions/losi-ai-
 const built=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None},reportDiagnostics:true});
 assert.equal(built.diagnostics.length,0);
 const helper=ts.transpileModule(fs.readFileSync(path.join(__dirname,"../supabase/functions/losi-ai-content/planning-research.ts"),"utf8").replace(/export /g,""),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const operationHelper=ts.transpileModule(fs.readFileSync(path.join(__dirname,"../supabase/functions/losi-ai-content/planning-operations.ts"),"utf8").replace(/export /g,""),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const supplierHelper=ts.transpileModule(fs.readFileSync(path.join(__dirname,"../supabase/functions/losi-ai-content/planning-suppliers.ts"),"utf8").replace(/export /g,""),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const mockOperations={scenario:"Um evento de quatro horas; teste sintético",activities:[{activity:"Recreação",role:"Monitor",method:"ratio",demand:80,capacity:10,hours:4,fixedPeople:null,basis:"assumption",explanation:"Hipótese de teste, não é proporção legal.",sourceUrls:[]}],costs:[{label:"Equipe",unit:"diária",quantity:1,unitCost:160,activityIndex:0,unitsPerPerson:1,basis:"estimate",explanation:"Custo hipotético para teste.",sourceUrls:[]}],contingencyPercent:10,taxPercent:6,marginPercent:30};
 const result={title:"Treinamento",description:"Proposta",objective:"Objetivo",methodology:"Método",notes:"Notas",content:"Conteúdo do material"};
 async function run(mode,kind="material",action="generate",tone=undefined,extra={}){
  let handler,providerCalls=0,reserves=0;const writes=[];
@@ -14,6 +17,14 @@ async function run(mode,kind="material",action="generate",tone=undefined,extra={
    return {data:mode==="quota"?{error:"QUOTA_EXHAUSTED"}:mode==="cached"?{cached:true,result}:{reserved:true}};
   },
   from(table){
+   if(table!=="losi_ai_generations"){
+    assert(["categories","services","business_profiles_public","business_profiles"].includes(table));
+    const filters=[];const query={select(){return query;},eq(k,v){filters.push([k,v]);return query;},in(){return query;},ilike(){return query;},order(){return query;},limit(){return query;},abortSignal(){return query;},then(resolve,reject){
+     if(table==="business_profiles_public")assert(filters.some(([k,v])=>k==="approval_status"&&v==="approved"));
+     const data=table==="business_profiles"?[]:table==="categories"?[{id:"cat-recreation",name:"Recreação"}]:table==="services"?[{id:"s1",business_id:"b1",name:"Recreação",category_id:"cat-recreation"}]:[{id:"b1",business_name:"Fornecedor de teste",slug:"teste",city:"Cotia",state:"SP"}];
+     return Promise.resolve({data,error:mode==="catalog-error"?{}:null}).then(resolve,reject);
+    }};return query;
+   }
    assert.equal(table,"losi_ai_generations");let write;
    const query={select(){return query;},eq(){return query;},in(){return query;},
     update(value){write=value;writes.push(value);return query;},
@@ -50,9 +61,9 @@ async function run(mode,kind="material",action="generate",tone=undefined,extra={
    if(mode==="provider-error")return Response.json({error:{code:"mock"}},{status:500});
    if(mode==="no-credit")return Response.json({error:{code:"credit_balance_exhausted"}},{status:429});
    if(mode==="rate-limit")return Response.json({error:{code:"rate_limit_exceeded"}},{status:429});
-   return Response.json({choices:[{finish_reason:mode==="truncated"?"length":"stop",message:{content:mode==="malformed"?"bad JSON":JSON.stringify(extra.planning?{...result,description:"",objective:"",methodology:"",notes:"",pricing:mode==="empty-pricing"?[]:[{service:"Recreação",unit:"pacote de 4 horas",region:"São Paulo",basis:"market",minimum:1200,maximum:1200,explanation:"Preço publicado para o pacote informado.",sourceUrls:[mode==="invented-source"?"https://invented.example/quote":"https://supplier.example/prices"]}]}:result)}}],usage:{prompt_tokens:100,completion_tokens:200}});
+   return Response.json({choices:[{finish_reason:mode==="truncated"?"length":"stop",message:{content:mode==="malformed"?"bad JSON":JSON.stringify(extra.planning?{...result,description:"",objective:"",methodology:"",notes:"",operations:mode==="invalid-operations"?{...mockOperations,marginPercent:-5}:mockOperations,supplierSearch:{categoryIds:["cat-recreation"],terms:["Recreação"],city:"Cotia",state:"SP"},pricing:mode==="empty-pricing"?[]:[{service:"Recreação",unit:"pacote de 4 horas",region:"São Paulo",basis:"market",minimum:1200,maximum:1200,explanation:"Preço publicado para o pacote informado.",sourceUrls:[mode==="invented-source"?"https://invented.example/quote":"https://supplier.example/prices"]}]}:result)}}],usage:{prompt_tokens:100,completion_tokens:200}});
   }};
- vm.runInNewContext(helper+"\n"+built.outputText,context);
+ vm.runInNewContext(operationHelper+"\n"+supplierHelper+"\n"+helper+"\n"+built.outputText,context);
  const unauth=await handler(new Request("https://example.invalid",{method:"POST",body:"{}"}));assert.equal(unauth.status,401);
  const response=await handler(new Request("https://example.invalid",{method:"POST",headers:{Authorization:"Bearer test"},
   body:JSON.stringify({action,kind,tone,requestId:"11111111-1111-4111-8111-111111111111",...extra,instructions:mode==="short"?"bad":extra.instructions??"Crie um treinamento da equipe.",context:{company:"Test",recipientContact:"do-not-send",...(extra.planText!==undefined?{currentPlan:extra.planText}:{}),...(mode==="long-context"?{description:"x".repeat(20000)}:{})}})}));
@@ -86,8 +97,10 @@ async function run(mode,kind="material",action="generate",tone=undefined,extra={
  const planner=await run("ok","material","generate",undefined,{planText:fullPlan});assert.equal(planner.response.status,200);assert.equal(planner.providerCalls,1);
  const oversized=await run("ok","material","generate",undefined,{planText:"x".repeat(40001)});assert.equal(oversized.response.status,400);assert.equal(oversized.reserves,0);assert.equal(oversized.providerCalls,0);
  const detailed=await run("ok","material","generate",undefined,{planning:true,planType:"work"});assert.equal(detailed.response.status,200);assert.equal(detailed.providerCalls,2);assert(detailed.data.result.content.includes("REFERÊNCIAS DE PREÇOS DOS SERVIÇOS"));assert(detailed.data.result.content.includes("R$"));assert.equal(detailed.data.result.research.sources[0].url,"https://supplier.example/prices");assert.equal(detailed.writes[0].input_tokens,150);assert.equal(detailed.writes[0].output_tokens,300);
+ assert(detailed.data.result.content.includes("8 profissional(is)"));assert(detailed.data.result.content.includes("2.200,00"));assert.equal(detailed.data.result.suppliers.items[0].slug,"teste");
+ const unavailable=await run("catalog-error","material","generate",undefined,{planning:true,planType:"work"});assert.equal(unavailable.response.status,200);assert.equal(unavailable.data.result.suppliers.status,"unavailable");
  const business=await run("ok","material","generate",undefined,{planning:true,planType:"business"});assert.equal(business.response.status,200);
- for(const mode of ["research-error","no-sources","invented-source","empty-pricing"]){const r=await run(mode,"material","generate",undefined,{planning:true,planType:"work"});assert.equal(r.response.status,502);assert(r.writes.some(w=>w.status==="failed"));assert(!r.writes.some(w=>w.status==="completed"));}
+ for(const mode of ["research-error","no-sources","invented-source","empty-pricing","invalid-operations"]){const r=await run(mode,"material","generate",undefined,{planning:true,planType:"work"});assert.equal(r.response.status,502);assert(r.writes.some(w=>w.status==="failed"));assert(!r.writes.some(w=>w.status==="completed"));}
  const invalidPlanner=await run("ok","proposal","generate",undefined,{planning:true,planType:"work"});assert.equal(invalidPlanner.response.status,400);assert.equal(invalidPlanner.reserves,0);assert.equal(invalidPlanner.providerCalls,0);
  const cachedPlanner=await run("cached","material","generate",undefined,{planning:true,planType:"business"});assert.equal(cachedPlanner.providerCalls,0);
  const cached=await run("cached");assert.equal(cached.data.cached,true);assert.equal(cached.providerCalls,0);

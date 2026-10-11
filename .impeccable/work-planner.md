@@ -62,3 +62,14 @@ Validation: mocked provider regression tests including mandatory research, prici
 ## Business-plan purpose correction (2026-10-10)
 
 Business plans are exclusively internal guidance for the supplier: market, services, pricing, costs, goals and next actions. The commercial presentation picker and quote/terms fields are hidden for business plans, and the export is explicitly labeled Plano de negócios em PDF. Existing business drafts previously marked commercial export as internal plans without commercial terms. Work plans retain their proposal presentation. Validated with the production build, browser fixture and downloaded PDF text; legacy draft formatting was also checked.
+
+
+## Activity calculations, costs, catalog and direct PDF (2026-10-11)
+
+Planner synthesis now returns structured activity rules (demand/capacity, hourly throughput, fixed team), explicit scenario/period, justified provenance and cost lines. The shared deterministic calculator checks arithmetic, rounds staff upward, links quantities to staffing, sums costs, adds contingency and calculates selling-price guidance from margin on revenue and estimated tax. Missing costs remain pending: subtotals are marked partial and no complete price is suggested. This validates formulas, not universal staffing ratios or legal/safety requirements. The editor permits adjustments, recalculates the appended section, and persists parameters in the account-local draft.
+
+Supplier matching reads active services/categories and the approved public-profile view, excludes the signed-in supplier's own business, prioritizes city/state, and attaches actual profile links. No result and catalog failure are distinct states. Availability, transport and price must be confirmed with the supplier; catalog records are not invented by the model.
+
+Gerar PDF is visible in the chat header and beside replies; it opens inline export controls for that response, without applying first. The editor header also exposes Gerar PDF and export controls precede the long reviewed content. Business export remains an internal business plan. Existing classic and geometric templates are reused.
+
+Validation: server regression with mocked model output, arithmetic/source/unknown-input tests, matched/empty/error/local supplier ranking, direct inspection of approved catalog data in Supabase, production build, and DOM integration covering direct PDF, apply, linked-cost edits, invalid margins, add/remove costs, supplier links and persistence. Both exported PDFs were checked for text/calculated totals and rendered for visual PDF review. No paid live generation. The environment blocked Chromium's local socket creation; full browser screenshots/responsive interaction checks could not run this pass. UI changes preserve existing responsive rules and use scoped wrapping/stacking. This supersedes earlier upcoming integration copy and does not claim an independent finish review.

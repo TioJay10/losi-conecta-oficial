@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { LosiPdfPreview } from "./LosiPdfPreview";
 import { PanelMenuIcon } from "./PanelMenuIcon";
 import { PDF_LAYOUTS, downloadPdf, materialPdf, type PdfLayout } from "../lib/lia-pdfs";
 import { planningDocumentText, type PlanningDocument } from "../lib/planning-pdf";
-export default function PlanningPdfTools({plan,layout,company,onLayout,onCompany,onPrice,onTerms}:{plan:PlanningDocument;layout:PdfLayout;company:string;onLayout:(value:PdfLayout)=>void;onCompany:(value:string)=>void;onPrice:(value:string)=>void;onTerms:(value:string)=>void}) {
+export default function PlanningPdfTools({plan,layout,company,onLayout,onCompany,onPrice,onTerms,headingId}:{headingId?:string;plan:PlanningDocument;layout:PdfLayout;company:string;onLayout:(value:PdfLayout)=>void;onCompany:(value:string)=>void;onPrice:(value:string)=>void;onTerms:(value:string)=>void}) {
+  const generatedId=useId();
+  const titleId=headingId||generatedId;
   const [preview,setPreview]=useState(false);
   const [error,setError]=useState("");
   const [busy,setBusy]=useState(false);
@@ -17,8 +19,8 @@ export default function PlanningPdfTools({plan,layout,company,onLayout,onCompany
     catch{setError("Não foi possível gerar o PDF. Tente novamente.");}
     finally{setBusy(false);}
   }
-  return <section className="wp-pdf-tools" aria-labelledby="wp-pdf-tools-title">
-    <h3 id="wp-pdf-tools-title">{commercial?"Proposta em PDF":plan.kind==="business"?"Plano de negócios em PDF":"Plano de trabalho em PDF"}</h3>
+  return <section className="wp-pdf-tools" aria-labelledby={titleId}>
+    <h3 id={titleId}>{commercial?"Proposta em PDF":plan.kind==="business"?"Plano de negócios em PDF":"Plano de trabalho em PDF"}</h3>
     <p>O PDF utiliza todo o conteúdo revisado acima. Escolha um modelo da LOSI. Prévia e download não consomem gerações.</p>
     <label>Sua empresa<input maxLength={200} value={company} onChange={e=>onCompany(e.target.value)} placeholder="Nome da empresa responsável"/></label>
     <label>Modelo do PDF<select value={layout} onChange={e=>onLayout(e.target.value as PdfLayout)}>{Object.entries(PDF_LAYOUTS).map(([key,value])=><option key={key} value={key}>{value.label}</option>)}</select></label>

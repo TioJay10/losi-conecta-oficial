@@ -12,7 +12,7 @@ export function PlanningWorkspace({userId,categories,categoryError,onRetryCatego
   const consumed=useCallback(()=>setPlanContext(undefined),[]);
   const applied=useCallback((plan:AppliedPlan)=>{setAppliedPlan(plan);setIncomingPlan(undefined);},[]);
   return <div>
-    <div hidden={mode!=="chat"}><LiaPlanningChat userId={userId} request={request} onOpenSteps={()=>{setOpenedSteps(true);setMode("steps");}} planContext={planContext} onContextConsumed={consumed} onApplyPlan={plan=>{setIncomingPlan(plan);setOpenedSteps(true);setMode("steps");}} appliedPlan={appliedPlan}/></div>
+    <div hidden={mode!=="chat"}><LiaPlanningChat providerCompany={providerCompany} userId={userId} request={request} onOpenSteps={()=>{setOpenedSteps(true);setMode("steps");}} planContext={planContext} onContextConsumed={consumed} onApplyPlan={plan=>{setIncomingPlan(plan);setOpenedSteps(true);setMode("steps");}} appliedPlan={appliedPlan}/></div>
     {openedSteps&&<div hidden={mode!=="steps"} className="lia-guided-page"><header className="lia-guided-bar"><button onClick={()=>setMode("chat")}><PanelMenuIcon name="back"/>Voltar ao chat da Lia</button></header><WorkPlanner providerCompany={providerCompany} userId={userId} categories={categories} categoryError={categoryError} onRetryCategories={onRetryCategories} incomingPlan={incomingPlan} onPlanApplied={applied} onTalk={context=>{setPlanContext(context);setMode("chat");}}/></div>}
   </div>;
 }

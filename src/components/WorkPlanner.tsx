@@ -1,3 +1,6 @@
+import { PlanningOperations } from "./PlanningOperations";
+import { isOperations, replaceOperationalSection, type Operations } from "../../supabase/functions/losi-ai-content/planning-operations";
+import { isSupplierResult, type SupplierResult } from "../../supabase/functions/losi-ai-content/planning-suppliers";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { AppliedPlan, GeneratedPlan, PlanContext } from "../lib/planning-link";
 import { PanelMenuIcon } from "./PanelMenuIcon";
@@ -24,6 +27,8 @@ type Brief = {
   notes: string;
   document: "internal" | "commercial";
   generatedContent?: string;
+  operations?: Operations;
+  suppliers?: SupplierResult;
   pdfLayout?: "classic"|"geometric";
   company?: string;
   quotedPrice?: string;
@@ -76,6 +81,8 @@ function isDraft(value: unknown): value is Draft {
     ) &&
     (d.brief.pdfLayout === undefined || ["classic","geometric"].includes(d.brief.pdfLayout)) &&
     ["company","quotedPrice","commercialTerms"].every(key => d.brief[key as keyof Brief] === undefined || typeof d.brief[key as keyof Brief] === "string") &&
+    (d.brief.operations === undefined || isOperations(d.brief.operations)) &&
+    (d.brief.suppliers === undefined || isSupplierResult(d.brief.suppliers)) &&
     (d.brief.generatedContent === undefined || typeof d.brief.generatedContent === "string") &&
     ["work", "business"].includes(d.brief.kind) &&
     ["internal", "commercial"].includes(d.brief.document)
@@ -178,7 +185,7 @@ export function WorkPlanner({
   function briefingText(value: Brief) {
     const labels: Record<string, string> = {title:"Título",kind:"Tipo",description:"Pedido",category:"Nicho",client:"Cliente",city:"Cidade",state:"Estado",date:"Data",duration:"Duração em horas",participants:"Participantes",audience:"Público",location:"Espaço",services:"Serviços",team:"Equipe",budget:"Orçamento informado",notes:"Observações",document:"Documento",generatedContent:"Plano atual",company:"Empresa responsável",quotedPrice:"Valor proposto",commercialTerms:"Condições comerciais",pdfLayout:"Modelo PDF"};
     const category = categories.find(c => c.id === value.category)?.name || value.category;
-    return Object.entries({...value, category, ...(value.kind === "business" ? {document:"internal",quotedPrice:"",commercialTerms:""} : {})}).filter(([k,v]) => k !== "generatedContent" && (Array.isArray(v) ? v.length : v)).map(([k,v]) => `${labels[k]}: ${Array.isArray(v) ? v.join(", ") : v}`).join("\n");
+    return Object.entries({...value, category, ...(value.kind === "business" ? {document:"internal",quotedPrice:"",commercialTerms:""} : {})}).filter(([k,v]) => !["generatedContent","operations","suppliers"].includes(k) && (Array.isArray(v) ? v.length : v)).map(([k,v]) => `${labels[k]}: ${Array.isArray(v) ? v.join(", ") : v}`).join("\n");
   }
   useEffect(() => {
     if (!incomingPlan || !ready || handledPlan.current === incomingPlan.requestId) return;
@@ -191,7 +198,7 @@ export function WorkPlanner({
     }
     const saved = drafts.find(d => d.id === incomingPlan.draftId);
     const base = id && id === incomingPlan.draftId ? brief : saved?.brief || blank();
-    const nextBrief: Brief = {...base, title: base.title || incomingPlan.title || "Meu plano", kind: incomingPlan.kind, document: incomingPlan.kind === "business" ? "internal" : base.document, description: base.description || incomingPlan.description, generatedContent: incomingPlan.content};
+    const nextBrief: Brief = {...base, title: base.title || incomingPlan.title || "Meu plano", kind: incomingPlan.kind, document: incomingPlan.kind === "business" ? "internal" : base.document, description: base.description || incomingPlan.description, generatedContent: incomingPlan.content, operations: incomingPlan.operations, suppliers: incomingPlan.suppliers};
     const draft: Draft = {id: saved?.id || (id === incomingPlan.draftId ? id : null) || crypto.randomUUID(), updatedAt: new Date().toISOString(), brief: nextBrief};
     try {
       // Read at the mutation boundary so the prior save and other tabs are retained.
@@ -283,8 +290,9 @@ export function WorkPlanner({
       <header className="wp-header">
         <div>
           <h1>{brief.kind === "business" ? "Plano de negócios" : "Plano de trabalho"}</h1>
-          <p>Da primeira ideia a um evento bem planejado.</p>
+          <p>{brief.kind === "business" ? "Estratégia e próximos passos para conduzir sua empresa." : "Da primeira ideia a um evento bem planejado."}</p>
         </div>
+        <button className="wp-button wp-gold" type="button" disabled={!brief.title.trim()||!(brief.generatedContent?.trim()||brief.description.trim())} onClick={()=>{setView("editor");go(3);requestAnimationFrame(()=>document.getElementById("wp-pdf-tools-title")?.scrollIntoView({block:"start"}));}}><PanelMenuIcon name="forms"/>Gerar PDF</button>
         <button
           className="wp-button wp-outline"
           type="button"
@@ -744,6 +752,8 @@ export function WorkPlanner({
                   )}
                   {step === 3 && (
                     <>
+                      <Suspense fallback={<p role="status">Preparando os modelos de PDF…</p>}><PlanningPdfTools headingId="wp-pdf-tools-title" plan={brief} layout={brief.pdfLayout||"classic"} company={brief.company??providerCompany??""} onLayout={value=>update("pdfLayout",value)} onCompany={value=>update("company",value)} onPrice={value=>update("quotedPrice",value)} onTerms={value=>update("commercialTerms",value)}/></Suspense>
+                      <PlanningOperations operations={brief.operations} suppliers={brief.suppliers} onChange={next=>{update("operations",next);update("generatedContent",replaceOperationalSection(brief.generatedContent||brief.description,next));}}/>
                       {brief.generatedContent !== undefined && <section className="wp-generated-plan" aria-labelledby="wp-generated-title">
                         <h3 id="wp-generated-title">{brief.kind === "business" ? "Plano de negócios" : "Plano de trabalho"} · conteúdo da Lia</h3>
                         <p>Revise e ajuste o texto. Ao continuar com a Lia, suas edições serão incluídas no contexto.</p>
@@ -879,7 +889,7 @@ export function WorkPlanner({
                           ))}
                         </div>
                       </fieldset>}
-                      <Suspense fallback={<p role="status">Preparando os modelos de PDF…</p>}><PlanningPdfTools plan={brief} layout={brief.pdfLayout||"classic"} company={brief.company??providerCompany??""} onLayout={value=>update("pdfLayout",value)} onCompany={value=>update("company",value)} onPrice={value=>update("quotedPrice",value)} onTerms={value=>update("commercialTerms",value)}/></Suspense>
+
                       {reviewed && (
                         <p className="wp-reviewed" role="status">
                           <PanelMenuIcon name="check" />
@@ -986,11 +996,11 @@ export function WorkPlanner({
               </div>
               <div className="wp-next">
                 <h3>Planejamento com IA</h3>
-                <p>Pesquisa e PDF já disponíveis. Próximas integrações:</p>
+                <p>Pesquisa, equipe, custos e fornecedores conectados ao plano.</p>
                 <ul>
                   <li>
                     <PanelMenuIcon name="users" />
-                    <span>Dimensionamento validado por atividade</span>
+                    <span>Dimensionamento por atividade com fórmulas verificadas</span>
                   </li>
                   <li>
                     <PanelMenuIcon name="search" />
@@ -1001,7 +1011,7 @@ export function WorkPlanner({
                     <span>Indicação de fornecedores cadastrados</span>
                   </li>
                 </ul>
-                <span className="wp-coming">Integrações em breve</span>
+                <span className="wp-coming">Recursos disponíveis no plano da Lia</span>
               </div>
             </aside>
           </div>
